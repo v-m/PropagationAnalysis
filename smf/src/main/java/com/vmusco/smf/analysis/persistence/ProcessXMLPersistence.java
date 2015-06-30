@@ -38,7 +38,6 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 	protected static String PROJECT_IN_2 = "project-root";
 	protected static String ORIGINAL_PROJECT_IN_2 = "originalproject-root";
 	protected static String PROJECT_NAME_2 = "project-name";
-	//protected static String WORKING_DIR_2 = "working-directory";		// RUN
 	protected static String CURRENT_STATE_2 = "state";					// RUN
 	protected static String CLASSPATH_2 = "classpath";					// RUN
 	protected static String COPY_CP_2 = "local";					// RUN

@@ -18,7 +18,6 @@ import com.vmusco.softminer.graphs.EdgeTypes;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.NodeMarkers;
 import com.vmusco.softminer.graphs.NodeTypes;
-import com.vmusco.softminer.graphs.Graph.GraphApi;
 
 /**
  * 

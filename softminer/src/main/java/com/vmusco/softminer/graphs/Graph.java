@@ -1,11 +1,7 @@
 package com.vmusco.softminer.graphs;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
-
-import org.graphstream.graph.Edge;
-import org.graphstream.graph.Node;
 
 /***
  * This interface represent an abstract graph representation

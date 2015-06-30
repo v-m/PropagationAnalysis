@@ -7,7 +7,6 @@ import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator.PatternBehavior;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuildLogic;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
-import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilderFactory;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.JeantessierGraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.processors.FeaturesProcessor;
@@ -17,12 +16,13 @@ public abstract class DepGraphTest {
 	protected static String currTestedPakg = "";
 	//protected static Class processorToUse = FeatureProcessorFinal.class;
 	
-	protected static GraphBuildLogic buildingLogicToUse = new SpoonGraphBuilder(FeaturesProcessor.class);
+	protected static GraphBuildLogic buildingLogicToUse = SpoonGraphBuilder.getFeatureGranularityGraphBuilder();
 	//protected static GraphBuildLogic buildingLogicToUse = new JeantessierGraphBuilder();
 	
 	protected static final String STRING_CANONICAL_NAME = java.lang.String.class.getCanonicalName();
 	protected static final String CLASS_CANONICAL_NAME = java.lang.Class.class.getCanonicalName();
 	
+	public abstract GraphBuilder getGraphBuilder(Class c) throws Exception;
 	
 	/**
 	 * Prepare the test for a specific test package
@@ -30,15 +30,43 @@ public abstract class DepGraphTest {
 	 * @return
 	 * @throws Exception
 	 */
-	protected static GraphBuilder setTestPkgAndGenerateBuilder(Class packageInto) throws Exception{
+	protected static GraphBuilder setTestPkgAndGenerateBuilderUseGraphA(Class packageInto) throws Exception{
+		String[] sources = preSetTestPkgAndGenerateBuilder(packageInto);
+		GraphBuilder instForTestCase = GraphBuilder.newGraphBuilderOnlyWithDependencies("test", sources); 
+		postSetTestPkgAndGenerateBuilder();
+		return instForTestCase;
+	}
+	
+	protected static GraphBuilder setTestPkgAndGenerateBuilderUseGraphB(Class packageInto) throws Exception{
+		String[] sources = preSetTestPkgAndGenerateBuilder(packageInto);
+		GraphBuilder instForTestCase = GraphBuilder.newGraphBuilderWithFields("test", sources); 
+		postSetTestPkgAndGenerateBuilder();
+		return instForTestCase;
+	}
+	
+	protected static GraphBuilder setTestPkgAndGenerateBuilderUseGraphC(Class packageInto) throws Exception{
+		String[] sources = preSetTestPkgAndGenerateBuilder(packageInto);
+		GraphBuilder instForTestCase = GraphBuilder.newGraphBuilderWithInheritence("test", sources); 
+		postSetTestPkgAndGenerateBuilder();
+		return instForTestCase;
+	}
+	
+	protected static GraphBuilder setTestPkgAndGenerateBuilderUseGraphD(Class packageInto) throws Exception{
+		String[] sources = preSetTestPkgAndGenerateBuilder(packageInto);
+		GraphBuilder instForTestCase = GraphBuilder.newGraphBuilderWithFieldsAndInheritence("test", sources); 
+		postSetTestPkgAndGenerateBuilder();
+		return instForTestCase;
+	}
+	
+	protected static String[] preSetTestPkgAndGenerateBuilder(Class packageInto) throws Exception{
 		System.out.println("\nCurrent test: "+packageInto.getPackage().getName());
 		System.out.println("*************");
 		DepGraphTest.currTestedPakg = packageInto.getPackage().getName();
 		
-		String[] sources = new String[]{System.getProperty("user.dir")+"/src/test/java/"+DepGraphTest.currTestedPakg.replaceAll("\\.", "/")};
-		//GraphBuilderFactory instantiateForTestCase = GraphBuilderFactory.instantiateFor(sources, null);
-		GraphBuilder instForTestCase = new GraphBuilder("test", sources);
-		
+		return new String[]{System.getProperty("user.dir")+"/src/test/java/"+DepGraphTest.currTestedPakg.replaceAll("\\.", "/")};
+	}
+	
+	protected static void postSetTestPkgAndGenerateBuilder() throws Exception{
 		ProcessorCommunicator.patternBehavior = PatternBehavior.INCLUDE_IF_BOTH;
 		ProcessorCommunicator.pattern = DepGraphTest.getFunction("").replace(".", "\\.")+".*";
 		
@@ -47,8 +75,8 @@ public abstract class DepGraphTest {
 				return DepGraphTest.popFunction(originalName);
 			}
 		};
-		return instForTestCase;
 	}
+		
 	
 	protected static String getFunction(String name){
 		return currTestedPakg + "." + name;

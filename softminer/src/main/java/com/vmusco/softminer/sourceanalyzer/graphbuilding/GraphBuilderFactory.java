@@ -16,7 +16,7 @@ import spoon.support.DefaultCoreFactory;
 import spoon.support.StandardEnvironment;
 import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
 
-@Deprecated
+/*@Deprecated
 public class GraphBuilderFactory {
 	private SpoonCompiler compiler;
 	private Factory factory;
@@ -58,4 +58,4 @@ public class GraphBuilderFactory {
 		
 		return null;
 	}
-}
+}*/

@@ -1,25 +1,8 @@
 package com.vmusco.softminer.sourceanalyzer.graphbuilding;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
 import org.graphstream.stream.gephi.JSONSender;
 
-import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softminer.graphs.GraphStream;
-import com.vmusco.softminer.graphs.Graph.GraphApi;
-import com.vmusco.softminer.graphs.persistance.GraphPersistFileCategory;
-import com.vmusco.softminer.graphs.persistance.GraphPersistanceDirector;
 import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
-
-import spoon.compiler.SpoonCompiler;
-import spoon.reflect.factory.Factory;
-import spoon.reflect.factory.FactoryImpl;
-import spoon.support.DefaultCoreFactory;
-import spoon.support.StandardEnvironment;
-import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
 
 public class NetworkedGraphBuilder extends GraphBuilder{
 
@@ -57,17 +40,6 @@ public class NetworkedGraphBuilder extends GraphBuilder{
 	
 	public NetworkedGraphBuilder(String projectName, String[] inputSources, String host, int port, String workspace) {
 		this(projectName, inputSources);
-		this.host = host;
-		this.port = port;
-		this.workspace = workspace;
-	}
-	
-	public NetworkedGraphBuilder(String projectName, String[] inputSources, ClassPathObtainer cpo) {
-		super(projectName, inputSources, cpo);
-	}
-	
-	public NetworkedGraphBuilder(String projectName, String[] inputSources, ClassPathObtainer cpo, String host, int port, String workspace) {
-		super(projectName, inputSources, cpo);
 		this.host = host;
 		this.port = port;
 		this.workspace = workspace;

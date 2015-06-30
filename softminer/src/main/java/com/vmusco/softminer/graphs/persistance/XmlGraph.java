@@ -1,5 +1,9 @@
 package com.vmusco.softminer.graphs.persistance;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 
@@ -10,7 +14,7 @@ import com.vmusco.softminer.graphs.NodeMarkers;
 import com.vmusco.softminer.graphs.NodeTypes;
 
 @Deprecated
-public class XmlGraph {
+public class XmlGraph implements GraphPersistence{
 
 	private Graph target;
 
@@ -18,13 +22,6 @@ public class XmlGraph {
 		this.target = aGraph;
 	}
 
-	public void save(){
-		//TODO: implement this
-	}
-
-	public void load(){
-		//TODO: implement this
-	}
 
 	public static void insertXmlNodes(Graph aGraph, Element root){
 		Element nodes = new Element("nodes");
@@ -123,6 +120,20 @@ public class XmlGraph {
 					anEdge.setAttribute(attr);
 			}
 		}
+	}
+
+
+	@Override
+	public void save(OutputStream os) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void load(InputStream is) throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

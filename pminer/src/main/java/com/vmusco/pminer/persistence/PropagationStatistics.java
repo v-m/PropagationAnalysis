@@ -1,14 +1,9 @@
-package com.vmusco.pminer.state.persistence;
+package com.vmusco.pminer.persistence;
 
 import java.util.HashMap;
 
 import com.vmusco.pminer.UseGraph;
-import com.vmusco.pminer.analyze.StatisticsMutantAnalyzer;
 import com.vmusco.pminer.analyze.UseGraphMutantStats;
-import com.vmusco.smf.analysis.MutationStatistics;
-import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
 
 public class PropagationStatistics {
 	private HashMap<String, UseGraph> sprop = new HashMap<String, UseGraph>();

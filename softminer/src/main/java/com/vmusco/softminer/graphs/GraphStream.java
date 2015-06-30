@@ -1,6 +1,5 @@
 package com.vmusco.softminer.graphs;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -9,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.graphstream.algorithm.Toolkit;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
@@ -19,20 +17,10 @@ import org.graphstream.stream.file.FileSinkImages.OutputType;
 import org.graphstream.stream.file.FileSinkImages.Quality;
 import org.graphstream.stream.file.FileSinkImages.RendererType;
 import org.graphstream.stream.file.FileSinkImages.Resolutions;
-import org.graphstream.stream.file.FileSinkSVG;
-import org.graphstream.stream.file.FileSinkSVG2;
-import org.graphstream.ui.layout.springbox.implementations.SpringBox;
 import org.graphstream.ui.swingViewer.Viewer;
-import org.graphstream.ui.swingViewer.ViewerListener;
 import org.graphstream.ui.swingViewer.ViewerPipe;
 
-import com.jeantessier.dependencyfinder.NullPrintWriter;
-
 public class GraphStream extends Graph {
-
-
-	private static final String __TAG_ATTRIB = "customUserTag";
-
 	private GraphStream() {
 
 	}
@@ -49,7 +37,7 @@ public class GraphStream extends Graph {
 	@Override
 	public void addNode(String name, boolean displayLabel){
 		if(!this.hasNode(name)){
-			Node addNode = this.getGraph().addNode(name);
+			this.getGraph().addNode(name);
 
 			if(displayLabel)
 				setNodeLabel(name, name);
@@ -60,7 +48,7 @@ public class GraphStream extends Graph {
 	public void addDirectedEdge(String from, String to, boolean displayLabel){
 		if(!this.hasDirectedEdge(from, to)){
 			String name = this.buildEdgeName(from, to, true);
-			Edge addEdge = this.getGraph().addEdge(name, from, to, true);
+			this.getGraph().addEdge(name, from, to, true);
 
 			if(displayLabel)
 				setEdgeLabel(name, name);
@@ -352,35 +340,6 @@ public class GraphStream extends Graph {
 		Node node2 = this.getGraph().getNode(node);
 		return (node2==null)?-1:node2.getInDegree();
 	}
-
-	/*@Override
-	public void tagNode(String node, String tag) {
-		Node node2 = this.getGraph().getNode(node);
-		node2.setAttribute(__TAG_ATTRIB, tag);
-	}
-
-	@Override
-	public void tagEdge(String from, String to, String tag) {
-		Edge edge = this.getGraph().getEdge(this.buildEdgeName(from, to, true));
-		edge.setAttribute(__TAG_ATTRIB, tag);
-	}
-
-	@Override
-	public String getNodeTag(String node) {
-		Node node2 = this.getGraph().getNode(node);
-		if(node2 == null)
-			return null;
-
-		return node2.getAttribute(__TAG_ATTRIB);
-	}
-
-	@Override
-	public String getEdgeTag(String from, String to) {
-		Edge edge = this.getGraph().getEdge(this.buildEdgeName(from, to, true));
-		if(edge == null)
-			return null;
-		return edge.getAttribute(__TAG_ATTRIB);
-	}*/
 	
 	@Override
 	public void markEdge(String from, String to, EdgeMarkers aMarker){
@@ -455,16 +414,6 @@ public class GraphStream extends Graph {
 		
 		return ret.toArray(new EdgeMarkers[0]);
 	}
-
-	/*@Override
-	public boolean isEdgeTag(String from, String to, String tag) {
-		return getEdgeTag(from, to) != null && getEdgeTag(from, to).equals(tag); 
-	}
-
-	@Override
-	public boolean isNodeTag(String node, String tag) {
-		return getNodeTag(node) != null && getNodeTag(node).equals(tag); 
-	}*/
 
 	@Override
 	public NodesNamesForEdge[] getEdges() {

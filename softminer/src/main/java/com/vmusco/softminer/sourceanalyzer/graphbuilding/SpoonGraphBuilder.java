@@ -5,11 +5,16 @@ import java.util.List;
 
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
+import com.vmusco.softminer.sourceanalyzer.processors.FeaturesProcessor;
 
 import spoon.compiler.SpoonCompiler;
 
 public class SpoonGraphBuilder extends GraphBuildLogic {
 	private Class<?> aProcessor;
+	
+	public static SpoonGraphBuilder getFeatureGranularityGraphBuilder(){
+		return new SpoonGraphBuilder(FeaturesProcessor.class);
+	}
 	
 	public SpoonGraphBuilder(Class<?> aProcessor) {
 		this.aProcessor = aProcessor;

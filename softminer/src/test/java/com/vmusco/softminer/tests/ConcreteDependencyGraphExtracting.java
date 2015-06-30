@@ -17,7 +17,7 @@ public class ConcreteDependencyGraphExtracting extends DepGraphTest {
 	
 	@Test
 	public void testPracticalApacheCommonLang3TestSmtp() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.real.testPracticalApacheCommonLang3TestSMTP.DateFormatUtilsTest.class);
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.real.testPracticalApacheCommonLang3TestSMTP.DateFormatUtilsTest.class);
 		ProcessorCommunicator.resolveInterfacesAndClasses = true;
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 		dg.persistAsImage("/tmp/graph.png");
@@ -39,7 +39,7 @@ public class ConcreteDependencyGraphExtracting extends DepGraphTest {
 	
 	@Test
 	public void testPracticalApacheCommonLang3StrSubstitutor() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.real.testPracticalApacheCommonLang3StrSubstitutor.StrSubstitutorTest.class);
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.real.testPracticalApacheCommonLang3StrSubstitutor.StrSubstitutorTest.class);
 		ProcessorCommunicator.resolveInterfacesAndClasses = true;
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 		dg.persistAsImage("/tmp/graph.png");
@@ -57,6 +57,11 @@ public class ConcreteDependencyGraphExtracting extends DepGraphTest {
 		//System.out.println(stateAsATestCase(dg));
 
 		Assert.fail("Checking not implemented yet !");
+	}
+
+	@Override
+	public GraphBuilder getGraphBuilder(Class c) throws Exception {
+		return setTestPkgAndGenerateBuilderUseGraphA(c);
 	}
 	
 }

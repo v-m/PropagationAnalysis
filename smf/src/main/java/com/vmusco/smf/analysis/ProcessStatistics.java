@@ -1,29 +1,18 @@
 package com.vmusco.smf.analysis;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InvalidClassException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
-import com.google.common.util.concurrent.Service.State;
 import com.vmusco.smf.analysis.persistence.ExecutionPersistence;
 import com.vmusco.smf.analysis.persistence.ProcessXMLPersistence;
-import com.vmusco.smf.mutation.MutationOperator;
-import com.vmusco.smf.mutation.operators.pitest.InDecrementMutationOperator;
 import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.utils.MavenTools;
 
@@ -59,7 +48,7 @@ public class ProcessStatistics implements Serializable{
 		 */
 		NEW,
 		/**
-		 * On this state, the project has been created and has STRONGLY BENN SET (cp, mutation, ...)
+		 * On this state, the project has been created and has STRONGLY BEEN SET (cp, mutation, ...)
 		 * STATE: preparation
 		 */
 		READY,
@@ -85,16 +74,6 @@ public class ProcessStatistics implements Serializable{
 
 	private ProcessStatistics() { }
 
-	/**
-	 * Similar to {@link ProcessStatistics#createOrLoad(ProjectDefinition, String, String, String, boolean)} with a temporary working folder (not persistable)
-	 * @throws IOException 
-	 */
-	public static ProcessStatistics createOrLoad(String datasetRepository, String workingDir, boolean reset) throws Exception{
-		return ProcessStatistics.createOrLoad(datasetRepository, workingDir, reset, null);
-
-	}
-
-
 
 	public static ProcessStatistics rawCreateProject(String datasetRepository, String workingDir){
 		ProcessStatistics ps;
@@ -118,51 +97,6 @@ public class ProcessStatistics implements Serializable{
 
 		ps.persistFile = DEFAULT_CONFIGFILE;
 		ps.currentState = STATE.NEW;
-
-		return ps;
-	}
-
-	/**
-	 * This factory method creates a new instance of PS object.
-	 * 
-	 * if persistanceFile starts with the folder separator char (/ on unix) this constructor 
-	 * 		will persist on the absolute path, otherwise it will  be stored relatively on the 
-	 * 		workingDir.
-	 * 
-	 * @param projectDefinitionClass the project to instantiate
-	 * @param datasetRepository the root folder on which the project resides in (src)
-	 * @param workingDir the directory where files are produced (mutats, builds, ...)
-	 * @param persistanceFile the file on which this object is persisted
-	 * @param reset true to skip the loading object phase
-	 * @return
-	 * @throws IOException if persistance failed
-	 */
-	public static ProcessStatistics createOrLoad(String datasetRepository, String workingDir, boolean reset, ProjectDefinition projectDefinitionClass) throws Exception{
-		ProcessStatistics ps = rawCreateProject(datasetRepository, workingDir);
-
-		// Alter values according to the project definition
-		if(projectDefinitionClass != null)
-			projectDefinitionClass.projectConfiguration(ps);
-
-		if(ps.persistFile != null){
-			String persistCalculated = ps.getPersistanceFile();
-
-			if(!reset && (new File(persistCalculated)).exists()){
-				// Load the object...
-				try{
-					return ProcessStatistics.loadState(persistCalculated);
-				}catch(InvalidClassException ex){
-					System.out.println("Project persistance file has changed... Reset is required! ");
-					ProcessStatistics.saveState(ps);
-				}catch(Exception e){
-					System.out.println("Exception on loading state. Creating new...");
-					e.printStackTrace();
-					ProcessStatistics.saveState(ps);
-				}
-			}else{
-				ProcessStatistics.saveState(ps);
-			}
-		}
 
 		return ps;
 	}
@@ -239,7 +173,7 @@ public class ProcessStatistics implements Serializable{
 	 * @return false if the new state is not the expected one.
 	 */
 	public boolean changeState(STATE newState) throws Exception{
-		if(!newState.equals(this.getNextState(this.currentState)) && !newState.equals(this.currentState))
+		if(!newState.equals(ProcessStatistics.getNextState(this.currentState)) && !newState.equals(this.currentState))
 			return false;
 
 		this.currentState = newState;
@@ -617,9 +551,6 @@ public class ProcessStatistics implements Serializable{
 		List<String> l = new ArrayList<String>();
 		
 		if(this.getClasspath() != null){
-			//new String[ps.classpath.length + 2];
-			int i = 0;
-
 			for(String c : this.getClasspath()){
 				l.add(c);
 			}

@@ -85,7 +85,7 @@ public class GraphGenerator {
 			else
 				output_path = new File(ps.getWorkingDir(), s);
 		}
-		
+
 		if(output_path.exists()){
 			if(!cmd.hasOption("delete-previous")){
 				System.out.println("The file "+output_path.getAbsolutePath()+" already exist. To force its overwriting use "+delprev.getOpt()+" flag.");
@@ -95,7 +95,7 @@ public class GraphGenerator {
 			}
 		}
 
-		GraphBuildLogic builder = new SpoonGraphBuilder(FeaturesProcessor.class);
+		GraphBuildLogic builder = SpoonGraphBuilder.getFeatureGranularityGraphBuilder();
 
 		ArrayList<String> sources = new ArrayList<String>();
 
@@ -107,10 +107,21 @@ public class GraphGenerator {
 			sources.add(ps.getProjectIn(true) + File.separator + s);
 		}
 
-		GraphBuilder gb = new GraphBuilder(ps.projectName, sources.toArray(new String[0]), ps.getClasspath());
-		ProcessorCommunicator.resolveInterfacesAndClasses = cmd.hasOption("cha");
-		ProcessorCommunicator.includesFields = cmd.hasOption("fields");
-
+		GraphBuilder gb;
+		if(cmd.hasOption("cha")){
+			if(cmd.hasOption("fields")){
+				gb = GraphBuilder.newGraphBuilderWithFieldsAndInheritence(ps.projectName, sources.toArray(new String[0]), ps.getClasspath());
+			}else{
+				gb = GraphBuilder.newGraphBuilderWithInheritence(ps.projectName, sources.toArray(new String[0]), ps.getClasspath());
+			}
+		}else{
+			if(cmd.hasOption("fields")){
+				gb = GraphBuilder.newGraphBuilderWithFields(ps.projectName, sources.toArray(new String[0]), ps.getClasspath());
+			}else{
+				gb = GraphBuilder.newGraphBuilderOnlyWithDependencies(ps.projectName, sources.toArray(new String[0]), ps.getClasspath());
+			}
+		}
+		 
 		Graph aGraph = gb.generateDependencyGraph(builder);
 
 		GraphPersistence gp = null;

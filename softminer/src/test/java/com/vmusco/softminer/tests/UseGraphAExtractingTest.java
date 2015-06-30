@@ -4,15 +4,17 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.vmusco.softminer.graphs.CausalityGraph;
 import com.vmusco.softminer.graphs.EdgeTypes;
 import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
 
-public class DependencyGraphExtractingTest extends DepGraphTest {
+public class UseGraphAExtractingTest extends DepGraphTest {
 
+	@Override
+	public GraphBuilder getGraphBuilder(Class c) throws Exception {
+		return setTestPkgAndGenerateBuilderUseGraphA(c);
+	}
 
 	/***
 	 * This test allows testing the direction of the edge regarding variable get/set.
@@ -21,7 +23,7 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 	 */
 	@Test
 	public void testVariableUsage() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testVariableUsage.MyClass.class);
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testVariableUsage.MyClass.class);
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 
 		//executionInspect(dg);
@@ -61,13 +63,8 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 	 */
 	@Test
 	public void testInterfaceAndLinking() throws Exception{
-		// WithOUT resolution
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testInterfaceAndLinking.T.class);
-		ProcessorCommunicator.resolveInterfacesAndClasses = false;
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testInterfaceAndLinking.T.class);
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
-
-		//executionInspect(dg);
-		//System.out.println(stateAsATestCase(dg));
 
 		fullAssertGraph(dg, 5, 4);
 
@@ -104,54 +101,6 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 				b_b, 
 				new String[]{u_bar}, 
 				new String[]{});
-
-		if(buildingLogicToUse instanceof SpoonGraphBuilder){
-			// With resolution
-			gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testInterfaceAndLinking.T.class);
-			ProcessorCommunicator.resolveInterfacesAndClasses = true;
-			dg = gb.generateDependencyGraph(buildingLogicToUse);
-
-			//executionInspect(dg);
-			//System.out.println(stateAsATestCase(dg));
-
-			fullAssertGraph(dg, 7, 6);
-
-			fullAssertNode(dg, 
-					a_foo, 
-					new String[]{t_biz}, 
-					new String[]{c_foo, b_foo});
-
-			fullAssertNode(dg, 
-					b_foo, 
-					new String[]{a_foo}, 
-					new String[]{});
-
-			fullAssertNode(dg, 
-					c_foo, 
-					new String[]{a_foo}, 
-					new String[]{});
-
-			fullAssertNode(dg, 
-					t_biz, 
-					new String[]{u_bar}, 
-					new String[]{a_foo});
-
-			fullAssertNode(dg, 
-					u_bar, 
-					new String[]{}, 
-					new String[]{t_biz, b_b, c_c});
-
-			fullAssertNode(dg, 
-					b_b, 
-					new String[]{u_bar}, 
-					new String[]{});
-
-			fullAssertNode(dg, 
-					c_c, 
-					new String[]{u_bar}, 
-					new String[]{});
-
-		}
 	}
 
 	/**
@@ -161,14 +110,8 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 	 */
 	@Test
 	public void testAbstractAndInheritanceClasses() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testAbstractAndInheritance.A.class);
-
-		// Testing with resolving disabled !
-		ProcessorCommunicator.resolveInterfacesAndClasses = false;
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testAbstractAndInheritance.A.class);
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
-
-		//executionInspect(dg);
-		//System.out.println(stateAsATestCase(dg));
 
 		fullAssertGraph(dg, 8, 8);
 
@@ -223,80 +166,12 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 				a_foo, 
 				new String[]{t_foo}, 
 				new String[]{});
-
-		// Testing with resolving enabled !
-		gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testAbstractAndInheritance.A.class);
-		ProcessorCommunicator.resolveInterfacesAndClasses = true;
-		dg = gb.generateDependencyGraph(buildingLogicToUse);
-
-		if(buildingLogicToUse instanceof SpoonGraphBuilder){
-			//executionInspect(dg);
-			//System.out.println(stateAsATestCase(dg));
-
-			fullAssertGraph(dg, 11, 11);
-
-			fullAssertNode(dg, 
-					a2_a2, 
-					new String[]{a3_a3, a4_a4}, 
-					new String[]{a_a});
-
-			fullAssertNode(dg, 
-					a_a, 
-					new String[]{a2_a2}, 
-					new String[]{});
-
-			fullAssertNode(dg, 
-					a_bar, 
-					new String[]{t_foo}, 
-					new String[]{a2_bar});
-
-			fullAssertNode(dg, 
-					a2_bar, 
-					new String[]{a_bar}, 
-					new String[]{});
-
-			fullAssertNode(dg, 
-					a3_a3, 
-					new String[]{t_foo}, 
-					new String[]{a2_a2});
-
-			fullAssertNode(dg, 
-					a_foo, 
-					new String[]{t_foo}, 
-					new String[]{a4_foo, a3_foo});
-
-			fullAssertNode(dg, 
-					a3_foo, 
-					new String[]{a_foo}, 
-					new String[]{});
-
-			fullAssertNode(dg, 
-					a4_a4, 
-					new String[]{t_foo}, 
-					new String[]{a2_a2});
-
-			fullAssertNode(dg, 
-					a4_foo, 
-					new String[]{a_foo}, 
-					new String[]{});
-
-			fullAssertNode(dg, 
-					t_foo, 
-					new String[]{}, 
-					new String[]{a_foo, a3_a3, a_bar, a4_a4, a_biz});
-
-			fullAssertNode(dg, 
-					a_biz, 
-					new String[]{t_foo}, 
-					new String[]{});
-		}
 	}
 
 	@Test
 	public void testInterfaceAndInheritance() throws Exception{
 		// Without resolution
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testInterfaceAndInheritance.Z.class);
-		ProcessorCommunicator.resolveInterfacesAndClasses = false;
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testInterfaceAndInheritance.Z.class);
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 
 		//executionInspect(dg);
@@ -340,54 +215,11 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 				c_foo, 
 				new String[]{z_main}, 
 				new String[]{});
-
-
-		if(buildingLogicToUse instanceof SpoonGraphBuilder){
-			// With resolution
-			gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testInterfaceAndInheritance.Z.class);
-			ProcessorCommunicator.resolveInterfacesAndClasses = true;
-			dg = gb.generateDependencyGraph(buildingLogicToUse);
-
-			//executionInspect(dg);
-			//System.out.println(stateAsATestCase(dg));	
-
-			fullAssertGraph(dg, 6, 7);
-
-			fullAssertNode(dg, 
-					b_bar, 
-					new String[]{z_main}, 
-					new String[]{c_bar});
-
-			fullAssertNode(dg, 
-					c_bar, 
-					new String[]{b_bar, z_main}, 
-					new String[]{});
-
-			fullAssertNode(dg, 
-					a_foo, 
-					new String[]{z_main}, 
-					new String[]{c_foo});
-
-			fullAssertNode(dg, 
-					c_foo, 
-					new String[]{a_foo, z_main}, 
-					new String[]{});
-
-			fullAssertNode(dg, 
-					z_main, 
-					new String[]{}, 
-					new String[]{b_bar, a_foo, c_c, c_foo, c_bar});
-
-			fullAssertNode(dg, 
-					c_c, 
-					new String[]{z_main}, 
-					new String[]{});
-		}
 	}
 
 	@Test
 	public void testImplicitDependency() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testImplicitDependency.Foo.class);
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testImplicitDependency.Foo.class);
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 
 		//executionInspect(dg);
@@ -399,7 +231,7 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 
 	@Test
 	public void testAnonymousClass() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testAnonymousClass.Foo.class);
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testAnonymousClass.Foo.class);
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 
 		//executionInspect(dg);
@@ -414,7 +246,7 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 	 */
 	@Test
 	public void testConstructors() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testConstructors.Foo.class);
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testConstructors.Foo.class);
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 
 		//executionInspect(dg);
@@ -450,7 +282,7 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 	 */
 	@Test
 	public void testSimpleMethodCalls() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testSimpleMethodCalls.Foo.class);
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testSimpleMethodCalls.Foo.class);
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 
 		//executionInspect(dg);
@@ -511,7 +343,7 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 	 */
 	@Test
 	public void testStaticMethodCalls() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testStaticMethodCalls.Foo1.class);
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testStaticMethodCalls.Foo1.class);
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 
 		//executionInspect(dg);
@@ -548,7 +380,7 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 
 	@Test
 	public void testGenericParameters() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testGenericParameters.MyClass.class);
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testGenericParameters.MyClass.class);
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 
 		//executionInspect(dg);
@@ -602,7 +434,7 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 
 	@Test
 	public void testInternalClasses() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testInternalClasses.Foo.class);
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testInternalClasses.Foo.class);
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 
 		//executionInspect(dg);
@@ -638,7 +470,7 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 
 	@Test
 	public void testSuperLinks() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testSuperLinks.Z.class);
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testSuperLinks.Z.class);
 		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 
 		//executionInspect(dg);
@@ -699,10 +531,9 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 
 	@Test
 	public void testExoObject() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testExoObject.Main.class);
-		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testExoObject.Main.class);
+		Graph g = gb.generateDependencyGraph(buildingLogicToUse);
 
-		Graph g = CausalityGraph.convert(dg);
 		//executionInspect(dg);
 		//System.out.println(stateAsATestCase(dg));
 		g.bestDisplay();
@@ -711,11 +542,9 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 
 	@Test
 	public void testExoInterface() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testExoInterface.Test.class);
-		ProcessorCommunicator.resolveInterfacesAndClasses = true;
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testExoInterface.Test.class);
 		
-		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
-		Graph g = CausalityGraph.convert(dg);
+		Graph g = gb.generateDependencyGraph(buildingLogicToUse);
 		//executionInspect(dg);
 		//System.out.println(stateAsATestCase(dg));
 		g.bestDisplay();
@@ -723,11 +552,9 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 
 	@Test
 	public void testMethodReturnIfceWithGenerics() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testMethodReturnIfceWithGenerics.Foo.class);
-		ProcessorCommunicator.resolveInterfacesAndClasses = true;
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testMethodReturnIfceWithGenerics.Foo.class);
 		
-		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
-		Graph g = CausalityGraph.convert(dg);
+		Graph g = gb.generateDependencyGraph(buildingLogicToUse);
 		//executionInspect(dg);
 		//System.out.println(stateAsATestCase(dg));
 		g.bestDisplay();
@@ -735,11 +562,9 @@ public class DependencyGraphExtractingTest extends DepGraphTest {
 
 	@Test
 	public void testMethodReturnIfceWithGenericsMixed() throws Exception{
-		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testMethodReturnIfceWithGenericsMixed.Foo.class);
-		ProcessorCommunicator.resolveInterfacesAndClasses = true;
+		GraphBuilder gb = getGraphBuilder(com.vmusco.softminer.tests.cases.testMethodReturnIfceWithGenericsMixed.Foo.class);
 		
-		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
-		Graph g = CausalityGraph.convert(dg);
+		Graph g = gb.generateDependencyGraph(buildingLogicToUse);
 		//executionInspect(dg);
 		//System.out.println(stateAsATestCase(dg));
 		g.bestDisplay();

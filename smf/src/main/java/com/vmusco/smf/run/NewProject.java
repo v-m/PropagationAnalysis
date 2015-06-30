@@ -2,8 +2,6 @@ package com.vmusco.smf.run;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,22 +9,15 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.jgit.api.Git;
-import org.junit.runner.RunWith;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics.STATE;
 import com.vmusco.smf.compilation.Compilation;
 import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.utils.ConsoleTools;
-import com.vmusco.smf.utils.MavenTools;
-
-import sun.reflect.misc.FieldUtil;
-import junit.framework.Assert;
 
 /**
  * This class defines a main function for generating a new project definition
