@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This is an execution file generated with SMF.
+-->
+<smf>
+  <config skip-mvn-cp="false">
+    <global>
+      <persistance-file>joda-time.smf.run.xml</persistance-file>
+      <project-root>/home/vince/Experiments/datasets/joda-time</project-root>
+      <working-directory>files/working_configs</working-directory>
+      <state>READY</state>
+    </global>
+    <source>
+      <bytecode>bytecode/source</bytecode>
+      <include>
+        <path>src/main/java</path>
+      </include>
+      <classpath>
+        <path>/home/vince/.m2/repository/org/joda/joda-convert/1.2/joda-convert-1.2.jar</path>
+        <path>/home/vince/.m2/repository/junit/junit/3.8.2/junit-3.8.2.jar</path>
+      </classpath>
+    </source>
+    <tests>
+      <bytecode>bytecode/tests</bytecode>
+      <include>
+        <path>src/test/java</path>
+      </include>
+      <classpath>
+        <path>/home/vince/.m2/repository/org/joda/joda-convert/1.2/joda-convert-1.2.jar</path>
+        <path>/home/vince/.m2/repository/junit/junit/3.8.2/junit-3.8.2.jar</path>
+        <path>/tmp/muts/joda-time/bytecode/source</path>
+        <path>/tmp/muts/joda-time/bytecode/tests</path>
+      </classpath>
+      <ressources>
+        <path>src/test/resources</path>
+        <path>target/classes</path>
+      </ressources>
+    </tests>
+    <mutation>
+      <source>mutations/{id}/{op}/source</source>
+      <bytecode>mutations/{id}/{op}/bytecode</bytecode>
+      <executions>mutations/{id}/{op}</executions>
+    </mutation>
+  </config>
+</smf>
+

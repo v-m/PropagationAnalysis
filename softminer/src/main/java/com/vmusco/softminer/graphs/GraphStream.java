@@ -1,0 +1,590 @@
+package com.vmusco.softminer.graphs;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import org.graphstream.algorithm.Toolkit;
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.stream.file.FileSinkImages;
+import org.graphstream.stream.file.FileSinkImages.LayoutPolicy;
+import org.graphstream.stream.file.FileSinkImages.OutputType;
+import org.graphstream.stream.file.FileSinkImages.Quality;
+import org.graphstream.stream.file.FileSinkImages.RendererType;
+import org.graphstream.stream.file.FileSinkImages.Resolutions;
+import org.graphstream.stream.file.FileSinkSVG;
+import org.graphstream.stream.file.FileSinkSVG2;
+import org.graphstream.ui.layout.springbox.implementations.SpringBox;
+import org.graphstream.ui.swingViewer.Viewer;
+import org.graphstream.ui.swingViewer.ViewerListener;
+import org.graphstream.ui.swingViewer.ViewerPipe;
+
+import com.jeantessier.dependencyfinder.NullPrintWriter;
+
+public class GraphStream extends Graph {
+
+
+	private static final String __TAG_ATTRIB = "customUserTag";
+
+	private GraphStream() {
+
+	}
+
+	public static Graph instantiate(){
+		Graph g = new GraphStream();
+		g.graph = new SingleGraph("Untitled Graph");
+
+		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
+
+		return g;
+	}
+
+	@Override
+	public void addNode(String name, boolean displayLabel){
+		if(!this.hasNode(name)){
+			Node addNode = this.getGraph().addNode(name);
+
+			if(displayLabel)
+				setNodeLabel(name, name);
+		}
+	}
+
+	@Override
+	public void addDirectedEdge(String from, String to, boolean displayLabel){
+		if(!this.hasDirectedEdge(from, to)){
+			String name = this.buildEdgeName(from, to, true);
+			Edge addEdge = this.getGraph().addEdge(name, from, to, true);
+
+			if(displayLabel)
+				setEdgeLabel(name, name);
+
+		}
+	}
+
+	protected void setNodeLabel(String id, String label){
+		if(label == null){
+			getGraph().getNode(id).removeAttribute("ui.label");
+			HashMap<String, String> na = getNodeAttribute(id);
+			na.remove("text-alignment");
+			setNodeAttribute(id, na);
+		}else{
+			getGraph().getNode(id).setAttribute("ui.label", label);
+			HashMap<String, String> na = getNodeAttribute(id);
+			na.put("text-alignment", "under");
+			setNodeAttribute(id, na);
+		}
+	}
+
+	protected String getNodeLabel(String id){
+		return getGraph().getNode(id).getAttribute("ui.label");
+	}
+
+	protected void setEdgeLabel(String id, String label){
+		if(label == null)
+			getGraph().getEdge(id).removeAttribute("ui.label");
+		else
+			getGraph().getEdge(id).setAttribute("ui.label", label);
+	}
+
+	protected String getEdgeLabel(String id){
+		return getGraph().getEdge(id).getAttribute("ui.label");
+	}
+
+	/*public void bestDisplay(){
+		this.getGraph().display();
+	}*/
+
+	public void bestDisplay(){
+		Viewer viewer = getGraph().display();
+		viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.HIDE_ONLY);
+		
+		ViewerPipe fromViewer = viewer.newViewerPipe();
+		MyViewerListener mvl = new MyViewerListener(this, viewer);
+		fromViewer.addViewerListener(mvl);
+		fromViewer.addSink(getGraph());
+
+		while(mvl.isAlive()) {
+			fromViewer.pump();
+		}
+	}
+
+	@Override
+	public SingleGraph getGraph(){
+		return ((SingleGraph)this.graph);
+	}
+
+	private String buildEdgeName(String from, String to, boolean directed){
+		return from + (directed?">":"-") + to;
+	}
+
+	@Override
+	public boolean hasNode(String name) {
+		return !(this.getGraph().getNode(name) == null);
+	}
+
+	@Override
+	public boolean hasDirectedEdge(String from, String to) {
+		String name = this.buildEdgeName(from, to, true);
+		return !(this.getGraph().getEdge(name) == null);
+	}
+
+	@Override
+	public void addDirectedEdgeAndNodeIfNeeded(String from, String to, boolean nodesLabel, boolean edgesLabel) {
+		this.addNode(from, nodesLabel);
+		this.addNode(to, nodesLabel);
+		this.addDirectedEdge(from, to, edgesLabel);
+	}
+
+	@Override
+	public int getNbNodes() {
+		return this.getGraph().getNodeCount();
+	}
+	
+	@Override
+	public int getNbNodes(NodeTypes t) {
+		int nb = 0;
+		
+		for(String n : getNodesNames()){
+			if(getNodeType(n) == t)
+				nb++;
+		}
+
+		return nb;
+	}
+
+	@Override
+	public int getNbEdges() {
+		return this.getGraph().getEdgeCount();
+	}
+	
+	@Override
+	public int getNbEdges(EdgeTypes t) {
+		int nb = 0;
+		
+		for(NodesNamesForEdge n : getEdges()){
+			if(getEdgeType(n.from, n.to) == t)
+				nb++;
+		}
+
+		return nb;
+	}
+
+	@Override
+	public boolean colorNode(String name, String color) {
+		if(!this.hasNode(name))
+			return false;
+
+		HashMap<String, String> nodeAttribute = this.getNodeAttribute(name);
+		nodeAttribute.put("fill-color", color);
+		this.setNodeAttribute(name, nodeAttribute);
+		return true;
+	}
+
+	@Override
+	public boolean shadowNode(String name, int shadowSize, String shadowColor) {
+		if(!this.hasNode(name))
+			return false;
+
+		HashMap<String, String> nodeAttribute = this.getNodeAttribute(name);
+		nodeAttribute.put("shadow-color", shadowColor);
+		nodeAttribute.put("shadow-width", shadowSize+"px");
+		nodeAttribute.put("shadow-offset", "0px");
+		nodeAttribute.put("shadow-mode", "plain");
+		this.setNodeAttribute(name, nodeAttribute);
+
+		return true;
+	}
+	@Override
+	public String[] getNodesConnectedTo(String node) {
+		Node node2 = this.getGraph().getNode(node);
+		if(node2 == null)
+			return null;
+
+		Iterator<Edge> enteringEdgeIterator = node2.getEnteringEdgeIterator();
+
+		ArrayList<String> edges = new ArrayList<String>();
+
+		while(enteringEdgeIterator.hasNext()){
+			Edge next = enteringEdgeIterator.next();
+			if(!next.isDirected())
+				continue;
+
+			edges.add(next.getSourceNode().getId());
+		}
+
+		return edges.toArray(new String[edges.size()]);
+	}
+
+	@Override
+	public String[] getNodesConnectedFrom(String node) {
+		Node node2 = this.getGraph().getNode(node);
+		if(node2 == null)
+			return null;
+
+		Iterator<Edge> enteringEdgeIterator = node2.getLeavingEdgeIterator();
+
+		ArrayList<String> edges = new ArrayList<String>();
+
+		while(enteringEdgeIterator.hasNext()){
+			Edge next = enteringEdgeIterator.next();
+			if(!next.isDirected())
+				continue;
+
+			edges.add(next.getTargetNode().getId());
+		}
+
+		return edges.toArray(new String[edges.size()]);
+	}
+
+	@Override
+	public boolean sizeNode(String name, NodeSize size) {
+		if(this.getGraph().getNode(name) == null)
+			return false;
+
+		HashMap<String, String> nodeAttribute = this.getNodeAttribute(name);
+
+		if(size == NodeSize.SMALL)
+			nodeAttribute.put("size", "5px");
+		else if(size == NodeSize.LARGE)
+			nodeAttribute.put("size", "20px");
+		else
+			nodeAttribute.put("size", "10px");
+
+		this.setNodeAttribute(name, nodeAttribute);
+
+		return true;
+	}
+
+	@Override
+	public boolean shapeNode(String name, NodeShape shape) {
+		if(this.getGraph().getNode(name) == null)
+			return false;
+
+		HashMap<String, String> nodeAttribute = this.getNodeAttribute(name);
+
+		switch(shape){
+		case BOX:
+			nodeAttribute.put("shape", "box");
+			break;
+		case CROSS:
+			nodeAttribute.put("shape", "cross");
+			break;
+		case DIAMOND:
+			nodeAttribute.put("shape", "diamond");
+			break;
+		case PIES:
+			nodeAttribute.put("shape", "pie-chart");
+			break;
+		case ROUNDED_BOX:
+			nodeAttribute.put("shape", "rounded-box");
+			break;
+		default:
+			nodeAttribute.put("shape", "circle");
+			break;
+		}
+
+		this.setNodeAttribute(name, nodeAttribute);
+
+		return true;
+	}
+
+	protected HashMap<String, String> getNodeAttribute(String node){
+		HashMap<String, String> ret = new HashMap<String, String>();
+
+		String attr = this.getGraph().getNode(node).getAttribute("ui.style");
+
+		if(attr != null){
+			for(String itm : attr.split(";")){
+				String[] parts = itm.split(":");
+				if(parts.length < 2)
+					continue;
+				ret.put(parts[0], parts[1]);
+			}
+		}
+
+		return ret;
+	}
+
+	protected void setNodeAttribute(String node, HashMap<String, String> attrs){
+		if(!this.hasNode(node))
+			return;
+
+		Iterator<String> iterator = attrs.keySet().iterator();
+		String ret = "";
+
+		while(iterator.hasNext()){
+			String next = iterator.next();
+
+			ret += next+":"+attrs.get(next)+";";
+		}
+
+		this.getGraph().getNode(node).setAttribute("ui.style", ret);
+	}
+
+	@Override
+	public String[] getNodesNames() {
+		ArrayList<String> nodes = new ArrayList<String>();
+
+		Iterator<Node> nodeIterator = this.getGraph().getNodeIterator();
+		while(nodeIterator.hasNext()){
+			Node n = nodeIterator.next();
+			nodes.add(n.getId());
+		}
+
+		return nodes.toArray(new String[nodes.size()]);
+	}
+
+	@Override
+	public int getOutDegreeFor(String node) {
+		Node node2 = this.getGraph().getNode(node);
+		return (node2==null)?-1:node2.getOutDegree();
+	}
+
+	@Override
+	public int getInDegreeFor(String node) {
+		Node node2 = this.getGraph().getNode(node);
+		return (node2==null)?-1:node2.getInDegree();
+	}
+
+	/*@Override
+	public void tagNode(String node, String tag) {
+		Node node2 = this.getGraph().getNode(node);
+		node2.setAttribute(__TAG_ATTRIB, tag);
+	}
+
+	@Override
+	public void tagEdge(String from, String to, String tag) {
+		Edge edge = this.getGraph().getEdge(this.buildEdgeName(from, to, true));
+		edge.setAttribute(__TAG_ATTRIB, tag);
+	}
+
+	@Override
+	public String getNodeTag(String node) {
+		Node node2 = this.getGraph().getNode(node);
+		if(node2 == null)
+			return null;
+
+		return node2.getAttribute(__TAG_ATTRIB);
+	}
+
+	@Override
+	public String getEdgeTag(String from, String to) {
+		Edge edge = this.getGraph().getEdge(this.buildEdgeName(from, to, true));
+		if(edge == null)
+			return null;
+		return edge.getAttribute(__TAG_ATTRIB);
+	}*/
+	
+	@Override
+	public void markEdge(String from, String to, EdgeMarkers aMarker){
+		Edge edge = this.getGraph().getEdge(this.buildEdgeName(from, to, true));
+		edge.setAttribute(aMarker.name(), true);
+	}
+	
+	@Override
+	public void setEdgeType(String from, String to, EdgeTypes aType){
+		Edge edge = this.getGraph().getEdge(this.buildEdgeName(from, to, true));
+		edge.setAttribute("type", aType);
+	}
+
+	@Override
+	public boolean isEdgeMarked(String from, String to, EdgeMarkers aMarker){
+		Edge edge = this.getGraph().getEdge(this.buildEdgeName(from, to, true));
+		return edge.hasAttribute(aMarker.name());
+	}
+
+	@Override
+	public EdgeTypes getEdgeType(String from, String to){
+		Edge edge = this.getGraph().getEdge(this.buildEdgeName(from, to, true));
+		if(edge == null)
+			return null;
+		
+		return (EdgeTypes) edge.getAttribute("type");
+	}
+	
+	
+	@Override
+	public void markNode(String node, NodeMarkers aMarker){
+		Node node2 = this.getGraph().getNode(node);
+		node2.setAttribute(aMarker.name(), true);
+	}
+	
+	@Override
+	public void setNodeType(String node, NodeTypes aType){
+		Node node2 = this.getGraph().getNode(node);
+		node2.setAttribute("type", aType);
+	}
+
+	@Override
+	public boolean isNodeMarked(String node, NodeMarkers aMarker){
+		Node node2 = this.getGraph().getNode(node);
+		return node2.hasAttribute(aMarker.name());
+	}
+
+	@Override
+	public NodeTypes getNodeType(String node){
+		Node node2 = this.getGraph().getNode(node);
+		return (NodeTypes) node2.getAttribute("type");
+	}
+	
+	public NodeMarkers[] getNodeMarkers(String node){
+		HashSet<NodeMarkers> ret = new HashSet<>();
+		
+		for(NodeMarkers aMarker : NodeMarkers.values()){
+			if(isNodeMarked(node, aMarker))
+				ret.add(aMarker);
+		}
+		
+		return ret.toArray(new NodeMarkers[0]);
+	}
+	
+	public EdgeMarkers[] getEdgeMarkers(String from, String to){
+		HashSet<EdgeMarkers> ret = new HashSet<>();
+		
+		for(EdgeMarkers aMarker : EdgeMarkers.values()){
+			if(isEdgeMarked(from, to, aMarker))
+				ret.add(aMarker);
+		}
+		
+		return ret.toArray(new EdgeMarkers[0]);
+	}
+
+	/*@Override
+	public boolean isEdgeTag(String from, String to, String tag) {
+		return getEdgeTag(from, to) != null && getEdgeTag(from, to).equals(tag); 
+	}
+
+	@Override
+	public boolean isNodeTag(String node, String tag) {
+		return getNodeTag(node) != null && getNodeTag(node).equals(tag); 
+	}*/
+
+	@Override
+	public NodesNamesForEdge[] getEdges() {
+		NodesNamesForEdge[] ret = new NodesNamesForEdge[this.getGraph().getEdgeCount()];
+
+		int i = 0;
+		for(Edge ed : this.getGraph().getEdgeSet()){
+			ret[i] = new NodesNamesForEdge();
+			ret[i].from = ed.getSourceNode().getId();
+			ret[i].to = ed.getTargetNode().getId();
+			i += 1;
+		}
+
+		return ret;
+	}
+
+	@Override
+	public GraphApi getGraphFamily() {
+		return GraphApi.GRAPH_STREAM;
+	}
+
+	@Override
+	public void persistAsImage(String persistTo, boolean shake) {
+		// see: http://graphstream-project.org/doc/Tutorials/Creating-a-movie-with-FileSinkImages_1.0/
+
+		//getGraph().addAttribute("ui.screenshot", persistTo.getAbsolutePath());
+		//System.out.println("Persist image to "+getGraph().getAttribute("ui.screenshot")+" :)");
+
+		/*FileSinkSVG2 pic = new FileSinkSVG2();
+		SpringBox sb = new SpringBox();
+		getGraph().addSink(sb);
+		sb.addAttributeSink(getGraph());
+
+		Toolkit.computeLayout(getGraph());
+		
+		sb.shake();
+		sb.compute();
+
+		while (sb.getStabilization() < 1) {
+			sb.compute();
+		}*/
+
+		FileSinkImages pic = new FileSinkImages(OutputType.PNG, Resolutions.HD720);		
+		if(shake)
+			pic.setLayoutPolicy(LayoutPolicy.COMPUTED_FULLY_AT_NEW_IMAGE);
+		
+		pic.setQuality(Quality.HIGH);
+		pic.setRenderer(RendererType.SCALA);			// TO RENDER OTHER TYPOS ITEMS SUCH AS SHAPE AND SHADOWS (https://github.com/graphstream/gs-core/issues/49)
+
+		// Store and disable out stream during persistance
+		// this is needed because graphstream output stuffs during the exportation process :(
+		PrintStream tmp = System.out;
+		System.setOut(new PrintStream(new OutputStream() {
+			@Override
+			public void write(int b) throws IOException {
+			}
+		}));
+
+		try {
+
+			pic.writeAll(getGraph(), persistTo+".png");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		System.setOut(tmp);
+	}
+
+	@Override
+	public String[] computeShortestPath(String from, String to) {
+		ArrayList<String> al = new ArrayList<String>();
+
+		org.graphstream.algorithm.AStar astar = new org.graphstream.algorithm.AStar(getGraph()); 
+		astar.compute(from, to); // with A and Z node identifiers in the graph. 
+		org.graphstream.graph.Path path = astar.getShortestPath();
+
+		for(Node n : path.getEachNode()){
+			al.add(n.getId());
+		}
+
+		return al.toArray(new String[al.size()]);
+	}
+
+	@Override
+	public Graph keepOnly(NodeTypes[] nt, NodeMarkers[] nm, EdgeTypes[] et, EdgeMarkers[] em) {
+		Graph g = instantiate();
+		
+		for(String n : getNodesNames()){
+			for(NodeTypes nt2 : nt){
+				if(getNodeType(n) == nt2){
+					g.addNode(n);
+					g.setNodeType(n, getNodeType(n));
+				}
+			}
+			
+			for(NodeMarkers nm2 : nm){
+				if(isNodeMarked(n, nm2)){
+					g.addNode(n);
+					g.markNode(n, nm2);
+				}
+			}
+		}
+		
+		for(NodesNamesForEdge e : getEdges()){
+			for(EdgeTypes et2 : et){
+				if(getEdgeType(e.from, e.to) == et2){
+					g.addDirectedEdgeAndNodeIfNeeded(e.from, e.to);
+					g.setEdgeType(e.from, e.to, getEdgeType(e.from, e.to));
+				}
+			}
+			
+			for(EdgeMarkers em2 : em){
+				if(isEdgeMarked(e.from, e.to , em2)){
+					g.addDirectedEdgeAndNodeIfNeeded(e.from, e.to);
+					g.markEdge(e.from, e.to, em2);
+				}
+			}
+		}
+		
+		return g;
+	}
+
+}

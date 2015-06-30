@@ -1,0 +1,9 @@
+package com.vmusco.softminer.graphs;
+
+public enum EdgeTypes {
+	READ_OPERATION, 
+	WRITE_OPERATION,
+	METHOD_CALL,
+	INTERFACE_IMPLEMENTATION,
+	ABSTRACT_METHOD_IMPLEMENTATION
+}
