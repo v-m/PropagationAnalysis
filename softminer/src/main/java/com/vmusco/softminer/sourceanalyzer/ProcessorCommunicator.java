@@ -108,9 +108,9 @@ public abstract class ProcessorCommunicator {
 				}
 				
 				outputgraph.addDirectedEdgeAndNodeIfNeeded(finalsrc, finaldst, true, false);
-				outputgraph.setNodeType(src, src_type);
-				outputgraph.setNodeType(dst, dst_type);
-				outputgraph.setEdgeType(src, dst, edgeType);
+				outputgraph.setNodeType(finalsrc, src_type);
+				outputgraph.setNodeType(finaldst, dst_type);
+				outputgraph.setEdgeType(finalsrc, finaldst, edgeType);
 				return true;
 			}
 		}

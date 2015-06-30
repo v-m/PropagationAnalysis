@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.vmusco.softminer.graphs.EdgeMarkers;
-import com.vmusco.softminer.graphs.EdgeTypes;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.GraphNodeVisitor;
 import com.vmusco.softminer.graphs.NodeMarkers;
@@ -14,13 +13,6 @@ import com.vmusco.softminer.graphs.Graph.NodesNamesForEdge;
 public class UseGraph implements GraphNodeVisitor {
 	private Graph concernedGraph;
 	private Graph newGraph;
-
-	/*//OPTIONS USE GRAPH
-	private boolean invertRead = false;
-
-	public void setInvertRead(boolean invertRead) {
-		this.invertRead = invertRead;
-	}*/
 
 	public UseGraph(Graph base) {
 		this.concernedGraph = base;
@@ -107,26 +99,5 @@ public class UseGraph implements GraphNodeVisitor {
 
 	public String[] nextNodesToVisitFrom(String node) {
 		return this.concernedGraph.getNodesConnectedTo(node);
-		/*Set<String> ret = new HashSet<String>();
-
-		for(String s : this.concernedGraph.getNodesConnectedTo(node)){
-			ret.add(s);
-			if(!invertRead){
-				ret.add(s);
-			}else if(invertRead && (this.concernedGraph.getEdgeType(node, s) == null || this.concernedGraph.getEdgeType(node, s) != EdgeTypes.WRITE_OPERATION)){
-				ret.add(s);
-			}
-		}
-
-		if(invertRead){
-			for(String s : this.concernedGraph.getNodesConnectedFrom(node)){
-				if(this.concernedGraph.getEdgeType(node, s) == EdgeTypes.WRITE_OPERATION){
-					ret.add(s);
-				}
-			}
-		}
-
-		return ret.toArray(new String[0]);
-		*/
 	}
 }

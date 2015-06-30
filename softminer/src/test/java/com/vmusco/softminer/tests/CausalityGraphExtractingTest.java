@@ -148,18 +148,18 @@ public class CausalityGraphExtractingTest extends DepGraphTest {
 		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testAbstractAndInheritance.A.class);
 		
 		// Testing with resolving disabled !
-		ProcessorCommunicator.resolveInterfacesAndClasses = false;
-		Graph dg = CausalityGraph.convert(gb.generateDependencyGraph(buildingLogicToUse));
+		//ProcessorCommunicator.resolveInterfacesAndClasses = false;
+		//ProcessorCommunicator.includesFields = true;
+		//Graph dg = CausalityGraph.convert(gb.generateDependencyGraph(buildingLogicToUse));
+		//Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 		
 		//executionInspect(dg);
 		//System.out.println(stateAsATestCase(dg));
 		
-		fullAssertGraph(dg, 8, 8);
-		
-		String a2_a2 = "A2.A2()";
-		String a3_a3 = "A3.A3()";
-		String a4_a4 = "A4.A4()";
-		String a_a = "A.A()";
+		String a2_a2 = "A2()";
+		String a3_a3 = "A3()";
+		String a4_a4 = "A4()";
+		String a_a = "A()";
 		String t_foo = "T.foo()";
 		String a_biz = "A.biz()";
 		String a_bar = "A.bar()";
@@ -167,6 +167,10 @@ public class CausalityGraphExtractingTest extends DepGraphTest {
 		String a2_bar = "A2.bar()";
 		String a3_foo = "A3.foo()";
 		String a4_foo = "A4.foo()";
+		
+		/*fullAssertGraph(dg, 8, 8);
+		
+		
 		
 		fullAssertNode(dg, 
 		a2_a2, 
@@ -206,12 +210,12 @@ public class CausalityGraphExtractingTest extends DepGraphTest {
 		fullAssertNode(dg, 
 		a_foo, 
 		new String[]{}, 
-		new String[]{t_foo});
+		new String[]{t_foo});*/
 		
 		// Testing with resolving enabled !
 		gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.testAbstractAndInheritance.A.class);
 		ProcessorCommunicator.resolveInterfacesAndClasses = true;
-		dg = CausalityGraph.convert(gb.generateDependencyGraph(buildingLogicToUse));
+		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
 		
 		//executionInspect(dg);
 		//System.out.println(stateAsATestCase(dg));
@@ -262,6 +266,24 @@ public class CausalityGraphExtractingTest extends DepGraphTest {
 		a4_foo, 
 		new String[]{}, 
 		new String[]{t_foo});
+	}
+	
+	/**
+	 * Test abstract class inheritance and links
+	 * Status: Finished
+	 * @throws Exception
+	 */
+	@Test
+	public void testTiti() throws Exception{
+		GraphBuilder gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.titi.All.class);
+		
+		
+		// Testing with resolving enabled !
+		gb = setTestPkgAndGenerateBuilder(com.vmusco.softminer.tests.cases.titi.All.class);
+		ProcessorCommunicator.resolveInterfacesAndClasses = true;
+		ProcessorCommunicator.includesFields = true;
+		Graph dg = gb.generateDependencyGraph(buildingLogicToUse);
+		
 	}
 
 	@Test

@@ -62,10 +62,6 @@ public class GraphBuilder {
 		ProcessorCommunicator.outputgraph = Graph.getNewGraph(GraphApi.GRAPH_STREAM);
 		afterGraphInstatiation();
 		
-		/**
-		 * If No persistance, 
-		 * Generate it ...
-		 */
 		this.factory = new FactoryImpl(new DefaultCoreFactory(), new StandardEnvironment());
 		this.compiler = new JDTBasedSpoonCompiler(this.factory);
 		

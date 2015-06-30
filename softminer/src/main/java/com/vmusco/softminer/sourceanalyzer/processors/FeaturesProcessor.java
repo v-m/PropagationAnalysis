@@ -3,26 +3,21 @@ package com.vmusco.softminer.sourceanalyzer.processors;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-
-import com.vmusco.smf.mutation.Mutation;
-import com.vmusco.softminer.graphs.EdgeTypes;
-import com.vmusco.softminer.graphs.NodeMarkers;
-import com.vmusco.softminer.graphs.NodeTypes;
-import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
+import java.util.Set;
 
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtConstructorCall;
+import spoon.reflect.code.CtFieldAccess;
+import spoon.reflect.code.CtFieldRead;
+import spoon.reflect.code.CtFieldWrite;
 import spoon.reflect.code.CtInvocation;
-import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.declaration.CtClass;
-import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtField;
-import spoon.reflect.declaration.CtInterface;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
+import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.reference.CtExecutableReference;
@@ -30,51 +25,21 @@ import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.Query;
 import spoon.reflect.visitor.filter.AbstractFilter;
 import spoon.reflect.visitor.filter.AbstractReferenceFilter;
-import spoon.support.reflect.declaration.CtParameterImpl;
+
+import com.vmusco.smf.mutation.Mutation;
+import com.vmusco.softminer.graphs.EdgeTypes;
+import com.vmusco.softminer.graphs.NodeMarkers;
+import com.vmusco.softminer.graphs.NodeTypes;
+import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 
 @SuppressWarnings({"rawtypes","unchecked"})
 public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
-	private static int cpt = 0;
 	private HashSet<String> tagAsReflexion = new HashSet<String>();
 
 	private static String getNodeForItemKey(CtExecutable anExecutable){
 		return Mutation.resolveName((CtTypeMember)anExecutable);
 	}
 	
-	/**
-	 * Do not use anymore this function.
-	 * It is not homogeneous with the smf approach
-	 * @param anExecutable
-	 * @return
-	 */
-	@Deprecated
-	private static String getNodeForItemKeyVersion0(CtExecutable anExecutable){
-		String key = anExecutable.getSignature();
-
-		CtType<?> declaringType = ((CtTypeMember) anExecutable).getDeclaringType();
-
-		if(anExecutable instanceof CtMethod){
-			CtMethod castedElement = (CtMethod) anExecutable;
-
-			int pos = anExecutable.getSignature().indexOf("(");
-			String st = anExecutable.getSignature().substring(0, pos);
-			pos = st.lastIndexOf(' ');
-
-
-
-			key = declaringType.getQualifiedName()+"."+anExecutable.getSignature().substring(pos+1);
-		}else if(anExecutable instanceof CtConstructor){
-			CtConstructor castedElement = (CtConstructor) anExecutable;
-
-			key = declaringType.getQualifiedName()+
-					"."+
-					declaringType.getSimpleName()+
-					anExecutable.getSignature().substring(declaringType.getQualifiedName().length());
-		}
-
-		return key;
-	}
-
 	@Override
 	public void process(CtNamedElement element){
 		if(!preliminarTests(element))
@@ -87,11 +52,11 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 		 * Here we create a bridge between 
 		 * a declared method and its abstract signature
 		 */
-		try{
-			bridgeMethodAndAbstract(execElement, src);
-		}catch(Exception ex){
-			exceptionOccured(ex);
-		}
+		//try{
+		bridgeMethodAndAbstract(execElement, src);
+		//}catch(Exception ex){
+		//	exceptionOccured(ex);
+		//}
 
 		/**********************************
 		 * Treating executable references
@@ -115,19 +80,15 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 		 */
 
 		if(ProcessorCommunicator.includesFields){
-			AbstractFilter af = new AbstractFilter<CtVariableAccess>(CtVariableAccess.class) {
-				public boolean matches(CtVariableAccess element) {
+			AbstractFilter af = new AbstractFilter<CtFieldAccess>(CtFieldAccess.class) {
+				public boolean matches(CtFieldAccess element) {
 					return true;
 				}
 			};
-			List<CtVariableAccess> refs2 = Query.getElements(element, af);
+			List<CtFieldAccess> refs2 = Query.getElements(element, af);
 	
-			for(CtVariableAccess anAccess : refs2){
-				try{
-					treatFieldReferences(anAccess, src);
-				}catch(Exception ex){
-					exceptionOccured(ex);
-				}
+			for(CtFieldAccess anAccess : refs2){
+				treatFieldReferences(anAccess, src);
 			}
 		}
 	}
@@ -167,49 +128,44 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 		return true;
 	}
 
-	private void treatFieldReferences(CtVariableAccess anAccess, String src) {
-		try{
-			if(anAccess.getVariable().getDeclaration() instanceof CtField){
-				String dst = anAccess.getSignature().split(" ")[1];
-				cpt += 1;
-
-				EdgeTypes et = EdgeTypes.READ_OPERATION;
-
-				if(anAccess.getParent() instanceof CtAssignment){
-					// This is a writing operation
-					CtAssignment casted = (CtAssignment)anAccess.getParent();
-					if(casted.getAssigned() == anAccess){
-						// This is definitively a writing operation
-						et = EdgeTypes.WRITE_OPERATION;
-					}
-
-				}
-
-				if(et == EdgeTypes.WRITE_OPERATION)
-					ProcessorCommunicator.addIfAllowed(dst, src, NodeTypes.METHOD, NodeTypes.FIELD, et);
-				else
-					ProcessorCommunicator.addIfAllowed(src, dst, NodeTypes.METHOD, NodeTypes.FIELD, et);
-			}
-		}catch(IllegalStateException ex){
-			//TODO: ???
-			System.out.println("Exception here for: "+anAccess);
+	private void treatFieldReferences(CtFieldAccess anAccess, String src) {
+		EdgeTypes et = null;
+		
+		if(anAccess instanceof CtFieldRead){
+			et = EdgeTypes.READ_OPERATION;
+		}else if(anAccess instanceof CtFieldWrite){
+			et = EdgeTypes.WRITE_OPERATION;
+		}else{
+			return;
 		}
+		
+		String dst = anAccess.getSignature().split(" ")[1];
+		
+		if(et == EdgeTypes.WRITE_OPERATION)
+			ProcessorCommunicator.addIfAllowed(dst, src, NodeTypes.METHOD, NodeTypes.FIELD, et);
+		else
+			ProcessorCommunicator.addIfAllowed(src, dst, NodeTypes.METHOD, NodeTypes.FIELD, et);
 	}
 
 	private void treatExecutableReferences(CtExecutableReference aReference, String src) {
 		String dst = null;
-		cpt += 1;
 
-		if(aReference.getDeclaration() == null){
-			// This is an exodependency => not useful
-
-			//But before, let's see if there is reflexion in it...
-			if(aReference.toString().startsWith("java.lang.reflect.") ||
-					aReference.toString().startsWith("java.lang.Class.") ||
-					aReference.toString().startsWith("java.lang.Class<?>.")){
-				tagAsReflexion.add(src);
+		try{
+			if(aReference.getDeclaration() == null){
+				// This is an exodependency => not useful
+	
+				//But before, let's see if there is reflexion in it...
+				if(aReference.toString().startsWith("java.lang.reflect.") ||
+						aReference.toString().startsWith("java.lang.Class.") ||
+						aReference.toString().startsWith("java.lang.Class<?>.")){
+					tagAsReflexion.add(src);
+				}
+	
+				return;
 			}
-
+		}catch(Exception ex){
+			// I think there is a bug in spoon here...
+			// Let's skip this case
 			return;
 		}
 
@@ -218,152 +174,124 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 		dst = getNodeForItemKey(aReferenceExecutable);
 		ProcessorCommunicator.addIfAllowed(src, dst, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.METHOD_CALL);
 	}
-
+	
+	private CtMethod<?> isMethodComingFrom(CtMethod aMethod, CtTypeReference anElement){
+		List<CtTypeReference<?>> resolveFrom = anElement.getDeclaration().getFormalTypeParameters();
+		List<CtTypeReference<?>> resolveTo = anElement.getActualTypeArguments();
+		if(resolveFrom.size() != resolveTo.size() && aMethod.getParent(CtClass.class) != null){
+			resolveTo = (aMethod.getParent(CtClass.class)).getFormalTypeParameters();
+		}else if(resolveFrom.size() != resolveTo.size()){
+			// Maybe other cases can be implied here ?!
+			return null;
+		}
+		
+		for(CtMethod<?> s : (Set<CtMethod<?>>)anElement.getDeclaration().getMethods()){
+			if(s.getParameters().size() != aMethod.getParameters().size()){
+				continue;
+			}
+			
+			CtTypeReference[] array = new CtTypeReference[s.getParameters().size()];
+			int i=0;
+			for(CtParameter<?> pr : s.getParameters()){
+				array[i++] = pr.getType();
+			}
+			
+			for(i=0; i<array.length; i++){
+				for(int j=0; j<resolveFrom.size(); j++){
+					if(array[i].equals(resolveFrom.get(j))){
+						array[i] = resolveTo.get(j);
+						break;
+					}
+				}
+			}
+			
+			if(s.getSimpleName().equals(aMethod.getSimpleName())){
+				List<CtParameter> meth_params = aMethod.getParameters();
+				
+				if(meth_params.size() == array.length){
+					boolean found = true;
+					for(i=0; i<meth_params.size(); i++){
+						if(!meth_params.get(i).getType().equals(array[i])){
+							found = false;
+							break;
+						}
+					}
+					
+					if(found)
+						return s;
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	
 	private void bridgeMethodAndAbstract(CtExecutable execElement, String src) {
 		String dst = "";
 
 		if(ProcessorCommunicator.resolveInterfacesAndClasses && execElement instanceof CtMethod){
 			CtMethod casted = (CtMethod) execElement;
-			CtTypeReference[] params = extractParams(casted.getParameters());
-			//TypeVariable[] formalParams;
-			List<CtTypeReference<?>> formalParams2;
 
 			CtType<?> declaringType = ((CtTypeMember) execElement).getDeclaringType();
 
 			if(declaringType instanceof CtClass){
-				CtClass exploration = (CtClass)declaringType;
-
-				formalParams2 = exploration.getFormalTypeParameters();
-				// formalParams = exploration.getActualClass().getTypeParameters();
-
-				//System.out.println(exploration.getQualifiedName());
-				ArrayList analyzeThoseIfces = new ArrayList<>();
-
-				if(exploration.getSuperclass() != null &&  
-						exploration.getSuperclass().getDeclaration() instanceof CtInterface){
-					analyzeThoseIfces.add(exploration.getSuperclass());
-					analyzeThoseIfces.addAll(exploration.getSuperclass().getSuperInterfaces());
-				}else{
-					analyzeThoseIfces.addAll(exploration.getSuperInterfaces());
-				}
-
-				// We first check if an interface is the responsible of a potential overriding
-				for(Object ifce : analyzeThoseIfces){
-
-					if(ifce instanceof CtTypeReference){
-						CtTypeReference ctr = ((CtTypeReference) ifce);
-
-						if(ctr.getDeclaration() == null)
-							continue;
-
-						if(ctr.getDeclaration() instanceof CtInterface){
-							for(Object o : ((CtInterface)ctr.getDeclaration()).getAllMethods()){
-								CtMethod exo = ((CtMethod)o);
-
-								CtInterface intfc = ((CtInterface)ctr.getDeclaration());
-
-								if(compareParams(params, extractParams(exo.getParameters()), formalParams2, intfc.getFormalTypeParameters()) && casted.getSimpleName().equals(exo.getSimpleName())){
-									dst = getNodeForItemKey(exo);
-
-									if(ProcessorCommunicator.addIfAllowed(dst, src, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION)){
-
-									}
-									exploration = null;
-								}
-							}
-						}else{
-							for(Object o : ctr.getAllExecutables()){
-								CtExecutableReference exo = ((CtExecutableReference)o);
-
-								if(compareParams(params, extractParams(exo.getActualTypeArguments()), null, null) && casted.getSimpleName().equals(exo.getSimpleName())){
-									dst = getNodeForItemKey(exo.getDeclaration());
-									if(ProcessorCommunicator.addIfAllowed(dst, src, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION)){
-
-									}
-									exploration = null;
+				List<CtTypeReference> analyzeThoseIfces = new ArrayList<CtTypeReference>();
+				List<CtTypeReference> analyzeThoseClasses = new ArrayList<CtTypeReference>();
+				
+				if(declaringType.getSuperclass() != null && declaringType.getSuperclass().getDeclaration() != null)
+					analyzeThoseClasses.add(declaringType.getSuperclass());
+				
+				if(declaringType.getSuperInterfaces().size() > 0)
+					analyzeThoseIfces.addAll(declaringType.getSuperInterfaces());
+				
+				
+				while(analyzeThoseIfces.size() > 0 || analyzeThoseClasses.size() > 0){
+					// We first check if an interface is the responsible of a potential overriding
+					while(analyzeThoseIfces.size() > 0){
+						CtTypeReference ifce = analyzeThoseIfces.remove(0);
+						
+						if(ifce instanceof CtTypeReference){
+							CtTypeReference ctr = ((CtTypeReference) ifce);
+	
+							if(ctr.getDeclaration() == null)
+								continue;
+							
+							CtMethod<?> exo = isMethodComingFrom(casted, ctr);
+							
+							if(exo != null){
+								dst = getNodeForItemKey(exo);
+								if(ProcessorCommunicator.addIfAllowed(dst, src, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION)){
+									//System.out.println(dst+" --I--> "+src);
 								}
 							}
 						}
+						
+						analyzeThoseIfces.addAll(ifce.getSuperInterfaces());
 					}
-				}
-
-				while(exploration != null && exploration.getSuperclass() != null){
-					CtClass parentClass = (CtClass)(exploration.getSuperclass()).getDeclaration();
-
-					if(parentClass != null){
-						CtMethod method = parentClass.getMethod(casted.getSimpleName(), params);
-
-						if(method != null && method.getBody() == null){
-							dst = getNodeForItemKey(method);
-							ProcessorCommunicator.addIfAllowed(dst, src, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.ABSTRACT_METHOD_IMPLEMENTATION);
-							exploration = null;
-						}else{
-							//System.out.println("Leaving from: "+exploration.getQualifiedName());
-							exploration = parentClass;
-							//formalParams = exploration.getActualClass().getTypeParameters();
-							formalParams2 = exploration.getFormalTypeParameters();
+	
+					while(analyzeThoseClasses.size() > 0){
+						CtTypeReference parentClass = analyzeThoseClasses.remove(0);
+	
+						if(parentClass != null){
+							CtMethod<?> exo = isMethodComingFrom(casted, parentClass);
+							
+							if(exo != null){
+								dst = getNodeForItemKey(exo);
+								if(ProcessorCommunicator.addIfAllowed(dst, src, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION)){
+									//System.out.println(dst+" --A--> "+src);
+								}
+							}
+							
+							if(parentClass.getSuperclass() != null && parentClass.getSuperclass().getDeclaration() != null)
+								analyzeThoseClasses.add(parentClass.getSuperclass());
+							
+							analyzeThoseIfces.addAll(parentClass.getSuperInterfaces());
 						}
-					}else
-						exploration = null;
-				}
-			}
-		}
-	}
-
-	private static CtTypeReference[] extractParams(List paramsIn) {
-		CtTypeReference[] params = new CtTypeReference[paramsIn.size()];
-		int i = 0;
-
-		for(Object ent : paramsIn){
-			if(ent instanceof CtTypeReference){
-				params[i++] = (CtTypeReference)ent;
-			}else{
-				CtParameterImpl entry = (CtParameterImpl) ent;
-				params[i++] = entry.getType();
-			}
-
-		}
-		return params;
-	}
-
-	private static boolean compareParams(CtTypeReference[] one, CtTypeReference[] two){
-		return compareParams(one, two, null, null);
-	}
-
-	/***
-	 * Uses Java introspection SDK TypeVariable because of a potential Spoon Bug.
-	 * See com.vmusco.softminer.tests.processors.TestMethodReturnIfceWithGenericsProcessor for a resulting processor and
-	 * classes in com.vmusco.softminer.tests.cases.testMethodReturnIfceWithGenericsMixed for a concrete case
-	 * @param one
-	 * @param two
-	 * @param formalTypesForOne
-	 * @param formalTypesForTwo
-	 * @return
-	 */
-	private static boolean compareParams(CtTypeReference[] one, CtTypeReference[] two, List<CtTypeReference<?>> formalTypesForOne, List<CtTypeReference<?>> formalTypesForTwo){
-		if(one.length != two.length)
-			return false;
-
-		for(int i=0; i<one.length; i++){
-			if(!one[i].equals(two[i])){
-
-				if(formalTypesForOne.size() != formalTypesForTwo.size())
-					return false;
-
-				boolean found = false;
-				for(int j=0; j<formalTypesForOne.size(); j++){
-					if(one[i].equals(formalTypesForOne.get(j)) && two[i].equals(formalTypesForTwo.get(j))){
-						found = true;
-						break;
 					}
 				}
-
-				if(!found)
-					return false;
 			}
 		}
-
-		return true;
 	}
 
 	@Override

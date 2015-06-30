@@ -37,12 +37,12 @@ public class Test1 {
 			System.out.println("Ver B");
 			GraphGenerator.main(ug2);
 			System.out.println("NbEdges: "+GraphGenerator.generatedGraph.getNbEdges());
-
 			System.out.println(p);
+
 			System.out.println("Ver C");
 			GraphGenerator.main(ug3);
 			System.out.println("NbEdges: "+GraphGenerator.generatedGraph.getNbEdges());
-			
+
 			System.out.println("Ver D");
 			GraphGenerator.main(ug4);
 			System.out.println("NbEdges: "+GraphGenerator.generatedGraph.getNbEdges());
