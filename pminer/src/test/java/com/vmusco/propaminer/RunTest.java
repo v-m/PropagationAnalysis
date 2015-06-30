@@ -10,18 +10,20 @@ import com.vmusco.pminer.run.SetsSizeForAllMutators;
 public class RunTest {
 	public static void main(String[] args) throws Exception {
 		String[] h = new String[]{
-				//"/home/vince/Experiments/bugimpact/mutants/commons-io",
+				"/home/vince/Experiments/bugimpact/mutants/commons-io",
 				"/home/vince/Experiments/bugimpact/mutants/ug/commons-codec",
-				//"/home/vince/Experiments/bugimpact/ug/commons-collections4",
-				//"/home/vince/Experiments/bugimpact/ug/gson",
-				//"/home/vince/Experiments/bugimpact/ug/shindig",
-				//"/home/vince/Experiments/bugimpact/ug/commons-lang",
-				//"/home/vince/Experiments/bugimpact/mutants/spojo",
-				//"/home/vince/Experiments/bugimpact/mutants/joda-time",
-				//"/home/vince/Experiments/bugimpact/ug/jgit",
-				//"/home/vince/Experiments/bugimpact/ug/sonar"
+				"/home/vince/Experiments/bugimpact/mutants/ug/commons-collections4",
+				"/home/vince/Experiments/bugimpact/mutants/ug/gson",
+				"/home/vince/Experiments/bugimpact/mutants/ug/shindig",
+				"/home/vince/Experiments/bugimpact/mutants/ug/commons-lang",
+				"/home/vince/Experiments/bugimpact/mutants/spojo",
+				"/home/vince/Experiments/bugimpact/mutants/joda-time",
+				"/home/vince/Experiments/bugimpact/mutants/ug/jgit",
+				"/home/vince/Experiments/bugimpact/mutants/ug/sonar"
 		};
 
+		String ug_loc = "/home/vince/Experiments/bugimpact/usegraphs";
+		
 		Map<String, String> homes = new HashMap<String, String>();
 		for(String s : h){
 			homes.put((new File(s)).getName(), s);
@@ -36,7 +38,7 @@ public class RunTest {
 
 					String[] s = new String[]{
 							home+"/mutations/main/",
-							home+"/usegraph_"+c+".xml",
+							ug_loc + File.separator + new File(home).getName() +"/usegraph_"+c+".xml",
 							"-s", "impact_"+c+".xml",
 							"-z"
 					};
