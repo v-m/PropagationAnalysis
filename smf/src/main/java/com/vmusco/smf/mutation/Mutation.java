@@ -1,7 +1,5 @@
 package com.vmusco.smf.mutation;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,7 +23,6 @@ import javax.tools.JavaFileObject;
 import org.apache.commons.io.FileUtils;
 
 import spoon.compiler.SpoonCompiler;
-import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
@@ -231,13 +228,8 @@ public final class Mutation {
 			m.setParent(toReplace.getParent());
 			toReplace.replace(m);
 
-			DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
-			Map<String, byte[]> built = Compilation.compilesUsingJavax(theClass, generateAssociatedClassContent(theClass), ps.getTestingClasspath(), diagnostics);
-
 			String mutationid = MUTANT_FILE_PREFIX+mutantcounter++;
 			String outp = ms.getSourceMutationResolved() + File.separator + mutationid;
-			String boutp = ms.getBytecodeMutationResolved() + File.separator + mutationid;
-
 			persistMutantClass(theClass, outp, factory);
 
 			boolean hashclash = false;
@@ -245,7 +237,6 @@ public final class Mutation {
 				ifos.hash = convertByteHashToString(getHashForMutationSource(outp));
 
 				if(mutHashs.contains(ifos.hash)){
-					System.out.println("\t =======>>>>>> This mutant already exist... Skipping and dropping "+mutationid+"...");
 					hashclash = true;
 					FileUtils.deleteDirectory(new File(outp));
 					mutantcounter--;
@@ -259,6 +250,11 @@ public final class Mutation {
 			}
 
 			if(!hashclash){
+				DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+				Map<String, byte[]> built = Compilation.compilesUsingJavax(theClass, generateAssociatedClassContent(theClass), ps.getTestingClasspath(), diagnostics);
+
+				String boutp = ms.getBytecodeMutationResolved() + File.separator + mutationid;
+
 				if(built != null){
 					ifos.viable = true;
 
@@ -365,34 +361,6 @@ public final class Mutation {
 		return hashtext;
 	}
 
-	private static SpoonCompiler prepareCompilerForFixing(ProcessStatistics ps) {
-		StandardEnvironment standardEnvironment = new StandardEnvironment();
-		standardEnvironment.setAutoImports(true);
-
-		Factory factory = new FactoryImpl(new DefaultCoreFactory(), standardEnvironment);
-		SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
-
-		//Updating classpath
-		String[] cp;
-		int i = 0;
-
-		if(ps.getClasspath() != null){
-			cp = new String[ps.getClasspath().length + 1];
-
-			for(String cpe : ps.getClasspath()){
-				cp[i++] = cpe;
-			}
-		}else{
-			cp = new String[1];
-		}
-
-		cp[i] = ps.getWorkingDir() + File.separator + ps.projectOut;
-
-		compiler.setSourceClasspath(cp);
-
-		return compiler;
-	}
-
 	private static String getMethodFullSignatureForParent(CtElement e){
 		CtElement searchSignature = e;
 		while(!(searchSignature instanceof CtMethod) && !(searchSignature instanceof CtConstructor) && searchSignature != null){
@@ -418,62 +386,6 @@ public final class Mutation {
 			return castedElement.getDeclaringType().getQualifiedName()+"."+castedElement.getSignature().substring(pos+1);
 		else
 			return null;
-	}
-
-	/**
-	 * 
-	 * @param parentItems the items (files) to mutate
-	 * @param classpath the classpath to use
-	 * @param parentBuild the folder in which the original has been built
-	 * @param processor a processor extending MutationOperation
-	 * @param mutantOut a folder where to persist valid mutants
-	 * @throws Exception 
-	 */
-	@Deprecated
-	public static void createMutant(String parentItems, String[] classpath, String parentBuild, MutationOperator processor, String mutantOut) throws Exception{
-		int mutantcounter = 0;
-
-		Factory factory = new FactoryImpl(new DefaultCoreFactory(), new StandardEnvironment());
-		SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
-		compiler.addInputSource(new File(parentItems));
-
-		//Updating classpath
-		String[] cp = new String[classpath.length + 1];
-
-		int i = 0;
-		for(String cpe : classpath){
-			cp[i++] = cpe;
-		}
-
-		cp[i] = parentBuild;
-		compiler.setSourceClasspath(cp);
-
-		// Build (in memory)
-		compiler.build();
-
-		// Obtain list of element to mutate
-		List<String> arg0 = new ArrayList<String>();
-		arg0.add(processor.getClass().getName());
-		compiler.process(arg0);
-
-		for(CtElement e : MutationGateway.getMutationCandidates()){
-			for(CtElement m : processor.getMutatedEntries(e, factory)){
-				CtElement parent = e;
-
-				parent.replace(m);
-
-				CtClass theClass = findAssociatedClass(e);
-
-				if(Compilation.compilesUsingJavax(theClass, generateAssociatedClassContent(theClass), classpath) != null){
-					String outp = mutantOut+File.separator+MUTANT_FILE_PREFIX+mutantcounter++;
-					//TODO: theClass.isTopLevel() ==> Should be taken into consideration !!!
-					persistMutantClass(theClass, outp, factory);
-				}
-
-				m.replace(parent);
-			}
-
-		}
 	}
 
 	public static void persistMutantClass(CtClass aClass, String outputPath, Factory f){
