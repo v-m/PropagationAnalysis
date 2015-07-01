@@ -1,4 +1,4 @@
-package com.vmusco.propaminer;
+package com.vmusco.pminer;
 
 import java.io.File;
 import java.util.HashMap;
@@ -10,16 +10,16 @@ import com.vmusco.pminer.run.SetsSizeForAllMutators;
 public class RunTest {
 	public static void main(String[] args) throws Exception {
 		String[] h = new String[]{
-				"/home/vince/Experiments/bugimpact/mutants/commons-io",
-				"/home/vince/Experiments/bugimpact/mutants/ug/commons-codec",
+				//"/home/vince/Experiments/bugimpact/mutants/commons-io",
+				//"/home/vince/Experiments/bugimpact/mutants/ug/commons-codec",
 				"/home/vince/Experiments/bugimpact/mutants/ug/commons-collections4",
-				"/home/vince/Experiments/bugimpact/mutants/ug/gson",
-				"/home/vince/Experiments/bugimpact/mutants/ug/shindig",
-				"/home/vince/Experiments/bugimpact/mutants/ug/commons-lang",
-				"/home/vince/Experiments/bugimpact/mutants/spojo",
-				"/home/vince/Experiments/bugimpact/mutants/joda-time",
-				"/home/vince/Experiments/bugimpact/mutants/ug/jgit",
-				"/home/vince/Experiments/bugimpact/mutants/ug/sonar"
+				//"/home/vince/Experiments/bugimpact/mutants/ug/gson",
+				//"/home/vince/Experiments/bugimpact/mutants/ug/shindig",
+				//"/home/vince/Experiments/bugimpact/mutants/ug/commons-lang",
+				//"/home/vince/Experiments/bugimpact/mutants/spojo",
+				//"/home/vince/Experiments/bugimpact/mutants/joda-time",
+				//"/home/vince/Experiments/bugimpact/mutants/ug/jgit",
+				//"/home/vince/Experiments/bugimpact/mutants/ug/sonar"
 		};
 
 		String ug_loc = "/home/vince/Experiments/bugimpact/usegraphs";
@@ -34,7 +34,7 @@ public class RunTest {
 				String home = homes.get(homekey);
 
 				System.out.println(home);
-				for(char c = 'A'; c<'E'; c++){
+				for(char c = 'A'; c<'B'; c++){
 
 					String[] s = new String[]{
 							home+"/mutations/main/",

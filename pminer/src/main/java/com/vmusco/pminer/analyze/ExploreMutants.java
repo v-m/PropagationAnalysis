@@ -32,10 +32,8 @@ public class ExploreMutants {
 		this.analyzeListeners.remove(mta);
 	}
 
-	public void start(String[] allMutations/*, boolean reverseReadVariable*/) throws Exception {
+	public void start(String[] allMutations) throws Exception {
 		ProcessStatistics ps = ms.ps;
-		//HashMap<String, UseGraph> cache = new HashMap<String, UseGraph>();
-		//HashMap<String, Long> durations = new HashMap<String, Long>();
 
 		// LOADING PHASE FINISHED !
 
@@ -45,7 +43,7 @@ public class ExploreMutants {
 		for(String mutation : allMutations){											// For each mutant...
 			if(++cpt %50 == 0)
 				System.out.println("\t"+(cpt)+" "+mutation);
-			
+
 			boolean forceStop = false;
 			MutantIfos ifos = (MutantIfos) ms.mutations.get(mutation);
 
@@ -67,7 +65,7 @@ public class ExploreMutants {
 			if(forceStop)
 				break;
 		}
-		
+
 		fireExecutionEnded();
 
 	}
@@ -80,10 +78,10 @@ public class ExploreMutants {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	public void fireExecutionStarting(){
 		for(MutantTestAnalyzer aListerner : this.analyzeListeners){
 			aListerner.fireExecutionStarting();
@@ -95,7 +93,7 @@ public class ExploreMutants {
 			aListerner.fireExecutionEnded();
 		}
 	}
-	
+
 
 	/***
 	 * This method return a list test impacted by the a bug inserted in this.mutations.get(mutationKey)
@@ -110,9 +108,9 @@ public class ExploreMutants {
 
 		for(String bug : bugs){																// We explore each bug determined using the basins technique
 			for(String test : tests){														// We determine whether bug basin determined node is a test
-				if(bug.indexOf(test) != -1)													// If so...
+				if(ProcessStatistics.areTestsEquivalents(bug, test)){						// If so...
 					retrieved.add(test);
-				else if(bug.indexOf("test") != -1){
+					//}else if(bug.indexOf("test") != -1){
 					// Nothing to do ? Those cases are reported as test but not returned as so by smf !
 				}
 			}
@@ -140,13 +138,13 @@ public class ExploreMutants {
 
 	private static String[] includeTestSuiteGlobalFailingCases(ProcessStatistics ps, String[] testsuites, String[] include){
 		Set<String> cases = new HashSet<String>();
-		
+
 		if(include != null){
 			for(String s : include){
 				cases.add(s);
 			}
 		}
-		
+
 		for(String ts : testsuites){
 			for(String s : ps.testCases){
 				if(s.startsWith(ts)){
@@ -154,10 +152,10 @@ public class ExploreMutants {
 				}
 			}
 		}
-		
+
 		return cases.toArray(new String[0]);
 	}
-	
+
 	public static String[] purifyFailingResultSetForMutant(ProcessStatistics ps, MutantIfos mi){
 		String[] mutset = includeTestSuiteGlobalFailingCases(ps, mi.mutantErrorOnTestSuite, mi.mutantFailingTestCases);
 		String[] glbset = includeTestSuiteGlobalFailingCases(ps, ps.errorOnTestSuite, ps.failingTestCases);
@@ -168,20 +166,20 @@ public class ExploreMutants {
 	public static String[] purifyIgnoredResultSetForMutant(ProcessStatistics ps, MutantIfos mi){
 		String[] mutset = mi.mutantIgnoredTestCases;
 		String[] glbset = ps.ignoredTestCases;
-		
+
 		return purifyResultSetForMutant(mutset, glbset);
 	}
 
 	public static String[] purifyHangingResultSetForMutant(ProcessStatistics ps, MutantIfos mi){
 		String[] mutset = mi.mutantHangingTestCases;
 		String[] glbset = ps.hangingTestCases;
-		
+
 		return purifyResultSetForMutant(mutset, glbset);
 	}
 
 	public static String[] purifyFailAndHangResultSetForMutant(ProcessStatistics ps, MutantIfos mi){
 		Set<String> cases = new HashSet<String>();
-		
+
 		for(String ts : mi.mutantErrorOnTestSuite){
 			for(String s : ps.testCases){
 				if(s.startsWith(ts)){
@@ -197,7 +195,7 @@ public class ExploreMutants {
 		for(String s:mi.mutantFailingTestCases){
 			cases.add(s);
 		}
-		
+
 		for(String s : mi.mutantErrorOnTestSuite){
 			for(String ss : ps.testCases){
 				if(ss.startsWith(s)){

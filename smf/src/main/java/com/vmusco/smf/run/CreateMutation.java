@@ -145,18 +145,6 @@ public class CreateMutation implements MutationCreationListener{
 		}
 	}
 
-	/*private static void synopsis() {
-		System.out.println();
-		System.out.println("Synopsis: CreateMutation <configFile> <mutatorOp> [<mname> <classes>]");
-		System.out.println("  * configFile: path to smf config file");
-		System.out.println("  * mutatorOp: the id or class full name of a mutation operator");
-		System.out.println("      'CreateMutation --operators' to dislay the list of operators available");
-		System.out.println("  * mname: a name for the mutation (default: main)");
-		System.out.println("  * classes: a );
-		System.out.println();
-		System.exit(1);
-	}*/
-
 	private int nbmutchekmax = 0;
 	private int nbmutchek = 0;
 	private int nbthischeck = 0;

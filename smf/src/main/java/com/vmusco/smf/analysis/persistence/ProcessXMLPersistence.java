@@ -18,6 +18,7 @@ import org.jdom2.output.XMLOutputter;
 import com.vmusco.smf.analysis.ProcessStatistics;
 
 public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistics>{
+
 	private static String ROOT_ELEMENT_0 = "smf";
 
 	// CONFIG START

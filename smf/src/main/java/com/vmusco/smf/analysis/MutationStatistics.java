@@ -180,20 +180,20 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 
 		if(!reset && f.exists()){
 			loadMutants();
-		}else{
-			if(nb == -1){
-				Mutation.createMutants(ps, this, mcl);
-			}else{
-				Mutation.createMutants(ps, this, mcl, nb);
-			}
-
-			MutationXMLPersisitence per = new MutationXMLPersisitence(f);
-			per.saveState(this);
 		}
+		
+		if(nb == -1){
+			Mutation.createMutants(ps, this, mcl, reset);
+		}else{
+			Mutation.createMutants(ps, this, mcl, reset, nb);
+		}
+		
+		MutationXMLPersisitence per = new MutationXMLPersisitence(f);
+		per.saveState(this);
 	}
 	
 	public void loadMutants() throws Exception{
-		File f = new File(getConfigFileResolved(), configFile);
+		File f = new File(getConfigFileResolved());
 		
 		MutationXMLPersisitence per = new MutationXMLPersisitence(f);
 		per.loadState(this);

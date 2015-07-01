@@ -26,9 +26,7 @@ import com.vmusco.smf.mutation.MutationOperator;
  *
  */
 public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
-
 	private static final String ROOT = "mutation-execution";
-	
 	private static final String ID = "id";
 	
 	private String mutantId;

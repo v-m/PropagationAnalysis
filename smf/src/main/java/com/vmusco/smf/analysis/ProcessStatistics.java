@@ -688,4 +688,21 @@ public class ProcessStatistics implements Serializable{
 		File f = new File(getProjectIn(true), ".git");
 		return f.exists();
 	}
+
+
+	public static String fixTestSignature(String test) {
+		if(test.endsWith(")")){
+			return test;
+		}else{
+			return test+"()";
+		}
+	}
+
+
+	public static boolean areTestsEquivalents(String bug, String test) {
+		String  cbug = fixTestSignature(bug);
+		String ctest = fixTestSignature(test);
+		
+		return cbug.equals(ctest);
+	}
 }

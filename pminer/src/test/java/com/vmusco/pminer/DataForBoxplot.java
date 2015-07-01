@@ -1,4 +1,4 @@
-package com.vmusco.propaminer;
+package com.vmusco.pminer;
 
 import java.io.File;
 import java.io.FileInputStream;

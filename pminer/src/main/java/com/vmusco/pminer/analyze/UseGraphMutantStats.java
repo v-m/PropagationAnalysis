@@ -98,6 +98,8 @@ public class UseGraphMutantStats {
 		this.mutationId = mutationId;
 		mutationInsertionPoint = mi.mutationIn;
 
+		//System.out.print(this.mutationId+"\t");
+		
 		data_basin = new HashSet<String>();
 		for(String node : basin.getBasinGraph().getNodesNames()){
 			data_basin.add(node);
@@ -138,10 +140,22 @@ public class UseGraphMutantStats {
 		nb_boths = data_inter.size();
 		nb_mores = data_graphOnly.size();
 		nb_lesss = data_mutationOnly.size();
+		//System.out.print(nb_graph+"\t");
+		//System.out.print(nb_mutat+"\t");
+		//System.out.print(nb_boths+"\t");
+		//System.out.print(nb_mores+"\t");
+		//System.out.print(nb_lesss+"\t");
 		
 		prediction_time = propagraphtime;
 		
 		calculate();
+		//System.out.print(precision+"\t");
+		//System.out.print(recall+"\t");
+		//System.out.print(fscore+"\t");
 		calculateAndExcludeNulls();
+		//System.out.print(precision_notnull+"\t");
+		//System.out.print(recall_notnull+"\t");
+		//System.out.print(fscore_notnull+"\t");
+		//System.out.print("\n");
 	}
 }

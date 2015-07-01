@@ -1,4 +1,4 @@
-package com.vmusco.propaminer;
+package com.vmusco.pminer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,7 +18,7 @@ public class RunTestAllWithInfos {
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 		String[] h = new String[]{
-				//"/home/vince/Experiments/bugimpact/mutants/commons-io",
+				"/home/vince/Experiments/bugimpact/mutants/commons-io",
 				"/home/vince/Experiments/bugimpact/ug/commons-codec",
 				"/home/vince/Experiments/bugimpact/ug/commons-collections4",
 				"/home/vince/Experiments/bugimpact/ug/gson",

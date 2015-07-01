@@ -37,6 +37,7 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 	private static String MUTATION_3 = "mutant";
 	private static final String MUTATION_CLASS_3 = "operator-class";
 	private static final String MUTATION_OPERATOR_3 = "operator-id";
+	private static final String MUTANT_HASH_4 = "hash";
 
 	private static String MUTANT_ID_4 = "id";
 	private static String MUTANT_IN_4 = "in";
@@ -149,6 +150,8 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 
 			amutant.setAttribute(new Attribute(MUTANT_ID_4, mut));
 			amutant.setAttribute(new Attribute(MUTANT_VIABLE_4, ifos.viable?"true":"false"));
+			if(ifos.hash != null)
+				amutant.setAttribute(new Attribute(MUTANT_HASH_4, ifos.hash));
 
 			setSensitiveAttribute(amutant, MUTANT_IN_4, ifos.mutationIn==null?"?":ifos.mutationIn);
 			try{
@@ -196,7 +199,8 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 
 	@Override
 	public void loadState(MutationStatistics<?> ms) throws Exception {
-
+		openFile();
+		
 		ms.configFile = root.getAttribute(CONFIG_FILE).getValue();
 
 		Attribute att = root.getAttribute(ProcessXMLPersistence.TIME_ATTRIBUTE);
@@ -226,6 +230,9 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 				ifos.mutationTo = e.getAttribute(MUTANT_TO_4).getValue();
 				ifos.mutationIn = e.getAttribute(MUTANT_IN_4).getValue();
 				ifos.viable = e.getAttribute(MUTANT_VIABLE_4).getValue().equals("true");
+				if(e.getAttribute(MUTANT_HASH_4) != null){
+					ifos.hash = e.getAttribute(MUTANT_HASH_4).getValue();
+				}
 				String id = e.getAttribute(MUTANT_ID_4).getValue();
 				ms.mutations.put(id, ifos);
 			}

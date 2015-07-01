@@ -18,6 +18,12 @@ public class MutantIfos{
 	 */
 	public boolean viable;
 	
+	/**
+	 * The hash of the source generated.
+	 * Obtained via {@link Mutation#getHashForMutationSource(java.io.File)}
+	 */
+	public String hash = null;
+	
 	public boolean excutedTests = false;
 	
 	/**
