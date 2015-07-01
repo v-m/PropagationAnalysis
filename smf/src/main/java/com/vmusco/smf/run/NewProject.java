@@ -11,7 +11,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-import org.eclipse.jgit.api.Git;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics.STATE;
@@ -64,8 +63,6 @@ public class NewProject extends GlobalTestRunning{
 		options.addOption(opt);
 		opt = new Option("F", "force", false, "Overwritte the working directory if it already exists !");
 		options.addOption(opt);
-		opt = new Option("g", "git-clone", false, "Clone the project from git repository");
-		options.addOption(opt);
 		opt = new Option("H", "testhang-timeout", true, "set the test timeout to a specific value in seconds (default: 0 - dynamic reseach of the timeout)");
 		options.addOption(opt);
 		
@@ -91,21 +88,8 @@ public class NewProject extends GlobalTestRunning{
 				}
 			}
 			ps.createWorkingDir();
+			ps.setProjectIn(f2.getAbsolutePath());
 			
-			if(cmd.hasOption("git-clone")){
-				ConsoleTools.write("Cloning from "+cmd.getArgs()[1]+"...\n");
-				Git result = Git.cloneRepository()
-		                .setURI(cmd.getArgs()[1])
-		                .setDirectory(new File(ps.getProjectIn(true)))
-		                .call();
-				System.out.println("Having repository: " + result.getRepository().getDirectory());
-				result.close();
-			/*}else if(cmd.hasOption("svn-checkout")){
-				ConsoleTools.write("Soon... \n");
-				System.exit(1);*/
-			}else{
-				ps.setProjectIn(f2.getAbsolutePath());
-			}
 			
 			if(!cmd.hasOption("do-not-copy")){
 				ConsoleTools.write("Copying files to project-local copies...\n");

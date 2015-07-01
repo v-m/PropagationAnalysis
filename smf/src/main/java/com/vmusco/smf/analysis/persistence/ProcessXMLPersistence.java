@@ -2,15 +2,10 @@ package com.vmusco.smf.analysis.persistence;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.jdom2.Attribute;
 import org.jdom2.Comment;
 import org.jdom2.Document;
@@ -20,10 +15,7 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
-import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistics>{
 	private static String ROOT_ELEMENT_0 = "smf";
@@ -530,6 +522,6 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 	@Override
 	public void loadState(ProcessStatistics updateMe)
 			throws Exception {
-		throw new NotImplementedException();
+		throw new Exception("Not implemented yet");
 	}
 }

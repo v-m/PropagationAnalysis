@@ -1,16 +1,6 @@
 package com.vmusco.softminer.sourceanalyzer.graphbuilding;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import org.graphstream.stream.gephi.JSONSender;
-
-import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softminer.graphs.GraphStream;
-import com.vmusco.softminer.graphs.Graph.GraphApi;
-import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 
 import spoon.compiler.SpoonCompiler;
 import spoon.reflect.factory.Factory;
@@ -18,6 +8,10 @@ import spoon.reflect.factory.FactoryImpl;
 import spoon.support.DefaultCoreFactory;
 import spoon.support.StandardEnvironment;
 import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
+
+import com.vmusco.softminer.graphs.Graph;
+import com.vmusco.softminer.graphs.Graph.GraphApi;
+import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 
 public class GraphBuilder {
 	final private String projectName;

@@ -60,7 +60,7 @@ public class ConstantMutationOperator extends MutationOperator<CtLiteral>{
 		}
 	}
 
-	private CtLiteral handleBooleanMutation(CtLiteral<?> elem, Factory factory){
+	private CtLiteral handleBooleanMutation(CtLiteral elem, Factory factory){
 		boolean analyzedValue = (boolean) elem.getValue();
 		boolean mutateTo = !analyzedValue;
 
@@ -73,7 +73,7 @@ public class ConstantMutationOperator extends MutationOperator<CtLiteral>{
 	 * @param elem
 	 * @param par
 	 */
-	private CtLiteral handleIntMutation(CtLiteral<?> elem, Factory factory){
+	private CtLiteral handleIntMutation(CtLiteral elem, Factory factory){
 		int analyzedValue = (int)elem.getValue();
 
 		int mutateTo;
@@ -108,7 +108,7 @@ public class ConstantMutationOperator extends MutationOperator<CtLiteral>{
 	 * @param elem
 	 * @param par
 	 */
-	private CtLiteral handleLongMutation(CtLiteral<?> elem, Factory factory){
+	private CtLiteral handleLongMutation(CtLiteral elem, Factory factory){
 		long analyzedValue = (long) elem.getValue();
 		long mutateTo = 0;
 		
@@ -126,7 +126,7 @@ public class ConstantMutationOperator extends MutationOperator<CtLiteral>{
 	 * @return
 	 */
 	
-	private CtLiteral handleDoubleMutation(CtLiteral<?> elem, Factory factory){
+	private CtLiteral handleDoubleMutation(CtLiteral elem, Factory factory){
 		double analyzedValue = 0.0d;
 
 		if(elem.getValue() instanceof Double)

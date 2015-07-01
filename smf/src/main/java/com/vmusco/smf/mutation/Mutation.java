@@ -4,15 +4,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
@@ -20,20 +17,11 @@ import javax.tools.JavaFileObject;
 
 import org.codehaus.plexus.util.FileUtils;
 
-import com.vmusco.smf.analysis.MutantIfos;
-import com.vmusco.smf.analysis.MutationStatistics;
-import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.smf.compilation.ClassFileUtil;
-import com.vmusco.smf.compilation.Compilation;
-import com.vmusco.smf.utils.ConsoleTools;
-import com.vmusco.smf.utils.NewReportedStandardEnvironment;
-
 import spoon.compiler.SpoonCompiler;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
-import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.factory.Factory;
@@ -43,6 +31,14 @@ import spoon.support.DefaultCoreFactory;
 import spoon.support.JavaOutputProcessor;
 import spoon.support.StandardEnvironment;
 import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
+
+import com.vmusco.smf.analysis.MutantIfos;
+import com.vmusco.smf.analysis.MutationStatistics;
+import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.compilation.ClassFileUtil;
+import com.vmusco.smf.compilation.Compilation;
+import com.vmusco.smf.utils.ConsoleTools;
+import com.vmusco.smf.utils.NewReportedStandardEnvironment;
 
 public final class Mutation {
 	private Mutation() {}
