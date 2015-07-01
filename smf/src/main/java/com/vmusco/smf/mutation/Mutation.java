@@ -151,19 +151,10 @@ public final class Mutation {
 			System.out.println("Continuing to mutant "+mutantcounter);
 		}
 
-		int cpt = 1;
-		int cpt2 = 1;
-
-		int nbmax = MutationGateway.getMutationCandidates().length;
-
-		if(mcl != null) mcl.preparationDone(nbmax);
-
 		List<Object[]> mutations = new ArrayList<Object[]>();
 
 		for(CtElement e : MutationGateway.getMutationCandidates()){
 			CtClass theClass = findAssociatedClass(e);
-
-			cpt++;
 
 			if(theClass == null){
 				ConsoleTools.write("WARNING:\n", ConsoleTools.BG_YELLOW);
@@ -211,10 +202,13 @@ public final class Mutation {
 			mutHashs.add(mi.hash);
 		}
 
+
 		int validmutants = 0;
 		int droppedmutants = 0;
 		int hashclashcpt = 0;
-		int fnb = (nb<0)?mutations.size():nb;
+		int fnb = (nb<0 || nb > mutations.size())?mutations.size():nb;
+		
+		if(mcl != null) mcl.preparationDone(mutations.size(), fnb);
 		
 		while(mutations.size()>0 && validmutants<fnb){
 			Object[] o = mutations.remove(0);
@@ -232,8 +226,7 @@ public final class Mutation {
 			ifos.mutationFrom = toReplace.toString();
 			ifos.mutationTo = m.toString();
 
-			if(mcl != null) mcl.newMutationProposal(cpt, cpt2, e, m);
-			cpt2++;
+			if(mcl != null) mcl.newMutationProposal(e, m);
 
 			m.setParent(toReplace.getParent());
 			toReplace.replace(m);
@@ -257,6 +250,7 @@ public final class Mutation {
 					FileUtils.deleteDirectory(new File(outp));
 					mutantcounter--;
 					hashclashcpt++;
+					if(mcl != null) mcl.alreadyProcessedMutant(e, m);
 				}else{
 					mutHashs.add(ifos.hash);
 				}
@@ -273,7 +267,7 @@ public final class Mutation {
 
 					validmutants++;
 
-					if(mcl != null) mcl.viableMutant(cpt, cpt2, e, m);
+					if(mcl != null) mcl.viableMutant(e, m);
 				}else{
 					ifos.viable = false;
 					if(ifos.mutationIn == null)
@@ -309,7 +303,7 @@ public final class Mutation {
 
 					fos.close();
 					droppedmutants++;
-					if(mcl != null) mcl.unviableMutant(cpt, cpt2, e, m);
+					if(mcl != null) mcl.unviableMutant(e, m);
 				}
 
 				ms.mutations.put(mutationid, ifos);
@@ -318,7 +312,7 @@ public final class Mutation {
 			m.replace(toReplace);
 
 
-			if(mcl != null) mcl.endingMutationCheck(cpt, validmutants, droppedmutants, e);
+			if(mcl != null) mcl.endingMutationCheck(validmutants, droppedmutants, e);
 		}
 
 		System.out.println(hashclashcpt);

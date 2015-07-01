@@ -145,20 +145,19 @@ public class CreateMutation implements MutationCreationListener{
 		}
 	}
 
-	private int nbmutchekmax = 0;
-	private int nbmutchek = 0;
-	private int nbthischeck = 0;
 	private int nbchecks = 0;
 	private int nbviables = 0;
 	private int nbunviables = 0;
+	private int alreadyproc = 0;
+	private int nbtotalelem = 0;
+	private int wantedviables = 0;
 
 	private CtElement mutprop;
-
 	private CtElement element;
+
 
 	private void displayStats(){
 		long elasped = (System.currentTimeMillis() - this.startTime) / 1000;
-		float percent = ((nbmutchek*1f) / (nbmutchekmax*1f)) *100;
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(1);
 
@@ -173,11 +172,10 @@ public class CreateMutation implements MutationCreationListener{
 		ConsoleTools.write("Mutation ("+this.mop+") viability checking... [");
 
 		ConsoleTools.write("#element: ", ConsoleTools.BOLD);
-		ConsoleTools.write(nbmutchek+"/"+nbmutchekmax+" ("+nf.format(percent)+"%)- ");
-		ConsoleTools.write("#probes (local): ", ConsoleTools.BOLD);
-		ConsoleTools.write(nbchecks+" ("+nbthischeck+") - ");
-		ConsoleTools.write("#(un)viables: ", ConsoleTools.BOLD);
-		ConsoleTools.write("("+nbunviables+") "+nbviables+" - elasped: "+elasped+" sec]");
+		ConsoleTools.write("#probes: ", ConsoleTools.BOLD);
+		ConsoleTools.write(nbchecks+"/"+nbtotalelem+" - ");
+		ConsoleTools.write("#(already)(un)viables (expected): ", ConsoleTools.BOLD);
+		ConsoleTools.write("("+alreadyproc+")("+nbunviables+") "+nbviables+"(/"+wantedviables+") - elasped: "+elasped+" sec]");
 		ConsoleTools.endLine();
 		
 		int NBL = 200;
@@ -203,8 +201,6 @@ public class CreateMutation implements MutationCreationListener{
 		}catch(Exception e){
 			ConsoleTools.write("Exception catched here for display. Safety code to avoid instability...");
 			ConsoleTools.endLine();
-			ConsoleTools.write("Exception catched here for display. Safety code to avoid instability...");
-			ConsoleTools.endLine();
 		}
 		
 		try{
@@ -223,21 +219,19 @@ public class CreateMutation implements MutationCreationListener{
 	}
 
 	@Override
-	public void preparationDone(int nb_mutation_possibility) {
-		this.nbmutchekmax = nb_mutation_possibility;
+	public void preparationDone(int nb_mutation_possibility, int nb_viables_wanted) {
+		this.nbtotalelem = nb_mutation_possibility;
+		this.wantedviables = nb_viables_wanted;
 		System.out.println("Mutation viability checking done...");
 	}
 
 	@Override
-	public void startingMutationCheck(int cpt, CtElement e) {
-		nbmutchek++;
-		nbthischeck=0;
+	public void startingMutationCheck(CtElement e) {
 		displayStats();
 	}
 
 	@Override
-	public void newMutationProposal(int cpt, int cpt2, CtElement e, CtElement m) {
-		nbthischeck++;
+	public void newMutationProposal(CtElement e, CtElement m) {
 		nbchecks++;
 		this.element = e;
 		this.mutprop = m;
@@ -245,19 +239,19 @@ public class CreateMutation implements MutationCreationListener{
 	}
 
 	@Override
-	public void unviableMutant(int cpt, int cpt2, CtElement e, CtElement m) {
+	public void unviableMutant(CtElement e, CtElement m) {
 		nbunviables++;
 		displayStats();
 	}
 
 	@Override
-	public void viableMutant(int cpt, int cpt2, CtElement e, CtElement m) {
+	public void viableMutant(CtElement e, CtElement m) {
 		nbviables++;
 		displayStats();
 	}
 
 	@Override
-	public void endingMutationCheck(int cpt, int validmutants, int droppedmutants, CtElement e) {
+	public void endingMutationCheck(int validmutants, int droppedmutants, CtElement e) {
 	}
 
 	@Override
@@ -271,5 +265,11 @@ public class CreateMutation implements MutationCreationListener{
 		ConsoleTools.write(validmutants+" viable mutants has been found on the "+total+" generated mutants ("+nf.format(percent)+"%) in "+elasped+" sec.");
 		ConsoleTools.endLine();
 		ConsoleTools.endLine();
+	}
+
+	@Override
+	public void alreadyProcessedMutant(CtElement e, CtElement m) {
+		alreadyproc ++;
+		displayStats();
 	}
 }
