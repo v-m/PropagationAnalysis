@@ -1,9 +1,6 @@
 package com.vmusco.smf.analysis.persistence;
 
 import java.io.File;
-import java.io.IOException;
-
-import com.vmusco.smf.analysis.ProcessStatistics;
 
 public abstract class ExecutionPersistence<T> {
 	protected File f;

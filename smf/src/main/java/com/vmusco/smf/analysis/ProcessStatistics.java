@@ -22,6 +22,8 @@ import com.vmusco.smf.utils.MavenTools;
  *
  */
 public class ProcessStatistics implements Serializable{
+	private static final long serialVersionUID = 1L;
+
 	/*****************
 	 * CONFIGURATION *
 	 *****************/
@@ -36,7 +38,7 @@ public class ProcessStatistics implements Serializable{
 	public static final String DEFAULT_TESTS_BYTECODE = "bytecode/tests";
 
 	public static final String DEFAULT_MUTANTION_DIR = "mutation";
-	
+
 	public static final String DEFAULT_MUTANT_BASEDIR = "mutations/{id}/{op}";
 	public static final String DEFAULT_MUTANT_SOURCE = "source";
 	public static final String DEFAULT_MUTANT_BYTECODE = "bytecode";
@@ -70,10 +72,126 @@ public class ProcessStatistics implements Serializable{
 	};
 
 	private static STATE[] orderStates = new STATE[]{ STATE.NEW, STATE.READY, STATE.BUILD, STATE.BUILD_TESTS, STATE.DRY_TESTS };
+
+	/***************
+	 ** Variables **
+	 ***************/
 	
+	private STATE currentState;
+	/**
+	 * A name for this project
+	 */
+	private String projectName;
+	/**
+	 * The project working dir (containing src/test folders)
+	 */
+	private String projectIn;
 
+	/**
+	 * The file on which this object has to be persisted
+	 */
+	private String persistFile = null;
+
+	/**
+	 * The folders/files in projectIn of files to compile
+	 */
+	private String[] srcToCompile;
+	/**
+	 * The folders/files in projectIn of test src files to compile/consider
+	 */
+	private String[] srcTestsToTreat;
+	/**
+	 * The folder where the process should take place (working dir)
+	 */
+	private String workingDir;
+	/**
+	 * The subfolder in workingDir where we can generate the program bytecode
+	 */
+	private String projectOut;
+	/**
+	 * The subfolder in workingDir where we can generate the tests bytecode
+	 */
+	private String testsOut;
+	/**
+	 * The classpath used for running (app)
+	 */
+	private String[] classpath;
+	/**
+	 * Set to true to avoid the automatic determination of the class path
+	 * using the method {@link ProcessStatistics#determineClassPath()}
+	 */
+	private boolean skipMvnClassDetermination = false;
+	/**
+	 * List of *ressources* folder to consider for running the test cases.
+	 * Typically it consist in files which are used to read/write to during the 
+	 * testing phase. Ignoring this element when required can lead to 
+	 * failing tests.
+	 */
+	private String[] testingRessources = new String[]{};
+
+	/**
+	 * The discovered test cases
+	 * null if no discovery process has been run
+	 */
+	private String[] testCases = null;
+	/**
+	 * The discovered test classes
+	 * null if no discovery process has been run
+	 */
+	private String[] testClasses = null;
+	/**
+	 * Failing test cases on original project
+	 * null if no discovery process has been run
+	 */
+	private String[] failingTestCases = null;
+	/**
+	 * Ignored test cases on original project
+	 * null if no discovery process has been run
+	 */
+	private String[] ignoredTestCases = null;
+	/**
+	 * Test cases which fails because they cannot be initialized.
+	 * This should never occurs in normal execution of tests
+	 * only for mutation cases...
+	 */
+	private String[] errorOnTestSuite;
+	/**
+	 * Hanging test cases on original project (infinite loops)
+	 * null if no discovery process has been run
+	 */
+	private String[] hangingTestCases = null;
+	/**
+	 * The folder in which all mutation takes place
+	 */
+	private String mutantsBasedir;
+	/**
+	 * Where are stored the test execution results against the mutants
+	 */
+	private String mutantsTestResults;
+	/**
+	 * The subfolder in workingDir where we generate the mutants bytecode
+	 */
+	private String mutantsBytecodeOut;
+	/**
+	 * The subfolder in workingDir where we generate the mutants
+	 */
+	private String mutantsOut;
+	private Long buildProjectTime = null;
+	private Long buildTestsTime = null;
+	private Long runTestsOriginalTime = null;
+	/**
+	 * Number of second after which the test is considered as hanging
+	 * Can be dynamically determined
+	 */
+	private int testTimeOut;
+	private boolean testTimeOut_auto;
+	private String originalSrc = null;
+	private String cpLocalFolder = null;
+
+	/*********************************************
+	 *********************************************/
+	
 	private ProcessStatistics() { }
-
 
 	public static ProcessStatistics rawCreateProject(String datasetRepository, String workingDir){
 		ProcessStatistics ps;
@@ -109,7 +227,6 @@ public class ProcessStatistics implements Serializable{
 			f = new File(f, ProcessStatistics.DEFAULT_CONFIGFILE);
 		}
 		if(f.exists()){
-			
 			// Load the object...
 			try{
 				ps =  ProcessStatistics.loadState(f.getAbsolutePath());
@@ -125,7 +242,11 @@ public class ProcessStatistics implements Serializable{
 		return ps;
 	}
 
-	public String getPersistanceFile() {
+	public String getPersistFile(boolean resolve) {
+		if(!resolve){
+			return this.persistFile;
+		}
+
 		if(this.persistFile.charAt(0) == File.separatorChar){
 			// Absolute path !
 			return this.persistFile;
@@ -133,6 +254,14 @@ public class ProcessStatistics implements Serializable{
 			// Relative path !
 			return this.workingDir + File.separatorChar + this.persistFile;
 		}
+	}
+
+	/**
+	 * Set th persistance file value
+	 * @param persistFile a relative path
+	 */
+	public void setPersistFile(String persistFile) {
+		this.persistFile = persistFile;
 	}
 
 	public static String fromStateToString(STATE aState){
@@ -281,7 +410,7 @@ public class ProcessStatistics implements Serializable{
 
 		this.classpath = finalcp.toArray(new String[0]);
 	}
-	
+
 	/**
 	 * This utility function complete the folder with the workspace prefix
 	 * @param subpath
@@ -327,85 +456,123 @@ public class ProcessStatistics implements Serializable{
 	 **************************************************************************************************
 	 **************************************************************************************************/
 
-	public STATE currentState;
 
+	public STATE getCurrentState() {
+		return currentState;
+	}
 
-	/**
-	 * NEW STATE
-	 * =========
-	 */
-	/**
-	 * A name for this project
-	 */
-	public String projectName;
+	public void setCurrentState(STATE currentState) {
+		this.currentState = currentState;
+	}
 
-	/**
-	 * The project working dir (containing src/test folders)
-	 */
-	private String projectIn;
-
-	/**
-	 * The file on which this object has to be persisted
-	 */
-	public String persistFile = null;
-
-	/**
-	 * The folders/files in projectIn of files to compile
-	 */
-	public String[] srcToCompile;
-
-	/**
-	 * The folders/files in projectIn of test src files to compile/consider
-	 */
-	public String[] srcTestsToTreat;
-
-	/**
-	 * The folder where the process should take place (working dir)
-	 */
-	private String workingDir;
 	
+	public String[] getTestCases() {
+		return testCases;
+	}
+	
+	public String getProjectName() {
+		return projectName;
+	}
+
+	public void setProjectName(String projectName) {
+		this.projectName = projectName;
+	}
+
+	public String[] resolveThis(String[] in){
+		String[] out = new String[in.length];
+
+		int i = 0;
+		for(String it : srcToCompile){
+			out[i++] = getProjectIn(true) + File.separator + it;
+		}
+
+		return out;
+	}
+
+	public String[] getSrcToCompile(boolean resolve) {
+		if(resolve){
+			return resolveThis(srcToCompile);
+		}else{
+			return srcToCompile;
+		}
+	}
+
+	public void setSrcToCompile(String[] srcToCompile) {
+		this.srcToCompile = srcToCompile;
+	}
+
+	public String[] getSrcTestsToTreat(boolean resolve) {
+		if(resolve){
+			return resolveThis(srcTestsToTreat);
+		}else{
+			return srcTestsToTreat;
+		}
+	}
+
+	public void setSrcTestsToTreat(String[] srcTestsToTreat) {
+		this.srcTestsToTreat = srcTestsToTreat;
+	}
+
 	public String getWorkingDir() {
 		return workingDir;
 	}
 
 	/**
-	 * The subfolder in workingDir where we can generate the program bytecode
+	 * Resolve the folder with full path for working directory
+	 * @param s
+	 * @return
 	 */
-	public String projectOut;
+	public String resolveThis(String s){
+		return getWorkingDir() + File.separator + s;
+	}
+	
+	public String getProjectOut(boolean resolve) {
+		if(resolve){
+			return resolveThis(projectOut);
+		}else{
+			return projectOut;
+		}
+	}
 
-	/**
-	 * The subfolder in workingDir where we can generate the tests bytecode
-	 */
-	public String testsOut;
+	public void setProjectOut(String projectOut) {
+		this.projectOut = projectOut;
+	}
 
-	/**
-	 * The classpath used for running (app)
-	 */
-	private String[] classpath;
+	public String getTestsOut(boolean resolve) {
+		if(resolve){
+			return resolveThis(testsOut);
+		}else{
+			return testsOut;
+		}
+	}
+
+	public void setTestsOut(String testsOut) {
+		this.testsOut = testsOut;
+	}
 
 	public String[] getClasspath(){
 		if(this.cpLocalFolder != null){
 			File f = new File(this.buildPath(this.cpLocalFolder));
-			
+
 			List<String> cpr = new ArrayList<String>();
 			for(File ff : f.listFiles()){
 				cpr.add(ff.getAbsolutePath());
 			}
-			
+
 			return cpr.toArray(new String[0]);
 		}else{
 			return this.classpath;
 		}
 	}
-	
+
 	public String[] getOriginalClasspath(){
 		return this.classpath;
 	}
-	
+
 	public String getProjectIn(boolean resolved){
 		if(this.projectIn == null)
 			return null;
-		
+
 		if(!resolved || (resolved && this.projectIn.startsWith("/"))){
 			return this.projectIn;
 		}else{
@@ -413,110 +580,156 @@ public class ProcessStatistics implements Serializable{
 			return f.getAbsolutePath();
 		}
 	}
-	
+
 	public void setProjectIn(String projectIn){
 		this.projectIn = projectIn;
 	}
-	
+
 	public void setOriginalClasspath(String[] classpath){
 		this.classpath = classpath;
 	}
 
-	/**
-	 * Set to true to avoid the automatic determination of the class path
-	 * using the method {@link ProcessStatistics#determineClassPath()}
-	 */
-	public boolean skipMvnClassDetermination = false;
+	public boolean isSkipMvnClassDetermination() {
+		return skipMvnClassDetermination;
+	}
 
-	/**
-	 * List of *ressources* folder to consider for running the test cases.
-	 * Typically it consist in files which are used to read/write to during the 
-	 * testing phase. Ignoring this element when required can lead to 
-	 * failing tests.
-	 */
-	public String[] testingRessources = new String[]{};
+	public void setSkipMvnClassDetermination(boolean skipMvnClassDetermination) {
+		this.skipMvnClassDetermination = skipMvnClassDetermination;
+	}
 
+	public String[] getTestingRessources(boolean resolve) {
+		if(resolve){
+			return resolveThis(testingRessources);
+		}else{
+			return testingRessources;
+		}
+	}
+	
+	public void setTestingRessources(String[] testingRessources) {
+		this.testingRessources = testingRessources;
+	}
 
-	/**
-	 * BUILD STATE
-	 * ===========
-	 */
-
-
-
-
-
-	/**
-	 * DRY_TESTS STATE
-	 * ===============
-	 */
+	public String[] getTestClasses() {
+		return testClasses;
+	}
+	
+	public void setTestClasses(String[] testClasses) {
+		this.testClasses = testClasses;
+	}
+	
+	public void setTestCases(String[] testCases) {
+		this.testCases = testCases;
+	}
+	
+	
+	public String[] getFailingTestCases() {
+		return failingTestCases;
+	}
+	
+	public void setFailingTestCases(String[] failingTestCases) {
+		this.failingTestCases = failingTestCases;
+	}
+	
+	public String[] getIgnoredTestCases() {
+		return ignoredTestCases;
+	}
+	
+	public void setIgnoredTestCases(String[] ignoredTestCases) {
+		this.ignoredTestCases = ignoredTestCases;
+	}
+	
+	public String[] getHangingTestCases() {
+		return hangingTestCases;
+	}
+	
+	public void setHangingTestCases(String[] hangingTestCases) {
+		this.hangingTestCases = hangingTestCases;
+	}
+	
+	public String[] getErrorOnTestSuite() {
+		return errorOnTestSuite;
+	}
+	
+	public void setErrorOnTestSuite(String[] errorOnTestSuite) {
+		this.errorOnTestSuite = errorOnTestSuite;
+	}
 	
 	/**
-	 * The discovered test classes
-	 * null if no discovery process has been run
+	 * Return the base directory for mutants. 
+	 * Normally, this string should contain {id} which represent the mutation project name and
+	 * {op} which represent the mutation operator consiered. Those two patterns will be replaced
+	 * by the desired value
+	 * @return
 	 */
-	public String[] testClasses = null;
-
-	/**
-	 * The discovered test cases
-	 * null if no discovery process has been run
-	 */
-	public String[] testCases = null;
-	/**
-	 * Failing test cases on original project
-	 * null if no discovery process has been run
-	 */
-	public String[] failingTestCases = null;
-	/**
-	 * Ignored test cases on original project
-	 * null if no discovery process has been run
-	 */
-	public String[] ignoredTestCases = null;
-	/**
-	 * Hanging test cases on original project (infinite loops)
-	 * null if no discovery process has been run
-	 */
-	public String[] hangingTestCases = null;
-
-	/**
-	 * Test cases which fails because they cannot be initialized.
-	 * This should never occurs in normal execution of tests
-	 * only for mutation cases...
-	 */
-	public String[] errorOnTestSuite;
-
-
-	/**
-	 * The folder in which all mutation takes place
-	 */
-	public String mutantsBasedir;
-
-	/**
-	 * The subfolder in workingDir where we generate the mutants
-	 */
-	public String mutantsOut;
-
-
-	/**
-	 * The subfolder in workingDir where we generate the mutants bytecode
-	 */
-	public String mutantsBytecodeOut;
+	public String getMutantsBasedir() {
+		return mutantsBasedir;
+	}
 	
 	/**
-	 * Where are stored the test execution results against the mutants
+	 * Return the path to the base directory containing all projects id
+	 * @return
 	 */
-	public String mutantsTestResults;
-
-	/**
-	 * TIMES
-	 * =====
-	 */
-
-	public Long buildProjectTime = null;
-	public Long buildTestsTime = null;
-	public Long runTestsOriginalTime = null;
+	public String getMutantsIdsBaseDir(){
+		int pos = mutantsBasedir.indexOf("{id}");
+		return mutantsBasedir.substring(0, pos);
+	}
+	
+	public String getMutantsOpsBaseDir(String id){
+		int pos = mutantsBasedir.indexOf("{op}");
+		String tmp = mutantsBasedir.substring(0, pos);
+		return tmp.replace("{id}", id);
+	}
+	
+	public void setMutantsBasedir(String mutantsBasedir) {
+		this.mutantsBasedir = mutantsBasedir;
+	}
 
 	
+	public String getMutantsOut() {
+		return mutantsOut;
+	}
+	
+	public void setMutantsOut(String mutantsOut) {
+		this.mutantsOut = mutantsOut;
+	}
+
+	public String getMutantsBytecodeOut() {
+		return mutantsBytecodeOut;
+	}
+	
+	public void setMutantsBytecodeOut(String mutantsBytecodeOut) {
+		this.mutantsBytecodeOut = mutantsBytecodeOut;
+	}
+
+	public String getMutantsTestResults() {
+		return mutantsTestResults;
+	}
+	
+	public void setMutantsTestResults(String mutantsTestResults) {
+		this.mutantsTestResults = mutantsTestResults;
+	}
+	
+	public Long getBuildProjectTime() {
+		return buildProjectTime;
+	}
+	public Long getBuildTestsTime() {
+		return buildTestsTime;
+	}
+	public Long getRunTestsOriginalTime() {
+		return runTestsOriginalTime;
+	}
+	
+	public void setBuildProjectTime(Long buildProjectTime) {
+		this.buildProjectTime = buildProjectTime;
+	}
+	public void setBuildTestsTime(Long buildTestsTime) {
+		this.buildTestsTime = buildTestsTime;
+	}
+	public void setRunTestsOriginalTime(Long runTestsOriginalTime) {
+		this.runTestsOriginalTime = runTestsOriginalTime;
+	}
+
+
 	public String[] getUnmutatedFailAndHang(){
 		Set<String> cases = new HashSet<String>();
 
@@ -527,7 +740,7 @@ public class ProcessStatistics implements Serializable{
 				}
 			}
 		}
-		
+
 		for(String s:this.hangingTestCases){
 			cases.add(s);
 		}
@@ -543,13 +756,13 @@ public class ProcessStatistics implements Serializable{
 				}
 			}
 		}
-		
+
 		return cases.toArray(new String[0]);
 	}
 
 	public String[] getTestingClasspath(){
 		List<String> l = new ArrayList<String>();
-		
+
 		if(this.getClasspath() != null){
 			for(String c : this.getClasspath()){
 				l.add(c);
@@ -557,42 +770,42 @@ public class ProcessStatistics implements Serializable{
 
 			l.add(this.srcGenerationFolder());
 			l.add(this.testsGenerationFolder());
-			
+
 			return l.toArray(new String[0]);
 		}else{
 			return new String[]{
-				this.srcGenerationFolder(),
-				this.testsGenerationFolder(),
+					this.srcGenerationFolder(),
+					this.testsGenerationFolder(),
 			};
 		}
 	}
-	
+
 	public void createLocalCopies(String source, String classpath_folder) throws IOException {
 		// SOURCES
 		if(this.projectIn.startsWith("/")){
 			File packTo = new File(this.buildPath(source));
 			File src = new File(this.projectIn);
-			
+
 			FileUtils.copyDirectory(src, packTo);
 			originalSrc = this.projectIn;
 			this.projectIn = source;
 		}
-		
+
 		// CLASSPATH
 		this.cpLocalFolder = classpath_folder;
 		File packTo = new File(this.buildPath(this.cpLocalFolder));
-		
+
 		if(packTo.exists()){
 			FileUtils.deleteDirectory(packTo);
 		}
-		
+
 		packTo.mkdirs();
-		
+
 		if(this.classpath != null){
 			for(String cp : this.classpath){
 				File src = new File(cp);
 				File dst = new File(packTo, src.getName());
-				
+
 				if(src.isDirectory()){
 					FileUtils.copyDirectory(src, dst);
 				}else{
@@ -602,16 +815,38 @@ public class ProcessStatistics implements Serializable{
 		}
 	}
 	
-	public String originalSrc = null;
-	public String cpLocalFolder = null;
+	public String getOriginalSrc() {
+		return originalSrc;
+	}
+	public void setOriginalSrc(String originalSrc) {
+		this.originalSrc = originalSrc;
+	}
 	
-	/**
-	 * Number of second after which the test is considered as hanging
-	 * Can be dynamically determined
-	 */
-	public int testTimeOut;
-	public boolean testTimeOut_auto;
+	public String getCpLocalFolder() {
+		return cpLocalFolder;
+	}
 	
+	public void setCpLocalFolder(String cpLocalFolder) {
+		this.cpLocalFolder = cpLocalFolder;
+	}
+	
+	public int getTestTimeOut() {
+		return testTimeOut;
+	}
+	
+	public void setTestTimeOut(int testTimeOut) {
+		this.testTimeOut = testTimeOut;
+	}
+	
+	
+	public boolean isAutoTestTimeOut(){
+		return testTimeOut_auto;
+	}
+	
+	public void setAutoTestTimeOut(boolean value){
+		testTimeOut_auto = value;
+	}
+
 
 	public boolean workingDirAlreadyExists() {
 		File f = new File(this.workingDir);
@@ -620,18 +855,11 @@ public class ProcessStatistics implements Serializable{
 
 	public void exportClassPath() throws IOException, InterruptedException {
 		System.out.println("[MAVEN] Exporting classpath...");
-		//MavenTools.exportDependenciesUsingMaven(this.getProjectIn(true), this.buildPath(this.cpLocalFolder), this.buildPath("maven.log"));
 
 		File dst = new File(this.buildPath(this.cpLocalFolder));
-		/*String cp = MavenTools.extractClassPathUsingMvnV2(this.getProjectIn(true), false);
-		
-		for(String c : cp.split(":")){
-			File src = new File(c);
-			FileUtils.copyFile(src, new File(dst, src.getName()));
-		}*/
 		MavenTools.exportDependenciesUsingMaven(this.getProjectIn(true), dst.getAbsolutePath(), this.buildPath("mvn_copy.log"));
 	}
-	
+
 	private File[] findAllPomsFiles(){
 		ArrayList<File> poms = new ArrayList<File>();
 
@@ -655,7 +883,7 @@ public class ProcessStatistics implements Serializable{
 
 		return poms.toArray(new File[0]);
 	}
-	
+
 	public void exportClassPathOnAll() throws IOException {
 		for(File fp : findAllPomsFiles()){
 			System.out.println("Handling "+fp.getAbsolutePath());
@@ -665,25 +893,25 @@ public class ProcessStatistics implements Serializable{
 
 	public void addRessources(String[] split) {
 		Set<String> res = new HashSet<String>();
-		
+
 		if(this.testingRessources != null){
 			for(String s : testingRessources){
 				res.add(s);
 			}
 		}
-		
+
 		for(String s : split){
 			res.add(s);
 		}
-			
+
 		testingRessources = res.toArray(new String[0]);
 	}
-	
+
 	public boolean isSubversionProject(){
 		File f = new File(getProjectIn(true), ".svn");
 		return f.exists();
 	}
-	
+
 	public boolean isGitProject(){
 		File f = new File(getProjectIn(true), ".git");
 		return f.exists();
@@ -702,7 +930,7 @@ public class ProcessStatistics implements Serializable{
 	public static boolean areTestsEquivalents(String bug, String test) {
 		String  cbug = fixTestSignature(bug);
 		String ctest = fixTestSignature(test);
-		
+
 		return cbug.equals(ctest);
 	}
 }

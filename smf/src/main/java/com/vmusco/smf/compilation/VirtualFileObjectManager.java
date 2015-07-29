@@ -16,9 +16,6 @@ import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
 import javax.tools.StandardLocation;
 
-
-
-@SuppressWarnings("restriction")
 public class VirtualFileObjectManager extends ForwardingJavaFileManager<JavaFileManager> {
 
 	private Map<URI, SourceCodeFileObject> sourceFiles;
@@ -72,8 +69,8 @@ public class VirtualFileObjectManager extends ForwardingJavaFileManager<JavaFile
 				}
 			}
 		}
-		//MetaCollection.addAll(files, result);
-		this.addAll(files,result);
+
+		VirtualFileObjectManager.addAll(files,result);
 		return files;
 	}
 

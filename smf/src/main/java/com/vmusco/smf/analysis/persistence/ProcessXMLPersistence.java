@@ -94,9 +94,9 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 		File ffinal;
 		
 		if(f.isDirectory()){
-			ffinal = new File(f, ps.persistFile);
+			ffinal = new File(f, ps.getPersistFile(false));
 		}else{
-			ps.persistFile = f.getName();
+			ps.setPersistFile(f.getName());
 			ffinal = f;
 		}
 
@@ -127,21 +127,21 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 
 		Element tmp;
 
-		if(ps.projectName != null){
+		if(ps.getProjectName() != null){
 			tmp = new Element(PROJECT_NAME_2);
-			tmp.setText(ps.projectName);
+			tmp.setText(ps.getProjectName());
 			run.addContent(tmp);
 		}
 
-		if(ps.persistFile != null){
+		if(ps.getPersistFile(false) != null){
 			tmp = new Element(PERSISTENCE_FILE_2);
-			tmp.setText(ps.persistFile);
+			tmp.setText(ps.getPersistFile(false));
 			run.addContent(tmp);
 		}
 		
-		if(ps.testTimeOut > 0){
+		if(ps.getTestTimeOut() > 0){
 			tmp = new Element(HANGTIMEOUT_2);
-			tmp.setText(Integer.toString(ps.testTimeOut));
+			tmp.setText(Integer.toString(ps.getTestTimeOut()));
 			run.addContent(tmp);
 		}
 
@@ -151,9 +151,9 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 			run.addContent(tmp);
 		}
 
-		if(ps.originalSrc != null){
+		if(ps.getOriginalSrc() != null){
 			tmp = new Element(ORIGINAL_PROJECT_IN_2);
-			tmp.setText(ps.originalSrc);
+			tmp.setText(ps.getOriginalSrc());
 			run.addContent(tmp);
 		}
 
@@ -168,124 +168,124 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 		if(ps.getOriginalClasspath() != null)
 			populateXml(tmp, CLASSPATH_3, ps.getOriginalClasspath());
 
-		if(ps.cpLocalFolder != null){
-			Attribute a = new Attribute(COPY_CP_2, ps.cpLocalFolder);
+		if(ps.getCpLocalFolder() != null){
+			Attribute a = new Attribute(COPY_CP_2, ps.getCpLocalFolder());
 			tmp.setAttribute(a);
 		}
 		
-		if(ps.projectOut != null){
+		if(ps.getProjectOut(false) != null){
 			tmp = new Element(PROJECT_OUT_2);
-			tmp.setText(ps.projectOut);
-			if(ps.buildProjectTime != null){
-				tmp.setAttribute(new Attribute(TIME_ATTRIBUTE, Long.toString(ps.buildProjectTime)));
+			tmp.setText(ps.getProjectOut(false));
+			if(ps.getBuildProjectTime() != null){
+				tmp.setAttribute(new Attribute(TIME_ATTRIBUTE, Long.toString(ps.getBuildProjectTime())));
 			}
 			source.addContent(tmp);
 		}
 
 
-		if(ps.testsOut != null){
+		if(ps.getTestsOut(false) != null){
 			tmp = new Element(TEST_OUT_2);
-			tmp.setText(ps.testsOut);
-			if(ps.buildTestsTime != null){
-				tmp.setAttribute(new Attribute(TIME_ATTRIBUTE, Long.toString(ps.buildTestsTime)));
+			tmp.setText(ps.getTestsOut(false));
+			if(ps.getBuildTestsTime() != null){
+				tmp.setAttribute(new Attribute(TIME_ATTRIBUTE, Long.toString(ps.getBuildTestsTime())));
 			}
 			tests.addContent(tmp);
 		}
 
-		Attribute a = new Attribute(SKIP_MVN_CLASS_2, ps.skipMvnClassDetermination?"true":"false");
+		Attribute a = new Attribute(SKIP_MVN_CLASS_2, ps.isSkipMvnClassDetermination()?"true":"false");
 		config.setAttribute(a);
 
 		tmp = new Element(CURRENT_STATE_2);
-		tmp.setText(ProcessStatistics.fromStateToString(ps.currentState));
+		tmp.setText(ProcessStatistics.fromStateToString(ps.getCurrentState()));
 		run.addContent(tmp);
 
 		/***** ARRAYS *****/
-		if(ps.srcToCompile != null){
+		if(ps.getSrcToCompile(false) != null){
 			tmp = new Element(SRC_TO_COMPILE_2);
 			source.addContent(tmp);
-			populateXml(tmp, SRC_TO_COMPILE_3, ps.srcToCompile);
+			populateXml(tmp, SRC_TO_COMPILE_3, ps.getSrcToCompile(false));
 		}
 
-		if(ps.srcTestsToTreat != null){
+		if(ps.getSrcTestsToTreat(false) != null){
 			tmp = new Element(SRC_TO_TREAT_2);
 			tests.addContent(tmp);
-			populateXml(tmp, SRC_TO_TREAT_3, ps.srcTestsToTreat);
+			populateXml(tmp, SRC_TO_TREAT_3, ps.getSrcTestsToTreat(false));
 		}
 
-		if(ps.testingRessources != null){
+		if(ps.getTestingRessources(false) != null){
 			tmp = new Element(TESTS_RESSOURCES_2);
 			tests.addContent(tmp);
-			populateXml(tmp, TESTS_RESSOURCES_3, ps.testingRessources);
+			populateXml(tmp, TESTS_RESSOURCES_3, ps.getTestingRessources(false));
 		}
 
-		a = new Attribute(MUTATION_BASEDIR, ps.mutantsBasedir);
+		a = new Attribute(MUTATION_BASEDIR, ps.getMutantsBasedir());
 		mutation.setAttribute(a);
 
-		if(ps.mutantsOut != null){
+		if(ps.getMutantsOut() != null){
 			tmp = new Element(MUTANTS_OUT_2);
-			tmp.setText(ps.mutantsOut);
+			tmp.setText(ps.getMutantsOut());
 			mutation.addContent(tmp);
 		}
-		if(ps.mutantsBytecodeOut != null){
+		if(ps.getMutantsBytecodeOut() != null){
 			tmp = new Element(MUTANTS_BYTECODE_2);
-			tmp.setText(ps.mutantsBytecodeOut);
+			tmp.setText(ps.getMutantsBytecodeOut());
 			mutation.addContent(tmp);
 		}
-		if(ps.mutantsTestResults != null){
+		if(ps.getMutantsTestResults() != null){
 			tmp = new Element(MUTANTS_EXEC_2);
-			tmp.setText(ps.mutantsTestResults);
+			tmp.setText(ps.getMutantsTestResults());
 			mutation.addContent(tmp);
 		}
 
 
-		if(ps.testClasses != null || ps.testCases != null){
+		if(ps.getTestClasses() != null || ps.getTestCases() != null){
 			Element tt = new Element(TESTS_1);
 			root.addContent(tt);
 
-			if(ps.testClasses != null){
+			if(ps.getTestClasses() != null){
 				Element testclasses = new Element(TESTSCLASSES_2);
 				tt.addContent(testclasses);
-				populateXml(testclasses, TESTSCLASSES_3, ps.testClasses);
+				populateXml(testclasses, TESTSCLASSES_3, ps.getTestClasses());
 			}
 
-			if(ps.testCases != null){
+			if(ps.getTestCases() != null){
 				Element testcases = new Element(TESTSCASES_2);
 				tt.addContent(testcases);
-				populateXml(testcases, TESTSCASES_3, ps.testCases);
+				populateXml(testcases, TESTSCASES_3, ps.getTestCases());
 			}
 		}
 
 
-		if(ps.failingTestCases != null || ps.ignoredTestCases != null || ps.hangingTestCases != null){
+		if(ps.getFailingTestCases() != null || ps.getIgnoredTestCases() != null || ps.getHangingTestCases() != null){
 			Element testexec = new Element(TEST_EXEC_1);
 			root.addContent(testexec);
 
-			if(ps.runTestsOriginalTime != null){
-				testexec.setAttribute(new Attribute(TIME_ATTRIBUTE, Long.toString(ps.runTestsOriginalTime)));
+			if(ps.getRunTestsOriginalTime() != null){
+				testexec.setAttribute(new Attribute(TIME_ATTRIBUTE, Long.toString(ps.getRunTestsOriginalTime())));
 			}
 
 			Element fail = new Element(FAILING_TC_3);;
 
-			if(ps.errorOnTestSuite != null){
-				populateXml(fail, ONE_TS_4, ps.errorOnTestSuite);
+			if(ps.getErrorOnTestSuite() != null){
+				populateXml(fail, ONE_TS_4, ps.getErrorOnTestSuite());
 			}
 
-			if(ps.failingTestCases != null){ 
-				populateXml(fail, ONE_TC_4, ps.failingTestCases);
+			if(ps.getFailingTestCases() != null){ 
+				populateXml(fail, ONE_TC_4, ps.getFailingTestCases());
 			}
 			
 			testexec.addContent(fail);
 
-			if(ps.ignoredTestCases != null){
+			if(ps.getIgnoredTestCases() != null){
 				Element e = new Element(IGNORED_TC_3);
 				testexec.addContent(e);
-				populateXml(e, ONE_TC_4, ps.ignoredTestCases);
+				populateXml(e, ONE_TC_4, ps.getIgnoredTestCases());
 			}
 
-			if(ps.hangingTestCases != null){
+			if(ps.getHangingTestCases() != null){
 				Element e = new Element(HANGING_TC_3);
 				testexec.addContent(e);
-				populateXml(e, ONE_TC_4, ps.hangingTestCases);
+				populateXml(e, ONE_TC_4, ps.getHangingTestCases());
 			}
 		}
 
@@ -327,29 +327,29 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 		String datasetRepository = global.getChild(PROJECT_IN_2).getText();
 		//String workingDir = global.getChild(WORKING_DIR_2).getText();
 		ProcessStatistics ps = ProcessStatistics.rawCreateProject(datasetRepository, this.f.getParentFile().getAbsolutePath());
-		ps.persistFile = f.getName();
+		ps.setPersistFile(f.getName());
 		
-		ps.skipMvnClassDetermination = config.getAttribute(SKIP_MVN_CLASS_2).getValue().equals("true")?true:false;
+		ps.setSkipMvnClassDetermination(config.getAttribute(SKIP_MVN_CLASS_2).getValue().equals("true")?true:false);
 
 		Element tmp;
 		List<Element> tmplist;
 
 		if((tmp = global.getChild(PERSISTENCE_FILE_2)) != null)
-			ps.persistFile = tmp.getText();
+			ps.setPersistFile(tmp.getText());
 
 		if((tmp = global.getChild(HANGTIMEOUT_2)) != null){
-			ps.testTimeOut = Integer.parseInt(tmp.getText());
-			ps.testTimeOut_auto = false;
+			ps.setTestTimeOut(Integer.parseInt(tmp.getText()));
+			ps.setAutoTestTimeOut(false);
 		}
 		
 		if((tmp = global.getChild(ORIGINAL_PROJECT_IN_2)) != null)
-			ps.originalSrc = tmp.getText();
+			ps.setOriginalSrc(tmp.getText());
 
 		if((tmp = global.getChild(PROJECT_NAME_2)) != null)
-			ps.projectName = tmp.getText();
+			ps.setProjectName(tmp.getText());
 
 		if((tmp = global.getChild(CURRENT_STATE_2)) != null)
-			ps.currentState = ProcessStatistics.fromStringToState(tmp.getText());
+			ps.setCurrentState(ProcessStatistics.fromStringToState(tmp.getText()));
 
 		if((tmp = global.getChild(CLASSPATH_2)) != null){
 			tmplist = tmp.getChildren(CLASSPATH_3);
@@ -361,21 +361,21 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 			ps.setOriginalClasspath(al.toArray(new String[0]));
 			
 			if(tmp.getAttribute(COPY_CP_2) != null){
-				ps.cpLocalFolder = tmp.getAttribute(COPY_CP_2).getValue(); 
+				ps.setCpLocalFolder(tmp.getAttribute(COPY_CP_2).getValue()); 
 			}
 		}
 		
 		Element source = config.getChild(SOURCE_ELEMENT_1);
 
 		if((tmp = source.getChild(PROJECT_OUT_2)) != null){
-			ps.projectOut = tmp.getText();
+			ps.setProjectOut(tmp.getText());
 			if(tmp.getAttribute(TIME_ATTRIBUTE) != null){
-				ps.buildProjectTime = Long.valueOf(tmp.getAttribute(TIME_ATTRIBUTE).getValue());
+				ps.setBuildProjectTime(Long.valueOf(tmp.getAttribute(TIME_ATTRIBUTE).getValue()));
 			}
 		}
 
 		if((tmp = source.getChild(SOURCE_ELEMENT_1)) != null)
-			ps.projectOut = tmp.getText();
+			ps.setProjectOut(tmp.getText());
 
 		if((tmp = source.getChild(SRC_TO_COMPILE_2)) != null){
 			tmplist = tmp.getChildren(SRC_TO_COMPILE_3);
@@ -384,7 +384,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 			for(Element e: tmplist){
 				al.add(e.getText());
 			}
-			ps.srcToCompile = al.toArray(new String[0]);
+			ps.setSrcToCompile(al.toArray(new String[0]));
 		}
 
 
@@ -392,9 +392,9 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 		Element tests = config.getChild(TESTS_ELEMENT_1);
 
 		if((tmp = tests.getChild(TEST_OUT_2)) != null){
-			ps.testsOut = tmp.getText();
+			ps.setTestsOut(tmp.getText());
 			if(tmp.getAttribute(TIME_ATTRIBUTE) != null){
-				ps.buildTestsTime = Long.valueOf(tmp.getAttribute(TIME_ATTRIBUTE).getValue());
+				ps.setBuildTestsTime(Long.valueOf(tmp.getAttribute(TIME_ATTRIBUTE).getValue()));
 			}
 		}
 
@@ -405,7 +405,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 			for(Element e: tmplist){
 				al.add(e.getText());
 			}
-			ps.srcTestsToTreat = al.toArray(new String[0]);
+			ps.setSrcTestsToTreat(al.toArray(new String[0]));
 		}
 
 		/*if((tmp = tests.getChild(TEST_CLASSPATH_2)) != null){
@@ -425,23 +425,23 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 			for(Element e: tmplist){
 				al.add(e.getText());
 			}
-			ps.testingRessources = al.toArray(new String[0]);
+			ps.setTestingRessources(al.toArray(new String[0]));
 		}
 
 
 
 		Element mutation = config.getChild(MUTATION_ELEMENT_1);
 
-		ps.mutantsBasedir = mutation.getAttribute(MUTATION_BASEDIR).getValue();
+		ps.setMutantsBasedir(mutation.getAttribute(MUTATION_BASEDIR).getValue());
 		
 		if((tmp = mutation.getChild(MUTANTS_OUT_2)) != null)
-			ps.mutantsOut = tmp.getText();
+			ps.setMutantsOut(tmp.getText());
 
 		if((tmp = mutation.getChild(MUTANTS_BYTECODE_2)) != null)
-			ps.mutantsBytecodeOut = tmp.getText();
+			ps.setMutantsBytecodeOut(tmp.getText());
 		
 		if((tmp = mutation.getChild(MUTANTS_EXEC_2)) != null)
-			ps.mutantsTestResults = tmp.getText();
+			ps.setMutantsTestResults(tmp.getText());
 
 
 		/************************************/
@@ -455,7 +455,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 				for(Element e: tmplist){
 					al.add(e.getText());
 				}
-				ps.testClasses = al.toArray(new String[0]);
+				ps.setTestClasses(al.toArray(new String[0]));
 			}
 
 			if((tmp = tests.getChild(TESTSCASES_2)) != null){
@@ -465,7 +465,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 				for(Element e: tmplist){
 					al.add(e.getText());
 				}
-				ps.testCases = al.toArray(new String[0]);
+				ps.setTestCases(al.toArray(new String[0]));
 			}
 		}
 
@@ -475,7 +475,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 
 		if(original != null){
 			if(original.getAttribute(TIME_ATTRIBUTE) != null){
-				ps.runTestsOriginalTime = Long.valueOf(original.getAttribute(TIME_ATTRIBUTE).getValue());
+				ps.setRunTestsOriginalTime(Long.valueOf(original.getAttribute(TIME_ATTRIBUTE).getValue()));
 			}
 
 			if((tmp = original.getChild(FAILING_TC_3)) != null){
@@ -485,7 +485,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 				for(Element e: tmplist){
 					al.add(e.getText());
 				}
-				ps.failingTestCases = al.toArray(new String[0]);
+				ps.setFailingTestCases(al.toArray(new String[0]));
 				
 				tmplist = tmp.getChildren(ONE_TS_4);
 
@@ -493,7 +493,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 				for(Element e: tmplist){
 					al.add(e.getText());
 				}
-				ps.errorOnTestSuite = al.toArray(new String[0]);
+				ps.setErrorOnTestSuite(al.toArray(new String[0]));
 			}
 
 			if((tmp = original.getChild(IGNORED_TC_3)) != null){
@@ -503,7 +503,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 				for(Element e: tmplist){
 					al.add(e.getText());
 				}
-				ps.ignoredTestCases = al.toArray(new String[0]);
+				ps.setIgnoredTestCases(al.toArray(new String[0]));
 			}
 
 			if((tmp = original.getChild(HANGING_TC_3)) != null){
@@ -513,7 +513,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 				for(Element e: tmplist){
 					al.add(e.getText());
 				}
-				ps.hangingTestCases = al.toArray(new String[0]);
+				ps.setHangingTestCases(al.toArray(new String[0]));
 			}
 		}
 		

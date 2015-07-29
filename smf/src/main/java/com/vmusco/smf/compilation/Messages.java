@@ -9,7 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-// This file is imported from eclipse builder
+/**
+ * This file is directly imported from Eclipse Builder
+ */
 
 package com.vmusco.smf.compilation;
 
@@ -31,8 +33,10 @@ public final class Messages {
 		private static final int MOD_MASK = MOD_EXPECTED | Modifier.FINAL;
 		private static final long serialVersionUID = 1L;
 
+		@SuppressWarnings("rawtypes")
 		private final Map fields;
 
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public MessagesProperties(Field[] fieldArray, String bundleName) {
 			super();
 			final int len = fieldArray.length;
@@ -168,6 +172,7 @@ public final class Messages {
 	/*
 	 * Build an array of directories to search
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static String[] buildVariants(String root) {
 		if (nlSuffixes == null) {
 			//build list of suffixes for loading resource bundles
@@ -191,6 +196,7 @@ public final class Messages {
 			variants[i] = root + nlSuffixes[i];
 		return variants;
 	}
+	@SuppressWarnings("rawtypes")
 	public static void initializeMessages(String bundleName, Class clazz) {
 		// load the resource bundle and set the fields
 		final Field[] fields = clazz.getDeclaredFields();

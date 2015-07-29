@@ -125,10 +125,10 @@ public class MutationRunTests extends GlobalTestRunning {
 
 	public static List<String> getViableCollection(MutationStatistics<?> ms){
 		ArrayList<String> al = new ArrayList<String>();
-		for(String mut : ms.mutations.keySet()){
-			MutantIfos ifos = ms.mutations.get(mut);
+		for(String mut : ms.getAllMutationsId()){
+			MutantIfos ifos = ms.getMutationStats(mut);
 
-			if(!ifos.viable){
+			if(!ifos.isViable()){
 				continue;
 			}
 
@@ -141,7 +141,7 @@ public class MutationRunTests extends GlobalTestRunning {
 	public static List<String> getUnfinishedCollection(MutationStatistics<?> ms, boolean shuffle){
 		ArrayList<String> al = new ArrayList<String>();
 		for(String mut : getViableCollection(ms)){
-			MutantIfos ifos = ms.mutations.get(mut);
+			MutantIfos ifos = ms.getMutationStats(mut);
 			File ff = new File(ms.getMutantFileResolved(mut));
 
 			if(!ff.exists()){
@@ -176,9 +176,9 @@ public class MutationRunTests extends GlobalTestRunning {
 			String mut = mutantIds.remove(0); 
 
 			if(tel != null)	tel.mutantStarted(mut);
-			MutantIfos ifos = ms.mutations.get(mut);
+			MutantIfos ifos = ms.getMutationStats(mut);
 
-			if(!ifos.viable){
+			if(!ifos.isViable()){
 				continue;
 			}
 
@@ -196,11 +196,11 @@ public class MutationRunTests extends GlobalTestRunning {
 
 						if(tel != null)	tel.mutantPersisting(mut);
 
-						MutantIfos mi = ms.mutations.get(mut);
+						MutantIfos mi = ms.getMutationStats(mut);
 						
-						if(mi.excutedTests){
+						if(mi.isExecutedTests()){
 							MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(fos, mut);
-							pers.saveState(ms.mutations.get(mut));
+							pers.saveState(ms.getMutationStats(mut));
 						}else{
 							if(tel != null)	tel.mutantSkippedDueToException(mut);
 						}

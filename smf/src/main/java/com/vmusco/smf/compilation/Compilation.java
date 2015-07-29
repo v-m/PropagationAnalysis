@@ -1,10 +1,7 @@
 package com.vmusco.smf.compilation;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -17,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaCompiler.CompilationTask;
@@ -28,9 +24,6 @@ import javax.tools.ToolProvider;
 
 import org.codehaus.plexus.util.FileUtils;
 
-import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.smf.utils.LogToFile;
-
 import spoon.compiler.Environment;
 import spoon.compiler.ModelBuildingException;
 import spoon.compiler.SpoonCompiler;
@@ -40,6 +33,9 @@ import spoon.reflect.factory.FactoryImpl;
 import spoon.support.DefaultCoreFactory;
 import spoon.support.StandardEnvironment;
 import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
+
+import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.utils.LogToFile;
 
 public final class Compilation {
 	private Compilation() {
@@ -54,8 +50,9 @@ public final class Compilation {
 		SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
 
 		// Add all sources here
-		for(String aSrcFile : ps.srcToCompile){
-			compiler.addInputSource(new File(ps.getProjectIn(true) + File.separator + aSrcFile));
+		for(String aSrcFile : ps.getSrcToCompile(true)){
+			//compiler.addInputSource(new File(ps.getProjectIn(true) + File.separator + aSrcFile));
+			compiler.addInputSource(new File(aSrcFile));
 		}
 
 		for(String cp : ps.getClasspath())
@@ -91,7 +88,7 @@ public final class Compilation {
 		}finally{
 			ltf.restablish();
 			long t2 = System.currentTimeMillis();
-			ps.buildProjectTime = t2-t1;
+			ps.setBuildProjectTime(t2-t1);
 		}
 	}
 
@@ -113,7 +110,7 @@ public final class Compilation {
 		ltf.redirectTo(f);
 		
 		// Add all sources here
-		for(String aSrcFile : ps.srcTestsToTreat){
+		for(String aSrcFile : ps.getSrcTestsToTreat(false)){
 			Environment environment = new StandardEnvironment();
 
 			Factory factory = new FactoryImpl(new DefaultCoreFactory(), environment);
@@ -133,7 +130,7 @@ public final class Compilation {
 				
 				ltf.restablish();
 				long t2 = System.currentTimeMillis();
-				ps.buildTestsTime = t2-t1;
+				ps.setBuildTestsTime(t2-t1);
 				
 				return false;
 			}
@@ -141,7 +138,7 @@ public final class Compilation {
 
 		ltf.restablish();
 		long t2 = System.currentTimeMillis();
-		ps.buildTestsTime = t2-t1;
+		ps.setBuildTestsTime(t2-t1);
 		
 		return true;
 	}
@@ -154,8 +151,8 @@ public final class Compilation {
 		SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
 
 		// Add all sources here
-		for(String aSrcFile : ps.srcTestsToTreat){
-			compiler.addInputSource(new File(ps.getProjectIn(true) + File.separator + aSrcFile));
+		for(String aSrcFile : ps.getSrcTestsToTreat(true)){
+			compiler.addInputSource(new File(aSrcFile));
 		}
 
 		File fdest = new File(ps.testsGenerationFolder());
@@ -187,7 +184,7 @@ public final class Compilation {
 		}finally{
 			ltf.restablish();
 			long t2 = System.currentTimeMillis();
-			ps.buildTestsTime = t2-t1;
+			ps.setBuildTestsTime(t2-t1);
 		}
 	}
 

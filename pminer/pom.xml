@@ -46,7 +46,6 @@
 			<scope>compile</scope>
 		</dependency>
 
-
 		<dependency>
 			<groupId>com.vmusco</groupId>
 			<artifactId>softminer</artifactId>

@@ -50,7 +50,7 @@ public class DatasetStats {
 		if(args[0].equals("0")){
 			ConsoleTools.write(nv[0]+" & ");
 				
-			ConsoleTools.write(nf.format(ps.runTestsOriginalTime/1000f)+"s & ");
+			ConsoleTools.write(nf.format(ps.getRunTestsOriginalTime()/1000f)+"s & ");
 			ConsoleTools.write(nf.format(usegraph.getBuildTime()/1000f)+"s & ");
 			
 			// TIMES
@@ -136,23 +136,22 @@ public class DatasetStats {
 
 	private static int getNbLineOfCode(ProcessStatistics ps) throws IOException{
 		int nb = 0;
-		String pt = ps.getProjectIn(true) + File.separatorChar;
 		
-		for(String sf : ps.srcToCompile){
-			int ret = getNbLineOfCode(pt + sf);
+		for(String sf : ps.getSrcToCompile(true)){
+			int ret = getNbLineOfCode(sf);
 			if(ret > 0)
 				nb += ret;
 			else{
-				System.out.println("Nothing found in "+pt);
+				System.out.println("Nothing found in root folder");
 			}
 		}
 
-		for(String sf : ps.srcTestsToTreat){
-			int ret = getNbLineOfCode(pt + sf);
+		for(String sf : ps.getSrcTestsToTreat(true)){
+			int ret = getNbLineOfCode(sf);
 			if(ret > 0)
 				nb += ret;
 			else{
-				System.out.println("Nothing found in "+pt);
+				System.out.println("Nothing found in root folder");
 			}
 		}
 		

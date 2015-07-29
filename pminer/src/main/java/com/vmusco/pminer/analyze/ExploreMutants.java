@@ -33,7 +33,7 @@ public class ExploreMutants {
 	}
 
 	public void start(String[] allMutations) throws Exception {
-		ProcessStatistics ps = ms.ps;
+		ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
 
 		// LOADING PHASE FINISHED !
 
@@ -45,7 +45,7 @@ public class ExploreMutants {
 				System.out.println("\t"+(cpt)+" "+mutation);
 
 			boolean forceStop = false;
-			MutantIfos ifos = (MutantIfos) ms.mutations.get(mutation);
+			MutantIfos ifos = ms.getMutationStats(mutation);
 
 			// relevant IS list of tests impacted by the introduced bug (determined using mutation)
 			String[] relevantArray = purifyFailAndHangResultSetForMutant(ps, ifos);
@@ -55,10 +55,10 @@ public class ExploreMutants {
 			}
 
 			UseGraph propaGraph = new UseGraph(usegraph);
-			long duration = usegraph.visitDirectedByGraphNodeVisitor(propaGraph, ifos.mutationIn);
+			long duration = usegraph.visitDirectedByGraphNodeVisitor(propaGraph, ifos.getMutationIn());
 
 			// retrieved IS list of tests impacted by the introduced bug (determined use graph)
-			String[] retrievedArray = getRetrievedTests(propaGraph, ps.testCases);
+			String[] retrievedArray = getRetrievedTests(propaGraph, ps.getTestCases());
 
 			forceStop = fireIntersectionFound(ps, mutation, ifos, retrievedArray, propaGraph, duration);
 
@@ -146,7 +146,7 @@ public class ExploreMutants {
 		}
 
 		for(String ts : testsuites){
-			for(String s : ps.testCases){
+			for(String s : ps.getTestCases()){
 				if(s.startsWith(ts)){
 					cases.add(s);
 				}
@@ -157,22 +157,22 @@ public class ExploreMutants {
 	}
 
 	public static String[] purifyFailingResultSetForMutant(ProcessStatistics ps, MutantIfos mi){
-		String[] mutset = includeTestSuiteGlobalFailingCases(ps, mi.mutantErrorOnTestSuite, mi.mutantFailingTestCases);
-		String[] glbset = includeTestSuiteGlobalFailingCases(ps, ps.errorOnTestSuite, ps.failingTestCases);
+		String[] mutset = includeTestSuiteGlobalFailingCases(ps, mi.getMutantErrorOnTestSuite(), mi.getMutantFailingTestCases());
+		String[] glbset = includeTestSuiteGlobalFailingCases(ps, ps.getErrorOnTestSuite(), ps.getFailingTestCases());
 
 		return purifyResultSetForMutant(mutset, glbset);
 	}
 
 	public static String[] purifyIgnoredResultSetForMutant(ProcessStatistics ps, MutantIfos mi){
-		String[] mutset = mi.mutantIgnoredTestCases;
-		String[] glbset = ps.ignoredTestCases;
+		String[] mutset = mi.getMutantIgnoredTestCases();
+		String[] glbset = ps.getIgnoredTestCases();
 
 		return purifyResultSetForMutant(mutset, glbset);
 	}
 
 	public static String[] purifyHangingResultSetForMutant(ProcessStatistics ps, MutantIfos mi){
-		String[] mutset = mi.mutantHangingTestCases;
-		String[] glbset = ps.hangingTestCases;
+		String[] mutset = mi.getMutantHangingTestCases();
+		String[] glbset = ps.getHangingTestCases();
 
 		return purifyResultSetForMutant(mutset, glbset);
 	}
@@ -180,24 +180,24 @@ public class ExploreMutants {
 	public static String[] purifyFailAndHangResultSetForMutant(ProcessStatistics ps, MutantIfos mi){
 		Set<String> cases = new HashSet<String>();
 
-		for(String ts : mi.mutantErrorOnTestSuite){
-			for(String s : ps.testCases){
+		for(String ts : mi.getMutantErrorOnTestSuite()){
+			for(String s : ps.getTestCases()){
 				if(s.startsWith(ts)){
 					cases.add(s);
 				}
 			}
 		}
 
-		for(String s:mi.mutantHangingTestCases){
+		for(String s:mi.getMutantHangingTestCases()){
 			cases.add(s);
 		}
 
-		for(String s:mi.mutantFailingTestCases){
+		for(String s:mi.getMutantFailingTestCases()){
 			cases.add(s);
 		}
 
-		for(String s : mi.mutantErrorOnTestSuite){
-			for(String ss : ps.testCases){
+		for(String s : mi.getMutantErrorOnTestSuite()){
+			for(String ss : ps.getTestCases()){
 				if(ss.startsWith(s)){
 					cases.add(ss);
 				}

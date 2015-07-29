@@ -73,7 +73,7 @@ public class PropagationEstimer implements MutantTestProcessingListener{
 		
 		// Load mutations and executions informations from the project
 		MutationStatistics<?> ms = MutationStatistics.loadState(cmd.getArgs()[1]);
-		ProcessStatistics ps = ms.ps;
+		ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
 		// Load the mutations in ms here
 		String[] allMutations = ms.loadResultsForExecutedTestOnMutants(0);
 
@@ -89,7 +89,7 @@ public class PropagationEstimer implements MutantTestProcessingListener{
 		//pe.analyzeListeners.add(new HistogramForSizesOfSubgraphs(ff.getAbsolutePath(), ff.getName(), 10));
 		//pe.analyzeListeners.add(new HistogramRawData(ff));
 
-		System.out.println("# tests = "+ps.testCases.length);
+		System.out.println("# tests = "+ps.getTestCases().length);
 		System.out.println("# nodes = "+usegraph.getNbNodes());
 		System.out.println("# edges = "+usegraph.getNbEdges());
 
@@ -99,7 +99,7 @@ public class PropagationEstimer implements MutantTestProcessingListener{
 
 		for(String mutation : allMutations){											// For each mutant...
 			boolean forceStop = false;
-			MutantIfos ifos = (MutantIfos) ms.mutations.get(mutation);
+			MutantIfos ifos = (MutantIfos) ms.getMutationStats(mutation);
 
 			// relevant IS list of tests impacted by the introduced bug (determined using mutation)
 			String[] relevantArray = ExploreMutants.purifyFailAndHangResultSetForMutant(ps, ifos);
@@ -109,11 +109,11 @@ public class PropagationEstimer implements MutantTestProcessingListener{
 
 			UseGraph propaGraph;
 
-			if(cache.containsKey(ifos.mutationIn)){
-				propaGraph = cache.get(ifos.mutationIn);
+			if(cache.containsKey(ifos.getMutationIn())){
+				propaGraph = cache.get(ifos.getMutationIn());
 			}else{
 				propaGraph = new UseGraph(usegraph);
-				usegraph.visitTo(propaGraph, ifos.mutationIn);
+				usegraph.visitTo(propaGraph, ifos.getMutationIn());
 				propaGraph.propagateMarkersAndTypes(usegraph);
 			}
 
@@ -123,11 +123,11 @@ public class PropagationEstimer implements MutantTestProcessingListener{
 					propaGraph.getBasinGraph(), 
 					/*new File(visusFolder, mutation).getAbsolutePath()*/null, false, false);
 
-			mta.setBuggyNodeAndOriginalGraph(ifos.mutationIn, usegraph);
+			mta.setBuggyNodeAndOriginalGraph(ifos.getMutationIn(), usegraph);
 			pe.analyzeListeners.add(mta);
 
 			// retrieved IS list of tests impacted by the introduced bug (determined using basin)
-			String[] retrievedArray = ExploreMutants.getRetrievedTests(propaGraph, ps.testCases);
+			String[] retrievedArray = ExploreMutants.getRetrievedTests(propaGraph, ps.getTestCases());
 
 			for(MutantTestAnalyzer aListerner : pe.analyzeListeners){
 				//TODO: default value of -1 is set here -- maybe change it further

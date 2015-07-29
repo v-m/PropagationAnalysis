@@ -46,7 +46,7 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 			String[] graphDetermined, UseGraph basin) {
 		String[] mutationDetermined = ExploreMutants.purifyFailAndHangResultSetForMutant(ps, mi); 
 		//String mutationInsertionPosition = ps.mutations.get(mutationOperator).mutationIn.get(mutationId);
-		String mutationInsertionPosition = mi.mutationIn;
+		String mutationInsertionPosition = mi.getMutationIn();
 		
 		// PRELEMINARY STATITSTICS
 		Set<String> relevant = new HashSet<String>();

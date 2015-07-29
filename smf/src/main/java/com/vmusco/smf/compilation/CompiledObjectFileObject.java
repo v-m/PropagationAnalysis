@@ -9,9 +9,6 @@ import java.net.URI;
 
 import javax.tools.SimpleJavaFileObject;
 
-
-
-@SuppressWarnings("restriction")
 public class CompiledObjectFileObject extends SimpleJavaFileObject {
 
 	protected ByteArrayOutputStream byteCodes;

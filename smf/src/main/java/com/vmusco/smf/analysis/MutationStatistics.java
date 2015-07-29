@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import com.vmusco.smf.analysis.persistence.ExecutionPersistence;
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
@@ -15,9 +16,31 @@ import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutationOperator;
 
+/**
+ * 
+ * @param <T>
+ * @see MutationXMLPersisitence
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class MutationStatistics<T extends MutationOperator<?>> implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	public static final String DEFAULT_ID_NAME = "main";
 	public static final String DEFAULT_CONFIGFILE = "mutations.xml";
+	
+	private ProcessStatistics ps = null;
+	private String mutationOpId = null;
+	private T mopobj = null;
+	private String mutationName = null;		// name to specify mutations (if null, not considered)
+	/**
+	 * This is the list of class which should be mutated
+	 * If this value is null, then all classes on the source are considered !
+	 */
+	private String[] classToMutate = new String[]{};
+	private String mutator;			// The mutator to use for mutation
+	private String configFile;
+	private HashMap<String, MutantIfos> mutations = new HashMap<String, MutantIfos>();
+	private Long mutantsGenerationTime = null;
 	
 	/**
 	 * This method loads the last saved instance of the object
@@ -42,7 +65,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		ArrayList<String> re = new ArrayList<String>();
 		
 		for(String s : mutations.keySet().toArray(new String[0])){
-			if(mutations.get(s).viable){
+			if(mutations.get(s).isViable()){
 				re.add(s);
 			}
 		}
@@ -58,7 +81,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	 */
 	public String[] loadResultsForExecutedTestOnMutants(int nb) throws Exception{
 		ArrayList<String> re = new ArrayList<String>();
-		File ff = new File(resolveName(ps.mutantsTestResults));
+		File ff = new File(resolveName(ps.getMutantsTestResults()));
 		
 		List<String> l = new ArrayList<>();
 		for(String f : ff.list()){
@@ -88,6 +111,11 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		return re.toArray(new String[0]);
 	}
 	
+	public boolean checkIfExecutionExists(String mutid){
+		File ff = new File(resolveName(ps.getMutantsTestResults()), mutid+".xml");
+		return  ff.exists();
+	}
+	
 	public MutationStatistics(ProcessStatistics ps, Class<T> mutator, String name) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		this.ps = ps;
 		this.configFile = DEFAULT_CONFIGFILE;
@@ -96,6 +124,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		resolveWithMutator();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void resolveWithMutator() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		this.mopobj = (T) Class.forName(this.mutator).newInstance();
 		this.mutationOpId = this.mopobj.operatorId();
@@ -104,11 +133,10 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	public MutationStatistics(ProcessStatistics ps, Class<T> mutator) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		this(ps, mutator, DEFAULT_ID_NAME);
 	}
-	
-	public ProcessStatistics ps = null;
-	
-	private String mutationOpId = null;
-	private T mopobj = null;
+
+	public ProcessStatistics getRelatedProcessStatisticsObject() {
+		return ps;
+	}
 	
 	public String getMutationId(){
 		return mutationOpId;
@@ -122,38 +150,61 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		return mopobj;
 	}
 	
-	/**
-	 * This is a name to specify mutations (if null, not considered)
-	 */
-	public String mutationName = null;
+	public String getMutationName() {
+		return mutationName;
+	}
+	public void setMutationName(String mutationName) {
+		this.mutationName = mutationName;
+	}
 	
-	/**
-	 * This is the list of class which should be mutated
-	 * If this value is null, then all classes on the source are considered !
-	 */
-	public String[] classToMutate = new String[]{};
-	
-	/**
-	 * The mutator to use for mutation
-	 */
-	public String mutator;
-	public String configFile;
+	public String[] getClassToMutate(boolean resolve) {
+		if(resolve){
+			String[] ret = new String[classToMutate.length];
 
+			int i = 0;
+			for(String it : classToMutate){
+				ret[i++] = ps.getProjectIn(true) + File.separator + it;
+			}
+
+			return ret;
+		}else{
+			return classToMutate;
+		}
+	}
+	
+	public void setClassToMutate(String[] classToMutate) {
+		this.classToMutate = classToMutate;
+	}
+	
+	public String getMutator() {
+		return mutator;
+	}
+	public void setMutator(String mutator) {
+		this.mutator = mutator;
+	}
+
+	public String getConfigFile() {
+		return configFile;
+	}
+	
+	public void setConfigFile(String configFile) {
+		this.configFile = configFile;
+	}
 	
 	public String resolveName(String resolving){
-		return ps.getWorkingDir() + File.separator + ps.mutantsBasedir.replace("{id}", this.mutationName).replace("{op}", this.mutationOpId) + File.separator + resolving;
+		return ps.getWorkingDir() + File.separator + ps.getMutantsBasedir().replace("{id}", this.mutationName).replace("{op}", this.mutationOpId) + File.separator + resolving;
 	}
 	
 	public String getSourceMutationResolved(){
-		return resolveName(ps.mutantsOut);
+		return resolveName(ps.getMutantsOut());
 	}
 	
 	public String getBytecodeMutationResolved(){
-		return resolveName(ps.mutantsBytecodeOut);
+		return resolveName(ps.getMutantsBytecodeOut());
 	}
 	
 	public String getExecutionFileResolved(){
-		return resolveName(ps.mutantsTestResults);
+		return resolveName(ps.getMutantsTestResults());
 	}
 
 	public String getConfigFileResolved(){
@@ -163,9 +214,34 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	public String getMutantFileResolved(String mutid){
 		return getExecutionFileResolved() + File.separator + mutid + ".xml";
 	}
-
-	public HashMap<String, MutantIfos> mutations = new HashMap<String, MutantIfos>();
-	public Long mutantsGenerationTime = null;
+	
+	public void clearMutations(){
+		mutations.clear();
+	}
+	
+	public int getMutationsSize(){
+		return mutations.size();
+	}
+	
+	public Set<String> getAllMutationsId(){
+		return (Set<String>) mutations.keySet();
+	}
+	
+	public MutantIfos getMutationStats(String mutationId){
+		return mutations.get(mutationId);
+	}
+	
+	public void setMutationStats(String mutationId, MutantIfos informations){
+		mutations.put(mutationId, informations);
+	}
+	
+	public Long getMutantsGenerationTime() {
+		return mutantsGenerationTime;
+	}
+	
+	public void setMutantsGenerationTime(Long mutantsGenerationTime) {
+		this.mutantsGenerationTime = mutantsGenerationTime;
+	}
 
 	public void loadOrCreateMutants(boolean reset) throws Exception {
 		loadOrCreateMutants(reset, null);

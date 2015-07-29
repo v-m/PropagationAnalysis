@@ -96,7 +96,7 @@ public class UseGraphMutantStats {
 
 	public void fillIn(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propagraphtime) {
 		this.mutationId = mutationId;
-		mutationInsertionPoint = mi.mutationIn;
+		mutationInsertionPoint = mi.getMutationIn();
 
 		//System.out.print(this.mutationId+"\t");
 		
@@ -105,7 +105,7 @@ public class UseGraphMutantStats {
 			data_basin.add(node);
 		}
 		data_basin_testnodes = new HashSet<String>();
-		for(String node : basin.getTestNodes(ps.testCases)){
+		for(String node : basin.getTestNodes(ps.getTestCases())){
 			data_basin_testnodes.add(node);
 		}
 		

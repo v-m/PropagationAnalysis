@@ -22,8 +22,7 @@ import com.vmusco.smf.utils.ConsoleTools;
  * This class defines a main function for generating a new project definition
  * It create all required working ressources and attempts a first resolution of 
  * the project mavens ressource in order to determine the appropriated classpath.
- * @author Vincenzo Musco - vincenzo.musco@inria.fr
- *
+ * @author Vincenzo Musco (http://www.vmusco.com)
  */
 public class NewProject extends GlobalTestRunning{	
 	private static final Class<?> thisclass = NewProject.class;
@@ -98,11 +97,11 @@ public class NewProject extends GlobalTestRunning{
 			
 			if(!cmd.hasOption("classpath") && !cmd.hasOption("no-classpath")){
 				//ps.determineClassPathOnAll();
-				ps.cpLocalFolder = ProcessStatistics.CLASSPATH_PACK;
-				ps.skipMvnClassDetermination = false;
+				ps.setCpLocalFolder(ProcessStatistics.CLASSPATH_PACK);
+				ps.setSkipMvnClassDetermination(false);
 				ps.exportClassPath();
 			}else{
-				ps.skipMvnClassDetermination = true;
+				ps.setSkipMvnClassDetermination(true);
 				if(cmd.hasOption("classpath")){
 					Set<String> set = new HashSet<>();
 					
@@ -112,7 +111,7 @@ public class NewProject extends GlobalTestRunning{
 
 					ps.setOriginalClasspath(set.toArray(new String[0]));
 				}
-				ps.cpLocalFolder = null;
+				ps.setCpLocalFolder(null);
 			}
 			
 			if(cmd.hasOption("ressources")){
@@ -120,24 +119,24 @@ public class NewProject extends GlobalTestRunning{
 			}
 
 			if(cmd.hasOption("sources")){
-				ps.srcToCompile = cmd.getOptionValue("sources").split(File.pathSeparator);
+				ps.setSrcToCompile(cmd.getOptionValue("sources").split(File.pathSeparator));
 			}
 
 			if(cmd.hasOption("tests")){
-				ps.srcTestsToTreat = cmd.getOptionValue("tests").split(File.pathSeparator);
+				ps.setSrcTestsToTreat(cmd.getOptionValue("tests").split(File.pathSeparator));
 			}else if(cmd.hasOption("no-tests")){
-				ps.srcTestsToTreat = new String[]{};
+				ps.setSrcTestsToTreat(new String[]{});
 			}
 			
 			if(cmd.hasOption("testhang-timeout")){
-				ps.testTimeOut = Integer.parseInt(cmd.getOptionValue("testhang-timeout"));
+				ps.setTestTimeOut(Integer.parseInt(cmd.getOptionValue("testhang-timeout")));
 			}else{
 				// Dynamic research
-				ps.testTimeOut = 0;
+				ps.setTestTimeOut(0);
 			}
 			
 			if(cmd.hasOption("persist-file")){
-				ps.persistFile = cmd.getOptionValue("persist-file");
+				ps.setPersistFile(cmd.getOptionValue("persist-file"));
 			}
 			
 			ProcessStatistics.saveState(ps);
@@ -161,16 +160,16 @@ public class NewProject extends GlobalTestRunning{
 			}
 			
 			if(cmd.hasOption("testhang-timeout")){
-				ps.testTimeOut = Integer.parseInt(cmd.getOptionValue("testhang-timeout"));
-			}else if(ps.testTimeOut_auto){
+				ps.setTestTimeOut(Integer.parseInt(cmd.getOptionValue("testhang-timeout")));
+			}else if(ps.isAutoTestTimeOut()){
 				// Dynamic research
-				ps.testTimeOut = 0;
+				ps.setTestTimeOut(0);
 			}
 			
 			if(cmd.hasOption("reset")){
-				ps.currentState = STATE.READY;
+				ps.setCurrentState(STATE.READY);
 			}else if(cmd.hasOption("reset-tests")){
-				ps.currentState = STATE.BUILD_TESTS;
+				ps.setCurrentState(STATE.BUILD_TESTS);
 			}
 			
 			runWithPs(ps);
@@ -187,7 +186,7 @@ public class NewProject extends GlobalTestRunning{
 		np.resetAndopenStream();
 		
 		System.out.println();
-		System.out.println("Current state is: " + ps.currentState);
+		System.out.println("Current state is: " + ps.getCurrentState());
 
 		System.out.print("Building project.....");
 		if(ps.currentStateIsBefore(STATE.BUILD)){

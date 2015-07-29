@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -16,9 +15,6 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import com.vmusco.smf.analysis.MutantIfos;
-import com.vmusco.smf.analysis.MutationStatistics;
-import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.smf.mutation.MutationOperator;
 
 /**
  * 
@@ -53,9 +49,7 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 	@Override
 	public MutantIfos loadState() throws Exception {
 		MutantIfos ifos = new MutantIfos();
-		
 		loadState(ifos);
-		
 		return ifos;
 	}
 
@@ -65,20 +59,20 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 		Document document = new Document(mutations);
 
 		mutations.setAttribute(new Attribute(ID, this.mutantId));
-		mutations.setAttribute(new Attribute(ProcessXMLPersistence.TIME_ATTRIBUTE, Long.toString(mi.runTestOnMutantTime)));
+		mutations.setAttribute(new Attribute(ProcessXMLPersistence.TIME_ATTRIBUTE, Long.toString(mi.getRunTestOnMutantTime())));
 
 		Element e = new Element(ProcessXMLPersistence.FAILING_TC_3);
 		mutations.addContent(e);
-		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TS_4, mi.mutantErrorOnTestSuite);
-		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mi.mutantFailingTestCases);
+		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TS_4, mi.getMutantErrorOnTestSuite());
+		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mi.getMutantFailingTestCases());
 
 		e = new Element(ProcessXMLPersistence.IGNORED_TC_3);
 		mutations.addContent(e);
-		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mi.mutantIgnoredTestCases);
+		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mi.getMutantIgnoredTestCases());
 
 		e = new Element(ProcessXMLPersistence.HANGING_TC_3);
 		mutations.addContent(e);
-		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mi.mutantHangingTestCases);
+		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mi.getMutantHangingTestCases());
 		
 		XMLOutputter output = new XMLOutputter(Format.getPrettyFormat());
 		output.output(document, fos);
@@ -96,8 +90,8 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 		}
 
 		Element root = document.getRootElement();
-		updateMe.runTestOnMutantTime = Long.valueOf(root.getAttributeValue(ProcessXMLPersistence.TIME_ATTRIBUTE));
-		updateMe.excutedTests = true;
+		updateMe.setRunTestOnMutantTime(Long.valueOf(root.getAttributeValue(ProcessXMLPersistence.TIME_ATTRIBUTE)));
+		updateMe.setExecutedTests(true);
 		
 		Element tmp;
 
@@ -108,14 +102,14 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 			for(Element e: tmplist){
 				al.add(e.getText());
 			}
-			updateMe.mutantFailingTestCases = al.toArray(new String[0]);
+			updateMe.setMutantFailingTestCases(al.toArray(new String[0]));
 			
 			tmplist = tmp.getChildren(ProcessXMLPersistence.ONE_TS_4);
 			al = new ArrayList<String>();
 			for(Element e: tmplist){
 				al.add(e.getText());
 			}
-			updateMe.mutantErrorOnTestSuite = al.toArray(new String[0]);
+			updateMe.setMutantErrorOnTestSuite(al.toArray(new String[0]));
 		}
 
 		if((tmp = root.getChild(ProcessXMLPersistence.IGNORED_TC_3)) != null){
@@ -125,7 +119,7 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 			for(Element e: tmplist){
 				al.add(e.getText());
 			}
-			updateMe.mutantIgnoredTestCases = al.toArray(new String[0]);
+			updateMe.setMutantIgnoredTestCases(al.toArray(new String[0]));
 		}
 
 		if((tmp = root.getChild(ProcessXMLPersistence.HANGING_TC_3)) != null){
@@ -135,8 +129,10 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 			for(Element e: tmplist){
 				al.add(e.getText());
 			}
-			updateMe.mutantHangingTestCases = al.toArray(new String[0]);
+			updateMe.setMutantHangingTestCases(al.toArray(new String[0]));
 		}
+		
+		updateMe.setExecutedTests(true);
 	}
 
 }

@@ -85,7 +85,7 @@ public class SetsSizeForAllMutators implements MutantTestProcessingListener {
 
 				// Load mutations and executions informations from the project
 				MutationStatistics<?> ms = MutationStatistics.loadState(ff.getAbsolutePath());
-				ProcessStatistics ps = ms.ps;
+				ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
 				// Load the mutations in ms here
 				String[] allMutations = ms.loadResultsForExecutedTestOnMutants(600);
 

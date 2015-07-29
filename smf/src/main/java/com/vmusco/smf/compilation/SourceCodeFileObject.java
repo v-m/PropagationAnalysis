@@ -4,9 +4,6 @@ import java.net.URI;
 
 import javax.tools.SimpleJavaFileObject;
 
-
-
-@SuppressWarnings("restriction")
 public class SourceCodeFileObject extends SimpleJavaFileObject {
 
 	private String sourceContent;

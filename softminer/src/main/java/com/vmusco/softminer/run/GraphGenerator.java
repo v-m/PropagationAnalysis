@@ -16,11 +16,9 @@ import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.persistance.GraphML;
 import com.vmusco.softminer.graphs.persistance.GraphPersistence;
-import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuildLogic;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
-import com.vmusco.softminer.sourceanalyzer.processors.FeaturesProcessor;
 
 public class GraphGenerator {
 	private static final String DEFAULT_USEGRAPH_FILENAME = "usegraph.xml";
@@ -99,26 +97,26 @@ public class GraphGenerator {
 
 		ArrayList<String> sources = new ArrayList<String>();
 
-		for(String s : ps.srcToCompile){
-			sources.add(ps.getProjectIn(true) + File.separator + s);
+		for(String s : ps.getSrcToCompile(true)){
+			sources.add(s);
 		}
 
-		for(String s : ps.srcTestsToTreat){
-			sources.add(ps.getProjectIn(true) + File.separator + s);
+		for(String s : ps.getSrcTestsToTreat(true)){
+			sources.add(s);
 		}
 
 		GraphBuilder gb;
 		if(cmd.hasOption("cha")){
 			if(cmd.hasOption("fields")){
-				gb = GraphBuilder.newGraphBuilderWithFieldsAndInheritence(ps.projectName, sources.toArray(new String[0]), ps.getClasspath());
+				gb = GraphBuilder.newGraphBuilderWithFieldsAndInheritence(ps.getProjectName(), sources.toArray(new String[0]), ps.getClasspath());
 			}else{
-				gb = GraphBuilder.newGraphBuilderWithInheritence(ps.projectName, sources.toArray(new String[0]), ps.getClasspath());
+				gb = GraphBuilder.newGraphBuilderWithInheritence(ps.getProjectName(), sources.toArray(new String[0]), ps.getClasspath());
 			}
 		}else{
 			if(cmd.hasOption("fields")){
-				gb = GraphBuilder.newGraphBuilderWithFields(ps.projectName, sources.toArray(new String[0]), ps.getClasspath());
+				gb = GraphBuilder.newGraphBuilderWithFields(ps.getProjectName(), sources.toArray(new String[0]), ps.getClasspath());
 			}else{
-				gb = GraphBuilder.newGraphBuilderOnlyWithDependencies(ps.projectName, sources.toArray(new String[0]), ps.getClasspath());
+				gb = GraphBuilder.newGraphBuilderOnlyWithDependencies(ps.getProjectName(), sources.toArray(new String[0]), ps.getClasspath());
 			}
 		}
 		 

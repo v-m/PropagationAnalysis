@@ -18,9 +18,12 @@ import org.jdom2.output.XMLOutputter;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.MutatorsFactory;
 
 /**
- * This class is responsible of creating the index.xml for all mutants but not the mutation result persistence !!!
+ * This class is responsible of creating the index xml file for all mutants.
+ * This class is *NOT* responsible of persisting mutation result !!!
  * @author Vincenzo Musco - vincenzo.musco@inria.fr
  *
  */
@@ -35,13 +38,14 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 
 	private static String MUTATION_2 = "mutants";
 	private static String MUTATION_3 = "mutant";
-	private static final String MUTATION_CLASS_3 = "operator-class";
+	//private static final String MUTATION_CLASS_3 = "operator-class";
 	private static final String MUTATION_OPERATOR_3 = "operator-id";
 	private static final String MUTANT_HASH_4 = "hash";
 
 	private static String MUTANT_ID_4 = "id";
 	private static String MUTANT_IN_4 = "in";
 	private static String MUTANT_VIABLE_4 = "viable";
+	private static String MUTANT_RAN_4 = "ran";
 	private static String MUTANT_TO_4 = "to";
 	private static String MUTANT_FROM_4 = "from";
 
@@ -73,7 +77,7 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 
 		root = document.getRootElement();
 		targetPs = root.getAttributeValue(MUTATIONS_PARENT_2);
-		mutid = root.getAttribute(MUTATION_CLASS_3).getValue();
+		mutid = root.getAttribute(MUTATION_OPERATOR_3).getValue();
 		name = root.getAttributeValue(MUTATION_NAME);
 
 		return true;
@@ -86,7 +90,8 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 		
 		ProcessStatistics ps = ProcessStatistics.loadState((new File(f.getParentFile(), targetPs)).getAbsolutePath());
 		
-		Class mutator = Class.forName(mutid);
+		//Class mutator = Class.forName(mutid);
+		Class<MutationOperator<?>> mutator = MutatorsFactory.getOperatorClassFromId(mutid);
 		MutationStatistics<?> ms = new MutationStatistics<>(ps, mutator, name);
 
 		loadState(ms);
@@ -108,9 +113,9 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 		Document document = new Document(mutations);
 
 		mutations.setAttribute(new Attribute(MUTATION_OPERATOR_3, ms.getMutationId()));
-		mutations.setAttribute(new Attribute(MUTATION_CLASS_3, ms.getMutationClassName()));
+		//mutations.setAttribute(new Attribute(MUTATION_CLASS_3, ms.getMutationClassName()));
 		
-		String rem = ms.getConfigFileResolved().substring(ms.ps.getWorkingDir().length());
+		String rem = ms.getConfigFileResolved().substring(ms.getRelatedProcessStatisticsObject().getWorkingDir().length());
 		if(rem.charAt(0) == File.separatorChar)
 			rem = rem.substring(1);
 		
@@ -122,41 +127,46 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 			parent += "../";
 		}
 		
-		parent += ms.ps.persistFile;
+		parent += ms.getRelatedProcessStatisticsObject().getPersistFile(false);
 		
 		mutations.setAttribute(new Attribute(MUTATIONS_PARENT_2, parent));
-		mutations.setAttribute(new Attribute(MUTATION_NAME, ms.mutationName));
-		mutations.setAttribute(new Attribute(CONFIG_FILE, ms.configFile));
+		mutations.setAttribute(new Attribute(MUTATION_NAME, ms.getMutationName()));
+		mutations.setAttribute(new Attribute(CONFIG_FILE, ms.getConfigFile()));
 
-		if(ms.mutantsGenerationTime != null){
-			mutations.setAttribute(new Attribute(ProcessXMLPersistence.TIME_ATTRIBUTE, Long.toString(ms.mutantsGenerationTime)));
+		if(ms.getMutantsGenerationTime() != null){
+			mutations.setAttribute(new Attribute(ProcessXMLPersistence.TIME_ATTRIBUTE, Long.toString(ms.getMutantsGenerationTime())));
 		}
 
-		if(ms.classToMutate != null){
+		if(ms.getClassToMutate(false) != null){
 			Element tmp = new Element(CLASS_TO_MUTATE_2);
 			mutations.addContent(tmp);
-			ProcessXMLPersistence.populateXml(tmp, CLASS_TO_MUTATE_3, ms.classToMutate);
+			ProcessXMLPersistence.populateXml(tmp, CLASS_TO_MUTATE_3, ms.getClassToMutate(false));
 		}
 
 
 		Element muts = new Element(MUTATION_2);
 		mutations.addContent(muts);
 
-		for(String mut : (String[]) ms.mutations.keySet().toArray(new String[0])){
-			MutantIfos ifos = (MutantIfos) ms.mutations.get(mut);
+		for(String mut : (String[]) ms.getAllMutationsId().toArray(new String[0])){
+			MutantIfos ifos = (MutantIfos) ms.getMutationStats(mut);
 
 			Element amutant = new Element(MUTATION_3);
 			muts.addContent(amutant);
 
 			amutant.setAttribute(new Attribute(MUTANT_ID_4, mut));
-			amutant.setAttribute(new Attribute(MUTANT_VIABLE_4, ifos.viable?"true":"false"));
-			if(ifos.hash != null)
-				amutant.setAttribute(new Attribute(MUTANT_HASH_4, ifos.hash));
+			amutant.setAttribute(new Attribute(MUTANT_VIABLE_4, ifos.isViable()?"true":"false"));
+			
+			if(ifos.isExecutionKnown()){
+				amutant.setAttribute(new Attribute(MUTANT_RAN_4, ifos.isExecutedTests()?"true":"false"));
+			}
+			
+			if(ifos.getHash() != null)
+				amutant.setAttribute(new Attribute(MUTANT_HASH_4, ifos.getHash()));
 
-			setSensitiveAttribute(amutant, MUTANT_IN_4, ifos.mutationIn==null?"?":ifos.mutationIn);
+			setSensitiveAttribute(amutant, MUTANT_IN_4, ifos.getMutationIn()==null?"?":ifos.getMutationIn());
 			try{
-				setSensitiveAttribute(amutant, MUTANT_FROM_4, ifos.mutationFrom);
-				setSensitiveAttribute(amutant, MUTANT_TO_4, ifos.mutationTo);
+				setSensitiveAttribute(amutant, MUTANT_FROM_4, ifos.getMutationFrom());
+				setSensitiveAttribute(amutant, MUTANT_TO_4, ifos.getMutationTo());
 			}catch(Exception ex){
 				amutant.setAttribute(new Attribute(MUTANT_FROM_4, "!!! Uncodable !!!"));
 				amutant.setAttribute(new Attribute(MUTANT_TO_4, "!!! Uncodable !!!"));
@@ -201,12 +211,12 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 	public void loadState(MutationStatistics<?> ms) throws Exception {
 		openFile();
 		
-		ms.configFile = root.getAttribute(CONFIG_FILE).getValue();
+		ms.setConfigFile(root.getAttribute(CONFIG_FILE).getValue());
 
 		Attribute att = root.getAttribute(ProcessXMLPersistence.TIME_ATTRIBUTE);
 
 		if(att != null){
-			ms.mutantsGenerationTime = Long.parseLong(att.getValue());
+			ms.setMutantsGenerationTime(Long.parseLong(att.getValue()));
 		}
 
 		Element tmp;
@@ -218,7 +228,7 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 			for(Element e: tmplist){
 				al.add(e.getText());
 			}
-			ms.classToMutate = al.toArray(new String[0]);
+			ms.setClassToMutate(al.toArray(new String[0]));
 		}
 
 		if((tmp = root.getChild(MUTATION_2)) != null){
@@ -226,15 +236,20 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 
 			for(Element e: tmplist){
 				MutantIfos ifos = new MutantIfos();
-				ifos.mutationFrom = e.getAttribute(MUTANT_FROM_4).getValue();
-				ifos.mutationTo = e.getAttribute(MUTANT_TO_4).getValue();
-				ifos.mutationIn = e.getAttribute(MUTANT_IN_4).getValue();
-				ifos.viable = e.getAttribute(MUTANT_VIABLE_4).getValue().equals("true");
+				ifos.setMutationFrom(e.getAttribute(MUTANT_FROM_4).getValue());
+				ifos.setMutationTo(e.getAttribute(MUTANT_TO_4).getValue());
+				ifos.setMutationIn(e.getAttribute(MUTANT_IN_4).getValue());
+				ifos.setViable(e.getAttribute(MUTANT_VIABLE_4).getValue().equals("true"));
+				
+				if(e.getAttribute(MUTANT_RAN_4) != null){
+					ifos.setExecutedTests(e.getAttribute(MUTANT_RAN_4).getValue().equals("true"));
+				}
+				
 				if(e.getAttribute(MUTANT_HASH_4) != null){
-					ifos.hash = e.getAttribute(MUTANT_HASH_4).getValue();
+					ifos.setHash(e.getAttribute(MUTANT_HASH_4).getValue());
 				}
 				String id = e.getAttribute(MUTANT_ID_4).getValue();
-				ms.mutations.put(id, ifos);
+				ms.setMutationStats(id, ifos);
 			}
 		}
 	}

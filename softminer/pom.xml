@@ -81,6 +81,7 @@
 			<scope>system</scope>
 			<systemPath>${basedir}/lib/gs-gephi-0.1-git.jar</systemPath>
 		</dependency>
+
 	</dependencies>
 </project>
 

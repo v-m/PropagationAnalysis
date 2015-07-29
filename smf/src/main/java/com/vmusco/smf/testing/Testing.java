@@ -77,14 +77,7 @@ public final class Testing {
 
 
 	public static void findTestClassesString(ProcessStatistics ps) throws Exception{
-		String[] re = new String[ps.srcTestsToTreat.length];
-		int i = 0;
-
-		for(String s : ps.srcTestsToTreat){
-			re[i++] = ps.getProjectIn(true) + File.separator + s; 
-		}
-
-		ps.testClasses = findTestClassesString(re, ps.getTestingClasspath());
+		ps.setTestClasses(findTestClassesString(ps.getSrcTestsToTreat(true), ps.getTestingClasspath()));
 	}
 
 	public static String[] findTestClassesString(String[] srcFolder, String[] classpath) throws Exception{
@@ -143,8 +136,8 @@ public final class Testing {
 			cpp += (cpp.length()==0?"":":")+s;
 		}
 		cpp += (cpp.length()==0?"":":")+ps.testsGenerationFolder();
-		for(String aRess : ps.testingRessources){
-			cpp += (cpp.length()==0?"":":")+ps.getProjectIn(true) + File.separator + aRess;
+		for(String aRess : ps.getTestingRessources(true)){
+			cpp += (cpp.length()==0?"":":")+aRess;
 		}
 
 		/*for(String aSrc : ps.srcToCompile){
@@ -190,7 +183,7 @@ public final class Testing {
 	}
 
 	public static void runTestCases(MutationStatistics<?> ms, String forMutant, TestsExecutionListener tes) throws IOException, ClassNotFoundException, InterruptedException{
-		runTestCases(ms.ps, ms, forMutant, tes);
+		runTestCases(ms.getRelatedProcessStatisticsObject(), ms, forMutant, tes);
 	}
 
 	public static void runTestCases(ProcessStatistics ps, MutationStatistics<?> ms, String forMutant, TestsExecutionListener tes) throws IOException, ClassNotFoundException, InterruptedException{
@@ -205,20 +198,20 @@ public final class Testing {
 		long t1 = System.currentTimeMillis();
 		int cpt = 0;
 		
-		boolean tweaking_timeout = ms==null && ps.testTimeOut == 0;
+		boolean tweaking_timeout = ms==null && ps.getTestTimeOut() == 0;
 		
 		int timeout = MAX_TEST_TIMEOUT;
 		if(tweaking_timeout){
 			timeout = MIN_TEST_TIMEOUT;
-		}else if(ps.testTimeOut > 0){
-			timeout = ps.testTimeOut;
+		}else if(ps.getTestTimeOut() > 0){
+			timeout = ps.getTestTimeOut();
 		}
 
 		ConsoleTools.write("Current timeout is: "+timeout);
 		ConsoleTools.endLine();
 		ConsoleTools.endLine();
 		
-		for(String aTest : ps.testClasses){
+		for(String aTest : ps.getTestClasses()){
 			cpt++;
 			boolean testcase_finished = false;
 			ArrayList<String> hangingTests = new ArrayList<String>();
@@ -252,7 +245,7 @@ public final class Testing {
 					s += c+" ";
 				s = s.trim();
 				
-				if(tes != null)		tes.testSuiteExecutionStart(cpt, ps.testClasses.length, s);
+				if(tes != null)		tes.testSuiteExecutionStart(cpt, ps.getTestClasses().length, s);
 				
 				ProcessBuilder pb = new ProcessBuilder(cmd);
 				pb.directory(new File(ps.getProjectIn(true)));
@@ -378,7 +371,7 @@ public final class Testing {
 			return;
 		
 		if(tweaking_timeout){
-			ps.testTimeOut = timeout;
+			ps.setTestTimeOut(timeout);
 		}
 
 		long t2 = System.currentTimeMillis();
@@ -390,20 +383,20 @@ public final class Testing {
 		String[] errts_arr = errorts.toArray(new String[0]);
 
 		if(forMutant == null){
-			ps.failingTestCases = failing_arr;
-			ps.ignoredTestCases = ignored_arr;
-			ps.hangingTestCases = hanging_arr;
-			ps.testCases = tests_arr;
-			ps.errorOnTestSuite = errts_arr;
-			ps.runTestsOriginalTime = t2 - t1;
+			ps.setFailingTestCases(failing_arr);
+			ps.setIgnoredTestCases(ignored_arr);
+			ps.setHangingTestCases(hanging_arr);
+			ps.setTestCases(tests_arr);
+			ps.setErrorOnTestSuite(errts_arr);
+			ps.setRunTestsOriginalTime(t2 - t1);
 		}else{
-			MutantIfos ifos = (MutantIfos) ms.mutations.get(forMutant);
-			ifos.mutantFailingTestCases = failing_arr;
-			ifos.mutantIgnoredTestCases = ignored_arr;
-			ifos.mutantHangingTestCases = hanging_arr;
-			ifos.mutantErrorOnTestSuite = errts_arr;
-			ifos.excutedTests = true;
-			ifos.runTestOnMutantTime = t2 - t1;
+			MutantIfos ifos = (MutantIfos) ms.getMutationStats(forMutant);
+			ifos.setMutantFailingTestCases(failing_arr);
+			ifos.setMutantIgnoredTestCases(ignored_arr);
+			ifos.setMutantHangingTestCases(hanging_arr);
+			ifos.setMutantErrorOnTestSuite(errts_arr);
+			ifos.setExecutedTests(true);
+			ifos.setRunTestOnMutantTime(t2 - t1);
 		}
 
 		if(tes != null){
@@ -418,7 +411,7 @@ public final class Testing {
 	private static boolean addIfPermited(String line, ProcessStatistics ps, Set<String> list) {
 		String right = line.substring(0, line.lastIndexOf('.'));
 
-		for(String tc : ps.testClasses){
+		for(String tc : ps.getTestClasses()){
 			if(tc.equals(right)){
 				list.add(line);
 				return true;

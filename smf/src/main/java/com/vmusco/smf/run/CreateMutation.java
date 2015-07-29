@@ -108,14 +108,14 @@ public class CreateMutation implements MutationCreationListener{
 		MutationStatistics<?> ms = Mutation.createMutationElement(ps, moc);
 
 		if(cmd.hasOption("mutate"))
-			ms.classToMutate = cmd.getOptionValue("mutate").split(File.pathSeparator);
+			ms.setClassToMutate(cmd.getOptionValue("mutate").split(File.pathSeparator));
 
 		if(cmd.getArgs().length > 2){
-			ms.mutationName = cmd.getArgs()[2];
+			ms.setMutationName(cmd.getArgs()[2]);
 		}
 
 		if(cmd.getArgs().length > 3){
-			ms.classToMutate = cmd.getArgs()[3].split(File.pathSeparator);
+			ms.setClassToMutate(cmd.getArgs()[3].split(File.pathSeparator));
 		}
 
 
@@ -124,18 +124,18 @@ public class CreateMutation implements MutationCreationListener{
 		if(cmd.hasOption("stats")){
 			ms.loadMutants();
 			ConsoleTools.write("# mutants: ", ConsoleTools.BOLD);
-			ConsoleTools.write(Integer.toString(ms.mutations.size()));
+			ConsoleTools.write(Integer.toString(ms.getMutationsSize()));
 			
 			int nbviable = 0;
-			for(String s : ms.mutations.keySet()){
-				MutantIfos ifos = ms.mutations.get(s);
-				nbviable += ifos.viable?1:0;
+			for(String s : ms.getAllMutationsId()){
+				MutantIfos ifos = ms.getMutationStats(s);
+				nbviable += ifos.isViable()?1:0;
 			}
 			ConsoleTools.write("# viables: ", ConsoleTools.BOLD);
 			ConsoleTools.write(Integer.toString(nbviable));
 		}else{
 			if(cmd.hasOption("name"))
-				ms.mutationName = cmd.getOptionValue("name");
+				ms.setMutationName(cmd.getOptionValue("name"));
 			
 			if(cmd.hasOption("nb-mutants")){
 				ms.loadOrCreateMutants(cmd.hasOption("reset"), cm, Integer.parseInt(cmd.getOptionValue("nb-mutants")));
