@@ -33,6 +33,8 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 		super();
 		this.nbmutants = nbmutants;
 	}
+	
+	@SuppressWarnings("unused")
 	private int nbmutants = 0;
 
 	public static void main(String[] args) throws ParseException {
@@ -117,8 +119,6 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 		if(f.isDirectory()){
 			fb = path + File.separator + MutationStatistics.DEFAULT_CONFIGFILE; 
 		}
-
-		MutationStatistics<?> ms = null;
 
 		return MutationStatistics.loadState(fb);
 	}

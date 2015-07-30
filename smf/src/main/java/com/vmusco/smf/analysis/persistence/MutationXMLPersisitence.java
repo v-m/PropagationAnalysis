@@ -21,11 +21,13 @@ import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.mutation.MutatorsFactory;
 
+
 /**
  * This class is responsible of creating the index xml file for all mutants.
  * This class is *NOT* responsible of persisting mutation result !!!
- * @author Vincenzo Musco - vincenzo.musco@inria.fr
- *
+ * @author Vincenzo Musco - http://www.vmusco.com
+ * @see MutationStatistics
+ * @see MutantInfoXMLPersisitence
  */
 public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatistics<?>>{
 

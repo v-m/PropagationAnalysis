@@ -1,4 +1,4 @@
-package com.vmusco.smf.utils;
+package com.vmusco.softminer.utils;
 
 public class TypeWithInfo<T> implements Comparable<TypeWithInfo<T>>{
 	private T value;

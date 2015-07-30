@@ -18,10 +18,11 @@ import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.testing.TestingFunctions;
 
 /**
- * 
+ * This class contains the mutations information for one project and one mutation operator
  * @param <T>
  * @see MutationXMLPersisitence
  * @author Vincenzo Musco - http://www.vmusco.com
+ * @see MutationOperator
  */
 public class MutationStatistics<T extends MutationOperator<?>> implements Serializable {
 	private static final long serialVersionUID = 1L;

@@ -15,8 +15,13 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
+/**
+ * This class offers utility functions to get classpath informations
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public abstract class MavenTools {
 
+	@Deprecated
 	public static String MAVEN_DIR = "/home/vince/.m2/repository";
 	
 	private MavenTools(){
@@ -78,10 +83,17 @@ public abstract class MavenTools {
 		return cp;
 	}
 	
-	// This method uses the local mvn installation to resolve and generate the effective POM
-	// As a consequence, the generated POM contains all dependencies (even nested !)
-	// Return null if a dependency cannot be resolved !!!
-	// TODO: This is duplicate as it is already defined on another project, but as long as there is conflict with spoon version we are blocked with this !
+	/**
+	 *  This method uses the local mvn installation to resolve and generate the effective POM
+	 *  As a consequence, the generated POM contains all dependencies (even nested !)
+	 * @param projectRoot
+	 * @param mavenDir
+	 * @return null if a dependency cannot be resolved !!!
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws XmlPullParserException
+	 * @throws InterruptedException
+	 */
 	@Deprecated
 	public static String extractClassPathFromPom(String projectRoot, String mavenDir) throws FileNotFoundException, IOException, XmlPullParserException, InterruptedException{
 		// First step: we execute package the project in order to get all dependencies in .m2 cache

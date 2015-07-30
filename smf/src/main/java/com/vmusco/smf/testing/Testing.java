@@ -29,6 +29,10 @@ import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 
+/**
+ * Tests execution logic
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public final class Testing {
 	public static ArrayList<CtClass<?>> temp;
 

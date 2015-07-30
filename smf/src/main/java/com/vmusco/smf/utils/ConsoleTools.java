@@ -1,5 +1,11 @@
 package com.vmusco.smf.utils;
 
+/**
+ * This util class is used to display information in terminals
+ * Various tools are proposed (moving caret, colors, ...)
+ * @author Vincenzo Musco - http://www.vmusco.com
+ *
+ */
 public class ConsoleTools {
 	private static boolean on = true;
 	

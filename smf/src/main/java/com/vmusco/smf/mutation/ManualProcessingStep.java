@@ -8,7 +8,7 @@ import spoon.reflect.factory.Factory;
 /**
  * This interface define a manual mutation operation to add in general abstract processing steps
  * such as in class {@link AbstractBinaryOperator}
- * @author Vincenzo Musco - vincenzo.musco@inria.fr
+ * @author Vincenzo Musco - http://www.vmusco.com
  */
 public interface ManualProcessingStep {
 	/**

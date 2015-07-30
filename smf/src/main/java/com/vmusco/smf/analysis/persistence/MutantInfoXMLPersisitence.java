@@ -17,9 +17,9 @@ import org.jdom2.output.XMLOutputter;
 import com.vmusco.smf.analysis.MutantIfos;
 
 /**
- * 
- * @author Vincenzo Musco - vincenzo.musco@inria.fr
- *
+ * This class is responsible of persisting mutation result !!!
+ * @author Vincenzo Musco - http://www.vmusco.com
+ * @see MutantIfos
  */
 public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 	private static final String ROOT = "mutation-execution";

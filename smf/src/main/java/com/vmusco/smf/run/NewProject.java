@@ -19,7 +19,6 @@ import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.utils.ConsoleTools;
 
 /**
- * 
  * This class defines a main function for generating a new project definition
  * It create all required working ressources and attempts a first resolution of 
  * the project mavens ressource in order to determine the appropriated classpath.

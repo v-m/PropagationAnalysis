@@ -1,17 +1,13 @@
 package com.vmusco.pminer.analyze;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import com.vmusco.pminer.MutantTestProcessingListener;
 import com.vmusco.pminer.UseGraph;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.softminer.graphs.Graph;
 
 public class ExploreMutants {

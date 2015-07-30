@@ -1,9 +1,7 @@
-package com.vmusco.softminer;
+package com.vmusco.softminer.utils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import com.vmusco.smf.utils.TypeWithInfo;
 
 public abstract class Tools {
 	public static Double median(ArrayList<Double> alist){

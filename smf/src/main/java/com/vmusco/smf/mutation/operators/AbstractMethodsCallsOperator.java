@@ -10,13 +10,13 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtTypeReference;
 
-public abstract class AbstractMethodsCallsOperator extends MutationOperator<CtInvocation>{
+public abstract class AbstractMethodsCallsOperator extends MutationOperator<CtInvocation<?>>{
 	
 	@Override
-	public CtElement[] getMutatedEntries(CtInvocation t, Factory factory) {
+	public CtElement[] getMutatedEntries(CtInvocation<?> t, Factory factory) {
 		List<CtElement> result = new ArrayList<CtElement>();
 		
-		CtTypeReference type = (CtTypeReference) t.getExecutable().getType();
+		CtTypeReference<?> type = (CtTypeReference<?>) t.getExecutable().getType();
 		CtElement e;
 		
 		if(type.getSimpleName().equals("void")){

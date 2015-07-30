@@ -17,9 +17,8 @@ import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.utils.MavenTools;
 
 /**
- * This class is intended to be serialized - it contains all informations...
- * @author Vincenzo Musco - vincenzo.musco@inria.fr
- *
+ * This class contains all informations required for a mutation project
+ * @author Vincenzo Musco - http://www.vmusco.com
  */
 public class ProcessStatistics implements Serializable{
 	private static final long serialVersionUID = 1L;

@@ -4,13 +4,12 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 /**
- * Taken From Spoon-Class loader project
- * 
- *
+ * This class is directly taken from Spoon class loader project
+ * Not used functions has been removed for simplicity
+ * @see https://github.com/INRIA/spoon
  */
 public class ClassFileUtil {
 
@@ -22,18 +21,6 @@ public class ClassFileUtil {
 		return i;
 	}
 
-	static long u4(byte[] bytes, int offset) {
-		long l = 0;
-		l |= bytes[offset] & 0xFF;
-		l <<= 8;
-		l |= bytes[offset + 1] & 0xFF;
-		l <<= 8;
-		l |= bytes[offset + 2] & 0xFF;
-		l <<= 8;
-		l |= bytes[offset + 3] & 0xFF;
-		return l;
-	}
-
 	public static void printBytes(byte[] bytes, int offset) {
 		for (int i = offset; i < bytes.length; i++) {
 			System.out.print("(" + i + "):" + bytes[i]);
@@ -41,147 +28,14 @@ public class ClassFileUtil {
 		System.out.println();
 	}
 
-	public static void adjustLineNumbers(byte[] bytes, int methodsOffset,
-			Map<Integer, Integer> lineNumberMapping) {
-		if (lineNumberMapping == null) {
-			return;
-		}
-		// printBytes(bytes, methodsOffset);
-		int offset = methodsOffset + 2;
-		int methodCount = u2(bytes, methodsOffset);
-		// System.out.println("- adjusting " + methodCount + " methods...");
-		for (int i = 0; i < methodCount; i++) {
-			offset = adjustMethod(bytes, offset, lineNumberMapping);
-		}
-	}
-
-	static int adjustMethod(byte[] bytes, int offset,
-			Map<Integer, Integer> lineNumberMapping) {
-		// System.out.println("adjusting method "
-		// + getPoolString(bytes, u2(bytes, offset + 2)));
-		int attrCount = u2(bytes, offset + 6);
-		offset += 8;
-		for (int i = 0; i < attrCount; i++) {
-			offset = adjustCodeAttribute(bytes, offset, lineNumberMapping);
-		}
-		return offset;
-	}
-
-	static int adjustCodeAttribute(byte[] bytes, int offset,
-			Map<Integer, Integer> lineNumberMapping) {
-		String attrName = getPoolString(bytes, u2(bytes, offset));
-		// System.out.println("attribute: "+attrName);
-		if ("Code".equals(attrName)) {
-			// printBytes(bytes, offset);
-			int offset2 = offset + 14 + (int) u4(bytes, offset + 10);
-			offset2 += u2(bytes, offset2) * 8;
-			offset2 += 2;
-			int attrCount = u2(bytes, offset2);
-			// System.out.println("attrcount: "+attrCount);
-			offset2 += 2;
-			for (int i = 0; i < attrCount; i++) {
-				offset2 = adjustLineNumberAttribute(bytes, offset2,
-						lineNumberMapping);
-			}
-		}
-		return offset + 6 + (int) u4(bytes, offset + 2);
-	}
-
-	static int adjustLineNumberAttribute(byte[] bytes, int offset,
-			Map<Integer, Integer> lineNumberMapping) {
-		String attrName = getPoolString(bytes, u2(bytes, offset));
-		if ("LineNumberTable".equals(attrName)) {
-			// System.out.println("found line number table");
-			int offset2 = offset + 6;
-			int lineCount = u2(bytes, offset2);
-			offset2 += 2;
-			for (int i = 0; i < lineCount; i++) {
-				int org = u2(bytes, offset2 + 2);
-				Integer pos = lineNumberMapping.get(org);
-				if (pos != null) {
-					int ipos = pos;
-					// System.out.println("adjusting " + org + " -> "
-					// + pos);
-					bytes[offset2 + 2] = (byte) (ipos >> 8);
-					bytes[offset2 + 3] = (byte) (ipos);
-					// ln.setLineNumber(pos.getLine());
-				} else {
-					// System.out.println("WARNING: no position for " + org);
-				}
-				offset2 += 4;
-			}
-		}
-		return offset + 6 + (int) u4(bytes, offset + 2);
-	}
-
-	// static int adjustCodeAttribute(byte[] bytes, int offset,
-	// Map<Integer, SourcePosition> lineNumberMapping) {
-	// String attrName = getPoolString(bytes, u2(bytes, offset));
-	// System.out.println("attribute: "+attrName);
-	// if ("Code".equals(attrName)) {
-	// }
-	// return offset+6+(int)u4(bytes,offset+2);
-	// }
-
-	static String getPoolString(byte[] bytes, int index) {
-		int offset = 10;
-		int i = index;
-		while (i > 1) {
-			if ((bytes[offset] == ConstantType.Double)
-					|| (bytes[offset] == ConstantType.Long)) {
-				// stupid adjustment because double and long take 2 entries
-				// many thanks to the guy who made this !$@% choice!
-				i--;
-			}
-			offset = skipPoolConstant(bytes, offset);
-			i--;
-		}
-		if (bytes[offset] != ConstantType.Utf8) {
-			throw new RuntimeException(
-					"error in pool constant: unable to get utf8 at " + index
-							+ " (o=" + offset + ")");
-		}
-		int length = u2(bytes, offset + 1);
-		byte[] string = new byte[length];
-		try {
-			System.arraycopy(bytes, offset + 3, string, 0, length);
-		} catch (Exception e) {
-			System.err.println("error getting the string: l=" + length + ", o="
-					+ offset);
-			printBytes(bytes, offset + 3);
-			e.printStackTrace();
-		}
-		return new String(string);
-	}
-
-	static int skipPoolConstant(byte[] bytes, int offset) {
-		byte constantType = bytes[offset];
-		switch (constantType) {
-		case ConstantType.String:
-		case ConstantType.Class:
-			return offset + 3;
-		case ConstantType.Methodref:
-		case ConstantType.InterfaceMethodref:
-		case ConstantType.Fieldref:
-		case ConstantType.Integer:
-		case ConstantType.Float:
-		case ConstantType.NameAndType:
-			return offset + 5;
-		case ConstantType.Double:
-		case ConstantType.Long:
-			return offset + 9;
-			// return skipPoolConstant(bytes, offset);
-		case ConstantType.Utf8:
-			// int length = u2(bytes, offset + 1);
-			// byte[] string = new byte[length];
-			// System.arraycopy(bytes, offset + 3, string, 0, length);
-			// String s=new String(string);
-			return offset + 3 + u2(bytes, offset + 1);
-		default:
-			throw new RuntimeException("invalid constant pool");
-		}
-	}
-
+	/**
+	 * This method is required !!!
+	 * @param generatePackagesStructure
+	 * @param outputPath
+	 * @param relativeFileName
+	 * @param bytes
+	 * @throws IOException
+	 */
 	public static void writeToDisk(boolean generatePackagesStructure,
 			String outputPath, String relativeFileName, byte[] bytes)
 			throws IOException {
@@ -281,28 +135,4 @@ public class ClassFileUtil {
 		return outDir.append(token).toString();
 	}
 
-}
-
-class ConstantType {
-	public static final byte Class = 7;
-
-	public static final byte Fieldref = 9;
-
-	public static final byte Methodref = 10;
-
-	public static final byte InterfaceMethodref = 11;
-
-	public static final byte String = 8;
-
-	public static final byte Integer = 3;
-
-	public static final byte Float = 4;
-
-	public static final byte Long = 5;
-
-	public static final byte Double = 6;
-
-	public static final byte NameAndType = 12;
-
-	public static final byte Utf8 = 1;
 }

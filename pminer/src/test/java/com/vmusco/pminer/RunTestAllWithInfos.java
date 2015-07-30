@@ -12,7 +12,7 @@ import java.util.TreeSet;
 import com.vmusco.pminer.analyze.StatisticsMutantAnalyzer;
 import com.vmusco.pminer.run.SetsSizeForAllMutators;
 import com.vmusco.smf.utils.ConsoleTools;
-import com.vmusco.softminer.Tools;
+import com.vmusco.softminer.utils.Tools;
 
 public class RunTestAllWithInfos {
 

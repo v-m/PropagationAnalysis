@@ -12,6 +12,10 @@ import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
 
+/**
+ * Tools used for testing executions
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public abstract class TestingFunctions {
 
 	public static List<String> getViableCollection(MutationStatistics<?> ms){

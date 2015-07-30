@@ -1,5 +1,10 @@
 package com.vmusco.smf.testing;
 
+/**
+ * Event listener for test suite/cases execution
+ * @author Vincenzo Musco - http://www.vmusco.com
+ *
+ */
 public interface TestsExecutionListener {
 
 	void testSuiteExecutionStart(int nbtest, int length, String cmd);

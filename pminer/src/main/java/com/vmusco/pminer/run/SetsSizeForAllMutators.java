@@ -5,12 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -19,19 +15,15 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.FileUtils;
-import org.jfree.io.FileUtilities;
 
 import com.vmusco.pminer.MutantTestProcessingListener;
 import com.vmusco.pminer.analyze.ExploreMutants;
 import com.vmusco.pminer.analyze.MutantTestAnalyzer;
 import com.vmusco.pminer.analyze.StatisticsMutantAnalyzer;
-import com.vmusco.pminer.analyze.UseGraphMutantStats;
 import com.vmusco.pminer.persistence.UseGraphStatsXml;
 import com.vmusco.smf.analysis.MutationStatistics;
-import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.GraphApi;
@@ -85,7 +77,7 @@ public class SetsSizeForAllMutators implements MutantTestProcessingListener {
 
 				// Load mutations and executions informations from the project
 				MutationStatistics<?> ms = MutationStatistics.loadState(ff.getAbsolutePath());
-				ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
+				//ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
 				// Load the mutations in ms here
 				String[] allMutations = ms.loadResultsForExecutedTestOnMutants(600);
 

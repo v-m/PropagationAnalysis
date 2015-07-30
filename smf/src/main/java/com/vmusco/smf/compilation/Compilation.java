@@ -37,13 +37,15 @@ import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.utils.LogToFile;
 
-public final class Compilation {
-	private Compilation() {
-	}
+/**
+ * Class containing all compilation methods 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
+public abstract class Compilation {
 
 	public static boolean compileProjectUsingSpoon(ProcessStatistics ps) throws IOException{
 		long t1 = System.currentTimeMillis();
-		
+
 		Environment environment = new StandardEnvironment();
 
 		Factory factory = new FactoryImpl(new DefaultCoreFactory(), environment);
@@ -57,15 +59,15 @@ public final class Compilation {
 
 		for(String cp : ps.getClasspath())
 			System.out.println(cp);
-		
+
 		compiler.setSourceClasspath(ps.getClasspath());
 
 		File fdest = new File(ps.srcGenerationFolder());
 		if(fdest.exists())
 			FileUtils.deleteDirectory(fdest);
-		
+
 		fdest.mkdirs();
-		
+
 		System.out.println("Compiling the project using spoon in "+fdest.getAbsolutePath()+".");
 
 		// This part is used to log WARNINGS or stderr !!!
@@ -73,7 +75,7 @@ public final class Compilation {
 		if(f.exists())
 			f.delete();
 		f.createNewFile();
-		
+
 		LogToFile ltf = new LogToFile();
 		ltf.redirectTo(f);
 
@@ -94,11 +96,11 @@ public final class Compilation {
 
 	public static boolean compileTestsDissociatedUsingSpoon(ProcessStatistics ps) throws IOException{
 		long t1 = System.currentTimeMillis();
-		
+
 		File fdest = new File(ps.testsGenerationFolder());
 		if(fdest.exists())
 			FileUtils.deleteDirectory(fdest);
-		
+
 		fdest.mkdirs();
 		File f = new File(ps.getWorkingDir() + File.separator + "spoonCompilationTests.log");
 		if(f.exists())
@@ -108,30 +110,30 @@ public final class Compilation {
 		// This part is used to log WARNINGS or stderr !!!
 		LogToFile ltf = new LogToFile();
 		ltf.redirectTo(f);
-		
+
 		// Add all sources here
 		for(String aSrcFile : ps.getSrcTestsToTreat(false)){
 			Environment environment = new StandardEnvironment();
 
 			Factory factory = new FactoryImpl(new DefaultCoreFactory(), environment);
 			SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
-			
+
 			compiler.addInputSource(new File(ps.getProjectIn(true) + File.separator + aSrcFile));
 			compiler.setSourceClasspath(ps.getTestingClasspath());
-			
+
 			System.out.println("Compiling test (aSrcFile) using spoon in "+fdest.getAbsolutePath()+".");
 			compiler.setDestinationDirectory(fdest);
-			
+
 			try{
 				compiler.compile();
 			}catch(ModelBuildingException ex){
 				System.err.println("Error on compilation phase:");
 				ex.printStackTrace();
-				
+
 				ltf.restablish();
 				long t2 = System.currentTimeMillis();
 				ps.setBuildTestsTime(t2-t1);
-				
+
 				return false;
 			}
 		}
@@ -139,10 +141,10 @@ public final class Compilation {
 		ltf.restablish();
 		long t2 = System.currentTimeMillis();
 		ps.setBuildTestsTime(t2-t1);
-		
+
 		return true;
 	}
-	
+
 	public static boolean compileTestsUsingSpoon(ProcessStatistics ps) throws IOException{
 		long t1 = System.currentTimeMillis();
 		Environment environment = new StandardEnvironment();
@@ -158,9 +160,9 @@ public final class Compilation {
 		File fdest = new File(ps.testsGenerationFolder());
 		if(fdest.exists())
 			FileUtils.deleteDirectory(fdest);
-		
+
 		fdest.mkdirs();
-		
+
 		System.out.println("Compiling the project tests using spoon in "+fdest.getAbsolutePath()+".");
 
 		// This part is used to log WARNINGS or stderr !!!
@@ -168,7 +170,7 @@ public final class Compilation {
 		if(f.exists())
 			f.delete();
 		f.createNewFile();
-		
+
 		LogToFile ltf = new LogToFile();
 		ltf.redirectTo(f);
 
@@ -214,10 +216,10 @@ public final class Compilation {
 	 */
 	public static Map<String, byte[]> compilesUsingJavax(CtClass<?> aClass, String source, String[] classpath, DiagnosticCollector<JavaFileObject> diagnostics) throws URISyntaxException{
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-		
+
 		StandardJavaFileManager standardFileManager = compiler.getStandardFileManager(diagnostics, null, null);
 		VirtualFileObjectManager fileManager = new VirtualFileObjectManager(standardFileManager);
-	
+
 		// Class path handling
 		List<String> options = new ArrayList<String>();
 		options.add("-cp");
@@ -232,21 +234,21 @@ public final class Compilation {
 				cp += ((cp.length()>0)?File.pathSeparator:"") + s;
 			}
 		}
-		
+
 		options.add(cp);
 
 		JavaFileObject jfo = new JavaSourceFromString(aClass.getQualifiedName(), source);
 		Iterable<? extends JavaFileObject> compilationUnits = Arrays.asList(jfo);
-		
+
 		CompilationTask task = compiler.getTask(null, fileManager, diagnostics, options, null, compilationUnits);
 		boolean re = task.call();
-		
+
 		if(!re){
 			return null;
 		}
-		
+
 		Map<String, byte[]> bytecodes = new HashMap<>();
-		
+
 		Map<String, CompiledObjectFileObject> classFiles = fileManager.classFiles();
 
 		for (String qualifiedName : classFiles.keySet()) {
@@ -254,15 +256,13 @@ public final class Compilation {
 			byte[] bytecode = classFiles.get(qualifiedName).byteCodes();
 			bytecodes.put(qualifiedName, bytecode);
 		}
-		
+
 		/*ClassFileUtil.writeToDisk(true, outputDir.getAbsolutePath(),
 						fileName, compiledClass);*/
-		
-		
-		
+
 		return bytecodes;
 	}
-	
+
 	/**
 	 * Compiles a class using Javax.
 	 * @param aClass

@@ -20,12 +20,10 @@ import com.vmusco.pminer.analyze.UseGraphMutantStats;
 
 public abstract class UseGraphStatsXml {
 	/**
-	 * This constats enable to persist the whole informations
+	 * This constant enable to persist the whole informations
 	 * However it can takes more than Gigs to persist all so we disable it
 	 */
 	private static boolean ENABLE_RAWDATA = false;
-	
-	
 	
 	// XML ELEMENTS/ATTRIBUTES DEFINITION
 	private static final String ROOT = "statistics-for-mutop";

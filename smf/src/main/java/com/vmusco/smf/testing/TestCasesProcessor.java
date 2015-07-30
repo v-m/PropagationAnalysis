@@ -2,50 +2,46 @@ package com.vmusco.smf.testing;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
-import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.ModifierKind;
-import spoon.support.reflect.declaration.CtClassImpl;
 
 // Based on logic of TestFilter (sacha-infrastructure project)
-
-public class TestCasesProcessor extends AbstractProcessor<CtClass> {
-	private static ArrayList<CtClass> annot_classes;
-	private static ArrayList<CtClass> tc_classes;
+public class TestCasesProcessor extends AbstractProcessor<CtClass<?>> {
+	private static ArrayList<CtClass<?>> annot_classes;
+	private static ArrayList<CtClass<?>> tc_classes;
 	//private static ArrayList<CtClass> rw_classes;
 
-	private static ArrayList<String> output;
+	//private static ArrayList<String> output;
 
 	public TestCasesProcessor() {
-		TestCasesProcessor.annot_classes = new ArrayList<CtClass>();
-		TestCasesProcessor.tc_classes = new ArrayList<CtClass>();
+		TestCasesProcessor.annot_classes = new ArrayList<CtClass<?>>();
+		TestCasesProcessor.tc_classes = new ArrayList<CtClass<?>>();
 		//TestCasesFinderProcessor.rw_classes = new ArrayList<CtClass>();
 
-		TestCasesProcessor.output = new ArrayList<String>();
+		//TestCasesProcessor.output = new ArrayList<String>();
 	}
 
 	@Override
-	public void process(CtClass element) {
+	public void process(CtClass<?> element) {
 		if(element.getModifiers().contains(ModifierKind.ABSTRACT))
 			return;
 
 		// TEST_CLASSES
-		Iterator iterator = element.getMethods().iterator();
+		Iterator<CtMethod<?>> iterator = element.getMethods().iterator();
 
 		while(iterator.hasNext()){
 			Object o = iterator.next();
 
 			if(o instanceof CtMethod){
-				CtMethod method = (CtMethod) o;
+				CtMethod<?> method = (CtMethod<?>) o;
 
 				if(method.getAnnotation(Test.class) != null){
 					// Ok there is tests :)
@@ -56,11 +52,11 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass> {
 		}
 
 		// JUNIT38 -- lookup reccurssively
-		CtClass explore = element;
+		CtClass<?> explore = element;
 		while(explore.getSuperclass() != null 
 				&& !explore.getSuperclass().getQualifiedName().equals(TestCase.class.getCanonicalName())
 				&& explore.getSuperclass().getDeclaration() instanceof CtClass){
-			explore = (CtClass)explore.getSuperclass().getDeclaration();
+			explore = (CtClass<?>)explore.getSuperclass().getDeclaration();
 		}
 		
 		
@@ -84,11 +80,11 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass> {
 		                          //TestCasesFinderProcessor.rw_classes.size() +
 		                          TestCasesProcessor.tc_classes.size()];
 
-		for(CtClass aClass : TestCasesProcessor.annot_classes){
+		for(CtClass<?> aClass : TestCasesProcessor.annot_classes){
 			ret[i++] = aClass.getQualifiedName();
 		}
 
-		for(CtClass aClass : TestCasesProcessor.tc_classes){
+		for(CtClass<?> aClass : TestCasesProcessor.tc_classes){
 			ret[i++] = aClass.getQualifiedName();
 		}
 
@@ -99,17 +95,17 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass> {
 		return ret;
 	}
 	
-	public static CtClass[] getTestClasses(){
+	public static CtClass<?>[] getTestClasses(){
 		int i=0;
-		CtClass[] ret = new CtClass[TestCasesProcessor.annot_classes.size() +
+		CtClass<?>[] ret = new CtClass[TestCasesProcessor.annot_classes.size() +
 		                          //TestCasesFinderProcessor.rw_classes.size() +
 		                          TestCasesProcessor.tc_classes.size()];
 
-		for(CtClass aClass : TestCasesProcessor.annot_classes){
+		for(CtClass<?> aClass : TestCasesProcessor.annot_classes){
 			ret[i++] = aClass;
 		}
 
-		for(CtClass aClass : TestCasesProcessor.tc_classes){
+		for(CtClass<?> aClass : TestCasesProcessor.tc_classes){
 			ret[i++] = aClass;
 		}
 
@@ -124,14 +120,14 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass> {
 		ArrayList<String> ret = new ArrayList<String>();
 
 		// Annotation usage
-		for(CtClass aClass : TestCasesProcessor.annot_classes){
-			Iterator iterator = aClass.getMethods().iterator();
+		for(CtClass<?> aClass : TestCasesProcessor.annot_classes){
+			Iterator<CtMethod<?>> iterator = aClass.getMethods().iterator();
 
 			while(iterator.hasNext()){
 				Object o = iterator.next();
 
 				if(o instanceof CtMethod){
-					CtMethod method = (CtMethod) o;
+					CtMethod<?> method = (CtMethod<?>) o;
 
 					if(method.getAnnotation(Test.class) != null){
 						ret.add("<A>"+getFullMethodSignature(method));
@@ -141,14 +137,14 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass> {
 		}
 
 		// TestCase abstract class usage
-		for(CtClass aClass : TestCasesProcessor.tc_classes){
-			Iterator iterator = aClass.getMethods().iterator();
+		for(CtClass<?> aClass : TestCasesProcessor.tc_classes){
+			Iterator<?> iterator = aClass.getMethods().iterator();
 
 			while(iterator.hasNext()){
 				Object o = iterator.next();
 
 				if(o instanceof CtMethod){
-					CtMethod method = (CtMethod) o;
+					CtMethod<?> method = (CtMethod<?>) o;
 
 					if(method.getSimpleName().startsWith("test")){
 						ret.add("<I>"+getFullMethodSignature(method));
@@ -164,18 +160,18 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass> {
 		return ret.toArray(new String[0]);
 	}
 	
-	public static CtMethod[] getTestCases(){
-		ArrayList<CtMethod> ret = new ArrayList<CtMethod>();
+	public static CtMethod<?>[] getTestCases(){
+		List<CtMethod<?>> ret = new ArrayList<CtMethod<?>>();
 		
 		// Annotation usage
-		for(CtClass aClass : TestCasesProcessor.annot_classes){
-			Iterator iterator = aClass.getMethods().iterator();
+		for(CtClass<?> aClass : TestCasesProcessor.annot_classes){
+			Iterator<?> iterator = aClass.getMethods().iterator();
 
 			while(iterator.hasNext()){
 				Object o = iterator.next();
 
 				if(o instanceof CtMethod){
-					CtMethod method = (CtMethod) o;
+					CtMethod<?> method = (CtMethod<?>) o;
 
 					if(method.getAnnotation(Test.class) != null){
 						ret.add(method);
@@ -185,14 +181,14 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass> {
 		}
 
 		// TestCase abstract class usage
-		for(CtClass aClass : TestCasesProcessor.tc_classes){
-			Iterator iterator = aClass.getMethods().iterator();
+		for(CtClass<?> aClass : TestCasesProcessor.tc_classes){
+			Iterator<CtMethod<?>> iterator = aClass.getMethods().iterator();
 
 			while(iterator.hasNext()){
 				Object o = iterator.next();
 
 				if(o instanceof CtMethod){
-					CtMethod method = (CtMethod) o;
+					CtMethod<?> method = (CtMethod<?>) o;
 
 					if(method.getSimpleName().startsWith("test")){
 						ret.add(method);
@@ -216,7 +212,7 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass> {
 		return tc_classes.size();
 	}
 	
-	private static String getFullMethodSignature(CtMethod method){
+	private static String getFullMethodSignature(CtMethod<?> method){
 		int pos = method.getSignature().indexOf("(");
 		String st = method.getSignature().substring(0, pos);
 		pos = st.lastIndexOf(' ');

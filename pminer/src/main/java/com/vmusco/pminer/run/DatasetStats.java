@@ -170,8 +170,6 @@ public class DatasetStats {
 		final BufferedReader br = new BufferedReader(isr);
 
 		String line;
-		String lastvalidline = null;
-
 		boolean startanalyze = false;
 
 		while((line = br.readLine()) != null){

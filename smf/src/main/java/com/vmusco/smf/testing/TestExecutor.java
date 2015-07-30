@@ -1,7 +1,6 @@
 package com.vmusco.smf.testing;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.junit.internal.requests.ClassRequest;
 import org.junit.internal.requests.FilterRequest;
@@ -13,9 +12,14 @@ import org.junit.runner.manipulation.Filter;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
+/**
+ * This entry point is used to do test cases executions.
+ * Used in {@link Testing#runTestCases(com.vmusco.smf.analysis.ProcessStatistics, com.vmusco.smf.analysis.MutationStatistics, String, TestsExecutionListener)}
+ * @author Vincenzo Musco - http://www.vmusco.com
+ * @see Testing#runTestCases(com.vmusco.smf.analysis.ProcessStatistics, com.vmusco.smf.analysis.MutationStatistics, String, TestsExecutionListener)
+ */
 public class TestExecutor {
 	public static final String TEST_MARKER = "(vmdtest)";
-	//public static final String SUCCESS_MARKER = "(vmdsuccess)";
 	public static final String FAIL_MARKER = "(vmdfails)";
 	public static final String FAILDETAILS_MARKER = "(+++vmdfails+++)";
 	public static final String IGNORE_MARKER = "(vmdignores)";
@@ -30,7 +34,7 @@ public class TestExecutor {
 	public static void main(String[] args) throws Exception {
 		String[] s = args;
 
-		Class c = Class.forName(s[0]);
+		Class<?> c = Class.forName(s[0]);
 		final ArrayList<String> skip = new ArrayList<>();
 
 		int i = 1;
@@ -109,8 +113,7 @@ public class TestExecutor {
 
 		Result result = juc.run(r2);
 
-		Iterator<Failure> iterator = result.getFailures().iterator();
-
+		//Iterator<Failure> iterator = result.getFailures().iterator();
 		System.out.println(STATS_MARKER+result.getRunCount()+"#"+result.getFailureCount()+"#"+result.getIgnoreCount());
 
 		System.exit(0);

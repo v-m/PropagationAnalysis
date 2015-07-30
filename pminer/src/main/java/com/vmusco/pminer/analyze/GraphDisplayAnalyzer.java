@@ -1,15 +1,12 @@
 package com.vmusco.pminer.analyze;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.vmusco.pminer.UseGraph;
-import com.vmusco.pminer.run.PropagationEstimer;
 import com.vmusco.smf.analysis.MutantIfos;
-import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.NodeShape;

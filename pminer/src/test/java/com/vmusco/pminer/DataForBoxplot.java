@@ -11,7 +11,7 @@ import java.util.Collections;
 import com.vmusco.pminer.analyze.StatisticsMutantAnalyzer;
 import com.vmusco.pminer.analyze.UseGraphMutantStats;
 import com.vmusco.pminer.persistence.UseGraphStatsXml;
-import com.vmusco.softminer.Tools;
+import com.vmusco.softminer.utils.Tools;
 
 public class DataForBoxplot {
 

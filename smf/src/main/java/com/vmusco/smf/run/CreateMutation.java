@@ -10,7 +10,9 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
-import com.vmusco.smf.analysis.MutantIfos;
+import spoon.reflect.declaration.CtClass;
+import spoon.reflect.declaration.CtElement;
+
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.mutation.Mutation;
@@ -18,9 +20,6 @@ import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.mutation.MutatorsFactory;
 import com.vmusco.smf.utils.ConsoleTools;
-
-import spoon.reflect.declaration.CtClass;
-import spoon.reflect.declaration.CtElement;
 
 /**
  * This entry point is used to create a new mutation project.
@@ -67,7 +66,7 @@ public class CreateMutation implements MutationCreationListener{
 			Class<MutationOperator<?>>[] allClasses = MutatorsFactory.allAvailMutator();
 
 			for(Class<MutationOperator<?>> c : allClasses){
-				MutationOperator m = c.newInstance();
+				MutationOperator<?> m = c.newInstance();
 				System.out.println("-> "+m.operatorId()+" ("+c.getCanonicalName()+"): "+m.shortDescription());
 			}
 
@@ -91,20 +90,20 @@ public class CreateMutation implements MutationCreationListener{
 			moc = MutatorsFactory.getOperatorClassFromId(cmd.getArgs()[1]);
 		}
 
-		CreateMutation cm = new CreateMutation();
-		cm.mop = ((MutationOperator)moc.newInstance()).operatorId();
-
-		if(ps==null){
+		if(moc == null){
 			ConsoleTools.write("ERROR: ", ConsoleTools.FG_RED);
-			ConsoleTools.write("unable to open ps file @ "+cmd.getArgs()[0]);
+			ConsoleTools.write("unable to find mutator "+cmd.getArgs()[1]);
 			ConsoleTools.endLine();
 
 			System.exit(1);
 		}
+		
+		CreateMutation cm = new CreateMutation();
+		cm.mop = ((MutationOperator<?>)moc.newInstance()).operatorId();
 
-		if(moc == null){
+		if(ps==null){
 			ConsoleTools.write("ERROR: ", ConsoleTools.FG_RED);
-			ConsoleTools.write("unable to find mutator "+cmd.getArgs()[1]);
+			ConsoleTools.write("unable to open ps file @ "+cmd.getArgs()[0]);
 			ConsoleTools.endLine();
 
 			System.exit(1);

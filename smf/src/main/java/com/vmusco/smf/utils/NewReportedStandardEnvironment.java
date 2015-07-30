@@ -7,12 +7,12 @@ import org.apache.log4j.Logger;
 import spoon.support.StandardEnvironment;
 
 /**
- * This is a class duplicate of the StandardEnvironment spoon class 
+ * This is a trick duplicate class of the StandardEnvironment spoon class 
  * in order to remove the WARNINGS !
- * @author Vincenzo Musco - vincenzo.musco@inria.fr
- *
+ * @author Vincenzo Musco - http://www.vmusco.com
  */
 public class NewReportedStandardEnvironment extends StandardEnvironment {
+	private static final long serialVersionUID = 1L;
 
 	public NewReportedStandardEnvironment() {
 		Logger logger = Logger.getLogger(StandardEnvironment.class);

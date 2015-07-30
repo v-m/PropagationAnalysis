@@ -1,11 +1,7 @@
 package com.vmusco.smf.basics;
 
-import com.vmusco.smf.mutation.MutationOperator;
-import com.vmusco.smf.mutation.MutatorsFactory;
-import com.vmusco.smf.run.CreateMutation;
 import com.vmusco.smf.run.MutationRunTests;
 import com.vmusco.smf.run.NewProject;
-import com.vmusco.smf.run.ParallelMutationRunTests;
 
 public class AllPipeTest {
 

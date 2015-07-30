@@ -5,15 +5,12 @@ import java.io.FileInputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
 import com.vmusco.pminer.MutantTestProcessingListener;
@@ -28,10 +25,6 @@ import com.vmusco.pminer.persistence.XmlPminerPersister;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.smf.mutation.MutationOperator;
-import com.vmusco.smf.mutation.MutatorsFactory;
-import com.vmusco.smf.mutation.operators.KingOffutt91.ArithmeticMutatorOperator;
-import com.vmusco.smf.run.CreateMutation;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.GraphApi;
 import com.vmusco.softminer.graphs.persistance.GraphML;

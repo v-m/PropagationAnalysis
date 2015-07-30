@@ -46,6 +46,11 @@ import com.vmusco.smf.compilation.Compilation;
 import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.smf.utils.NewReportedStandardEnvironment;
 
+/**
+ * This class contains tools for performing mutant generation
+ * @author Vincenzo Musco - http://www.vmusco.com
+ *
+ */
 public final class Mutation {
 	private static final String MUTANT_FILE_PREFIX = "mutant_";
 
@@ -226,7 +231,7 @@ public final class Mutation {
 			CtElementImpl m = (CtElementImpl) o[1];
 			TargetObtainer to = (TargetObtainer) o[2];
 			CtClass<?> theClass = findAssociatedClass(e);
-			CtElementImpl toReplace = (CtElementImpl) to.DetermineTarget(e);
+			CtElementImpl toReplace = (CtElementImpl) to.determineTarget(e);
 
 			MutantIfos ifos = new MutantIfos();
 			ifos.setMutationIn(Mutation.getMethodFullSignatureForParent(toReplace));

@@ -17,6 +17,11 @@ import org.jdom2.output.XMLOutputter;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
 
+/**
+ * This class is responsible to persist to xml file the mutation project
+ * @author Vincenzo Musco - http://www.vmusco.com
+ * @see ProcessStatistics
+ */
 public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistics>{
 
 	private static String ROOT_ELEMENT_0 = "smf";

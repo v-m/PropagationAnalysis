@@ -5,6 +5,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 
+/**
+ * This class is used to redirect and restore the stdout and stderr
+ * @author Vincenzo Musco - http://www.vmusco.com
+ *
+ */
 public class LogToFile {
 	private PrintStream retainer_out = null;
 	private PrintStream retainer_err = null;

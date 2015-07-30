@@ -7,7 +7,6 @@ import java.io.IOException;
 
 import com.vmusco.pminer.UseGraph;
 import com.vmusco.smf.analysis.MutantIfos;
-import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 
 public class HistogramRawData extends MutantTestAnalyzer {

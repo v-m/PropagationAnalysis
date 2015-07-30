@@ -2,6 +2,11 @@ package com.vmusco.smf.mutation;
 
 import spoon.reflect.declaration.CtElement;
 
+/**
+ * Event listener for the mutant creation process
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
+
 public interface MutationCreationListener {
 	void preparationDone(int nb_mutation_possibility, int nb_viables_wanted);
 	void startingMutationCheck(CtElement e);

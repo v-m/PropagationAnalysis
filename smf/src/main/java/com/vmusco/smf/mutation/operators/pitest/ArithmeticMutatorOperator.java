@@ -2,7 +2,6 @@ package com.vmusco.smf.mutation.operators.pitest;
 
 import java.util.ArrayList;
 
-import com.vmusco.smf.mutation.MutationGateway;
 import com.vmusco.smf.mutation.MutationOperator;
 
 import spoon.reflect.code.BinaryOperatorKind;

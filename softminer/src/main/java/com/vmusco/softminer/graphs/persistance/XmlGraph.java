@@ -108,7 +108,7 @@ public class XmlGraph implements GraphPersistence{
 			anEdge.setAttribute(attr);
 
 			for(EdgeMarkers em : aGraph.getEdgeMarkers(e.from, e.to)){
-				attr = null;
+				//attr = null;
 
 				switch(em){
 				default:
@@ -116,8 +116,8 @@ public class XmlGraph implements GraphPersistence{
 					break;
 				}
 
-				if(attr != null)
-					anEdge.setAttribute(attr);
+				//if(attr != null)
+				//	anEdge.setAttribute(attr);
 			}
 		}
 	}
