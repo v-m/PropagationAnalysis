@@ -8,6 +8,10 @@ import java.io.IOException;
 import com.vmusco.smf.testing.TestsExecutionListener;
 import com.vmusco.smf.utils.ConsoleTools;
 
+/**
+ * This is an abstract implementation of a test runner entry point
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public abstract class GlobalTestRunning implements TestsExecutionListener{
 
 	private File file;
@@ -164,4 +168,15 @@ public abstract class GlobalTestRunning implements TestsExecutionListener{
 		}
 	}
 	
+	@Override
+	public void currentTimeout(int timeout) {
+		ConsoleTools.write("Current timeout is: "+timeout);
+		ConsoleTools.endLine();
+		ConsoleTools.endLine();
+	}
+	
+	@Override
+	public void newTimeout(int timeout) {
+		System.out.println("Dynamic timeout tweaking... New timeout is "+timeout+" secs. \n\n\n");
+	}
 }

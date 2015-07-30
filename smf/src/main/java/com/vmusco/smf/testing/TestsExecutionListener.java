@@ -17,4 +17,6 @@ public interface TestsExecutionListener {
 	void testCaseNewLoop(int cpt, String line);
 	void testCaseFailureInfos(int cpt, String line);
 	void testSuiteUnrunnable(int cpt, String aTest, String line);
+	void currentTimeout(int timeout);
+	void newTimeout(int timeout);
 }

@@ -1,24 +1,31 @@
 package com.vmusco.smf.run;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.HashMap;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+
+import spoon.reflect.declaration.CtElement;
+import spoon.reflect.factory.Factory;
 
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.Mutation;
+import com.vmusco.smf.mutation.TargetObtainer;
 import com.vmusco.smf.utils.ConsoleTools;
 
+/**
+ * This entry point is used to obtain informations about a mutation project
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class ProjectTools {
-	private static final Class<?> thisclass = CreateMutation.class;
+	private static final Class<?> thisclass = ProjectTools.class;
 
 	public static void main(String[] args) throws Exception {
 
@@ -100,6 +107,16 @@ public class ProjectTools {
 				MutationStatistics<?> ms = MutationStatistics.loadState(pth);
 
 				//int treated = ms.loadResultsForExecutedTestOnMutants(0).length;
+				int maxmutat = 0;
+				
+				Factory factory = Mutation.obtainFactory();
+				CtElement[] mutations = Mutation.getMutations(ps, ms, factory);
+				
+				for(CtElement e : mutations){
+					HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = Mutation.obtainsMutationCandidates(ms, e, factory, false);
+					if(mutatedEntriesWithTargets != null)
+						maxmutat += mutatedEntriesWithTargets.size();
+				}
 				
 				int treated = 0;
 				int not_viable = 0;
@@ -117,8 +134,8 @@ public class ProjectTools {
 						treated += mutationStats.isExecutedTests()?1:0;
 					}
 				}
-
-				ConsoleTools.write("....."+ms.getMutationsSize()+" mutants - "+treated+" treated, "+not_viable+" unviables");
+				
+				ConsoleTools.write("....."+ms.getMutationsSize()+" mutants (max: "+maxmutat+") - "+treated+" treated, "+not_viable+" unviables. [Remaining] To generate: "+(maxmutat-ms.getMutationsSize())+". To test:"+(maxmutat-treated-not_viable));
 				ConsoleTools.endLine();
 			}
 		}

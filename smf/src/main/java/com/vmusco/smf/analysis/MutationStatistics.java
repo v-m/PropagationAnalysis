@@ -15,6 +15,7 @@ import com.vmusco.smf.analysis.persistence.MutationXMLPersisitence;
 import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.testing.TestingFunctions;
 
 /**
  * 
@@ -225,6 +226,34 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	
 	public Set<String> getAllMutationsId(){
 		return (Set<String>) mutations.keySet();
+	}
+	
+	/**
+	 * Return an array with the number of not viable mutations, the number of treated ones and the number of remaining ones
+	 * @return
+	 * @see TestingFunctions#getUnfinishedCollection(MutationStatistics, boolean)
+	 * @see TestingFunctions#getViableCollection(MutationStatistics)
+	 */
+	@Deprecated
+	public int[] statsMutations(){
+		int treated = 0;
+		int not_viable = 0;
+		
+		for(String mid : getAllMutationsId()){
+			MutantIfos mutationStats = getMutationStats(mid);
+
+			if(!mutationStats.isViable())
+				not_viable++;
+			else{
+				if(!mutationStats.isExecutionKnown()){
+					mutationStats.setExecutedTests(checkIfExecutionExists(mid));
+				}
+				
+				treated += mutationStats.isExecutedTests()?1:0;
+			}
+		}
+		
+		return new int[]{not_viable, treated, getMutationsSize()-treated-not_viable};
 	}
 	
 	public MutantIfos getMutationStats(String mutationId){

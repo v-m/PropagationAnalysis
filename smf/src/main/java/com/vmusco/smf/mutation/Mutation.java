@@ -73,14 +73,25 @@ public final class Mutation {
 		createMutants(ps, ms, mcl, reset, -1);
 	}
 
-	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset, int nb) throws IOException, URISyntaxException{		
-		long t1 = System.currentTimeMillis();
-		int mutantcounter = 0;
-
+	/**
+	 * Get a factory to work with
+	 * @return
+	 */
+	public static Factory obtainFactory(){
 		StandardEnvironment standardEnvironment = new StandardEnvironment();
 		standardEnvironment.setAutoImports(true);
 
-		Factory factory = new FactoryImpl(new DefaultCoreFactory(), standardEnvironment);
+		return new FactoryImpl(new DefaultCoreFactory(), standardEnvironment);
+	}
+	
+	/**
+	 * Extract all mutations for a project and a mutation
+	 * @param ps
+	 * @param ms
+	 * @param factory
+	 * @return
+	 */
+	public static CtElement[] getMutations(ProcessStatistics ps, MutationStatistics ms, Factory factory){
 		SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
 
 		String[] mutateFrom = ms.getClassToMutate(true);
@@ -89,7 +100,6 @@ public final class Mutation {
 		}
 
 		for(String srcitem : mutateFrom){
-			//compiler.addInputSource(new File(ps.getProjectIn(true) + File.separator + srcitem));
 			compiler.addInputSource(new File(srcitem));
 		}
 
@@ -119,15 +129,25 @@ public final class Mutation {
 
 		arg0.add(ms.getMutationClassName());
 		compiler.process(arg0);
+		
+		return MutationGateway.getMutationCandidates();
+	}
+	
+	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset, int nb) throws IOException, URISyntaxException{
+		Factory factory = obtainFactory();
+		
+		long t1 = System.currentTimeMillis();
+		int mutantcounter = 0;
 
-		// Clean previous mutants
+		// Prepare generation workspace (eventually clear it)
 		File f = new File(ms.getSourceMutationResolved());
 		if(reset && f.exists()){
 			System.out.println("Mutant sources folder exists... Erasing...");
 			FileUtils.deleteDirectory(f);
 			System.out.println("Succeded: "+(f.exists()?"False":"True"));
 		}
-		f.mkdirs();
+		if(!f.exists())
+			f.mkdirs();
 
 		f = new File(ms.getBytecodeMutationResolved());
 		if(reset && f.exists()){
@@ -135,7 +155,8 @@ public final class Mutation {
 			FileUtils.deleteDirectory(f);
 			System.out.println("Succeded: "+(f.exists()?"False":"True"));
 		}
-		f.mkdirs();
+		if(!f.exists())
+			f.mkdirs();
 
 		if(reset){
 			ms.clearMutations();
@@ -154,25 +175,12 @@ public final class Mutation {
 
 		List<Object[]> mutations = new ArrayList<Object[]>();
 
-		for(CtElement e : MutationGateway.getMutationCandidates()){
-			CtClass theClass = findAssociatedClass(e);
+		for(CtElement e : getMutations(ps, ms, factory)){
+			HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = obtainsMutationCandidates(ms, e, factory, true);
 
-			if(theClass == null){
-				ConsoleTools.write("WARNING:\n", ConsoleTools.BG_YELLOW);
-				ConsoleTools.write("Unable to find a parent class for the element "+e.getSignature()+".");
-				ConsoleTools.write("This item is skipped cleanly and silently but be aware of this :)");
-				ConsoleTools.endLine(2);
+			if(mutatedEntriesWithTargets == null)
 				continue;
-			}
-
-			HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = null;
-
-			try{
-				mutatedEntriesWithTargets = ms.getMutationObject().getMutatedEntriesWithTarget(e, factory);
-			}catch(ClassCastException ex){
-				ex.printStackTrace();
-			}
-
+			
 			Iterator iterator = mutatedEntriesWithTargets.keySet().iterator();
 
 			while(iterator.hasNext()){
@@ -205,7 +213,6 @@ public final class Mutation {
 			mutHashs.add(mi.getHash());
 		}
 
-
 		int validmutants = 0;
 		int droppedmutants = 0;
 		int hashclashcpt = 0;
@@ -218,7 +225,7 @@ public final class Mutation {
 			CtElement e = (CtElement) o[0];
 			CtElementImpl m = (CtElementImpl) o[1];
 			TargetObtainer to = (TargetObtainer) o[2];
-			CtClass theClass = findAssociatedClass(e);
+			CtClass<?> theClass = findAssociatedClass(e);
 			CtElementImpl toReplace = (CtElementImpl) to.DetermineTarget(e);
 
 			MutantIfos ifos = new MutantIfos();
@@ -323,6 +330,27 @@ public final class Mutation {
 		ms.setMutantsGenerationTime(t2-t1);
 
 		if(mcl != null) mcl.mutationSummary(validmutants, droppedmutants+hashclashcpt, ms.getMutantsGenerationTime());
+	}
+
+	public static HashMap<CtElement, TargetObtainer> obtainsMutationCandidates(MutationStatistics ms, CtElement e, Factory factory, boolean debug) {
+		CtClass<?> theClass = findAssociatedClass(e);
+
+		if(debug && theClass == null){
+			ConsoleTools.write("WARNING:\n", ConsoleTools.BG_YELLOW);
+			ConsoleTools.write("Unable to find a parent class for the element "+e.getSignature()+".");
+			ConsoleTools.write("This item is skipped cleanly and silently but be aware of this :)");
+			ConsoleTools.endLine(2);
+			return null;
+		}
+
+		HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = null;
+
+		try{
+			return ms.getMutationObject().getMutatedEntriesWithTarget(e, factory);
+		}catch(ClassCastException ex){
+			ex.printStackTrace();
+			return null;
+		}
 	}
 
 	public static byte[] getHashForMutationSource(String mutant_roots) throws IOException, NoSuchAlgorithmException{

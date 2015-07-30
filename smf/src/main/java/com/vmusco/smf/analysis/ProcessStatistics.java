@@ -482,7 +482,7 @@ public class ProcessStatistics implements Serializable{
 		String[] out = new String[in.length];
 
 		int i = 0;
-		for(String it : srcToCompile){
+		for(String it : in){
 			out[i++] = getProjectIn(true) + File.separator + it;
 		}
 

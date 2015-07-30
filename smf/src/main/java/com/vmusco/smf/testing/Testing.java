@@ -5,27 +5,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import org.junit.Test;
-
-import com.vmusco.smf.analysis.MutantIfos;
-import com.vmusco.smf.analysis.MutationStatistics;
-import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.smf.utils.ConsoleTools;
 
 import spoon.compiler.SpoonCompiler;
 import spoon.reflect.declaration.CtClass;
@@ -35,6 +24,10 @@ import spoon.reflect.factory.FactoryImpl;
 import spoon.support.DefaultCoreFactory;
 import spoon.support.StandardEnvironment;
 import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
+
+import com.vmusco.smf.analysis.MutantIfos;
+import com.vmusco.smf.analysis.MutationStatistics;
+import com.vmusco.smf.analysis.ProcessStatistics;
 
 public final class Testing {
 	public static ArrayList<CtClass<?>> temp;
@@ -170,8 +163,16 @@ public final class Testing {
 		return cmd.toArray(new String[0]);
 	}
 
-	public static void runTestCases(ProcessStatistics ps, TestsExecutionListener tes) throws IOException, ClassNotFoundException, InterruptedException{
-		runTestCases(ps, null, null, tes);
+	/**
+	 * Used for base project running
+	 * @param ps
+	 * @param tn
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 * @throws InterruptedException
+	 */
+	public static void runTestCases(ProcessStatistics ps, TestsExecutionListener tn) throws IOException, ClassNotFoundException, InterruptedException{
+		runTestCases(ps, null, null, tn);
 	}
 
 	public static void runTestCases(ProcessStatistics ps) throws IOException, ClassNotFoundException, InterruptedException{
@@ -182,11 +183,11 @@ public final class Testing {
 		runTestCases(ms, forMutant, null);
 	}
 
-	public static void runTestCases(MutationStatistics<?> ms, String forMutant, TestsExecutionListener tes) throws IOException, ClassNotFoundException, InterruptedException{
-		runTestCases(ms.getRelatedProcessStatisticsObject(), ms, forMutant, tes);
+	public static void runTestCases(MutationStatistics<?> ms, String forMutant, TestingNotification tn) throws IOException, ClassNotFoundException, InterruptedException{
+		runTestCases(ms.getRelatedProcessStatisticsObject(), ms, forMutant, tn);
 	}
 
-	public static void runTestCases(ProcessStatistics ps, MutationStatistics<?> ms, String forMutant, TestsExecutionListener tes) throws IOException, ClassNotFoundException, InterruptedException{
+	public static void runTestCases(ProcessStatistics ps, MutationStatistics<?> ms, String forMutant, TestsExecutionListener tel) throws IOException, ClassNotFoundException, InterruptedException{
 		//MutationStatistics ms = ps.mutations.get(mutationoperatorid);
 		Set<String> tests = new HashSet<>();
 		Set<String> failing = new HashSet<>();
@@ -207,9 +208,7 @@ public final class Testing {
 			timeout = ps.getTestTimeOut();
 		}
 
-		ConsoleTools.write("Current timeout is: "+timeout);
-		ConsoleTools.endLine();
-		ConsoleTools.endLine();
+		tel.currentTimeout(timeout);
 		
 		for(String aTest : ps.getTestClasses()){
 			cpt++;
@@ -245,7 +244,7 @@ public final class Testing {
 					s += c+" ";
 				s = s.trim();
 				
-				if(tes != null)		tes.testSuiteExecutionStart(cpt, ps.getTestClasses().length, s);
+				if(tel != null)		tel.testSuiteExecutionStart(cpt, ps.getTestClasses().length, s);
 				
 				ProcessBuilder pb = new ProcessBuilder(cmd);
 				pb.directory(new File(ps.getProjectIn(true)));
@@ -277,9 +276,9 @@ public final class Testing {
 							testcase_finished = true;
 							if(line.contains("ExceptionInInitializerError")){
 								errorts.add(aTest);
-								if(tes != null)		tes.testSuiteUnrunnable(cpt, aTest, line);
+								if(tel != null)		tel.testSuiteUnrunnable(cpt, aTest, line);
 							}else{
-								if(tes != null)		tes.testCaseException(cpt, line, cmd);
+								if(tel != null)		tel.testCaseException(cpt, line, cmd);
 								run_exception_skipped = true;
 							}
 							break;
@@ -290,37 +289,37 @@ public final class Testing {
 						if(line.startsWith(TestExecutor.FAIL_MARKER)){
 							line = line.substring(TestExecutor.FAIL_MARKER.length());
 							if(addIfPermited(line, ps, failing)){
-								if(tes != null)		tes.testCaseNewFail(cpt, line);
+								if(tel != null)		tel.testCaseNewFail(cpt, line);
 							}else{
-								if(tes != null)		tes.testCaseNotPermitted(cpt, line);
+								if(tel != null)		tel.testCaseNotPermitted(cpt, line);
 							}
 						}if(line.startsWith(TestExecutor.FAILDETAILS_MARKER)){
 							line = line.substring(TestExecutor.FAILDETAILS_MARKER.length());
-							if(tes != null)		tes.testCaseFailureInfos(cpt, line);
+							if(tel != null)		tel.testCaseFailureInfos(cpt, line);
 						}else if(line.startsWith(TestExecutor.IGNORE_MARKER)){
 							line = line.substring(TestExecutor.IGNORE_MARKER.length());
 							if(addIfPermited(line, ps, ignored)){
-								if(tes != null)		tes.testCaseNewIgnored(cpt, line);
+								if(tel != null)		tel.testCaseNewIgnored(cpt, line);
 							}else{
-								if(tes != null)		tes.testCaseNotPermitted(cpt, line);
+								if(tel != null)		tel.testCaseNotPermitted(cpt, line);
 							}
 						}else if(line.startsWith(TestExecutor.TEST_MARKER)){
 							// Here all success and failing tests
 							line = line.substring(TestExecutor.TEST_MARKER.length());
 							currentTestCase =  line;
 							if(addIfPermited(line, ps, tests)){
-								if(tes != null)		tes.testCaseEntered(cpt, line);
+								if(tel != null)		tel.testCaseEntered(cpt, line);
 							}else{
-								if(tes != null)		tes.testCaseNotPermitted(cpt, line);
+								if(tel != null)		tel.testCaseNotPermitted(cpt, line);
 							}
 						}else if(line.startsWith(TestExecutor.UNDETERMINED_MARKER)){
 							// Here all success and failing tests
 							line = line.substring(TestExecutor.UNDETERMINED_MARKER.length());
 							//System.out.println("\tDROPPED (undt): "+line);
-							if(tes != null)		tes.testCaseUndeterminedTest(cpt, line);
+							if(tel != null)		tel.testCaseUndeterminedTest(cpt, line);
 						}else{
 							//System.out.println("((((( "+line+" )))))");
-							if(tes != null)		tes.testCaseOtherCase(cpt, line);
+							if(tel != null)		tel.testCaseOtherCase(cpt, line);
 						}
 
 						future = executor.submit(readTask);
@@ -330,23 +329,23 @@ public final class Testing {
 				}catch(TimeoutException e){
 					if(tweaking_timeout && timeout < MAX_TEST_TIMEOUT){
 						timeout += INC_TEST_TIMEOUT;
-						System.out.println("Dynamic timeout tweaking... New timeout is "+timeout+" secs. \n\n\n");
+						tel.newTimeout(timeout);
 					}else{
 						try{
 							String shortcurrent = currentTestCase.substring(currentTestCase.lastIndexOf('.') + 1);
 							hangingTests.add(shortcurrent);
 		
 							if(addIfPermited(currentTestCase, ps, infloops)){
-								if(tes != null)		tes.testCaseNewLoop(cpt, line);
+								if(tel != null)		tel.testCaseNewLoop(cpt, line);
 							}else{
-								if(tes != null)		tes.testCaseNotPermitted(cpt, line);
+								if(tel != null)		tel.testCaseNotPermitted(cpt, line);
 							}
 		
 							future.cancel(true);
 							executor.shutdownNow();
 							proc.destroy();
 						}catch(Exception ex){
-							if(tes != null)		tes.testCaseException(cpt, line, cmd);
+							if(tel != null)		tel.testCaseException(cpt, line, cmd);
 							run_exception_skipped = true;
 							testcase_finished = true;
 						}
@@ -354,7 +353,7 @@ public final class Testing {
 				}catch(/*ExecutionException | */Exception e){
 					//e.printStackTrace();
 					//System.exit(1);
-					if(tes != null)		tes.testCaseException(cpt, line, cmd);
+					if(tel != null)		tel.testCaseException(cpt, line, cmd);
 					run_exception_skipped = true;
 					testcase_finished = true;
 				}finally{
@@ -399,8 +398,8 @@ public final class Testing {
 			ifos.setRunTestOnMutantTime(t2 - t1);
 		}
 
-		if(tes != null){
-			tes.testCaseExecutionFinished(cpt, 
+		if(tel != null){
+			tel.testCaseExecutionFinished(cpt, 
 					tests_arr,
 					failing_arr,
 					ignored_arr,

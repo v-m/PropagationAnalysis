@@ -22,6 +22,13 @@ import com.vmusco.smf.utils.ConsoleTools;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 
+/**
+ * This entry point is used to create a new mutation project.
+ * The old functionality to get statistics about a project has been moved to
+ * {@link ProjectTools}
+ * @author Vincenzo Musco - http://www.vmusco.com
+ * @see ProjectTools
+ */
 public class CreateMutation implements MutationCreationListener{
 
 	private static final Class<?> thisclass = CreateMutation.class;
@@ -48,8 +55,6 @@ public class CreateMutation implements MutationCreationListener{
 		opt = new Option("m", "mutate", true, "classes to mutate ("+useAsSepString+" - default: all classes)");
 		options.addOption(opt);
 		opt = new Option("n", "nb-mutants", true, "number of desired viable mutants (default: max)");
-		options.addOption(opt);
-		opt = new Option("s", "stats", false, "display statistics about a mutation generation process");
 		options.addOption(opt);
 		opt = new Option("R", "reset", false, "drop all previously generated mutants if so (default: false)");
 		options.addOption(opt);
@@ -121,28 +126,15 @@ public class CreateMutation implements MutationCreationListener{
 
 		System.out.println("Generating mutations, please wait...\n\n\n\n");
 
-		if(cmd.hasOption("stats")){
-			ms.loadMutants();
-			ConsoleTools.write("# mutants: ", ConsoleTools.BOLD);
-			ConsoleTools.write(Integer.toString(ms.getMutationsSize()));
-			
-			int nbviable = 0;
-			for(String s : ms.getAllMutationsId()){
-				MutantIfos ifos = ms.getMutationStats(s);
-				nbviable += ifos.isViable()?1:0;
-			}
-			ConsoleTools.write("# viables: ", ConsoleTools.BOLD);
-			ConsoleTools.write(Integer.toString(nbviable));
+		if(cmd.hasOption("name"))
+			ms.setMutationName(cmd.getOptionValue("name"));
+		
+		if(cmd.hasOption("nb-mutants")){
+			ms.loadOrCreateMutants(cmd.hasOption("reset"), cm, Integer.parseInt(cmd.getOptionValue("nb-mutants")));
 		}else{
-			if(cmd.hasOption("name"))
-				ms.setMutationName(cmd.getOptionValue("name"));
-			
-			if(cmd.hasOption("nb-mutants")){
-				ms.loadOrCreateMutants(cmd.hasOption("reset"), cm, Integer.parseInt(cmd.getOptionValue("nb-mutants")));
-			}else{
-				ms.loadOrCreateMutants(cmd.hasOption("reset"), cm);
-			}
+			ms.loadOrCreateMutants(cmd.hasOption("reset"), cm);
 		}
+	
 	}
 
 	private int nbchecks = 0;

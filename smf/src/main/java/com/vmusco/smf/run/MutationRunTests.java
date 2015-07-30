@@ -1,9 +1,6 @@
 package com.vmusco.smf.run;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,13 +13,16 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
-import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
-import com.vmusco.smf.testing.Testing;
+import com.vmusco.smf.testing.TestingFunctions;
+import com.vmusco.smf.testing.TestingNotification;
 import com.vmusco.smf.utils.ConsoleTools;
 
-public class MutationRunTests extends GlobalTestRunning {
+/**
+ * This entry point is used to run the tests for mutations 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
+public class MutationRunTests extends GlobalTestRunning implements TestingNotification {
 	private static final Class<?> thisclass = MutationRunTests.class;
 
 	protected MutationRunTests() {
@@ -88,7 +88,7 @@ public class MutationRunTests extends GlobalTestRunning {
 				
 				MutationRunTests tel = new MutationRunTests(mutations.length);
 				
-				processMutants(ms, al, 0, mutations.length, tel);
+				TestingFunctions.processMutants(ms, al, 0, mutations.length, tel);
 			}else{
 				mutations = ms.listMutants();
 
@@ -100,12 +100,12 @@ public class MutationRunTests extends GlobalTestRunning {
 					nbtodo = Integer.parseInt(cmd.getOptionValue("proceed-nb"));
 				}
 				
-				int nbviable = getViableCollection(ms).size();
+				int nbviable = TestingFunctions.getViableCollection(ms).size();
 
-				List<String> al = getUnfinishedCollection(ms, !cmd.hasOption("no-shuffle"));
+				List<String> al = TestingFunctions.getUnfinishedCollection(ms, !cmd.hasOption("no-shuffle"));
 				int alreadydone = nbviable - al.size(); 
 						
-				processMutants(ms, al, alreadydone, nbtodo, tel);
+				TestingFunctions.processMutants(ms, al, alreadydone, nbtodo, tel);
 			}
 		}
 	}
@@ -123,123 +123,12 @@ public class MutationRunTests extends GlobalTestRunning {
 		return MutationStatistics.loadState(fb);
 	}
 
-	public static List<String> getViableCollection(MutationStatistics<?> ms){
-		ArrayList<String> al = new ArrayList<String>();
-		for(String mut : ms.getAllMutationsId()){
-			MutantIfos ifos = ms.getMutationStats(mut);
-
-			if(!ifos.isViable()){
-				continue;
-			}
-
-			al.add(mut);
-		}
-
-		return al;
-	}
-
-	public static List<String> getUnfinishedCollection(MutationStatistics<?> ms, boolean shuffle){
-		ArrayList<String> al = new ArrayList<String>();
-		for(String mut : getViableCollection(ms)){
-			MutantIfos ifos = ms.getMutationStats(mut);
-			File ff = new File(ms.getMutantFileResolved(mut));
-
-			if(!ff.exists()){
-				al.add(mut);
-			}else if(ff.length() == 0){
-				try{
-					FileOutputStream fos = new FileOutputStream(ff);
-
-					FileLock lock = fos.getChannel().tryLock();
-					if(lock != null){
-						lock.release();
-						fos.close();
-						al.add(mut);
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-					System.exit(-1);
-				}
-			}
-		}
-
-		if(shuffle)
-			Collections.shuffle(al);
-		
-		return al;
-	}
-
-	public static int processMutants(MutationStatistics<?> ms, List<String> mutantIds, int nbdone, int nbmax, MutationRunTests tel){
-		int nbproc = nbdone;
-
-		while(mutantIds.size() > 0){
-			String mut = mutantIds.remove(0); 
-
-			if(tel != null)	tel.mutantStarted(mut);
-			MutantIfos ifos = ms.getMutationStats(mut);
-
-			if(!ifos.isViable()){
-				continue;
-			}
-
-			File ff = new File(ms.getMutantFileResolved(mut));
-
-			if(!ff.exists() || ff.length() == 0){
-
-				try{
-					FileOutputStream fos = new FileOutputStream(ff);
-
-					FileLock lock = fos.getChannel().tryLock();
-					if(lock != null){
-						
-						Testing.runTestCases(ms, mut, tel);
-
-						if(tel != null)	tel.mutantPersisting(mut);
-
-						MutantIfos mi = ms.getMutationStats(mut);
-						
-						if(mi.isExecutedTests()){
-							MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(fos, mut);
-							pers.saveState(ms.getMutationStats(mut));
-						}else{
-							if(tel != null)	tel.mutantSkippedDueToException(mut);
-						}
-						
-						lock.release();
-						fos.close();
-
-						if(tel != null)	tel.mutantEnded(mut);
-
-						nbproc++;
-					}else{
-						if(tel != null)	tel.mutantLocked();
-						nbproc++;
-					}
-				} catch (IOException | InterruptedException | ClassNotFoundException e) {
-					if(tel != null)	tel.mutantException(e);
-				}
-			}else{
-				if(tel == null)	tel.mutantAlreadyDone();
-			}
-
-			if(nbproc >= nbmax){
-				return nbproc;
-			}
-		}
-
-		return nbproc;
-	}
-	
-	public static int processMutants(MutationStatistics<?> ms, List<String> mutantIds, int nbmax, MutationRunTests tel){
-		return processMutants(ms, mutantIds, 0, nbmax, tel);
-	}
-
-	private void mutantException(Exception e) {
+	public void mutantException(Exception e) {
 		e.printStackTrace();
 		System.exit(-1);
 	}
 
-	private void mutantPersisting(String mut) {
+	public void mutantPersisting(String mut) {
 		this.state = "Storing results...";
 		printMutantStat();
 	}
