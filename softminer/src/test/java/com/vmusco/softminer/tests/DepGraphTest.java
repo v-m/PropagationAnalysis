@@ -12,6 +12,7 @@ import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.processors.FeaturesProcessor;
 import com.vmusco.softminer.sourceanalyzer.processors.GraphItemRenamer;
 
+@Deprecated
 public abstract class DepGraphTest {
 	protected static String currTestedPakg = "";
 	//protected static Class processorToUse = FeatureProcessorFinal.class;
