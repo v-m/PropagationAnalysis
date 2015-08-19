@@ -13,6 +13,7 @@ import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.processors.SpecificTags;
 
+@Deprecated
 public class ConcreteDependencyGraphExtracting extends DepGraphTest {
 	
 	@Test

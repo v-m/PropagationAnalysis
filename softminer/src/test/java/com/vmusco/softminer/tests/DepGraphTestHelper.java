@@ -14,6 +14,7 @@ public class DepGraphTestHelper {
 	private String currTestedPakg = "";
 	private GraphBuildLogic buildingLogicToUse = SpoonGraphBuilder.getFeatureGranularityGraphBuilder();
 	private GraphBuilder graphBuilder; 
+	private Graph builtGraph;
 	
 	public static final String STRING_CANONICAL_NAME = java.lang.String.class.getCanonicalName();
 	public static final String CLASS_CANONICAL_NAME = java.lang.Class.class.getCanonicalName();
@@ -27,10 +28,11 @@ public class DepGraphTestHelper {
 		String[] sources = getFullPath(currTestedPakg); 
 		graphBuilder = gbo.getGraphBuilder(sources);
 		postSetTestPkgAndGenerateBuilder();
+		builtGraph = graphBuilder.generateDependencyGraph(buildingLogicToUse); 
 	}
 	
 	public Graph getGraph() throws Exception{
-		return graphBuilder.generateDependencyGraph(buildingLogicToUse);
+		return builtGraph;
 	}
 	
 	/**
@@ -102,7 +104,7 @@ public class DepGraphTestHelper {
 		return name;
 	}
 	
-	protected void assertHasEdge(Graph g, String src, String dst){
+	public void assertHasEdge(String src, String dst){
 		//System.out.println(Tests.getFunction(src)+" -> "+Tests.getFunction(dst)+" ?");
 		String fsrc = getFunction(src);
 		String fdst = getFunction(dst);
@@ -112,71 +114,71 @@ public class DepGraphTestHelper {
 			fdst = ProcessorCommunicator.nodesRenamer.renamed(fdst);
 		}
 		
-		Assert.assertTrue(g.hasDirectedEdge(fsrc, fdst));
+		Assert.assertTrue(builtGraph.hasDirectedEdge(fsrc, fdst));
 	}
 	
-	protected void assertHasEdges(Graph g, String src, String[] dsts){
+	public void assertHasEdges(String src, String[] dsts){
 		for(String dst : dsts){
-			assertHasEdge(g, src, dst);
+			assertHasEdge(src, dst);
 		}
 	}
 	
-	protected void assertHasEdges(Graph g, String[] srcs, String dst){
+	protected void assertHasEdges(String[] srcs, String dst){
 		for(String src : srcs){
-			assertHasEdge(g, src, dst);
+			assertHasEdge(src, dst);
 		}
 	}
 	
-	protected void assertHasOutDegree(Graph g, String node, int degree){
-		Assert.assertEquals(degree, g.getOutDegreeFor(node));
+	protected void assertHasOutDegree(String node, int degree){
+		Assert.assertEquals(degree, builtGraph.getOutDegreeFor(node));
 	}
 
-	protected void assertHasInDegree(Graph g, String node, int degree){
-		Assert.assertEquals(degree, g.getInDegreeFor(node));
+	protected void assertHasInDegree(String node, int degree){
+		Assert.assertEquals(degree, builtGraph.getInDegreeFor(node));
 	}
 
-	protected void assertHasDegree(Graph g, String node, int degree){
-		Assert.assertEquals(degree, g.getDegreeFor(node));
+	protected void assertHasDegree(String node, int degree){
+		Assert.assertEquals(degree, builtGraph.getDegreeFor(node));
 	}
 
-	protected void assertHasDegrees(Graph g, String node, int in_degree, int out_degree){
-		assertHasInDegree(g, node, in_degree);
-		assertHasOutDegree(g, node, out_degree);
+	protected void assertHasDegrees(String node, int in_degree, int out_degree){
+		assertHasInDegree(node, in_degree);
+		assertHasOutDegree(node, out_degree);
 	}
 	
-	protected void fullAssertGraph(Graph g, int nb_nodes, int nb_edges){
-		Assert.assertEquals(nb_nodes, g.getNbNodes());
-		Assert.assertEquals(nb_edges, g.getNbEdges());
+	protected void fullAssertGraph(int nb_nodes, int nb_edges){
+		Assert.assertEquals(nb_nodes, builtGraph.getNbNodes());
+		Assert.assertEquals(nb_edges, builtGraph.getNbEdges());
 	}
 	
-	protected void fullAssertNode(Graph g, String node, String[] srcs, String[] dsts){
-		assertHasDegrees(g, node, srcs.length, dsts.length);
-		assertHasEdges(g, node, dsts);
-		assertHasEdges(g, srcs, node);
+	protected void fullAssertNode(String node, String[] srcs, String[] dsts){
+		assertHasDegrees(node, srcs.length, dsts.length);
+		assertHasEdges(node, dsts);
+		assertHasEdges(srcs, node);
 	}
 	
-	protected void executionInspect(Graph aGraph) throws Exception{
-		aGraph.bestDisplay();
+	protected void executionInspect() throws Exception{
+		builtGraph.bestDisplay();
 		
 		
-		for(String node : aGraph.getNodesNames()){
+		for(String node : builtGraph.getNodesNames()){
 			System.out.println("\t"+popFunction(node));
 		}
 		System.out.println("Press any key to continue...");
 		System.in.read();
 	}
 	
-	protected String stateAsATestCase(Graph aGraph){
-		String out = "fullAssertGraph(dg, "+aGraph.getNbNodes()+", "+aGraph.getNbEdges()+");\n\n";
+	protected String stateAsATestCase(){
+		String out = "fullAssertGraph(dg, "+builtGraph.getNbNodes()+", "+builtGraph.getNbEdges()+");\n\n";
 		
-		for(String node : aGraph.getNodesNames()){
+		for(String node : builtGraph.getNodesNames()){
 			String innodeslist = "";
-			for(String innode : aGraph.getNodesConnectedTo(node)){
+			for(String innode : builtGraph.getNodesConnectedTo(node)){
 				innodeslist += ((innodeslist.length()>0)?", ":"")+"\""+innode+"\"";
 			}
 
 			String outnodeslist = "";
-			for(String outnode : aGraph.getNodesConnectedFrom(node)){
+			for(String outnode : builtGraph.getNodesConnectedFrom(node)){
 				outnodeslist += ((outnodeslist.length()>0)?", ":"")+"\""+outnode+"\"";
 			}
 			

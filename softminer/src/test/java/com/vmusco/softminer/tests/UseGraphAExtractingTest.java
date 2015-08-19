@@ -9,6 +9,7 @@ import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
 
+@Deprecated
 public class UseGraphAExtractingTest extends DepGraphTest {
 
 	@Override
