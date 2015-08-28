@@ -21,6 +21,8 @@ import org.graphstream.ui.swingViewer.Viewer;
 import org.graphstream.ui.swingViewer.ViewerPipe;
 
 public class GraphStream extends Graph {
+	private Viewer lastViewer;
+	
 	private GraphStream() {
 
 	}
@@ -55,7 +57,7 @@ public class GraphStream extends Graph {
 
 		}
 	}
-
+	
 	protected void setNodeLabel(String id, String label){
 		if(label == null){
 			getGraph().getNode(id).removeAttribute("ui.label");
@@ -90,11 +92,19 @@ public class GraphStream extends Graph {
 	}*/
 
 	public void bestDisplay(){
-		Viewer viewer = getGraph().display();
-		viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.HIDE_ONLY);
+		bestDisplay(true);
+	}
+	
+	public void bestDisplay(boolean closePrevious){
+		if(closePrevious && lastViewer != null){
+			lastViewer.close();
+		}
 		
-		ViewerPipe fromViewer = viewer.newViewerPipe();
-		MyViewerListener mvl = new MyViewerListener(this, viewer);
+		lastViewer = getGraph().display();
+		lastViewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
+		
+		ViewerPipe fromViewer = lastViewer.newViewerPipe();
+		MyViewerListener mvl = new MyViewerListener(this, lastViewer);
 		fromViewer.addViewerListener(mvl);
 		fromViewer.addSink(getGraph());
 
@@ -315,6 +325,39 @@ public class GraphStream extends Graph {
 
 		this.getGraph().getNode(node).setAttribute("ui.style", ret);
 	}
+	
+	protected HashMap<String, String> getEdgeAttribute(String from, String to){
+		HashMap<String, String> ret = new HashMap<String, String>();
+
+		String attr = this.getGraph().getEdge(buildEdgeName(from, to, true)).getAttribute("ui.style");
+
+		if(attr != null){
+			for(String itm : attr.split(";")){
+				String[] parts = itm.split(":");
+				if(parts.length < 2)
+					continue;
+				ret.put(parts[0], parts[1]);
+			}
+		}
+
+		return ret;
+	}
+
+	protected void setEdgeAttribute(String from, String to, HashMap<String, String> attrs){
+		if(!this.hasDirectedEdge(from, to))
+			return;
+
+		Iterator<String> iterator = attrs.keySet().iterator();
+		String ret = "";
+
+		while(iterator.hasNext()){
+			String next = iterator.next();
+
+			ret += next+":"+attrs.get(next)+";";
+		}
+
+		this.getGraph().getEdge(buildEdgeName(from, to, true)).setAttribute("ui.style", ret);
+	}
 
 	@Override
 	public String[] getNodesNames() {
@@ -534,6 +577,56 @@ public class GraphStream extends Graph {
 		}
 		
 		return g;
+	}
+
+	@Override
+	public boolean colorEdge(String from, String to, String color) {
+		if(!this.hasDirectedEdge(from, to))
+			return false;
+
+		HashMap<String, String> edgeAttributes = this.getEdgeAttribute(from, to);
+		edgeAttributes.put("fill-color", color);
+		this.setEdgeAttribute(from, to, edgeAttributes);
+		return true;
+	}
+
+	@Override
+	public boolean sizeEdge(String from, String to, int size) {
+		if(!this.hasDirectedEdge(from, to))
+			return false;
+
+		HashMap<String, String> edgeAttributes = this.getEdgeAttribute(from, to);
+
+		edgeAttributes.put("size", size+"px");
+		edgeAttributes.put("arrow-size", size*2+"px");
+		this.setEdgeAttribute(from, to, edgeAttributes);
+
+		return true;
+	}
+	
+	@Override
+	public boolean labelEdge(String from, String to, String label){
+		setEdgeLabel(buildEdgeName(from, to, true), label);
+		return true;
+	}
+	
+	@Override
+	public boolean labelNode(String name, String label){
+		setNodeLabel(name, label);
+		return true;
+	}
+
+	@Override
+	public boolean appendLabelEdge(String from, String to, String label) {
+		String name = buildEdgeName(from, to, true);
+		labelEdge(from, to, getEdgeLabel(name)+label);
+		return true;
+	}
+
+	@Override
+	public boolean appendLabelNode(String name, String label) {
+		labelNode(name, getNodeLabel(name)+label);
+		return true;
 	}
 
 }

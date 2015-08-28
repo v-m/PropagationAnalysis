@@ -46,6 +46,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	
 	/**
 	 * This method loads the last saved instance of the object
+	 * Take care: the content of the execution is NOT loaded !
 	 * @throws IOException 
 	 * @throws ClassNotFoundException 
 	 */
@@ -79,6 +80,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	/**
 	 * This method check which mutants has already been tested with test suites and
 	 * load the result. It also return an array with all proceeded mutants
+	 * @param nb the number to consider. zero for all
 	 * @throws Exception 
 	 */
 	public String[] loadResultsForExecutedTestOnMutants(int nb) throws Exception{
@@ -257,7 +259,35 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		return new int[]{not_viable, treated, getMutationsSize()-treated-not_viable};
 	}
 	
+	/**
+	 * Load the mutation stats from file instead of returning directly from the structure
+	 * Required because loading the state of MutationStatistics do not load the mutant states
+	 * @param mutationId
+	 * @return
+	 * @throws Exception 
+	 */
+	public MutantIfos loadMutationStats(String mutationId) throws Exception{
+		File ff = new File(resolveName(ps.getMutantsTestResults()));
+		File f = new File(ff, mutationId+".xml");
+		
+		if(!f.exists())
+			return null;
+		
+		MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(f);
+		pers.loadState(mutations.get(mutationId));
+		
+		return mutations.get(mutationId);
+	}
+	
+	/**
+	 * Return the statistics for a mutation execution.
+	 * If the MutationStatistics object has been loaded, the results for this exection are not loaded
+	 * Use {@link MutationStatistics#loadMutationStats(String)} instead to load from file.
+	 * @param mutationId
+	 * @return
+	 */
 	public MutantIfos getMutationStats(String mutationId){
+		//TODO: Include the loading here (with a boolean param) via loadMutationStats(String) and add a structure (or a vaiable in MutantIfos) to map what is legitim and what is not.
 		return mutations.get(mutationId);
 	}
 	

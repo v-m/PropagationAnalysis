@@ -9,7 +9,12 @@ import com.vmusco.softminer.graphs.GraphNodeVisitor;
 import com.vmusco.softminer.graphs.NodeMarkers;
 import com.vmusco.softminer.graphs.Graph.NodesNamesForEdge;
 
-
+/**
+ * This class build a sub graph of the original graph with only nodes implied
+ * in the propagation
+ * @author Vincenzo Musco - http://www.vmusco.com
+ *
+ */
 public class UseGraph implements GraphNodeVisitor {
 	private Graph concernedGraph;
 	private Graph newGraph;
@@ -24,9 +29,9 @@ public class UseGraph implements GraphNodeVisitor {
 		propagateMarkersAndTypesForNode(node, this.concernedGraph);
 	}
 
-	public void visitEdge(String from, String to) {
+	/*public void visitEdge(String from, String to) {
 		newGraph.addDirectedEdgeAndNodeIfNeeded(to, from,false, false);
-		
+
 		if(this.concernedGraph.hasDirectedEdge(to, from)){
 			propagateMarkersAndTypesForEdge(to, from, this.concernedGraph);
 		}else{
@@ -35,6 +40,20 @@ public class UseGraph implements GraphNodeVisitor {
 			}
 
 			newGraph.setEdgeType(to, from, this.concernedGraph.getEdgeType(from, to));
+		}
+	}*/
+
+	public void visitEdge(String from, String to) {
+		newGraph.addDirectedEdgeAndNodeIfNeeded(from, to,false, false);
+
+		if(this.concernedGraph.hasDirectedEdge(from, to)){
+			propagateMarkersAndTypesForEdge(from, to, this.concernedGraph);
+		}else{
+			for(EdgeMarkers aMarker : this.concernedGraph.getEdgeMarkers(from, to)){
+				newGraph.markEdge(from, to, aMarker);
+			}
+
+			newGraph.setEdgeType(from, to, this.concernedGraph.getEdgeType(from, to));
 		}
 	}
 
@@ -76,15 +95,15 @@ public class UseGraph implements GraphNodeVisitor {
 	public Graph getBasinGraph(){
 		return this.newGraph;
 	}
-	
+
 	public int getNbTestNodes(String[] tests){
 		return getTestNodes(tests).length;
 	}
-	
+
 	public String[] getTestNodes(String[] tests){
 		String[] nodesNames = this.newGraph.getNodesNames();
 		Set<String> r = new HashSet<String>();
-		
+
 		for(String n : nodesNames){
 			for(String t : tests){
 				if(n.startsWith(t)){
@@ -93,7 +112,7 @@ public class UseGraph implements GraphNodeVisitor {
 				}
 			}
 		}
-		
+
 		return r.toArray(new String[0]);
 	}
 
