@@ -16,8 +16,8 @@ public class UseGraphMutantStats {
 	public int nb_graph;	// # determined using graph
 	public int nb_mutat;	// # determined using testing
 	public int nb_boths;	// # determined by both
-	public int nb_mores;	// # determined by usegraph only
-	public int nb_lesss;	// # determined by test execution only
+	public int nb_mores;	//��# determined by usegraph only
+	public int nb_lesss;	//��# determined by test execution only
 	
 	public long prediction_time = -1;
 

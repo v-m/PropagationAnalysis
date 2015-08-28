@@ -61,7 +61,9 @@ public abstract class Graph {
 	public abstract String[] computeShortestPath(String from, String to);
 
 	public abstract boolean colorNode(String name, String color);
+	public abstract boolean colorEdge(String from, String to, String color);
 	public abstract boolean sizeNode(String name, NodeSize size);
+	public abstract boolean sizeEdge(String from, String to, int size);
 	public abstract boolean shapeNode(String name, NodeShape shape);
 	public abstract boolean shadowNode(String name, int shadowSize, String shadowColor);
 
@@ -238,4 +240,9 @@ public abstract class Graph {
 	public void persistAsImage(String persistTo){
 		persistAsImage(persistTo, true);
 	}
+
+	public abstract boolean labelEdge(String from, String to, String label);
+	public abstract boolean labelNode(String name, String label);
+	public abstract boolean appendLabelEdge(String from, String to, String label);
+	public abstract boolean appendLabelNode(String name, String label);
 }

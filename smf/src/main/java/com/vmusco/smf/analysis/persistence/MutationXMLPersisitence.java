@@ -242,7 +242,7 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 				ifos.setMutationTo(e.getAttribute(MUTANT_TO_4).getValue());
 				ifos.setMutationIn(e.getAttribute(MUTANT_IN_4).getValue());
 				ifos.setViable(e.getAttribute(MUTANT_VIABLE_4).getValue().equals("true"));
-				
+
 				if(e.getAttribute(MUTANT_RAN_4) != null){
 					ifos.setExecutedTests(e.getAttribute(MUTANT_RAN_4).getValue().equals("true"));
 				}

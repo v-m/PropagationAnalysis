@@ -3,6 +3,7 @@ package com.vmusco.softminer.tests;
 import org.junit.Test;
 
 import com.vmusco.softminer.graphs.Graph;
+import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
 
 public class UseGraphCTest extends UseGraphAbstractTest {
 	
@@ -202,4 +203,6 @@ public class UseGraphCTest extends UseGraphAbstractTest {
 				new String[]{z_main, a_foo}, 
 				new String[]{});
 	}
+
+	
 }

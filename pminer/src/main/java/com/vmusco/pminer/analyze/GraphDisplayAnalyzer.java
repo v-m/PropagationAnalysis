@@ -3,11 +3,13 @@ package com.vmusco.pminer.analyze;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.vmusco.pminer.UseGraph;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.NodeShape;
 import com.vmusco.softminer.graphs.Graph.NodeSize;
@@ -73,28 +75,25 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 		
 		// MATCHING CASES
 		for(String aTest : inter){
-        	g.colorNode(aTest, INTERSECTED_NODES_COLOR);
-        	g.shapeNode(aTest, INTERSECTED_NODES_SHAPE);
+        	g.colorNode(aTest+"()", INTERSECTED_NODES_COLOR);
+        	g.shapeNode(aTest+"()", INTERSECTED_NODES_SHAPE);
 		}
 		
 		for(String aTest : tempList.toArray(new String[tempList.size()])){
-        	g.colorNode(aTest, NODES_ONLY_WITH_GRAPH_COLOR);
-        	g.shapeNode(aTest, NODES_ONLY_WITH_GRAPH_SHAPE);
+        	g.colorNode(aTest+"()", NODES_ONLY_WITH_GRAPH_COLOR);
+        	g.shapeNode(aTest+"()", NODES_ONLY_WITH_GRAPH_SHAPE);
 		}
 		
 		for(String aTest : tempList2.toArray(new String[tempList2.size()])){
-			g.addNode(aTest, false);
-			g.colorNode(aTest, NODES_ONLY_WITH_EXEC_COLOR);
-			g.shapeNode(aTest, NODES_ONLY_WITH_EXEC_SHAPE);
+			//g.addNode(aTest+"()", false);
+			g.colorNode(aTest+"()", NODES_ONLY_WITH_EXEC_COLOR);
+			g.shapeNode(aTest+"()", NODES_ONLY_WITH_EXEC_SHAPE);
 		}
 	}
 	@Override
 	public void fireIntersectionFound(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propatime){
 		
 		makeUp(ps, mi, graphDetermined, basin);
-		
-		if(displayWindow)
-			basin.getBasinGraph().bestDisplay();
 		
 		if(showLinkDetailsOnConsole){
 			String[] mutationDetermined = ExploreMutants.purifyFailAndHangResultSetForMutant(ps, mi); 
@@ -135,6 +134,24 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 			for(String aTest : tempList2.toArray(new String[tempList2.size()])){
 				System.out.println("\u001b[90m"+"\t"+aTest+"\u001b[0m");
 			}
+		}
+		
+		if(displayWindow)
+			basin.getBasinGraph().bestDisplay();
+	}
+	
+	public void changeEdgesWeights(Map<EdgeIdentity, Float> weights){
+		for(EdgeIdentity k : weights.keySet()){
+			float w = weights.get(k);
+			int ww = ((int)((w/2)*10) ) + 2;
+			System.out.println(ww);
+			g.sizeEdge(k.getFrom(), k.getTo(), ww);
+			g.appendLabelEdge(k.getFrom(), k.getTo(), Float.toString(w));
+			
+			if(w < 0.2)
+				g.colorEdge(k.getFrom(), k.getTo(), "red");
+			else
+				g.colorEdge(k.getFrom(), k.getTo(), "green");
 		}
 	}
 

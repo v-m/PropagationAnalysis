@@ -2,8 +2,8 @@ package com.vmusco.softminer.graphs;
 
 import java.util.HashMap;
 
-import org.graphstream.ui.swingViewer.Viewer;
-import org.graphstream.ui.swingViewer.ViewerListener;
+import org.graphstream.ui.view.Viewer;
+import org.graphstream.ui.view.ViewerListener;
 
 public class MyViewerListener implements ViewerListener{
 	private boolean alive = true;
