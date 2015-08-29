@@ -50,8 +50,6 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	 * Take care: the content of the execution is NOT loaded !
 	 * Return null if an error has occured
 	 * @throws PersistenceException 
-	 * @throws IOException 
-	 * @throws ClassNotFoundException 
 	 */
 	public static MutationStatistics<?> loadState(String persistFile) throws PersistenceException {
 		File finalf = new File(persistFile);
@@ -84,8 +82,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	 * This method check which mutants has already been tested with test suites and
 	 * load the result. It also return an array with all proceeded mutants
 	 * @param nb the number to consider. zero for all
-	 * @return the loaded mutants or null if a loading error occured
-	 * @throws PersistenceException 
+	 * @throws Exception 
 	 */
 	public String[] loadResultsForExecutedTestOnMutants(int nb) throws PersistenceException{
 		ArrayList<String> re = new ArrayList<String>();
