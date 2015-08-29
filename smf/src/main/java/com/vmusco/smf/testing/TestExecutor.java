@@ -50,7 +50,7 @@ public class TestExecutor {
 				String name = description.getDisplayName();
 				
 				// For Parametric Testing (to be continued...)
-				//TODO: See what happend with parametric tests... (i.e. [...])
+				//TODO: See what happened with parametric tests... (i.e. [...])
 				/*if(name.charAt(0) == '[')
 					return true;*/
 				
@@ -85,7 +85,7 @@ public class TestExecutor {
 				String right = description.substring(0, pos);
 				String left = description.substring(pos+1, description.length()-1);
 
-				return left+"."+right;
+				return left+"."+right+"()";
 			}
 
 			@Override
