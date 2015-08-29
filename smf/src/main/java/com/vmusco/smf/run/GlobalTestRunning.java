@@ -143,7 +143,7 @@ public abstract class GlobalTestRunning implements TestsExecutionListener{
 		printMutantStat();
 	}
 	
-	protected void resetAndopenStream() throws FileNotFoundException{
+	protected void resetAndOpenStream() throws FileNotFoundException{
 		if(file.exists())
 			file.delete();
 

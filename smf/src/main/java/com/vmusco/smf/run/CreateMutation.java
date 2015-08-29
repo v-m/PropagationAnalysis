@@ -20,6 +20,7 @@ import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.mutation.MutatorsFactory;
 import com.vmusco.smf.utils.ConsoleTools;
+import com.vmusco.smf.utils.InterruptionDemander;
 
 /**
  * This entry point is used to create a new mutation project.
@@ -109,7 +110,7 @@ public class CreateMutation implements MutationCreationListener{
 			System.exit(1);
 		}
 
-		MutationStatistics<?> ms = Mutation.createMutationElement(ps, moc);
+		final MutationStatistics<?> ms = Mutation.createMutationElement(ps, moc);
 
 		if(cmd.hasOption("mutate"))
 			ms.setClassToMutate(cmd.getOptionValue("mutate").split(File.pathSeparator));
@@ -125,6 +126,10 @@ public class CreateMutation implements MutationCreationListener{
 
 		System.out.println("Generating mutations, please wait...\n\n\n\n");
 
+		InterruptionDemander id = new InterruptionDemander();
+		
+		Runtime.getRuntime().addShutdownHook(id);
+		
 		if(cmd.hasOption("name"))
 			ms.setMutationName(cmd.getOptionValue("name"));
 		

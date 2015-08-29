@@ -20,8 +20,8 @@ import com.vmusco.smf.utils.ConsoleTools;
 
 /**
  * This class defines a main function for generating a new project definition
- * It create all required working ressources and attempts a first resolution of 
- * the project mavens ressource in order to determine the appropriated classpath.
+ * It create all required working resources and attempts a first resolution of 
+ * the project maven resource in order to determine the appropriated classpath.
  * @author Vincenzo Musco - http://www.vmusco.com
  *
  */
@@ -184,7 +184,7 @@ public class NewProject extends GlobalTestRunning {
 		NewProject np = new NewProject(ps.buildPath("tests_execution.log"));
 		np.execname = "original";
 
-		np.resetAndopenStream();
+		np.resetAndOpenStream();
 		
 		System.out.println();
 		System.out.println("Current state is: " + ps.getCurrentState());

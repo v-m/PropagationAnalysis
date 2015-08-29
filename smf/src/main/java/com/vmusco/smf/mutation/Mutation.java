@@ -38,12 +38,14 @@ import spoon.support.StandardEnvironment;
 import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
 import spoon.support.reflect.declaration.CtElementImpl;
 
+import com.google.common.io.Files;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.compilation.ClassFileUtil;
 import com.vmusco.smf.compilation.Compilation;
 import com.vmusco.smf.utils.ConsoleTools;
+import com.vmusco.smf.utils.InterruptionManager;
 import com.vmusco.smf.utils.NewReportedStandardEnvironment;
 
 /**
@@ -174,8 +176,30 @@ public final class Mutation {
 					mutantcounter = numb+1;
 				}
 			}
+			
+			System.out.println("Syncing generation folder");
+			
+			File syncf = new File(ms.getBytecodeMutationResolved());
+			for(String s : syncf.list()){
+				String ss = s;
+				if(s.endsWith(".debug.txt")){
+					ss = s.substring(0, s.length()-".debug.txt".length());
+				}
+				
+				
+				if(!ms.isMutantDefined(ss)){
+					File ssyncf = new File(syncf, s);
+					
+					if(ssyncf.isDirectory()){
+						FileUtils.deleteDirectory(ssyncf);
+					}else{
+						ssyncf.delete();
+					}
+					System.out.println("Dropped "+s);
+				}
+			}
 
-			System.out.println("Continuing to mutant "+mutantcounter);
+			System.out.println("Continue generation @ mutant "+mutantcounter);
 		}
 
 		List<Object[]> mutations = new ArrayList<Object[]>();
@@ -225,7 +249,7 @@ public final class Mutation {
 		
 		if(mcl != null) mcl.preparationDone(mutations.size(), fnb);
 		
-		while(mutations.size()>0 && validmutants<fnb){
+		while(mutations.size()>0 && validmutants<fnb && !InterruptionManager.isInterruptedDemanded()){
 			Object[] o = mutations.remove(0);
 			CtElement e = (CtElement) o[0];
 			CtElementImpl m = (CtElementImpl) o[1];

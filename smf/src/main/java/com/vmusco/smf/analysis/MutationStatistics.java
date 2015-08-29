@@ -17,6 +17,7 @@ import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.testing.TestingFunctions;
+import com.vmusco.smf.utils.InterruptionManager;
 
 /**
  * This class contains the mutations information for one project and one mutation operator
@@ -292,6 +293,15 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		return mutations.get(mutationId);
 	}
 	
+	/**
+	 * Determine if the mutant is defined in the mutation structure (!= files)
+	 * @param mutid
+	 * @return
+	 */
+	public boolean isMutantDefined(String mutid){
+		return this.mutations.containsKey(mutid);
+	}
+	
 	public void setMutationStats(String mutationId, MutantIfos informations){
 		mutations.put(mutationId, informations);
 	}
@@ -327,6 +337,10 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		
 		MutationXMLPersisitence per = new MutationXMLPersisitence(f);
 		per.saveState(this);
+		
+		if(InterruptionManager.isInterruptedDemanded()){
+			InterruptionManager.notifyLastIterationFinished();
+		}
 	}
 	
 	public void loadMutants() throws Exception{
