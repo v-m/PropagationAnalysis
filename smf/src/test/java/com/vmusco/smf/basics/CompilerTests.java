@@ -22,6 +22,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.ToolProvider;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class CompilerTests {
@@ -66,7 +67,7 @@ public class CompilerTests {
 			System.out.println("=====");
 		}
 
-		System.out.println(success?"Yes :)":"No :(");
+		Assert.assertTrue(success);
 	}
 	
 	private Set<String> getLibraryAccess() {

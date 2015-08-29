@@ -13,7 +13,7 @@ public class UseGraphCTest extends UseGraphAbstractTest {
 	
 	@Test
 	public void testVariableUsage() throws Exception{
-		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtaine(), com.vmusco.softminer.tests.cases.testVariableUsage.MyClass.class);
+		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testVariableUsage.MyClass.class);
 		Graph dg = dgth.getGraph();
 		
 		dgth.fullAssertGraph(0, 0);
@@ -25,7 +25,7 @@ public class UseGraphCTest extends UseGraphAbstractTest {
 	 */
 	@Test
 	public void testInterfaceAndLinking() throws Exception{
-		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtaine(), com.vmusco.softminer.tests.cases.testInterfaceAndLinking.T.class);
+		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testInterfaceAndLinking.T.class);
 		Graph dg = dgth.getGraph();
 
 		//dgth.executionInspect(dg);
@@ -82,7 +82,7 @@ public class UseGraphCTest extends UseGraphAbstractTest {
 	 */
 	@Test
 	public void testAbstractAndInheritanceClasses() throws Exception{
-		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtaine(), com.vmusco.softminer.tests.cases.testAbstractAndInheritance.A.class);
+		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testAbstractAndInheritance.A.class);
 		Graph dg = dgth.getGraph();
 
 		//dgth.executionInspect(dg);
@@ -158,7 +158,7 @@ public class UseGraphCTest extends UseGraphAbstractTest {
 
 	@Test
 	public void testInterfaceAndInheritance() throws Exception{
-		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtaine(), com.vmusco.softminer.tests.cases.testInterfaceAndInheritance.Z.class);
+		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testInterfaceAndInheritance.Z.class);
 		Graph dg = dgth.getGraph();
 		
 		//dgth.executionInspect();

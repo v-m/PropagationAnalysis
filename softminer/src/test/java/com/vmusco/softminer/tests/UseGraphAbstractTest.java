@@ -1,5 +1,6 @@
 package com.vmusco.softminer.tests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vmusco.softminer.graphs.Graph;
@@ -12,7 +13,7 @@ public abstract class UseGraphAbstractTest {
 		this.gbo = gbo;
 	}
 	
-	protected GraphBuilderObtainer getGraphBuilderObtaine() {
+	protected GraphBuilderObtainer getGraphBuilderObtainer() {
 		return gbo;
 	}
 	
@@ -45,12 +46,13 @@ public abstract class UseGraphAbstractTest {
 	
 	
 	
-	
+	@Ignore
 	@Test
 	public void testImplicitDependency() throws Exception{
 		//com.vmusco.softminer.tests.cases.testImplicitDependency.Foo.class
 	}
 
+	@Ignore
 	@Test
 	public void testAnonymousClass() throws Exception{
 		//com.vmusco.softminer.tests.cases.testAnonymousClass.Foo.class
@@ -61,6 +63,7 @@ public abstract class UseGraphAbstractTest {
 	 * Status: Finished
 	 * @throws Exception
 	 */
+	@Ignore
 	@Test
 	public void testConstructors() throws Exception{
 		//com.vmusco.softminer.tests.cases.testConstructors.Foo.class
@@ -73,6 +76,7 @@ public abstract class UseGraphAbstractTest {
 	 * Status: Finished
 	 * @throws Exception
 	 */
+	@Ignore
 	@Test
 	public void testSimpleMethodCalls() throws Exception{
 		//com.vmusco.softminer.tests.cases.testSimpleMethodCalls.Foo.class
@@ -83,44 +87,49 @@ public abstract class UseGraphAbstractTest {
 	 * State: Finished
 	 * @throws Exception
 	 */
+	@Ignore
 	@Test
 	public void testStaticMethodCalls() throws Exception{
 		//com.vmusco.softminer.tests.cases.testStaticMethodCalls.Foo1.class
 	}
 
-
+	@Ignore
 	@Test
 	public void testGenericParameters() throws Exception{
 		//com.vmusco.softminer.tests.cases.testGenericParameters.MyClass.class
 	}
 
+	@Ignore
 	@Test
 	public void testInternalClasses() throws Exception{
 		//com.vmusco.softminer.tests.cases.testInternalClasses.Foo.class
 	}
 
+	@Ignore
 	@Test
 	public void testSuperLinks() throws Exception{
 		//com.vmusco.softminer.tests.cases.testSuperLinks.Z.class
 	}
 
-
+	@Ignore
 	@Test
 	public void testExoObject() throws Exception{
 		// com.vmusco.softminer.tests.cases.testExoObject
 	}
 
-
+	@Ignore
 	@Test
 	public void testExoInterface() throws Exception{
 		// com.vmusco.softminer.tests.cases.testExoInterface.Test.class
 	}
 
+	@Ignore
 	@Test
 	public void testMethodReturnIfceWithGenerics() throws Exception{
 		// com.vmusco.softminer.tests.cases.testMethodReturnIfceWithGenerics.Foo.class
 	}
 
+	@Ignore
 	@Test
 	public void testMethodReturnIfceWithGenericsMixed() throws Exception{
 		// com.vmusco.softminer.tests.cases.testMethodReturnIfceWithGenericsMixed.Foo.class

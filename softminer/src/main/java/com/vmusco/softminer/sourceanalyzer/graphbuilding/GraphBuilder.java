@@ -70,6 +70,8 @@ public class GraphBuilder {
 	 */
 	public static GraphBuilder newGraphBuilderOnlyWithDependencies(String projectName, String[] inputSources, String[] cp){
 		GraphBuilder gb = new GraphBuilder(projectName, inputSources, cp);
+		ProcessorCommunicator.resolveInterfacesAndClasses = false;
+		ProcessorCommunicator.includesFields = false;
 		return gb;
 	}
 	
@@ -82,6 +84,7 @@ public class GraphBuilder {
 	 */
 	public static GraphBuilder newGraphBuilderWithFields(String projectName, String[] inputSources, String[] cp){
 		GraphBuilder gb = new GraphBuilder(projectName, inputSources, cp);
+		ProcessorCommunicator.resolveInterfacesAndClasses = false;
 		ProcessorCommunicator.includesFields = true;
 		return gb;
 	}
@@ -97,6 +100,7 @@ public class GraphBuilder {
 	public static GraphBuilder newGraphBuilderWithInheritence(String projectName, String[] inputSources, String[] cp){
 		GraphBuilder gb = new GraphBuilder(projectName, inputSources, cp);
 		ProcessorCommunicator.resolveInterfacesAndClasses = true;
+		ProcessorCommunicator.includesFields = false;
 		return gb;
 	}
 	

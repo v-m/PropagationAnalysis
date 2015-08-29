@@ -2,6 +2,7 @@ package com.vmusco.softminer.tests;
 
 import junit.framework.Assert;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vmusco.softminer.graphs.EdgeTypes;
@@ -9,6 +10,7 @@ import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
 
+@Ignore
 @Deprecated
 public class UseGraphAExtractingTest extends DepGraphTest {
 
