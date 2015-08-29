@@ -1,1 +1,1 @@
-java -cp softminer/target/softminer-0.0.1-SNAPSHOT-jar-with-dependencies.jar com.vmusco.softminer.run.GraphGenerator "$@"
+java -cp softminer/target/*-jar-with-dependencies.jar com.vmusco.softminer.run.GraphGenerator "$@"

@@ -1,1 +1,1 @@
-java -cp smf/target/smf-0.0.1-SNAPSHOT-jar-with-dependencies.jar com.vmusco.smf.run.MutationRunTests "$@"
+java -cp smf/target/*-jar-with-dependencies.jar com.vmusco.smf.run.MutationRunTests "$@"
