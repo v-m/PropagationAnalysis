@@ -13,6 +13,7 @@ import org.apache.commons.io.FileUtils;
 
 import com.vmusco.smf.analysis.persistence.ExecutionPersistence;
 import com.vmusco.smf.analysis.persistence.ProcessXMLPersistence;
+import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.utils.MavenTools;
 
@@ -230,8 +231,6 @@ public class ProcessStatistics implements Serializable{
 			try{
 				ps =  ProcessStatistics.loadState(f.getAbsolutePath());
 				ps.persistFile = f.getName();
-			}catch(InvalidClassException ex){
-				System.out.println("Project persistance file has changed... Reset is required! ");
 			}catch(Exception e){
 				System.out.println("Exception on loading state. Creating new...");
 				e.printStackTrace();
@@ -317,7 +316,7 @@ public class ProcessStatistics implements Serializable{
 	 * This method saves the instance of a ProcessStatistics object
 	 * @throws IOException 
 	 */
-	public static void saveState(ProcessStatistics ps) throws Exception {
+	public static void saveState(ProcessStatistics ps) throws PersistenceException {
 		File f = new File(ps.buildPath(ps.persistFile));
 		ExecutionPersistence<ProcessStatistics> persist = new ProcessXMLPersistence(f);
 		persist.saveState(ps);
@@ -325,12 +324,15 @@ public class ProcessStatistics implements Serializable{
 
 	/**
 	 * This method loads the last saved instance of the object
+	 * @throws PersistenceException 
 	 * @throws IOException 
 	 * @throws ClassNotFoundException 
 	 */
-	public static ProcessStatistics loadState(String persistFile) throws Exception {
+	public static ProcessStatistics loadState(String persistFile) throws PersistenceException{
 		ExecutionPersistence<ProcessStatistics> persist = new ProcessXMLPersistence(new File(persistFile));
-		return persist.loadState();
+
+		ProcessStatistics loadState = persist.loadState();
+		return loadState;
 	}
 
 	public boolean isPersistanceEnabled(){

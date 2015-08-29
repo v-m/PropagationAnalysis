@@ -11,6 +11,7 @@ import java.util.List;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
+import com.vmusco.smf.exceptions.PersistenceException;
 
 /**
  * Tools used for testing executions
@@ -65,7 +66,7 @@ public abstract class TestingFunctions {
 		return al;
 	}
 	
-	public static int processMutants(MutationStatistics<?> ms, List<String> mutantIds, int nbdone, int nbmax, TestingNotification tn){
+	public static int processMutants(MutationStatistics<?> ms, List<String> mutantIds, int nbdone, int nbmax, TestingNotification tn) throws PersistenceException{
 		int nbproc = nbdone;
 
 		while(mutantIds.size() > 0){
@@ -125,7 +126,7 @@ public abstract class TestingFunctions {
 		return nbproc;
 	}
 	
-	public static int processMutants(MutationStatistics<?> ms, List<String> mutantIds, int nbmax, TestingNotification tn){
+	public static int processMutants(MutationStatistics<?> ms, List<String> mutantIds, int nbmax, TestingNotification tn) throws PersistenceException{
 		return processMutants(ms, mutantIds, 0, nbmax, tn);
 	}
 }

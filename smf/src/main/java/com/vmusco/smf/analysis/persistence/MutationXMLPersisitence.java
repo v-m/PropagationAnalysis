@@ -18,6 +18,7 @@ import org.jdom2.output.XMLOutputter;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.mutation.MutatorsFactory;
 
@@ -30,7 +31,8 @@ import com.vmusco.smf.mutation.MutatorsFactory;
  * @see MutantInfoXMLPersisitence
  */
 public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatistics<?>>{
-
+	private File f;
+	
 	private static String MUTATIONS_1 = "mutation";
 	private static String MUTATIONS_PARENT_2 = "parent";
 	private static String MUTATION_NAME = "name";
@@ -60,7 +62,7 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 	String targetPs, mutid, name;
 
 	public MutationXMLPersisitence(File f) {
-		super(f);
+		this.f = f;
 	}
 	
 	private boolean openFile() throws IOException{
@@ -87,29 +89,41 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 
 	
 	@Override
-	public MutationStatistics<?> loadState() throws Exception {
-		openFile();
+	public MutationStatistics<?> loadState()  throws PersistenceException {
+		try {
+			openFile();
+		} catch (IOException e) {
+			throw new PersistenceException(e);
+		}
 		
 		ProcessStatistics ps = ProcessStatistics.loadState((new File(f.getParentFile(), targetPs)).getAbsolutePath());
 		
-		//Class mutator = Class.forName(mutid);
-		Class<MutationOperator<?>> mutator = MutatorsFactory.getOperatorClassFromId(mutid);
-		MutationStatistics<?> ms = new MutationStatistics<>(ps, mutator, name);
+		MutationStatistics<?> ms;
+		try{
+			//Class mutator = Class.forName(mutid);
+			Class<MutationOperator<?>> mutator = MutatorsFactory.getOperatorClassFromId(mutid);
+			ms = new MutationStatistics<>(ps, mutator, name);
+		}catch(Exception e){
+			throw new PersistenceException(e);
+		}
 
 		loadState(ms);
-
 		return ms;
 	}
 
 	@Override
-	public void saveState(MutationStatistics<?> ms) throws IOException {
+	public void saveState(MutationStatistics<?> ms)  throws PersistenceException {
 		File f = new File(ms.getConfigFileResolved());
 
 		System.out.println(f);
 		if(f.exists())
 			f.delete();
 
-		f.createNewFile();
+		try {
+			f.createNewFile();
+		} catch (IOException e) {
+			throw new PersistenceException(e);
+		}
 
 		Element mutations = new Element(MUTATIONS_1);
 		Document document = new Document(mutations);
@@ -175,10 +189,14 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 			}
 		}
 
-		FileOutputStream fos = new FileOutputStream(f);
-		XMLOutputter output = new XMLOutputter(Format.getPrettyFormat());
-		output.output(document, fos);
-		fos.close();
+		try{
+			FileOutputStream fos = new FileOutputStream(f);
+			XMLOutputter output = new XMLOutputter(Format.getPrettyFormat());
+			output.output(document, fos);
+			fos.close();
+		}catch(Exception e){
+			throw new PersistenceException(e);
+		}
 	}
 
 	private void setSensitiveAttribute(Element amutant, String attributeName, String attributeValue) throws IllegalDataException{
@@ -210,8 +228,12 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 	}
 
 	@Override
-	public void loadState(MutationStatistics<?> ms) throws Exception {
-		openFile();
+	public void loadState(MutationStatistics<?> ms) throws PersistenceException {
+		try {
+			openFile();
+		} catch (IOException e1) {
+			throw new PersistenceException(e1);
+		}
 		
 		ms.setConfigFile(root.getAttribute(CONFIG_FILE).getValue());
 

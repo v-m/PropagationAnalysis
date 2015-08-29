@@ -15,6 +15,7 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import com.vmusco.smf.analysis.MutantIfos;
+import com.vmusco.smf.exceptions.PersistenceException;
 
 /**
  * This class is responsible of persisting mutation result !!!
@@ -22,6 +23,7 @@ import com.vmusco.smf.analysis.MutantIfos;
  * @see MutantIfos
  */
 public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
+	private File f;
 	private static final String ROOT = "mutation-execution";
 	private static final String ID = "id";
 	
@@ -32,7 +34,7 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 	 * Used for loading
 	 */
 	public MutantInfoXMLPersisitence(File persistFile) {
-		super(persistFile);
+		this.f = persistFile;
 	}
 	
 	/**
@@ -41,20 +43,20 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 	 * @param mutantId
 	 */
 	public MutantInfoXMLPersisitence(FileOutputStream locked_fos, String mutantId) {
-		super(null);
+		this.f = null;
 		this.mutantId = mutantId;
 		this.fos = locked_fos;
 	}
 
 	@Override
-	public MutantIfos loadState() throws Exception {
+	public MutantIfos loadState() throws PersistenceException {
 		MutantIfos ifos = new MutantIfos();
 		loadState(ifos);
 		return ifos;
 	}
 
 	@Override
-	public void saveState(MutantIfos mi) throws IOException {
+	public void saveState(MutantIfos mi) throws PersistenceException {
 		Element mutations = new Element(ROOT);
 		Document document = new Document(mutations);
 
@@ -75,15 +77,23 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mi.getMutantHangingTestCases());
 		
 		XMLOutputter output = new XMLOutputter(Format.getPrettyFormat());
-		output.output(document, fos);
+		try {
+			output.output(document, fos);
+		} catch (IOException e1) {
+			throw new PersistenceException(e1);
+		}
 	}
 
 	@Override
-	public void loadState(MutantIfos updateMe) throws Exception {
+	public void loadState(MutantIfos updateMe) throws PersistenceException {
 		SAXBuilder sxb = new SAXBuilder();
 		Document document;
 		try {
-			document = sxb.build(f);
+			try {
+				document = sxb.build(f);
+			} catch (IOException e) {
+				throw new PersistenceException(e);
+			}
 		} catch (JDOMException e1) {
 			e1.printStackTrace();
 			return;

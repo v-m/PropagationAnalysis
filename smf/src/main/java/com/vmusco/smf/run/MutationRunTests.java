@@ -14,6 +14,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
 import com.vmusco.smf.analysis.MutationStatistics;
+import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.testing.TestingFunctions;
 import com.vmusco.smf.testing.TestingNotification;
 import com.vmusco.smf.utils.ConsoleTools;
@@ -37,7 +38,7 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 	@SuppressWarnings("unused")
 	private int nbmutants = 0;
 
-	public static void main(String[] args) throws ParseException {
+	public static void main(String[] args) throws ParseException, PersistenceException {
 		Options options = new Options();
 
 		Option opt;
@@ -120,7 +121,12 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 			fb = path + File.separator + MutationStatistics.DEFAULT_CONFIGFILE; 
 		}
 
-		return MutationStatistics.loadState(fb);
+		MutationStatistics<?> loadState = MutationStatistics.loadState(fb);
+		
+		if(loadState == null)
+			throw new Exception("Unable to load data, an error has occured");
+		else
+			return loadState;
 	}
 
 	public void mutantException(Exception e) {

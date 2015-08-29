@@ -1,6 +1,7 @@
 package com.vmusco.smf.analysis.persistence;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.exceptions.PersistenceException;
 
 /**
  * This class is responsible to persist to xml file the mutation project
@@ -23,7 +25,7 @@ import com.vmusco.smf.analysis.ProcessStatistics;
  * @see ProcessStatistics
  */
 public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistics>{
-
+	File f;
 	private static String ROOT_ELEMENT_0 = "smf";
 
 	// CONFIG START
@@ -84,14 +86,15 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 	protected static String TIME_ATTRIBUTE = "time";
 
 	public ProcessXMLPersistence(File f) {
-		super(f);
+		this.f = f;
 	}
 	
 	/**
 	 * This method saves the instance of a ProcessStatistics object (XML)
 	 * @throws IOException
 	 */
-	public void saveState(ProcessStatistics ps) throws IOException {
+	@Override
+	public void saveState(ProcessStatistics ps) throws PersistenceException {
 
 		if(!ps.isPersistanceEnabled()){
 		}
@@ -108,7 +111,11 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 		if(ffinal.exists())
 			ffinal.delete();
 
-		f.createNewFile();
+		try {
+			f.createNewFile();
+		} catch (IOException e1) {
+			throw new PersistenceException(e1);
+		}
 
 		Element root = new Element(ROOT_ELEMENT_0);
 		Document document = new Document(root);
@@ -296,7 +303,11 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 
 		//FileOutputStream fos = new FileOutputStream(f);
 		XMLOutputter output = new XMLOutputter(Format.getPrettyFormat());
-		output.output(document, new FileOutputStream(ffinal));
+		try {
+			output.output(document, new FileOutputStream(ffinal));
+		} catch (Exception e) {
+			throw new PersistenceException(e);
+		}
 	}
 
 	protected static void populateXml(Element parent, String elementsName, String[] data){
@@ -310,13 +321,17 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 		}
 	}
 
-
-	public ProcessStatistics loadState() throws IOException {
+	@Override
+	public ProcessStatistics loadState() throws PersistenceException {
 
 		SAXBuilder sxb = new SAXBuilder();
 		Document document;
 		try {
-			document = sxb.build(this.f);
+			try {
+				document = sxb.build(this.f);
+			} catch (IOException e) {
+				throw new PersistenceException(e);
+			}
 		} catch (JDOMException e1) {
 			e1.printStackTrace();
 			return null;
@@ -526,8 +541,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 	}
 
 	@Override
-	public void loadState(ProcessStatistics updateMe)
-			throws Exception {
-		throw new Exception("Not implemented yet");
+	public void loadState(ProcessStatistics updateMe) throws PersistenceException {
+		throw new PersistenceException(new Exception("Not implemented yet"));
 	}
 }

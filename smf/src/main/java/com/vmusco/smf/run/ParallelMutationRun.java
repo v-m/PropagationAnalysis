@@ -15,6 +15,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
 import com.vmusco.smf.analysis.MutationStatistics;
+import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.testing.TestingFunctions;
 import com.vmusco.smf.testing.TestingNotification;
 import com.vmusco.smf.utils.ConsoleTools;
@@ -160,7 +161,7 @@ public class ParallelMutationRun implements TestingNotification{
 
 	private boolean firstPrinting = true;
 
-	private void process(String cop, String cpr) throws InterruptedException {
+	private void process(String cop, String cpr) throws InterruptedException, PersistenceException {
 		int nbviable = viables.get(cpr).get(cop);
 		List<String> al = remains.get(cpr).get(cop);
 		int alreadydone = nbviable - al.size(); 
