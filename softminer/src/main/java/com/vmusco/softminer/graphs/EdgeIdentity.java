@@ -5,7 +5,7 @@ package com.vmusco.softminer.graphs;
  * @author Vincenzo Musco - http://www.vmusco.com
  *
  */
-public class EdgeIdentity {
+public class EdgeIdentity  {
 	private String from;
 	private String to;
 	
@@ -30,4 +30,25 @@ public class EdgeIdentity {
 	public String getFrom() {
 		return from;
 	}
+	
+	@Override
+	public String toString() {
+		return this.from+"->"+this.to;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof EdgeIdentity))	
+			return false;
+		
+		EdgeIdentity ei = (EdgeIdentity) obj;
+		
+		return ei.from.equals(this.from) && ei.to.equals(this.to);
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.from.hashCode()+this.to.hashCode();
+	}
+	
 }
