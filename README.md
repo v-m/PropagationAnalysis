@@ -21,7 +21,7 @@ Tool used for producing Java Software graphs. Currently support Call Graphs incl
 
 It proposes a total of four types of different graphs. It is based on the Spoon library for producing exploring the code.
 
-### Propagation Minre (pminer)
+### Propagation Miner (pminer)
 
 Tool used to compute some statistics regarding the produces mutants and the software graphs produced with smf and softminer.
 Including: precisions, recall and f-scores.
