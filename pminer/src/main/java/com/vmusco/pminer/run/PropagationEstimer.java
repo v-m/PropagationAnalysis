@@ -31,7 +31,7 @@ import com.vmusco.softminer.graphs.persistance.GraphML;
 
 public class PropagationEstimer implements MutantTestProcessingListener{
 	private static final Class<?> thisclass = PropagationEstimer.class;
-	
+
 	private ArrayList<MutantTestAnalyzer> analyzeListeners = new ArrayList<MutantTestAnalyzer>();
 	private static final DecimalFormat nf = new DecimalFormat("0.00");
 
@@ -48,6 +48,8 @@ public class PropagationEstimer implements MutantTestProcessingListener{
 		Options options = new Options();
 
 		Option opt;
+		opt = new Option("k", "only-killed", false, "include only killed mutants in the analysis");
+		options.addOption(opt);
 		opt = new Option("h", "help", false, "display this message");
 		options.addOption(opt);
 
@@ -59,22 +61,28 @@ public class PropagationEstimer implements MutantTestProcessingListener{
 			formatter.printHelp(thisclass.getCanonicalName()+" [options] <usegraph> <mutationFile>", options);
 			System.exit(0);
 		}
-		
+
 		PropagationEstimer pe = new PropagationEstimer();
 		PropagationStatistics prop = new PropagationStatistics();
 		HashMap<String, UseGraph> cache = new HashMap<String, UseGraph>();
-		
+
 		// Load mutations and executions informations from the project
 		MutationStatistics<?> ms = MutationStatistics.loadState(cmd.getArgs()[1]);
 		ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
 		// Load the mutations in ms here
-		String[] allMutations = ms.listViableAndRunnedMutants(true);
+
+		String[] allMutations;
+		if(cmd.hasOption("only-killed")){
+			allMutations = ms.listViableButKilledMutants();
+		}else{
+			allMutations = ms.listViableAndRunnedMutants(true);
+		}
 
 		// Load the UseGraph
 		Graph usegraph = Graph.getNewGraph(GraphApi.GRAPH_STREAM);
 		GraphML gml = new GraphML(usegraph);
 		gml.load(new FileInputStream(cmd.getArgs()[0]));
-		
+
 		// LOADING PHASE FINISHED !
 		StatisticsMutantAnalyzer stats = new StatisticsMutantAnalyzer(allMutations.length, pe); 
 		pe.analyzeListeners.add(stats);

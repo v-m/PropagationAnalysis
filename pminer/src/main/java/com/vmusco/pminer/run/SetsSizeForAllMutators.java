@@ -42,6 +42,8 @@ public class SetsSizeForAllMutators implements MutantTestProcessingListener {
 		Option opt;
 		opt = new Option("z", "silent", false, "Do not ouput results to console");
 		options.addOption(opt);
+		opt = new Option("k", "only-killed", false, "include only killed mutants in the analysis");
+		options.addOption(opt);
 		opt = new Option("s", "save", true, "Persist results in mutation subfolder with specified name");
 		options.addOption(opt);
 		opt = new Option("l", "load", true, "Read statistics from file in mutation subfolder");
@@ -80,7 +82,14 @@ public class SetsSizeForAllMutators implements MutantTestProcessingListener {
 				MutationStatistics<?> ms = MutationStatistics.loadState(ff.getAbsolutePath());
 				//ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
 				// Load the mutations in ms here
-				String[] allMutationsLoaded = ms.listViableAndRunnedMutants(true);
+				String[] allMutationsLoaded;
+				if(cmd.hasOption("only-killed")){
+					allMutationsLoaded = ms.listViableButKilledMutants();
+				}else{
+					allMutationsLoaded = ms.listViableAndRunnedMutants(true);
+				}
+				
+				
 				String[] allMutations = MutationsSetTools.shuffleAndSlice(allMutationsLoaded, 600);
 				
 				// Load the UseGraph

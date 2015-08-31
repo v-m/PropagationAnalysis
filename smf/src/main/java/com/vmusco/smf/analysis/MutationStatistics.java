@@ -50,11 +50,25 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 
 	/**
 	 * This method loads the last saved instance of the object
-	 * Take care: the content of the execution is NOT loaded !
+	 * The content of the test execution is NOT loaded. To load them, use {@link MutationStatistics#loadState(String, boolean)} instead or invoke
+	 * {@link MutationStatistics#listViableAndRunnedMutants(boolean) with true argument.} to load them later.
 	 * Return null if an error has occured
+	 * @param persistFile the file to load
+	 * @param loadTestExecutionsResults true if the test executions results should be loaded (when existing)
 	 * @throws PersistenceException 
 	 */
 	public static MutationStatistics<?> loadState(String persistFile) throws PersistenceException {
+		return loadState(persistFile, false);
+	}
+	
+	/**
+	 * This method loads the last saved instance of the object
+	 * Take care: the content of the execution is NOT loaded !
+	 * @param persistFile the file to load
+	 * @param loadTestExecutionsResults true if the test executions results should be loaded (when existing)
+	 * @throws PersistenceException 
+	 */
+	public static MutationStatistics<?> loadState(String persistFile, boolean loadTestExecutionsResults) throws PersistenceException {
 		File finalf = new File(persistFile);
 		if(finalf.isDirectory()){
 			finalf = new File(finalf, MutationStatistics.DEFAULT_CONFIGFILE);
