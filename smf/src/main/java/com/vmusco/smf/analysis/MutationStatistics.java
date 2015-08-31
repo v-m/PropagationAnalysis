@@ -103,20 +103,42 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	}
 
 	/**
-	 * List all viables mutants which has been tested (and eventually load them)
+	 * Similar as {@link MutationStatistics#listViableAndRunnedMutants(boolean, boolean)} without force reload.
+	 */
+	public String[] listViableAndRunnedMutants(boolean load) throws PersistenceException{
+		return listViableAndRunnedMutants(load, false);
+	}
+	
+	/**
+	 * List all viables mutants which has been tested (and eventually load them and force reload)
 	 * @param load true if the structure must be loaded at the same time
+	 * @param forceReload if true, reload even if already loaded, else not
 	 * @return
 	 * @throws PersistenceException 
 	 */
-	public String[] listViableAndRunnedMutants(boolean load) throws PersistenceException{
+	public String[] listViableAndRunnedMutants(boolean load, boolean forceReload) throws PersistenceException{
 		ArrayList<String> re = new ArrayList<String>();
 
 		for(String s : listViableMutants()){
 			if(load){
-				try {
-					loadMutationStats(s);
-					re.add(s);
-				} catch (MutationNotRunException e) { }
+				boolean mustBeLoaded = false;
+				
+				if(forceReload){
+					mustBeLoaded = true;
+				}else{
+					try{
+						getMutationStats(s).getExecutedTestsResults();
+						re.add(s);
+					}catch(MutationNotRunException e1){
+						mustBeLoaded = true;	
+					}
+				}
+				if(mustBeLoaded){
+					try {
+						loadMutationStats(s);
+						re.add(s);
+					} catch (MutationNotRunException e) { }
+				}
 			}else{
 				if(isMutantExecutionPersisted(s))
 					re.add(s);
@@ -290,13 +312,12 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 
 	/**
 	 * Return the statistics for a mutation execution.
-	 * If the MutationStatistics object has been loaded, the results for this exection are not loaded
+	 * If the MutationStatistics object has been loaded, the results for this execution are not loaded
 	 * Use {@link MutationStatistics#loadMutationStats(String)} instead to load from file.
 	 * @param mutationId
 	 * @return
 	 */
 	public MutantIfos getMutationStats(String mutationId){
-		//TODO: Include the loading here (with a boolean param) via loadMutationStats(String) and add a structure (or a vaiable in MutantIfos) to map what is legitim and what is not.
 		return mutations.get(mutationId);
 	}
 

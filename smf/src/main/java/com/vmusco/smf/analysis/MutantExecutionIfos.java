@@ -1,5 +1,7 @@
 package com.vmusco.smf.analysis;
 
+import com.vmusco.smf.utils.MutationsSetTools;
+
 /**
  * This class contains all informations related to a mutant run 
  * @author Vincenzo Musco - vincenzo.musco@inria.fr
@@ -54,5 +56,9 @@ public class MutantExecutionIfos {
 	}
 	public void setRunTestOnMutantTime(long runTestOnMutantTime) {
 		this.runTestOnMutantTime = runTestOnMutantTime;
+	}
+
+	public String[] getMutantFailingAndHangingTestCases() {
+		return MutationsSetTools.setUnionWithoutDuplicates(this.mutantFailingTestCases, this.mutantHangingTestCases);
 	}
 }

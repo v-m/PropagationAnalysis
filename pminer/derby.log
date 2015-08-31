@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Mon Aug 31 19:49:52 CEST 2015:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.11.1.1 - (1616546): instance a816c00e-014f-84e1-27c1-00000cdb1630 
+on database directory /home/vince/Temp/db/fullspojo with class loader sun.misc.Launcher$AppClassLoader@214c265e 
+Loaded from file:/home/vince/.m2/repository/org/apache/derby/derby/10.11.1.1/derby-10.11.1.1.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_60-b24
+user.dir=/home/vince/Experiments/bugimpact/workspace/ChangePropagation/pminer
+os.name=Linux
+os.arch=amd64
+os.version=4.1.5-1-ARCH
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

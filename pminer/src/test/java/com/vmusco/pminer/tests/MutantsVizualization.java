@@ -1,8 +1,9 @@
-package com.vmusco.pminer;
+package com.vmusco.pminer.tests;
 
 import java.io.FileInputStream;
 import java.util.HashMap;
 
+import com.vmusco.pminer.UseGraph;
 import com.vmusco.pminer.analyze.ExploreMutants;
 import com.vmusco.pminer.analyze.GraphDisplayAnalyzer;
 import com.vmusco.pminer.analyze.StatisticsMutantAnalyzer;

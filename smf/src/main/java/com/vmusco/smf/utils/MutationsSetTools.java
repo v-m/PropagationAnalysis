@@ -104,4 +104,18 @@ public abstract class MutationsSetTools {
 		
 		return ret;
 	}
+
+	public static String[] setUnionWithoutDuplicates(String[] set1, String[] set2) {
+		Set<String> unionset = new HashSet<>();
+
+		for(String s : set1){
+			unionset.add(s);
+		}
+
+		for(String s : set2){
+			unionset.add(s);
+		}
+		
+		return unionset.toArray(new String[0]);
+	}
 }

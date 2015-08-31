@@ -1,0 +1,1 @@
+java -cp pminer/target/*-jar-with-dependencies.jar com.vmusco.pminer.run.JavaPDGAnalyzer "$@"

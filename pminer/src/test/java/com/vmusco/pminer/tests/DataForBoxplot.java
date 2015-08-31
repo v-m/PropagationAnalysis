@@ -1,4 +1,4 @@
-package com.vmusco.pminer;
+package com.vmusco.pminer.tests;
 
 import java.io.File;
 import java.io.FileInputStream;
