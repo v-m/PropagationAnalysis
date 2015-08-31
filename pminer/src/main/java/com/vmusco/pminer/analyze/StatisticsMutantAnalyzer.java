@@ -7,6 +7,7 @@ import com.vmusco.pminer.MutantTestProcessingListener;
 import com.vmusco.pminer.UseGraph;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.softminer.utils.Tools;
 import com.vmusco.softminer.utils.TypeWithInfo;
 
@@ -73,7 +74,7 @@ public class StatisticsMutantAnalyzer extends MutantTestAnalyzer {
 	}
 
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propatime){
+	public void fireIntersectionFound(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propatime) throws MutationNotRunException{
 		UseGraphMutantStats mutstat = new UseGraphMutantStats();
 
 		mutstat.fillIn(ps, mutationId, mi, graphDetermined, basin, propatime);

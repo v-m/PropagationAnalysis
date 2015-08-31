@@ -9,6 +9,7 @@ import java.util.Set;
 import com.vmusco.pminer.UseGraph;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.NodeShape;
@@ -42,7 +43,7 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 			/*String mutationOperator,
 			String mutationId,*/
 			MutantIfos mi,
-			String[] graphDetermined, UseGraph basin) {
+			String[] graphDetermined, UseGraph basin) throws MutationNotRunException {
 		String[] mutationDetermined = ExploreMutants.purifyFailAndHangResultSetForMutant(ps, mi); 
 		//String mutationInsertionPosition = ps.mutations.get(mutationOperator).mutationIn.get(mutationId);
 		String mutationInsertionPosition = mi.getMutationIn();
@@ -91,7 +92,7 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 		}
 	}
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propatime){
+	public void fireIntersectionFound(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propatime) throws MutationNotRunException{
 		
 		makeUp(ps, mi, graphDetermined, basin);
 		

@@ -11,6 +11,7 @@ import java.util.List;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
+import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
 
 /**
@@ -66,7 +67,7 @@ public abstract class TestingFunctions {
 		return al;
 	}
 	
-	public static int processMutants(MutationStatistics<?> ms, List<String> mutantIds, int nbdone, int nbmax, TestingNotification tn) throws PersistenceException{
+	public static int processMutants(MutationStatistics<?> ms, List<String> mutantIds, int nbdone, int nbmax, TestingNotification tn, boolean onlyKilled) throws PersistenceException{
 		int nbproc = nbdone;
 
 		while(mutantIds.size() > 0){
@@ -94,11 +95,17 @@ public abstract class TestingFunctions {
 
 						MutantIfos mi = ms.getMutationStats(mut);
 						
-						if(mi.isExecutedTests()){
+						try{
 							MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(fos, mut);
 							pers.saveState(ms.getMutationStats(mut));
-						}else{
-							if(tn != null)	tn.mutantSkippedDueToException(mut);
+						}catch(PersistenceException e){
+							if(e.getUnderException() instanceof MutationNotRunException){
+								// Should not occurs here !!!
+								System.err.print("After a generation unable to persis ?! Core error !");
+								System.exit(1);
+							}else{
+								if(tn != null)	tn.mutantSkippedDueToException(mut);
+							}
 						}
 						
 						lock.release();
@@ -127,6 +134,6 @@ public abstract class TestingFunctions {
 	}
 	
 	public static int processMutants(MutationStatistics<?> ms, List<String> mutantIds, int nbmax, TestingNotification tn) throws PersistenceException{
-		return processMutants(ms, mutantIds, 0, nbmax, tn);
+		return processMutants(ms, mutantIds, 0, nbmax, tn, false);
 	}
 }

@@ -49,7 +49,6 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 	private static String MUTANT_ID_4 = "id";
 	private static String MUTANT_IN_4 = "in";
 	private static String MUTANT_VIABLE_4 = "viable";
-	private static String MUTANT_RAN_4 = "ran";
 	private static String MUTANT_TO_4 = "to";
 	private static String MUTANT_FROM_4 = "from";
 
@@ -172,10 +171,6 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 			amutant.setAttribute(new Attribute(MUTANT_ID_4, mut));
 			amutant.setAttribute(new Attribute(MUTANT_VIABLE_4, ifos.isViable()?"true":"false"));
 			
-			if(ifos.isExecutionKnown()){
-				amutant.setAttribute(new Attribute(MUTANT_RAN_4, ifos.isExecutedTests()?"true":"false"));
-			}
-			
 			if(ifos.getHash() != null)
 				amutant.setAttribute(new Attribute(MUTANT_HASH_4, ifos.getHash()));
 
@@ -265,10 +260,6 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 				ifos.setMutationIn(e.getAttribute(MUTANT_IN_4).getValue());
 				ifos.setViable(e.getAttribute(MUTANT_VIABLE_4).getValue().equals("true"));
 
-				if(e.getAttribute(MUTANT_RAN_4) != null){
-					ifos.setExecutedTests(e.getAttribute(MUTANT_RAN_4).getValue().equals("true"));
-				}
-				
 				if(e.getAttribute(MUTANT_HASH_4) != null){
 					ifos.setHash(e.getAttribute(MUTANT_HASH_4).getValue());
 				}

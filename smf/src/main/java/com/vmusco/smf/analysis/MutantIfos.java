@@ -1,6 +1,8 @@
 package com.vmusco.smf.analysis;
 
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
+import com.vmusco.smf.exceptions.MutationNotRunException;
+import com.vmusco.smf.exceptions.PersistenceException;
 
 /**
  * This class bundles all informations relatives to one mutation
@@ -8,6 +10,8 @@ import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
  * @see MutantInfoXMLPersisitence
  */
 public class MutantIfos{
+	private String id;
+	
 	/**
 	 * Describes the method in which the mutation occured (mutant id => method)
 	 */
@@ -31,29 +35,7 @@ public class MutantIfos{
 	 */
 	private String hash = null;
 	
-	private Boolean executedTests = null;
-	
-	/**
-	 * Failing test cases for the mutant
-	 */
-	private String[] mutantFailingTestCases = null;
-	/**
-	 * Ignored test cases for the mutant
-	 */
-	private String[] mutantIgnoredTestCases = null;
-	/**
-	 * Hanging (infinite-loop) test cases for the mutant
-	 */
-	private String[] mutantHangingTestCases = null;
-	/**
-	 * Full test suite failure (eg. static field on init)
-	 */
-	private String[] mutantErrorOnTestSuite = null;
-	private long runTestOnMutantTime = -1;
-	
-	
-	
-	
+	private MutantExecutionIfos execution = null;
 	
 	public String getMutationIn() {
 		return mutationIn;
@@ -95,18 +77,13 @@ public class MutantIfos{
 		return hash;
 	}
 	
-	/**
-	 * Determine whether the tests has already been run for this mutant.
-	 * Note that if the answer is undetermined, the function will also return false.
-	 * To ensure the state is known, use {@link MutantIfos#isExecutionKnown()}.
-	 * @return true if the test has been run on this mutant, else false
-	 */
-	public boolean isExecutedTests() {
-		return executedTests!=null?executedTests:false;
+	public void setExecutedTestsResults(MutantExecutionIfos exec) {
+		this.execution = exec;
 	}
 	
-	public void setExecutedTests(boolean excutedTests) {
-		this.executedTests = excutedTests;
+	public MutantExecutionIfos getExecutedTestsResults() throws MutationNotRunException {
+		if(execution == null) throw new MutationNotRunException();
+		return execution;
 	}
 	
 	/**
@@ -118,38 +95,18 @@ public class MutantIfos{
 	 * @see MutationStatistics#loadResultsForExecutedTestOnMutants(int)
 	 */
 	public boolean isExecutionKnown(){
-		return executedTests!=null;
+		return this.execution != null;
 	}
 	
-	public String[] getMutantErrorOnTestSuite() {
-		return mutantErrorOnTestSuite;
+	public void loadExecution(MutationStatistics<?> ms) throws MutationNotRunException, PersistenceException{
+		ms.loadMutationStats(id);
+	}
+
+	public void setId(String mutationId) {
+		this.id = mutationId;
 	}
 	
-	public String[] getMutantFailingTestCases() {
-		return mutantFailingTestCases;
-	}
-	public String[] getMutantHangingTestCases() {
-		return mutantHangingTestCases;
-	}
-	public String[] getMutantIgnoredTestCases() {
-		return mutantIgnoredTestCases;
-	}
-	public long getRunTestOnMutantTime() {
-		return runTestOnMutantTime;
-	}
-	public void setMutantErrorOnTestSuite(String[] mutantErrorOnTestSuite) {
-		this.mutantErrorOnTestSuite = mutantErrorOnTestSuite;
-	}
-	public void setMutantFailingTestCases(String[] mutantFailingTestCases) {
-		this.mutantFailingTestCases = mutantFailingTestCases;
-	}
-	public void setMutantHangingTestCases(String[] mutantHangingTestCases) {
-		this.mutantHangingTestCases = mutantHangingTestCases;
-	}
-	public void setMutantIgnoredTestCases(String[] mutantIgnoredTestCases) {
-		this.mutantIgnoredTestCases = mutantIgnoredTestCases;
-	}
-	public void setRunTestOnMutantTime(long runTestOnMutantTime) {
-		this.runTestOnMutantTime = runTestOnMutantTime;
+	public String getId() {
+		return id;
 	}
 }

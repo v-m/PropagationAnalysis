@@ -54,7 +54,9 @@ public class CreateMutation implements MutationCreationListener{
 		options.addOption(opt);
 		opt = new Option("m", "mutate", true, "classes to mutate ("+useAsSepString+" - default: all classes)");
 		options.addOption(opt);
-		opt = new Option("n", "nb-mutants", true, "number of desired viable mutants (default: max)");
+		opt = new Option("n", "nb-mutants", true, "number of desired viable mutants (already generated are not taken into consideration) (default: max)");
+		options.addOption(opt);
+		opt = new Option("s", "safe-persist", true, "specify the number of mutant to generate before do an intermediate safety persistance, 0 for no intermediate safe persistance (default: 0)");
 		options.addOption(opt);
 		opt = new Option("R", "reset", false, "drop all previously generated mutants if so (default: false)");
 		options.addOption(opt);
@@ -123,7 +125,15 @@ public class CreateMutation implements MutationCreationListener{
 			ms.setClassToMutate(cmd.getArgs()[3].split(File.pathSeparator));
 		}
 
-
+		int safepersist = 0;
+		int nbmut = -1;
+		
+		if(cmd.hasOption("safe-persist"))
+			safepersist = Integer.parseInt(cmd.getOptionValue("safe-persist"));
+		
+		if(cmd.hasOption("nb-mutants"))
+			nbmut = Integer.parseInt(cmd.getOptionValue("nb-mutants"));
+		
 		System.out.println("Generating mutations, please wait...\n\n\n\n");
 
 		InterruptionDemander id = new InterruptionDemander();
@@ -133,12 +143,7 @@ public class CreateMutation implements MutationCreationListener{
 		if(cmd.hasOption("name"))
 			ms.setMutationName(cmd.getOptionValue("name"));
 		
-		if(cmd.hasOption("nb-mutants")){
-			ms.loadOrCreateMutants(cmd.hasOption("reset"), cm, Integer.parseInt(cmd.getOptionValue("nb-mutants")));
-		}else{
-			ms.loadOrCreateMutants(cmd.hasOption("reset"), cm);
-		}
-	
+		ms.loadOrCreateMutants(cmd.hasOption("reset"), cm, nbmut, safepersist);
 	}
 
 	private int nbchecks = 0;

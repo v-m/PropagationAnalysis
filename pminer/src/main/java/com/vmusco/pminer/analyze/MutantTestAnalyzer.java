@@ -6,6 +6,7 @@ import java.util.Set;
 import com.vmusco.pminer.UseGraph;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.exceptions.MutationNotRunException;
 
 
 public abstract class MutantTestAnalyzer {
@@ -38,7 +39,7 @@ public abstract class MutantTestAnalyzer {
 			String mutationId,
 			MutantIfos mi,
 			String[] graphDetermined, 
-			UseGraph basin, long propatime);
+			UseGraph basin, long propatime) throws MutationNotRunException;
 	
 	/***
 	 * This method can be invoked to order the runner to interrupt its execution and discard remaining set

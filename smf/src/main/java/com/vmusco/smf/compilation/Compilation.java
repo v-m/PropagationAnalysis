@@ -195,9 +195,8 @@ public abstract class Compilation {
 	 * @param project_path
 	 * @param classpath
 	 * @param outputPath
-	 * @throws IOException
 	 */
-	public static void compileProjectUsingSpoon(String project_path, String[] classpath, String outputPath) throws IOException{
+	public static void compileProjectUsingSpoon(String project_path, String[] classpath, String outputPath) {
 		Factory factory = new FactoryImpl(new DefaultCoreFactory(), new StandardEnvironment());
 		SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
 		compiler.addInputSource(new File(project_path));
@@ -212,9 +211,8 @@ public abstract class Compilation {
 	 * @param source
 	 * @param classpath
 	 * @return null if compilation fails. bytecodes if succeed.
-	 * @throws URISyntaxException
 	 */
-	public static Map<String, byte[]> compilesUsingJavax(CtClass<?> aClass, String source, String[] classpath, DiagnosticCollector<JavaFileObject> diagnostics) throws URISyntaxException{
+	public static Map<String, byte[]> compilesUsingJavax(CtClass<?> aClass, String source, String[] classpath, DiagnosticCollector<JavaFileObject> diagnostics) {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
 		StandardJavaFileManager standardFileManager = compiler.getStandardFileManager(diagnostics, null, null);
@@ -269,9 +267,8 @@ public abstract class Compilation {
 	 * @param source
 	 * @param classpath
 	 * @return null if compilation fails. bytecodes if succeed.
-	 * @throws URISyntaxException
 	 */
-	public static Map<String, byte[]> compilesUsingJavax(CtClass<?> aClass, String source, String[] classpath) throws URISyntaxException{
+	public static Map<String, byte[]> compilesUsingJavax(CtClass<?> aClass, String source, String[] classpath){
 		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
 		return compilesUsingJavax(aClass, source, classpath, diagnostics);
 	}

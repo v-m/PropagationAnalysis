@@ -3,6 +3,7 @@ package com.vmusco.pminer.analyze;
 import com.vmusco.pminer.UseGraph;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.NodeMarkers;
 
@@ -28,7 +29,7 @@ public class GraphDisplayAnalyzerAndExporter extends GraphDisplayAnalyzer{
 	}
 
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propatime){
+	public void fireIntersectionFound(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propatime) throws MutationNotRunException {
 		
 		super.makeUp(ps, mi, graphDetermined, basin);
 		super.g.persistAsImage(this.persistTo);

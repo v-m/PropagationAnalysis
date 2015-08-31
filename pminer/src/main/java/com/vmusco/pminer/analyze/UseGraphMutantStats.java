@@ -6,6 +6,7 @@ import java.util.Set;
 import com.vmusco.pminer.UseGraph;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.exceptions.MutationNotRunException;
 
 public class UseGraphMutantStats {
 	public String mutationId;
@@ -16,8 +17,8 @@ public class UseGraphMutantStats {
 	public int nb_graph;	// # determined using graph
 	public int nb_mutat;	// # determined using testing
 	public int nb_boths;	// # determined by both
-	public int nb_mores;	//��# determined by usegraph only
-	public int nb_lesss;	//��# determined by test execution only
+	public int nb_mores;	// # determined by usegraph only
+	public int nb_lesss;	// # determined by test execution only
 	
 	public long prediction_time = -1;
 
@@ -94,7 +95,7 @@ public class UseGraphMutantStats {
 		}
 	}
 
-	public void fillIn(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propagraphtime) {
+	public void fillIn(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propagraphtime) throws MutationNotRunException {
 		this.mutationId = mutationId;
 		mutationInsertionPoint = mi.getMutationIn();
 

@@ -176,7 +176,7 @@ public class ParallelMutationRun implements TestingNotification{
 		if(al.size()<=0)
 			return;
 		
-		TestingFunctions.processMutants(ms, al, alreadydone, slicesize, this);
+		TestingFunctions.processMutants(ms, al, alreadydone, slicesize, this, false);
 	}
 	
 	private void printStats(String cop, String cpr) {

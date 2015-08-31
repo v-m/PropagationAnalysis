@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ import javax.tools.JavaFileObject;
 import org.apache.commons.io.FileUtils;
 
 import spoon.compiler.SpoonCompiler;
-import spoon.reflect.code.CtIf;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
@@ -38,12 +36,12 @@ import spoon.support.StandardEnvironment;
 import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
 import spoon.support.reflect.declaration.CtElementImpl;
 
-import com.google.common.io.Files;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.compilation.ClassFileUtil;
 import com.vmusco.smf.compilation.Compilation;
+import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.smf.utils.InterruptionManager;
 import com.vmusco.smf.utils.NewReportedStandardEnvironment;
@@ -76,8 +74,13 @@ public final class Mutation {
 		return ms;
 	}
 
-	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset) throws IOException, URISyntaxException{
-		createMutants(ps, ms, mcl, reset, -1);
+	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset) throws PersistenceException {
+		createMutants(ps, ms, mcl, reset, 0);
+	}
+	
+
+	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset, int safepersist) throws PersistenceException {
+		createMutants(ps, ms, mcl, reset, -1, safepersist);
 	}
 
 	/**
@@ -140,225 +143,235 @@ public final class Mutation {
 		return MutationGateway.getMutationCandidates();
 	}
 	
-	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset, int nb) throws IOException, URISyntaxException{
-		Factory factory = obtainFactory();
-		
-		long t1 = System.currentTimeMillis();
-		int mutantcounter = 0;
-
-		// Prepare generation workspace (eventually clear it)
-		File f = new File(ms.getSourceMutationResolved());
-		if(reset && f.exists()){
-			System.out.println("Mutant sources folder exists... Erasing...");
-			FileUtils.deleteDirectory(f);
-			System.out.println("Succeded: "+(f.exists()?"False":"True"));
-		}
-		if(!f.exists())
-			f.mkdirs();
-
-		f = new File(ms.getBytecodeMutationResolved());
-		if(reset && f.exists()){
-			System.out.println("Mutant bytecode folder exists... Erasing...");
-			FileUtils.deleteDirectory(f);
-			System.out.println("Succeded: "+(f.exists()?"False":"True"));
-		}
-		if(!f.exists())
-			f.mkdirs();
-
-		if(reset){
-			ms.clearMutations();
-		}else{
-			Set<String> r = ms.getAllMutationsId();
+	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset, int nb, int safepersist) throws PersistenceException{
+		try{
+			Factory factory = obtainFactory();
 			
-			for(String s : r){
-				int numb = Integer.valueOf(s.substring(MUTANT_FILE_PREFIX.length()));
-				if(numb >= mutantcounter){
-					mutantcounter = numb+1;
-				}
+			long t1 = System.currentTimeMillis();
+			int mutantcounter = 0;
+	
+			// Prepare generation workspace (eventually clear it)
+			File f = new File(ms.getSourceMutationResolved());
+			if(reset && f.exists()){
+				System.out.println("Mutant sources folder exists... Erasing...");
+				FileUtils.deleteDirectory(f);
+				System.out.println("Succeded: "+(f.exists()?"False":"True"));
 			}
-			
-			System.out.println("Syncing generation folder");
-			
-			File syncf = new File(ms.getBytecodeMutationResolved());
-			for(String s : syncf.list()){
-				String ss = s;
-				if(s.endsWith(".debug.txt")){
-					ss = s.substring(0, s.length()-".debug.txt".length());
+			if(!f.exists())
+				f.mkdirs();
+	
+			f = new File(ms.getBytecodeMutationResolved());
+			if(reset && f.exists()){
+				System.out.println("Mutant bytecode folder exists... Erasing...");
+				FileUtils.deleteDirectory(f);
+				System.out.println("Succeded: "+(f.exists()?"False":"True"));
+			}
+			if(!f.exists())
+				f.mkdirs();
+	
+			if(reset){
+				ms.clearMutations();
+			}else{
+				Set<String> r = ms.getAllMutationsId();
+				
+				for(String s : r){
+					int numb = Integer.valueOf(s.substring(MUTANT_FILE_PREFIX.length()));
+					if(numb >= mutantcounter){
+						mutantcounter = numb+1;
+					}
 				}
 				
+				System.out.println("Syncing generation folder");
 				
-				if(!ms.isMutantDefined(ss)){
-					File ssyncf = new File(syncf, s);
+				File syncf = new File(ms.getBytecodeMutationResolved());
+				for(String s : syncf.list()){
+					String ss = s;
+					if(s.endsWith(".debug.txt")){
+						ss = s.substring(0, s.length()-".debug.txt".length());
+					}
 					
-					if(ssyncf.isDirectory()){
-						FileUtils.deleteDirectory(ssyncf);
-					}else{
-						ssyncf.delete();
+					
+					if(!ms.isMutantDefined(ss)){
+						File ssyncf = new File(syncf, s);
+						
+						if(ssyncf.isDirectory()){
+							FileUtils.deleteDirectory(ssyncf);
+						}else{
+							ssyncf.delete();
+						}
+						System.out.println("Dropped "+s);
 					}
-					System.out.println("Dropped "+s);
+				}
+	
+				System.out.println("Continue generation @ mutant "+mutantcounter);
+			}
+	
+			List<Object[]> mutations = new ArrayList<Object[]>();
+	
+			for(CtElement e : getMutations(ps, ms, factory)){
+				HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = obtainsMutationCandidates(ms, e, factory, true);
+	
+				if(mutatedEntriesWithTargets == null)
+					continue;
+				
+				Iterator iterator = mutatedEntriesWithTargets.keySet().iterator();
+	
+				while(iterator.hasNext()){
+					CtElement m = (CtElement) iterator.next();
+					TargetObtainer to = mutatedEntriesWithTargets.get(m);
+	
+					Object[] o = new Object[]{ e, m, to };
+					mutations.add(o);
 				}
 			}
-
-			System.out.println("Continue generation @ mutant "+mutantcounter);
-		}
-
-		List<Object[]> mutations = new ArrayList<Object[]>();
-
-		for(CtElement e : getMutations(ps, ms, factory)){
-			HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = obtainsMutationCandidates(ms, e, factory, true);
-
-			if(mutatedEntriesWithTargets == null)
-				continue;
+	
+			Collections.shuffle(mutations);
+			Set<String> mutHashs = new HashSet<String>();
+	
+			Set<String> t = ms.getAllMutationsId();
 			
-			Iterator iterator = mutatedEntriesWithTargets.keySet().iterator();
-
-			while(iterator.hasNext()){
-				CtElement m = (CtElement) iterator.next();
-				TargetObtainer to = mutatedEntriesWithTargets.get(m);
-
-				Object[] o = new Object[]{ e, m, to };
-				mutations.add(o);
-			}
-		}
-
-		Collections.shuffle(mutations);
-		Set<String> mutHashs = new HashSet<String>();
-
-		Set<String> t = ms.getAllMutationsId();
-		
-		for(String m : t){
-			MutantIfos mi = (MutantIfos) ms.getMutationStats(m);
-
-			if(mi.getHash() == null){
-				String outp = ms.getSourceMutationResolved() + File.separator + m;
-				System.out.println("Fixing hash for "+outp);
-				try{
-					mi.setHash(convertByteHashToString(getHashForMutationSource(outp)));
-				}catch(Exception ex){
-					System.out.println("Unable to extract hash for "+m);
-				}
-			}
-
-			mutHashs.add(mi.getHash());
-		}
-
-		int validmutants = 0;
-		int droppedmutants = 0;
-		int hashclashcpt = 0;
-		int fnb = (nb<0 || nb > mutations.size())?mutations.size():nb;
-		
-		if(mcl != null) mcl.preparationDone(mutations.size(), fnb);
-		
-		while(mutations.size()>0 && validmutants<fnb && !InterruptionManager.isInterruptedDemanded()){
-			Object[] o = mutations.remove(0);
-			CtElement e = (CtElement) o[0];
-			CtElementImpl m = (CtElementImpl) o[1];
-			TargetObtainer to = (TargetObtainer) o[2];
-			CtClass<?> theClass = findAssociatedClass(e);
-			CtElementImpl toReplace = (CtElementImpl) to.determineTarget(e);
-
-			MutantIfos ifos = new MutantIfos();
-			ifos.setMutationIn(Mutation.getMethodFullSignatureForParent(toReplace));
-			if(ifos.getMutationIn() == null)
-				continue;
-
-			ifos.setMutationFrom(toReplace.toString());
-			ifos.setMutationTo(m.toString());
-
-			if(mcl != null) mcl.newMutationProposal(e, m);
-
-			m.setParent(toReplace.getParent());
-			toReplace.replace(m);
-
-			String mutationid = MUTANT_FILE_PREFIX+mutantcounter++;
-			String outp = ms.getSourceMutationResolved() + File.separator + mutationid;
-			persistMutantClass(theClass, outp, factory);
-
-			boolean hashclash = false;
-			try{
-				ifos.setHash(convertByteHashToString(getHashForMutationSource(outp)));
-
-				if(mutHashs.contains(ifos.getHash())){
-					hashclash = true;
-					FileUtils.deleteDirectory(new File(outp));
-					mutantcounter--;
-					hashclashcpt++;
-					if(mcl != null) mcl.alreadyProcessedMutant(e, m);
-				}else{
-					mutHashs.add(ifos.getHash());
-				}
-			}catch(Exception ex){
-				System.out.println("Unable to extract hash for "+mutationid);
-			}
-
-			if(!hashclash){
-				DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
-				Map<String, byte[]> built = Compilation.compilesUsingJavax(theClass, generateAssociatedClassContent(theClass), ps.getTestingClasspath(), diagnostics);
-
-				String boutp = ms.getBytecodeMutationResolved() + File.separator + mutationid;
-
-				if(built != null){
-					ifos.setViable(true);
-
-					//TODO: theClass.isTopLevel() ==> Should be taken into consideration !!!
-					persistBytecodes(built, boutp);
-
-					validmutants++;
-
-					if(mcl != null) mcl.viableMutant(e, m);
-				}else{
-					ifos.setViable(false);
-					if(ifos.getMutationIn() == null)
-						ifos.setMutationIn("?");
-
-					FileOutputStream fos = new FileOutputStream(boutp+".debug.txt");
-
-					for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
-						if(diagnostic.getCode() != null){
-							fos.write(diagnostic.getCode().getBytes());
-							fos.write("\n".getBytes());
-						}
-						if(diagnostic.getKind() != null){
-							fos.write(diagnostic.getKind().toString().getBytes());
-							fos.write("\n".getBytes());
-						}
-						fos.write(Long.toString(diagnostic.getPosition()).getBytes());
-						fos.write("\n".getBytes());
-						fos.write(Long.toString(diagnostic.getStartPosition()).getBytes());
-						fos.write("\n".getBytes());
-						fos.write(Long.toString(diagnostic.getEndPosition()).getBytes());
-						fos.write("\n".getBytes());
-						if(diagnostic.getSource() != null){
-							fos.write(diagnostic.getSource().toString().getBytes());
-							fos.write("\n".getBytes());
-						}
-						if(diagnostic.getMessage(null) != null){
-							fos.write(diagnostic.getMessage(null).getBytes());
-							fos.write("\n".getBytes());
-						}
-						fos.write("=====\n".getBytes());
+			for(String m : t){
+				MutantIfos mi = (MutantIfos) ms.getMutationStats(m);
+	
+				if(mi.getHash() == null){
+					String outp = ms.getSourceMutationResolved() + File.separator + m;
+					System.out.println("Fixing hash for "+outp);
+					try{
+						mi.setHash(convertByteHashToString(getHashForMutationSource(outp)));
+					}catch(Exception ex){
+						System.out.println("Unable to extract hash for "+m);
 					}
-
-					fos.close();
-					droppedmutants++;
-					if(mcl != null) mcl.unviableMutant(e, m);
 				}
-
-				ms.setMutationStats(mutationid, ifos);
+	
+				mutHashs.add(mi.getHash());
 			}
-
-			m.replace(toReplace);
-
-
-			if(mcl != null) mcl.endingMutationCheck(validmutants, droppedmutants, e);
+	
+			int validmutants = 0;
+			int nbmutants = 0;
+			int droppedmutants = 0;
+			int hashclashcpt = 0;
+			int fnb = (nb<0 || nb > mutations.size())?mutations.size():nb;
+			
+			if(mcl != null) mcl.preparationDone(mutations.size(), fnb);
+			
+			while(mutations.size()>0 && validmutants<fnb && !InterruptionManager.isInterruptedDemanded()){
+				Object[] o = mutations.remove(0);
+				CtElement e = (CtElement) o[0];
+				CtElementImpl m = (CtElementImpl) o[1];
+				TargetObtainer to = (TargetObtainer) o[2];
+				CtClass<?> theClass = findAssociatedClass(e);
+				CtElementImpl toReplace = (CtElementImpl) to.determineTarget(e);
+	
+				MutantIfos ifos = new MutantIfos();
+				ifos.setMutationIn(Mutation.getMethodFullSignatureForParent(toReplace));
+				if(ifos.getMutationIn() == null)
+					continue;
+	
+				ifos.setMutationFrom(toReplace.toString());
+				ifos.setMutationTo(m.toString());
+	
+				if(mcl != null) mcl.newMutationProposal(e, m);
+	
+				m.setParent(toReplace.getParent());
+				toReplace.replace(m);
+	
+				String mutationid = MUTANT_FILE_PREFIX+mutantcounter++;
+				String outp = ms.getSourceMutationResolved() + File.separator + mutationid;
+				persistMutantClass(theClass, outp, factory);
+	
+				boolean hashclash = false;
+				try{
+					ifos.setHash(convertByteHashToString(getHashForMutationSource(outp)));
+	
+					if(mutHashs.contains(ifos.getHash())){
+						hashclash = true;
+						FileUtils.deleteDirectory(new File(outp));
+						mutantcounter--;
+						hashclashcpt++;
+						if(mcl != null) mcl.alreadyProcessedMutant(e, m);
+					}else{
+						mutHashs.add(ifos.getHash());
+					}
+				}catch(Exception ex){
+					System.out.println("Unable to extract hash for "+mutationid);
+				}
+	
+				if(!hashclash){
+					DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+					Map<String, byte[]> built = Compilation.compilesUsingJavax(theClass, generateAssociatedClassContent(theClass), ps.getTestingClasspath(), diagnostics);
+	
+					String boutp = ms.getBytecodeMutationResolved() + File.separator + mutationid;
+	
+					if(built != null){
+						ifos.setViable(true);
+	
+						//TODO: theClass.isTopLevel() ==> Should be taken into consideration !!!
+						persistBytecodes(built, boutp);
+	
+						validmutants++;
+	
+						if(mcl != null) mcl.viableMutant(e, m);
+					}else{
+						ifos.setViable(false);
+						if(ifos.getMutationIn() == null)
+							ifos.setMutationIn("?");
+	
+						FileOutputStream fos = new FileOutputStream(boutp+".debug.txt");
+	
+						for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
+							if(diagnostic.getCode() != null){
+								fos.write(diagnostic.getCode().getBytes());
+								fos.write("\n".getBytes());
+							}
+							if(diagnostic.getKind() != null){
+								fos.write(diagnostic.getKind().toString().getBytes());
+								fos.write("\n".getBytes());
+							}
+							fos.write(Long.toString(diagnostic.getPosition()).getBytes());
+							fos.write("\n".getBytes());
+							fos.write(Long.toString(diagnostic.getStartPosition()).getBytes());
+							fos.write("\n".getBytes());
+							fos.write(Long.toString(diagnostic.getEndPosition()).getBytes());
+							fos.write("\n".getBytes());
+							if(diagnostic.getSource() != null){
+								fos.write(diagnostic.getSource().toString().getBytes());
+								fos.write("\n".getBytes());
+							}
+							if(diagnostic.getMessage(null) != null){
+								fos.write(diagnostic.getMessage(null).getBytes());
+								fos.write("\n".getBytes());
+							}
+							fos.write("=====\n".getBytes());
+						}
+	
+						fos.close();
+						droppedmutants++;
+						if(mcl != null) mcl.unviableMutant(e, m);
+					}
+	
+					ms.setMutationStats(mutationid, ifos);
+				}
+	
+				m.replace(toReplace);
+	
+				nbmutants++;
+				if(safepersist > 0 && nbmutants%safepersist == 0){
+					ConsoleTools.write("Safe persisting...");
+					ms.saveMutants();
+				}
+	
+				if(mcl != null) mcl.endingMutationCheck(validmutants, droppedmutants, e);
+			}
+	
+			System.out.println(hashclashcpt);
+	
+			long t2 = System.currentTimeMillis();
+			ms.setMutantsGenerationTime(t2-t1);
+	
+			if(mcl != null) mcl.mutationSummary(validmutants, droppedmutants+hashclashcpt, ms.getMutantsGenerationTime());
+		}catch(IOException e){
+			throw new PersistenceException(e);
 		}
-
-		System.out.println(hashclashcpt);
-
-		long t2 = System.currentTimeMillis();
-		ms.setMutantsGenerationTime(t2-t1);
-
-		if(mcl != null) mcl.mutationSummary(validmutants, droppedmutants+hashclashcpt, ms.getMutantsGenerationTime());
 	}
 
 	public static HashMap<CtElement, TargetObtainer> obtainsMutationCandidates(MutationStatistics ms, CtElement e, Factory factory, boolean debug) {

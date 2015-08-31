@@ -16,6 +16,7 @@ import spoon.reflect.factory.Factory;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.smf.mutation.TargetObtainer;
 import com.vmusco.smf.utils.ConsoleTools;
@@ -108,34 +109,39 @@ public class ProjectTools {
 
 				//int treated = ms.loadResultsForExecutedTestOnMutants(0).length;
 				int maxmutat = 0;
-				
+
 				Factory factory = Mutation.obtainFactory();
 				CtElement[] mutations = Mutation.getMutations(ps, ms, factory);
-				
+
 				for(CtElement e : mutations){
 					HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = Mutation.obtainsMutationCandidates(ms, e, factory, false);
 					if(mutatedEntriesWithTargets != null)
 						maxmutat += mutatedEntriesWithTargets.size();
 				}
-				
+
 				int treated = 0;
 				int not_viable = 0;
+				int alivemut  = 0;
 
 				for(String mid : ms.getAllMutationsId()){
-					MutantIfos mutationStats = ms.getMutationStats(mid);
-
-					if(!mutationStats.isViable())
-						not_viable++;
-					else{
-						if(!mutationStats.isExecutionKnown()){
-							mutationStats.setExecutedTests(ms.checkIfExecutionExists(mid));
-						}
+					try{
+						ms.loadMutationStats(mid);
+						treated += 1;
 						
-						treated += mutationStats.isExecutedTests()?1:0;
+						if(ms.isMutantAlive(mid)){
+							alivemut++;
+						}
+					}catch(MutationNotRunException e){
+						// If mutation not run yet, just skip it from the count process
+					}
+					
+					MutantIfos mutationStats = ms.getMutationStats(mid);
+					if(!mutationStats.isViable()){
+						not_viable++;
 					}
 				}
-				
-				ConsoleTools.write("....."+ms.getMutationsSize()+" mutants (max: "+maxmutat+") - "+treated+" treated, "+not_viable+" unviables. [Remaining] To generate: "+(maxmutat-ms.getMutationsSize())+". To test:"+(maxmutat-treated-not_viable));
+
+				ConsoleTools.write("....."+ms.getMutationsSize()+" mutants (max: "+maxmutat+") - "+treated+" treated, "+not_viable+" unviables. [Remaining] To generate: "+(maxmutat-ms.getMutationsSize())+". To test:"+(maxmutat-treated-not_viable)+". Alive mutants: "+alivemut);
 				ConsoleTools.endLine();
 			}
 		}

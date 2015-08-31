@@ -25,6 +25,7 @@ import spoon.support.DefaultCoreFactory;
 import spoon.support.StandardEnvironment;
 import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
 
+import com.vmusco.smf.analysis.MutantExecutionIfos;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
@@ -394,12 +395,13 @@ public final class Testing {
 			ps.setRunTestsOriginalTime(t2 - t1);
 		}else{
 			MutantIfos ifos = (MutantIfos) ms.getMutationStats(forMutant);
-			ifos.setMutantFailingTestCases(failing_arr);
-			ifos.setMutantIgnoredTestCases(ignored_arr);
-			ifos.setMutantHangingTestCases(hanging_arr);
-			ifos.setMutantErrorOnTestSuite(errts_arr);
-			ifos.setExecutedTests(true);
-			ifos.setRunTestOnMutantTime(t2 - t1);
+			MutantExecutionIfos mei = new MutantExecutionIfos();
+			mei.setMutantFailingTestCases(failing_arr);
+			mei.setMutantIgnoredTestCases(ignored_arr);
+			mei.setMutantHangingTestCases(hanging_arr);
+			mei.setMutantErrorOnTestSuite(errts_arr);
+			mei.setRunTestOnMutantTime(t2 - t1);
+			ifos.setExecutedTestsResults(mei);
 		}
 
 		if(tel != null){

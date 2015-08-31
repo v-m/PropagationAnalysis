@@ -47,9 +47,11 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 		options.addOption(opt);
 		opt = new Option("n", "proceed-nb", true, "number of mutants to proceed (default: all).");
 		options.addOption(opt);
+		opt = new Option("k", "only-killed", false, "if proceed-nb is set, defines if the number proceeded must be killed mutants (default: false)");
+		options.addOption(opt);
 		opt = new Option("m", "mutants-id", true, "mutation id to proceed separated by "+File.pathSeparator+" (default: all mutants).");
 		options.addOption(opt);
-		opt = new Option("s", "no-shuffle", false, "indicated the mutants selection order should not be shuffled (they order is system dependent).");
+		opt = new Option("s", "no-shuffle", false, "indicated the mutants selection order should not be shuffled (the order is system dependent).");
 		options.addOption(opt);
 
 
@@ -91,7 +93,7 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 				
 				MutationRunTests tel = new MutationRunTests(mutations.length);
 				
-				TestingFunctions.processMutants(ms, al, 0, mutations.length, tel);
+				TestingFunctions.processMutants(ms, al, 0, mutations.length, tel, false);
 			}else{
 				mutations = ms.listMutants();
 
@@ -99,8 +101,12 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 				
 				int nbtodo = mutations.length;
 				
+				boolean onlykilled = false;
+				
 				if(cmd.hasOption("proceed-nb")){
 					nbtodo = Integer.parseInt(cmd.getOptionValue("proceed-nb"));
+					
+					onlykilled = cmd.hasOption("only-killed");
 				}
 				
 				int nbviable = TestingFunctions.getViableCollection(ms).size();
@@ -108,7 +114,7 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 				List<String> al = TestingFunctions.getUnfinishedCollection(ms, !cmd.hasOption("no-shuffle"));
 				int alreadydone = nbviable - al.size(); 
 						
-				TestingFunctions.processMutants(ms, al, alreadydone, nbtodo, tel);
+				TestingFunctions.processMutants(ms, al, alreadydone, nbtodo, tel, onlykilled);
 			}
 		}
 	}
