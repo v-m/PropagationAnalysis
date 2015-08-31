@@ -25,6 +25,7 @@ import com.vmusco.pminer.analyze.StatisticsMutantAnalyzer;
 import com.vmusco.pminer.persistence.UseGraphStatsXml;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.utils.ConsoleTools;
+import com.vmusco.smf.utils.MutationsSetTools;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.GraphApi;
 import com.vmusco.softminer.graphs.persistance.GraphML;
@@ -79,8 +80,9 @@ public class SetsSizeForAllMutators implements MutantTestProcessingListener {
 				MutationStatistics<?> ms = MutationStatistics.loadState(ff.getAbsolutePath());
 				//ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
 				// Load the mutations in ms here
-				String[] allMutations = ms.loadResultsForExecutedTestOnMutants(600);
-
+				String[] allMutationsLoaded = ms.listViableAndRunnedMutants(true);
+				String[] allMutations = MutationsSetTools.shuffleAndSlice(allMutationsLoaded, 600);
+				
 				// Load the UseGraph
 				Graph usegraph = Graph.getNewGraph(GraphApi.GRAPH_STREAM);
 				GraphML gml = new GraphML(usegraph);

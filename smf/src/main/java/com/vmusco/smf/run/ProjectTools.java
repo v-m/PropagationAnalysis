@@ -123,7 +123,7 @@ public class ProjectTools {
 				int not_viable = 0;
 				int alivemut  = 0;
 
-				for(String mid : ms.getAllMutationsId()){
+				for(String mid : ms.listMutants()){
 					try{
 						ms.loadMutationStats(mid);
 						treated += 1;

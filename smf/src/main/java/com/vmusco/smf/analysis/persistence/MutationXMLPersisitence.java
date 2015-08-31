@@ -162,7 +162,7 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 		Element muts = new Element(MUTATION_2);
 		mutations.addContent(muts);
 
-		for(String mut : (String[]) ms.getAllMutationsId().toArray(new String[0])){
+		for(String mut : ms.listMutants()){
 			MutantIfos ifos = (MutantIfos) ms.getMutationStats(mut);
 
 			Element amutant = new Element(MUTATION_3);

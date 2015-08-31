@@ -22,7 +22,7 @@ public abstract class TestingFunctions {
 
 	public static List<String> getViableCollection(MutationStatistics<?> ms){
 		ArrayList<String> al = new ArrayList<String>();
-		for(String mut : ms.getAllMutationsId()){
+		for(String mut : ms.listMutants()){
 			MutantIfos ifos = ms.getMutationStats(mut);
 
 			if(!ifos.isViable()){

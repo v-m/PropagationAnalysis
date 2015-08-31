@@ -87,12 +87,7 @@ public class MutantIfos{
 	}
 	
 	/**
-	 * To ensure compatibility with older versions of the software, this method allows to 
-	 * ensure if the xml file contains informations about exeuction. If false, a manual determination
-	 * is required (see {@link MutationStatistics#loadResultsForExecutedTestOnMutants(int)} for updating the datastructure
-	 * or {@link MutationStatistics#checkIfExecutionExists(String)}.
-	 * @return
-	 * @see MutationStatistics#loadResultsForExecutedTestOnMutants(int)
+	 * @return true if the mutation statistics has been loaded or computed
 	 */
 	public boolean isExecutionKnown(){
 		return this.execution != null;

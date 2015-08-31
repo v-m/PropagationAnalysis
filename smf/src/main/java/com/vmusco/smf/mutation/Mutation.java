@@ -172,9 +172,7 @@ public final class Mutation {
 			if(reset){
 				ms.clearMutations();
 			}else{
-				Set<String> r = ms.getAllMutationsId();
-				
-				for(String s : r){
+				for(String s : ms.listMutants()){
 					int numb = Integer.valueOf(s.substring(MUTANT_FILE_PREFIX.length()));
 					if(numb >= mutantcounter){
 						mutantcounter = numb+1;
@@ -228,9 +226,7 @@ public final class Mutation {
 			Collections.shuffle(mutations);
 			Set<String> mutHashs = new HashSet<String>();
 	
-			Set<String> t = ms.getAllMutationsId();
-			
-			for(String m : t){
+			for(String m : ms.listMutants()){
 				MutantIfos mi = (MutantIfos) ms.getMutationStats(m);
 	
 				if(mi.getHash() == null){

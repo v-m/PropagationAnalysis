@@ -1,9 +1,13 @@
 package com.vmusco.smf.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.vmusco.smf.mutation.Mutation;
 
 public abstract class MutationsSetTools {
 	
@@ -73,5 +77,31 @@ public abstract class MutationsSetTools {
 	
 	public static boolean isMutantAlive(String[] failing, String[] hanging, String[] mutfailing, String[] muthanging){
 		return areSetsSimilars(failing, mutfailing) && areSetsSimilars(hanging, muthanging);
+	}
+
+	public static String[] shuffle(String[] allMutations) {
+		List<String> l = new ArrayList<String>();
+		
+		for(String m : allMutations){
+			l.add(m);
+		}
+		
+		Collections.shuffle(l);
+		return (String[]) l.toArray(new String[0]);
+	}
+
+	public static String[] shuffleAndSlice(String[] allMutations, int nb) {
+		String[] shuffled = shuffle(allMutations);
+		return slice(shuffled, nb);
+	}
+
+	public static String[] slice(String[] allMutations, int nb) {
+		String[] ret = new String[allMutations.length>nb?nb:allMutations.length];
+		
+		for(int i=0; i<ret.length; i++){
+			ret[i] = allMutations[i];
+		}
+		
+		return ret;
 	}
 }

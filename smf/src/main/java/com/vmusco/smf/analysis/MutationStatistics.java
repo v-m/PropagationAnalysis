@@ -65,10 +65,18 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	}
 
 	/**
-	 * List viables mutants
+	 * List all mutants
 	 * @return
 	 */
 	public String[] listMutants(){
+		return (String[]) mutations.keySet().toArray(new String[0]);
+	}
+
+	/**
+	 * List viables mutants
+	 * @return
+	 */
+	public String[] listViableMutants(){
 		ArrayList<String> re = new ArrayList<String>();
 
 		for(String s : mutations.keySet().toArray(new String[0])){
@@ -80,48 +88,50 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		return re.toArray(new String[0]);
 	}
 
-
 	/**
-	 * This method check which mutants has already been tested with test suites and
-	 * load the result. It also return an array with all proceeded mutants
-	 * @param nb the number to consider. zero for all
-	 * @throws Exception 
+	 * List all viables mutants which has been tested (and eventually load them)
+	 * @param load true if the structure must be loaded at the same time
+	 * @return
+	 * @throws PersistenceException 
 	 */
-	public String[] loadResultsForExecutedTestOnMutants(int nb) throws PersistenceException{
+	public String[] listViableAndRunnedMutants(boolean load) throws PersistenceException{
 		ArrayList<String> re = new ArrayList<String>();
-		File ff = new File(resolveName(ps.getMutantsTestResults()));
 
-		List<String> l = new ArrayList<>();
-		for(String f : ff.list()){
-			l.add(f);
-		}
-
-		Collections.sort(l);
-
-		while(nb>0 && l.size() > nb){
-			l.remove(l.size() - 1);
-		}
-
-		for(String fs : l){
-			File f = new File(ff, fs);
-			if(f.length() > 0) {
-				String name = f.getName();
-				if(name.endsWith(".xml")){
-					name = name.substring(0, name.length()-4);
-				}
-
-				MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(f);
-				pers.loadState(mutations.get(name));
-				re.add(name);
+		for(String s : listViableMutants()){
+			if(load){
+				try {
+					loadMutationStats(s);
+					re.add(s);
+				} catch (MutationNotRunException e) { }
+			}else{
+				if(isMutantExecutionPersisted(s))
+					re.add(s);
 			}
 		}
 
 		return re.toArray(new String[0]);
 	}
 
-	public boolean checkIfExecutionExists(String mutid){
-		File ff = new File(resolveName(ps.getMutantsTestResults()), mutid+".xml");
-		return  ff.exists();
+	/**
+	 * List all viables but killed mutants
+	 * @param load true if the structure must be loaded at the same time
+	 * @return
+	 * @throws PersistenceException 
+	 */
+	public String[] listViableButKilledMutants() throws PersistenceException{
+		ArrayList<String> re = new ArrayList<String>();
+
+		for(String s : listViableAndRunnedMutants(true)){
+			try{
+				if(isMutantKilled(s)){
+					re.add(s);
+				}
+			}catch(MutationNotRunException e){
+				// Should never occurs !
+			}
+		}
+
+		return re.toArray(new String[0]);
 	}
 
 	public MutationStatistics(ProcessStatistics ps, Class<T> mutator, String name) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
@@ -231,8 +241,17 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		return mutations.size();
 	}
 
-	public Set<String> getAllMutationsId(){
-		return (Set<String>) mutations.keySet();
+	private File getMutantExecutionFile(String mutationId){
+		return new File(getMutantFileResolved(mutationId));
+	}
+
+	/**
+	 * Determine if a file for mutant execution test has been generated (whatever content)
+	 * @param mutationId
+	 * @return
+	 */
+	public boolean isMutantExecutionPersisted(String mutationId){
+		return getMutantExecutionFile(mutationId).exists();
 	}
 
 	/**
@@ -244,18 +263,17 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	 * @throws MutationNotRunException 
 	 */
 	public MutantIfos loadMutationStats(String mutationId) throws PersistenceException, MutationNotRunException {
-		File ff = new File(resolveName(ps.getMutantsTestResults()));
-		File f = new File(ff, mutationId+".xml");
-
-		if(!f.exists())
+		if(mutations.get(mutationId).isExecutionKnown())
+		
+		if(!isMutantExecutionPersisted(mutationId))
 			throw new MutationNotRunException();
 
-		MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(f);
+		MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(getMutantExecutionFile(mutationId));
 		pers.loadState(mutations.get(mutationId));
 
 		return mutations.get(mutationId);
 	}
-	
+
 	/**
 	 * Return the statistics for a mutation execution.
 	 * If the MutationStatistics object has been loaded, the results for this exection are not loaded
@@ -297,7 +315,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	public void loadOrCreateMutants(boolean reset, MutationCreationListener mcl) throws Exception {
 		loadOrCreateMutants(reset, mcl, 0);
 	}
-	
+
 	public void loadOrCreateMutants(boolean reset, MutationCreationListener mcl, int safepersist) throws Exception {
 		loadOrCreateMutants(reset, mcl, -1, safepersist);
 	}
@@ -317,7 +335,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 			InterruptionManager.notifyLastIterationFinished();
 		}
 	}
-	
+
 
 	public void saveMutants() throws PersistenceException {
 		File f = new File(getConfigFileResolved());
@@ -341,7 +359,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 
 	public boolean isMutantAlive(String mutid) throws MutationNotRunException, PersistenceException {
 		MutantIfos mutationStats = loadMutationStats(mutid);
-		
+
 		return MutationsSetTools.areSetsSimilars(ps.getFailingTestCases(), mutationStats.getExecutedTestsResults().getMutantFailingTestCases()) &&
 				MutationsSetTools.areSetsSimilars(ps.getHangingTestCases(), mutationStats.getExecutedTestsResults().getMutantHangingTestCases());
 	}

@@ -68,7 +68,7 @@ public class PropagationEstimer implements MutantTestProcessingListener{
 		MutationStatistics<?> ms = MutationStatistics.loadState(cmd.getArgs()[1]);
 		ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
 		// Load the mutations in ms here
-		String[] allMutations = ms.loadResultsForExecutedTestOnMutants(0);
+		String[] allMutations = ms.listViableAndRunnedMutants(true);
 
 		// Load the UseGraph
 		Graph usegraph = Graph.getNewGraph(GraphApi.GRAPH_STREAM);

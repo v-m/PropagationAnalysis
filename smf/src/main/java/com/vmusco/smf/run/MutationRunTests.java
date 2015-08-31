@@ -95,7 +95,7 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 				
 				TestingFunctions.processMutants(ms, al, 0, mutations.length, tel, false);
 			}else{
-				mutations = ms.listMutants();
+				mutations = ms.listViableMutants();
 
 				MutationRunTests tel = new MutationRunTests(mutations.length);
 				
