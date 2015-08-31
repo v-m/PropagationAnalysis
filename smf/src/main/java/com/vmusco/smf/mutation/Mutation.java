@@ -356,7 +356,6 @@ public final class Mutation {
 	
 				nbmutants++;
 				if(safepersist > 0 && nbmutants%safepersist == 0){
-					ConsoleTools.write("Safe persisting...");
 					ms.saveMutants();
 				}
 	

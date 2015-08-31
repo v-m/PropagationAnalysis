@@ -58,6 +58,8 @@ public class CreateMutation implements MutationCreationListener{
 		options.addOption(opt);
 		opt = new Option("s", "safe-persist", true, "specify the number of mutant to generate before do an intermediate safety persistance, 0 for no intermediate safe persistance (default: 0)");
 		options.addOption(opt);
+		opt = new Option("P", "paranoid", false, "save after each generated mutant (overwrite -s behavior, similar as -s 1)");
+		options.addOption(opt);
 		opt = new Option("R", "reset", false, "drop all previously generated mutants if so (default: false)");
 		options.addOption(opt);
 
@@ -130,6 +132,11 @@ public class CreateMutation implements MutationCreationListener{
 		
 		if(cmd.hasOption("safe-persist"))
 			safepersist = Integer.parseInt(cmd.getOptionValue("safe-persist"));
+		
+		if(cmd.hasOption("paranoid")){
+			ConsoleTools.write("Running in paranoid mode. For preformances reasons, avoid it if not required.\n");
+			safepersist = 1;
+		}
 		
 		if(cmd.hasOption("nb-mutants"))
 			nbmut = Integer.parseInt(cmd.getOptionValue("nb-mutants"));
