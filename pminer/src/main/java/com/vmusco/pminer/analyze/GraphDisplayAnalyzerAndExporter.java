@@ -7,6 +7,11 @@ import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.NodeMarkers;
 
+/**
+ * This class persists the graphical visualization obtained with GraphStream
+ * @author Vincenzo Musco - http://www.vmusco.com
+ *
+ */
 public class GraphDisplayAnalyzerAndExporter extends GraphDisplayAnalyzer{
 
 	private String persistTo;

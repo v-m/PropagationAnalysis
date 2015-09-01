@@ -7,7 +7,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
-import com.vmusco.pminer.analyze.PrecisionRecallFscore;
+import com.vmusco.pminer.analyze.PRFStatistics;
 import com.vmusco.pminer.compute.ImpactPredictionListener;
 import com.vmusco.pminer.compute.JavaPDGImpactPredictionScore;
 import com.vmusco.smf.analysis.MutantIfos;
@@ -33,7 +33,7 @@ public class JavaPDGAnalyzer {
 
 		MutationStatistics<?> ms = MutationStatistics.loadState(cmd.getArgs()[1]);
 		
-		PrecisionRecallFscore prf = JavaPDGImpactPredictionScore.runOverMutants(cmd.getArgs()[0], ms , new ImpactPredictionListener() {
+		PRFStatistics prf = JavaPDGImpactPredictionScore.runOverMutants(cmd.getArgs()[0], ms , new ImpactPredictionListener() {
 			@Override
 			public void fireTestIntersection(String string) {
 			}

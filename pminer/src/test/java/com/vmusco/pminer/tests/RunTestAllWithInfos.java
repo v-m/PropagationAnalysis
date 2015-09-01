@@ -88,8 +88,8 @@ public class RunTestAllWithInfos {
 		Collections.sort(al[0]);
 		Collections.sort(al[1]);
 		Collections.sort(al[2]);
-		System.out.println("MEDIAN 0 = "+Tools.median(al[0]));
-		System.out.println("MEDIAN 1 = "+Tools.median(al[1]));
-		System.out.println("MEDIAN 2 = "+Tools.median(al[2]));
+		System.out.println("MEDIAN 0 = "+Tools.median(Tools.toDoubleArray(al[0])));
+		System.out.println("MEDIAN 1 = "+Tools.median(Tools.toDoubleArray(al[1])));
+		System.out.println("MEDIAN 2 = "+Tools.median(Tools.toDoubleArray(al[2])));
 	}
 }

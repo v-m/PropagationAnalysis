@@ -10,18 +10,6 @@ import com.vmusco.smf.exceptions.MutationNotRunException;
 
 
 public abstract class MutantTestAnalyzer {
-
-	public static <T> Set<T> intersection(Set<T> list1, Set<T> list2) {
-        Set<T> list = new HashSet<T>();
-
-        for (T t : list1) {
-            if(list2.contains(t)) {
-                list.add(t);
-            }
-        }
-
-        return list;
-	}
 	
 	/***
 	 * This method is called once before startng the execution (i.e. to display headers ?)

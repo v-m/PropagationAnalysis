@@ -46,13 +46,13 @@ public class MutantExecutionIfos {
 		this.mutantErrorOnTestSuite = mutantErrorOnTestSuite;
 	}
 	public void setMutantFailingTestCases(String[] mutantFailingTestCases) {
-		this.mutantFailingTestCases = mutantFailingTestCases;
+		this.mutantFailingTestCases = ProcessStatistics.fixTestSignatures(mutantFailingTestCases);
 	}
 	public void setMutantHangingTestCases(String[] mutantHangingTestCases) {
-		this.mutantHangingTestCases = mutantHangingTestCases;
+		this.mutantHangingTestCases = ProcessStatistics.fixTestSignatures(mutantHangingTestCases);
 	}
 	public void setMutantIgnoredTestCases(String[] mutantIgnoredTestCases) {
-		this.mutantIgnoredTestCases = mutantIgnoredTestCases;
+		this.mutantIgnoredTestCases = ProcessStatistics.fixTestSignatures(mutantIgnoredTestCases);
 	}
 	public void setRunTestOnMutantTime(long runTestOnMutantTime) {
 		this.runTestOnMutantTime = runTestOnMutantTime;

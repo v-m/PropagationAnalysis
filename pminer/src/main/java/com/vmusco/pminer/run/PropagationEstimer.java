@@ -13,12 +13,12 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
-import com.vmusco.pminer.MutantTestProcessingListener;
 import com.vmusco.pminer.UseGraph;
 import com.vmusco.pminer.analyze.ExploreMutants;
 import com.vmusco.pminer.analyze.GraphDisplayAnalyzer;
 import com.vmusco.pminer.analyze.GraphDisplayAnalyzerAndExporter;
 import com.vmusco.pminer.analyze.MutantTestAnalyzer;
+import com.vmusco.pminer.analyze.MutantTestProcessingListener;
 import com.vmusco.pminer.analyze.StatisticsMutantAnalyzer;
 import com.vmusco.pminer.persistence.PropagationStatistics;
 import com.vmusco.pminer.persistence.XmlPminerPersister;
@@ -29,7 +29,12 @@ import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.GraphApi;
 import com.vmusco.softminer.graphs.persistance.GraphML;
 
-public class PropagationEstimer implements MutantTestProcessingListener{
+/**
+ * Use now {@link MutationStatsRunner}
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
+@Deprecated
+public class PropagationEstimer implements MutantTestProcessingListener<StatisticsMutantAnalyzer>{
 	private static final Class<?> thisclass = PropagationEstimer.class;
 
 	private ArrayList<MutantTestAnalyzer> analyzeListeners = new ArrayList<MutantTestAnalyzer>();
@@ -124,7 +129,7 @@ public class PropagationEstimer implements MutantTestProcessingListener{
 					propaGraph.getBasinGraph(), 
 					/*new File(visusFolder, mutation).getAbsolutePath()*/null, false, false);
 
-			mta.setBuggyNodeAndOriginalGraph(ifos.getMutationIn(), usegraph);
+			//mta.setBuggyNodeAndOriginalGraph(ifos.getMutationIn(), usegraph);
 			pe.analyzeListeners.add(mta);
 
 			// retrieved IS list of tests impacted by the introduced bug (determined using basin)
@@ -208,26 +213,23 @@ public class PropagationEstimer implements MutantTestProcessingListener{
 		}
 	}
 
-	public void aMutantHasBeenProceeded(MutantTestAnalyzer a) {
-		if(a instanceof StatisticsMutantAnalyzer){
-			StatisticsMutantAnalyzer stats = (StatisticsMutantAnalyzer) a;
+	public void aMutantHasBeenProceeded(StatisticsMutantAnalyzer a) {
+		StatisticsMutantAnalyzer stats = (StatisticsMutantAnalyzer) a;
 
-			System.out.print(stats.getLastMutationId());
-			System.out.print("\t");
-			System.out.print(stats.getLastGraphSize()+"\t"+
-					stats.getLastNumberOfCasesDeterminedByGraphs()+"\t"+
-					stats.getLastNumberOfCasesDeterminedByMutation()+"\t"+
-					stats.getLastNumberOfCasesDeterminedByBoth()+"\t");
+		System.out.print(stats.getLastMutationId());
+		System.out.print("\t");
+		System.out.print(stats.getLastGraphSize()+"\t"+
+				stats.getLastNumberOfCasesDeterminedByGraphs()+"\t"+
+				stats.getLastNumberOfCasesDeterminedByMutation()+"\t"+
+				stats.getLastNumberOfCasesDeterminedByBoth()+"\t");
 
-			System.out.print(stats.getLastNumberOfCasesDeterminedOnlyByGraphs()+"\t"+
-					stats.getLastNumberOfCasesDeterminedOnlyByMutation()+"\t");
+		System.out.print(stats.getLastNumberOfCasesDeterminedOnlyByGraphs()+"\t"+
+				stats.getLastNumberOfCasesDeterminedOnlyByMutation()+"\t");
 
-			System.out.println(nf.format(stats.getLastPrecision())+"\t"+
-					nf.format(stats.getLastRecall())+"\t"+
-					nf.format(stats.getLastFScore())+"\t"+
-					"=> "+stats.getLastMutationInsertionPoint());
-
-		}
+		System.out.println(nf.format(stats.getLastPrecision())+"\t"+
+				nf.format(stats.getLastRecall())+"\t"+
+				nf.format(stats.getLastFScore())+"\t"+
+				"=> "+stats.getLastMutationInsertionPoint());
 	}
 
 	private static void printDataHeader(String before){

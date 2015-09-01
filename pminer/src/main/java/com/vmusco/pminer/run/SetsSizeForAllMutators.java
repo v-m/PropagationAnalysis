@@ -18,9 +18,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.FileUtils;
 
-import com.vmusco.pminer.MutantTestProcessingListener;
 import com.vmusco.pminer.analyze.ExploreMutants;
 import com.vmusco.pminer.analyze.MutantTestAnalyzer;
+import com.vmusco.pminer.analyze.MutantTestProcessingListener;
 import com.vmusco.pminer.analyze.StatisticsMutantAnalyzer;
 import com.vmusco.pminer.persistence.UseGraphStatsXml;
 import com.vmusco.smf.analysis.MutationStatistics;
@@ -30,7 +30,7 @@ import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.GraphApi;
 import com.vmusco.softminer.graphs.persistance.GraphML;
 
-public class SetsSizeForAllMutators implements MutantTestProcessingListener {
+public class SetsSizeForAllMutators implements MutantTestProcessingListener<MutantTestAnalyzer> {
 	private static final Class<?> thisclass = PropagationEstimer.class;
 
 
@@ -58,7 +58,7 @@ public class SetsSizeForAllMutators implements MutantTestProcessingListener {
 				|| (cmd.getArgs().length == 1 && !cmd.hasOption("load"))
 				||  cmd.hasOption("help")){
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp(thisclass.getCanonicalName()+" [options] <mutationRootFolder> [<usegraph>]", options);
+			formatter.printHelp(thisclass.getCanonicalName()+" [options] <mutationRootFolder> [<usegraph>]", options);
 			return;
 		}
 

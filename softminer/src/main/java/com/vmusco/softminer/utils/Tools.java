@@ -1,38 +1,48 @@
 package com.vmusco.softminer.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 public abstract class Tools {
-	public static Double median(ArrayList<Double> alist){
-		if(alist.size() == 0)
+	public static double median(double[] alist){
+		Arrays.sort(alist);
+		
+		if(alist.length == 0)
 			return -1d;
 		
-		if(alist.size()%2==0){
-			Double a = alist.get(alist.size()/2);
-			Double b = alist.get((alist.size()/2)-1);
+		if(alist.length % 2 == 0){
+			double a = alist[alist.length / 2];
+			double b = alist[(alist.length / 2) - 1];
 			
 			return (a + b) / 2;
 		}else{
-			return alist.get((int)Math.ceil(alist.size()/2));
+			return alist[(int)Math.ceil(alist.length/2)];
 		}
 	}
 	
-	public static Integer medianInt(ArrayList<Integer> alist){
-		if(alist.size() == 0)
+	public static double medianInt(int[] alist){
+		//Collections.sort(alist);
+		Arrays.sort(alist);
+		
+		if(alist.length == 0)
 			return -1;
 		
-		if(alist.size()%2==0){
-			Integer a = alist.get(alist.size()/2);
-			Integer b = alist.get((alist.size()/2)-1);
+		if(alist.length % 2 == 0){
+			int a = alist[alist.length / 2];
+			int b = alist[(alist.length / 2) - 1];
 			
-			return (a + b) / 2;
+			return ((a + b) * 1d) / 2;
 		}else{
-			return alist.get((int)Math.ceil(alist.size()/2));
+			return alist[(int)Math.ceil(alist.length/2)];
 		}
 	}
 	
-	public static TypeWithInfo[] medianWithInfo(ArrayList<TypeWithInfo> alist){
+	public static TypeWithInfo[] medianWithInfo(List<TypeWithInfo> alist){
+		Collections.sort(alist);
+		
 		if(alist.size() == 0)
 			return null;
 		
@@ -46,18 +56,63 @@ public abstract class Tools {
 		}
 	}
 	
-	public static Double average(ArrayList<Double> alist){
-		if(alist.size() == 0)
+	public static double average(double[] alist){
+		if(alist.length == 0)
 			return -1d;
 		
 		double ret = 0.0;
 		
-		Iterator<Double> iterator = alist.iterator();
-		
-		while(iterator.hasNext()){
-			ret += iterator.next();
+		for(double i : alist){
+			ret += i;
 		}
 		
-		return ret/alist.size();
+		return ret/alist.length;
+	}
+	
+	public static double average(int[] alist){
+		if(alist.length == 0)
+			return -1;
+		
+		double ret = 0.0;
+		
+		for(int i : alist){
+			ret += i;
+		}
+		
+		ret = ret * 1d;
+		
+		return ret/alist.length;
+	}
+	
+	/**
+	 * Convert to an array. Makes a copy, thus sorting the array is safe.
+	 * @param list
+	 * @return
+	 */
+	public static double[] toDoubleArray(List<Double> list){
+		double[] ret = new double[list.size()];
+		
+		int i = 0;
+		for(Double d : list){
+			ret[i++] = d;
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Convert to an array. Makes a copy, thus sorting the array is safe.
+	 * @param list
+	 * @return
+	 */
+	public static int[] toIntArray(List<Integer> list){
+		int[] ret = new int[list.size()];
+		
+		int i = 0;
+		for(Integer d : list){
+			ret[i++] = d;
+		}
+		
+		return ret;
 	}
 }

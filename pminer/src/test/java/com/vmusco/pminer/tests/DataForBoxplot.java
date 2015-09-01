@@ -61,7 +61,7 @@ public class DataForBoxplot {
 			
 			
 			Collections.sort(al);
-			System.out.println(projname+" => "+Tools.medianInt(al)+" - max = "+al.get(al.size()-1));
+			System.out.println(projname+" => "+Tools.medianInt(Tools.toIntArray(al))+" - max = "+al.get(al.size()-1));
 			
 			for(Integer i : al)
 				System.out.println(i);

@@ -291,7 +291,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	}
 
 	/**
-	 * Load the mutation stats from file instead of returning directly from the structure
+	 * Load the mutation stats from file instead of returning directly from the structure (except if already loaded)
 	 * Required because loading the state of MutationStatistics do not load the mutant states
 	 * @param mutationId
 	 * @return
@@ -299,14 +299,13 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	 * @throws MutationNotRunException 
 	 */
 	public MutantIfos loadMutationStats(String mutationId) throws PersistenceException, MutationNotRunException {
-		if(mutations.get(mutationId).isExecutionKnown())
-		
-		if(!isMutantExecutionPersisted(mutationId))
-			throw new MutationNotRunException();
-
-		MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(getMutantExecutionFile(mutationId));
-		pers.loadState(mutations.get(mutationId));
-
+		if(!mutations.get(mutationId).isExecutionKnown()){
+			if(!isMutantExecutionPersisted(mutationId))
+				throw new MutationNotRunException();
+	
+			MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(getMutantExecutionFile(mutationId));
+			pers.loadState(mutations.get(mutationId));
+		}
 		return mutations.get(mutationId);
 	}
 

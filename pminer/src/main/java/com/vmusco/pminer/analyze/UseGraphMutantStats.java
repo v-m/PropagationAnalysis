@@ -7,6 +7,7 @@ import com.vmusco.pminer.UseGraph;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
+import com.vmusco.smf.utils.MutationsSetTools;
 
 public class UseGraphMutantStats {
 	public String mutationId;
@@ -124,7 +125,10 @@ public class UseGraphMutantStats {
 		}
 
 		// inter IS list of tests impacted by the introduced bug (determined by BOTH)
-		data_inter = MutantTestAnalyzer.intersection(data_retrieved, data_relevant);
+		data_inter = new HashSet<String>();
+		for(String tt : MutationsSetTools.setIntersection(graphDetermined, ExploreMutants.purifyFailAndHangResultSetForMutant(ps, mi))){
+			data_inter.add(tt);
+		}
 
 		// FALSE POSITIVES (only detected using mutation)
 		data_graphOnly = new HashSet<String>();

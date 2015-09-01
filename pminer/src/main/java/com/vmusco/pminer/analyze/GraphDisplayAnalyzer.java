@@ -1,12 +1,9 @@
 package com.vmusco.pminer.analyze;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.vmusco.pminer.UseGraph;
+import com.vmusco.pminer.compute.CIAEstimationSets;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
@@ -15,6 +12,10 @@ import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.NodeShape;
 import com.vmusco.softminer.graphs.Graph.NodeSize;
 
+/**
+ * This class is used to display the impacts as a sub graph visualization
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 	private static final String BUGGY_NODE_COLOR = "red";
 	private static final String INTERSECTED_NODES_COLOR = "blue";
@@ -28,8 +29,6 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 	
 	protected boolean requireResave = false;
 	protected Graph g;
-	private String buggyNode = null;
-	private Graph originalGraph = null;
 	protected boolean showLinkDetailsOnConsole = false;
 	protected boolean displayWindow;
 	
@@ -40,34 +39,13 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 	}
 
 	protected void makeUp(ProcessStatistics ps,
-			/*String mutationOperator,
-			String mutationId,*/
 			MutantIfos mi,
 			String[] graphDetermined, UseGraph basin) throws MutationNotRunException {
+		
 		String[] mutationDetermined = ExploreMutants.purifyFailAndHangResultSetForMutant(ps, mi); 
-		//String mutationInsertionPosition = ps.mutations.get(mutationOperator).mutationIn.get(mutationId);
 		String mutationInsertionPosition = mi.getMutationIn();
-		
-		// PRELEMINARY STATITSTICS
-		Set<String> relevant = new HashSet<String>();
-		for(String s : mutationDetermined){
-			relevant.add(s);
-		}
-				
-		Set<String> retrieved = new HashSet<String>();
-		for(String s : graphDetermined){
-			retrieved.add(s);
-		}
-		
-		Set<String> inter = intersection(retrieved, relevant);
-		// FALSE POSITIVES (only detected using graphs)
-		List<String> tempList = new ArrayList<String>();
-		tempList.addAll(retrieved);
-		tempList.removeAll(inter);
-		// FALSE NEGATIVES (only detected using mutation)
-		List<String> tempList2 = new ArrayList<String>();
-		tempList2.addAll(relevant);
-		tempList2.removeAll(inter);
+
+		CIAEstimationSets sets = new CIAEstimationSets(graphDetermined, mutationDetermined);
 		
 		// STYLE THE BUG NODE
     	g.colorNode(mutationInsertionPosition, BUGGY_NODE_COLOR);
@@ -75,70 +53,27 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 		g.sizeNode(mutationInsertionPosition, NodeSize.LARGE);
 		
 		// MATCHING CASES
-		for(String aTest : inter){
+		for(String aTest : sets.getFoundImpactedSet()){
         	g.colorNode(aTest+"()", INTERSECTED_NODES_COLOR);
         	g.shapeNode(aTest+"()", INTERSECTED_NODES_SHAPE);
 		}
 		
-		for(String aTest : tempList.toArray(new String[tempList.size()])){
+		for(String aTest : sets.getFalsePositivesImpactedSet()){
         	g.colorNode(aTest+"()", NODES_ONLY_WITH_GRAPH_COLOR);
         	g.shapeNode(aTest+"()", NODES_ONLY_WITH_GRAPH_SHAPE);
 		}
 		
-		for(String aTest : tempList2.toArray(new String[tempList2.size()])){
+		for(String aTest : sets.getDiscoveredImpactedSet()){
 			//g.addNode(aTest+"()", false);
 			g.colorNode(aTest+"()", NODES_ONLY_WITH_EXEC_COLOR);
 			g.shapeNode(aTest+"()", NODES_ONLY_WITH_EXEC_SHAPE);
 		}
 	}
+	
 	@Override
 	public void fireIntersectionFound(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propatime) throws MutationNotRunException{
-		
 		makeUp(ps, mi, graphDetermined, basin);
-		
-		if(showLinkDetailsOnConsole){
-			String[] mutationDetermined = ExploreMutants.purifyFailAndHangResultSetForMutant(ps, mi); 
-			
-			// PRELEMINARY STATITSTICS
-			Set<String> relevant = new HashSet<String>();
-			for(String s : mutationDetermined){
-				relevant.add(s);
-			}
-					
-			Set<String> retrieved = new HashSet<String>();
-			for(String s : graphDetermined){
-				retrieved.add(s);
-			}
-			
-			Set<String> inter = intersection(retrieved, relevant);
-			// FALSE POSITIVES (only detected using graphs)
-			List<String> tempList = new ArrayList<String>();
-			tempList.addAll(retrieved);
-			tempList.removeAll(inter);
-			// FALSE NEGATIVES (only detected using mutation)
-			List<String> tempList2 = new ArrayList<String>();
-			tempList2.addAll(relevant);
-			tempList2.removeAll(inter);
-			
-			for(String aTest : inter){
-					System.out.println("\u001b[32m"+"\t"+aTest+"\u001b[0m");
-			}
-			
-			for(String aTest : inter){
-				System.out.println("\u001b[32m"+"\t"+aTest+"\u001b[0m");
-			}
-			
-			for(String aTest : tempList.toArray(new String[tempList.size()])){
-				System.out.println("\u001b[31m"+"\t"+aTest+"\u001b[0m");
-			}
-			
-			for(String aTest : tempList2.toArray(new String[tempList2.size()])){
-				System.out.println("\u001b[90m"+"\t"+aTest+"\u001b[0m");
-			}
-		}
-		
-		if(displayWindow)
-			basin.getBasinGraph().bestDisplay();
+		basin.getBasinGraph().bestDisplay();
 	}
 	
 	public void changeEdgesWeights(Map<EdgeIdentity, Float> weights){
@@ -155,10 +90,4 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 				g.colorEdge(k.getFrom(), k.getTo(), "green");
 		}
 	}
-
-	public void setBuggyNodeAndOriginalGraph(String buggyNode, Graph originalGraph) {
-		this.buggyNode = buggyNode;
-		this.originalGraph = originalGraph;
-	}
-
 }

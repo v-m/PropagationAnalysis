@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vmusco.pminer.analyze.PrecisionRecallFscore;
+import com.vmusco.pminer.analyze.PRFStatistics;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
@@ -22,8 +22,8 @@ import com.vmusco.softminer.graphs.Graph.GraphApi;
 
 public abstract class JavaPDGImpactPredictionScore {
 
-	public static PrecisionRecallFscore runOverMutants(String dbpath, MutationStatistics<?> ms, ImpactPredictionListener ipl) throws MutationNotRunException, PersistenceException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		PrecisionRecallFscore prf = new PrecisionRecallFscore();
+	public static PRFStatistics runOverMutants(String dbpath, MutationStatistics<?> ms, ImpactPredictionListener ipl) throws MutationNotRunException, PersistenceException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		PRFStatistics prf = new PRFStatistics();
 
 		System.out.println("GETTING METHODS ENTRIES FROM DATABASE");
 		Map<Long, JavaPDGTriplet> dbentries = getMethodsFromDerby(dbpath);
@@ -66,10 +66,10 @@ public abstract class JavaPDGImpactPredictionScore {
 
 			String[] ais = mi.getExecutedTestsResults().getMutantFailingAndHangingTestCases();
 			String[] cis = impactedAccordingToJavaPdg.toArray(new String[0]);
-			prf.newRun(ais, cis);
-			ipl.fireOneMutantResults(PrecisionRecallFscore.precision(ais, cis), 
-					PrecisionRecallFscore.recall(ais, cis), 
-					PrecisionRecallFscore.fscore(ais, cis));
+			prf.cumulate(ais, cis);
+			ipl.fireOneMutantResults(PRFStatistics.precision(ais, cis), 
+					PRFStatistics.recall(ais, cis), 
+					PRFStatistics.fscore(ais, cis));
 		}
 
 		return prf;

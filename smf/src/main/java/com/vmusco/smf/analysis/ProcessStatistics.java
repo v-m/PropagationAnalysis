@@ -619,7 +619,7 @@ public class ProcessStatistics implements Serializable{
 	}
 	
 	public void setTestCases(String[] testCases) {
-		this.testCases = testCases;
+		this.testCases = ProcessStatistics.fixTestSignatures(testCases);
 	}
 	
 	
@@ -628,7 +628,7 @@ public class ProcessStatistics implements Serializable{
 	}
 	
 	public void setFailingTestCases(String[] failingTestCases) {
-		this.failingTestCases = failingTestCases;
+		this.failingTestCases = ProcessStatistics.fixTestSignatures(failingTestCases);
 	}
 	
 	public String[] getIgnoredTestCases() {
@@ -636,7 +636,7 @@ public class ProcessStatistics implements Serializable{
 	}
 	
 	public void setIgnoredTestCases(String[] ignoredTestCases) {
-		this.ignoredTestCases = ignoredTestCases;
+		this.ignoredTestCases = ProcessStatistics.fixTestSignatures(ignoredTestCases);
 	}
 	
 	public String[] getHangingTestCases() {
@@ -644,9 +644,19 @@ public class ProcessStatistics implements Serializable{
 	}
 	
 	public void setHangingTestCases(String[] hangingTestCases) {
-		this.hangingTestCases = hangingTestCases;
+		this.hangingTestCases = ProcessStatistics.fixTestSignatures(hangingTestCases);
 	}
 	
+	public static String[] fixTestSignatures(String[] hangingTestCases2) {
+		String[] ret = new String[hangingTestCases2.length];
+		
+		for(int i = 0; i < hangingTestCases2.length; i++){
+			ret[i] = ProcessStatistics.fixTestSignature(hangingTestCases2[i]);
+		}
+		
+		return ret;
+	}
+
 	public String[] getErrorOnTestSuite() {
 		return errorOnTestSuite;
 	}

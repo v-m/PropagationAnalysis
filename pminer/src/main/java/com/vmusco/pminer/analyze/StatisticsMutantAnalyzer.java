@@ -3,7 +3,6 @@ package com.vmusco.pminer.analyze;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import com.vmusco.pminer.MutantTestProcessingListener;
 import com.vmusco.pminer.UseGraph;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
@@ -16,9 +15,10 @@ import com.vmusco.softminer.utils.TypeWithInfo;
  * Considered metrics are: 
  * 	- precision/recall for each with their avg/median values
  * 	- number of error tests using mutation, using graph, basin size and avg/median values
+ * @see StatisticsDisplayer
  * @author Vincenzo Musco - vincenzo.musco@inria.fr
- *
  */
+@Deprecated
 public class StatisticsMutantAnalyzer extends MutantTestAnalyzer {
 	
 	// Numerical stats
@@ -122,12 +122,12 @@ public class StatisticsMutantAnalyzer extends MutantTestAnalyzer {
 		}
 		needSorting = true;
 		
-		if(mta != null)
-			mta.aMutantHasBeenProceeded(this);
-		
 		allMutatObjs.add(ugms);
 		
 		this.mutstat = ugms;
+		
+		if(mta != null)
+			mta.aMutantHasBeenProceeded(this);
 	}
 
 	@Override
@@ -278,115 +278,115 @@ public class StatisticsMutantAnalyzer extends MutantTestAnalyzer {
 
 	public double getAvgPrecision(){
 		sort();
-		return Tools.average(precmedian);
+		return Tools.average(Tools.toDoubleArray(precmedian));
 	}
 
 	public double getMedianPrecision(){
 		sort();
-		return Tools.median(precmedian);
+		return Tools.median(Tools.toDoubleArray(precmedian));
 	}
 	
 	public double getAvgExecTime(){
 		sort();
-		return Tools.average(exec_time);
+		return Tools.average(Tools.toDoubleArray(exec_time));
 	}
 
 	public double getMedianExecTime(){
 		sort();
-		return Tools.median(exec_time);
+		return Tools.median(Tools.toDoubleArray(exec_time));
 	}
 	
 	
 	public double getAvgMoreSizes(){
 		sort();
-		return Tools.average(mores);
+		return Tools.average(Tools.toDoubleArray(mores));
 	}
 
 	public double getMedianMoreSizes(){
 		sort();
-		return Tools.median(mores);
+		return Tools.median(Tools.toDoubleArray(mores));
 	}
 	
 	
 	
 	public double getAvgLessSizes(){
 		sort();
-		return Tools.average(lesses);
+		return Tools.average(Tools.toDoubleArray(lesses));
 	}
 
 	public double getMedianLessSizes(){
 		sort();
-		return Tools.median(lesses);
+		return Tools.median(Tools.toDoubleArray(lesses));
 	}
 
 	public double getAvgRecall(){
 		sort();
-		return Tools.average(recamedian);
+		return Tools.average(Tools.toDoubleArray(recamedian));
 	}
 
 	public double getMedianRecall(){
 		sort();
-		return Tools.median(recamedian);
+		return Tools.median(Tools.toDoubleArray(recamedian));
 	}
 
 	public double getAvgFScore(){
 		sort();
-		return Tools.average(fscomedian);
+		return Tools.average(Tools.toDoubleArray(fscomedian));
 	}
 
 	public double getMedianFScore(){
 		sort();
-		return Tools.median(fscomedian);
+		return Tools.median(Tools.toDoubleArray(fscomedian));
 	}
 
 	public double getAvgCasesFoundByGraph(){
 		sort();
-		return Tools.average(basinall);
+		return Tools.average(Tools.toDoubleArray(basinall));
 	}
 
 	public double getMedianCasesFoundByGraph(){
 		sort();
-		return Tools.median(basinall);
+		return Tools.median(Tools.toDoubleArray(basinall));
 	}
 
 	public double getAvgCasesFoundByMutation(){
 		sort();
-		return Tools.average(mutatall);
+		return Tools.average(Tools.toDoubleArray(mutatall));
 	}
 
 	public double getMedianCasesFoundByMutation(){
 		sort();
-		return Tools.median(mutatall);
+		return Tools.median(Tools.toDoubleArray(mutatall));
 	}
 
 	public double getAvgCasesFoundByBoth(){
 		sort();
-		return Tools.average(bothall);
+		return Tools.average(Tools.toDoubleArray(bothall));
 	}
 
 	public double getMedianCasesFoundByBoth(){
 		sort();
-		return Tools.median(bothall);
+		return Tools.median(Tools.toDoubleArray(bothall));
 	}
 
 	public double getAvgCasesFoundOnlyByGraph(){
 		sort();
-		return Tools.average(graphonlyall);
+		return Tools.average(Tools.toDoubleArray(graphonlyall));
 	}
 
 	public double getMedianCasesFoundOnlyByGraph(){
 		sort();
-		return Tools.median(graphonlyall);
+		return Tools.median(Tools.toDoubleArray(graphonlyall));
 	}
 
 	public double getAvgCasesFoundOnlyByMutation(){
 		sort();
-		return Tools.average(mutonlyall);
+		return Tools.average(Tools.toDoubleArray(mutonlyall));
 	}
 
 	public double getMedianCasesFoundOnlyByMutation(){
 		sort();
-		return Tools.median(mutonlyall);
+		return Tools.median(Tools.toDoubleArray(mutonlyall));
 	}
 
 	public double getAvgGraphSize(){
@@ -397,7 +397,7 @@ public class StatisticsMutantAnalyzer extends MutantTestAnalyzer {
 			calc.add(it.getValue());
 		}
 		
-		return Tools.average(calc);
+		return Tools.average(Tools.toDoubleArray(calc));
 	}
 
 	public double getMedianGraphSize(){
