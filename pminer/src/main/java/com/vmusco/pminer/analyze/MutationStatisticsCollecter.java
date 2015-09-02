@@ -9,11 +9,11 @@ import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.softminer.utils.Tools;
 
-public class StatisticsDisplayer extends MutantTestAnalyzer {
+public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 
 	private PRFStatistics prf = new PRFStatistics();
 	private SOUDStatistics soud = new SOUDStatistics();
-	private MutantTestProcessingListener<StatisticsDisplayer> mtpl = null;
+	private MutantTestProcessingListener<MutationStatisticsCollecter> mtpl = null;
 
 	// Last values retainer
 	private String lastMutantId = null;
@@ -23,7 +23,7 @@ public class StatisticsDisplayer extends MutantTestAnalyzer {
 	private String[] lastGraphDetermined = null;
 	private List<Double> times = new ArrayList<Double>();
 	
-	public StatisticsDisplayer(MutantTestProcessingListener<StatisticsDisplayer> mtpl) {
+	public MutationStatisticsCollecter(MutantTestProcessingListener<MutationStatisticsCollecter> mtpl) {
 		this.mtpl  = mtpl;
 	}
 

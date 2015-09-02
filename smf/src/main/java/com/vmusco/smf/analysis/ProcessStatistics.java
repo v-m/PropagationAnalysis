@@ -668,7 +668,7 @@ public class ProcessStatistics implements Serializable{
 	/**
 	 * Return the base directory for mutants. 
 	 * Normally, this string should contain {id} which represent the mutation project name and
-	 * {op} which represent the mutation operator consiered. Those two patterns will be replaced
+	 * {op} which represent the mutation operator consiered. Those two patterns should be replaced
 	 * by the desired value
 	 * @return
 	 */

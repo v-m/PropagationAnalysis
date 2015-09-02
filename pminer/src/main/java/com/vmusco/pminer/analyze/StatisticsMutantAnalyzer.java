@@ -15,7 +15,7 @@ import com.vmusco.softminer.utils.TypeWithInfo;
  * Considered metrics are: 
  * 	- precision/recall for each with their avg/median values
  * 	- number of error tests using mutation, using graph, basin size and avg/median values
- * @see StatisticsDisplayer
+ * @see MutationStatisticsCollecter
  * @author Vincenzo Musco - vincenzo.musco@inria.fr
  */
 @Deprecated

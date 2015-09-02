@@ -1,7 +1,7 @@
 # ChangePropagation
 
 ## Overview
-Software graphs, mutation testing and propagation estimer tools. 
+Software graphs, mutation testing and propagation estimer tools.
 This framework is split into three tools.
 Those tools are used for my PhD research purposes.
 
@@ -33,6 +33,8 @@ This framework is used in the following papers:
 - __Vincenzo Musco__, Martin Monperrus, Philippe Preux. An Experimental Protocol for Analyzing the Accuracy of Software Error Impact Analysis. Tenth IEEE/ACM International Workshop on Automation of Software Test, May 2015, Florence, Italy.
 
 ## How to use
+
+All commands can take the ``-h`` or ``--help`` option which will give the list of possible options for the command.
 
 ### Create project, mutants and run tests
 
@@ -93,9 +95,65 @@ $ ./softminer-creategraph /tmp/myproject/
 
 To generate other type of graphs and more options, just add the ``--help`` parameter to the program.
 
+### Use JavaPDG as a graph data source
+
+- Extract a JavaPDG
+- Use the ``pminer-javapdg`` command.
+
+*(more details soon...)*
+
 ### Obtain propagation statistics
 
-(Soon)
+Let consider the following hierarchy:
+
+- mut_result
+ - soft1
+   - mutations
+     - main
+        - ABS
+          - mutations.xml
+          - exec
+            - mutant_52.xml
+            - mutant_1045.xml
+            - (...)
+        - AOR
+        - (...)
+   - smf.run.xml
+   - graph.xml
+   - graph_cha.xml
+ - soft2
+   - (...)
+
+#### Detailed performances for one project/mutation operator
+
+To get the performances of mutation using the CHA graph for soft1 software and the ABS mutation operator:
+
+```
+./pminer-mutop-perf mut_result/soft1/graph_cha.xml mut_result/soft1/mutations/main/ABS/mutations.xml
+```
+
+Following options are availables:
+
+- ``-k``: include only killed mutants in the analysis;
+- ``-r``: remove nulls from the medians calculation;
+- ``-n <nb>``: filter out if more than <nb> mutants are present;
+- ``-c <sep>``: export in csv format with <sep> separator.
+
+#### Global performances for all projects mutation operators
+
+To get the performances of mutation with and without CHA graph for all soft present in mut_result and all mutation operator:
+
+```
+./pminer-global-perf mut_result graph.xml:graph_cha.xml
+```
+
+If there is only the two softwares listed above the following command is equivalent:
+
+```
+./pminer-global-perf mut_result/soft1:mut_result/soft2 graph.xml:graph_cha.xml
+```
+
+Similar options than for ``pminer-mutop-perf`` can be used. Moreover, the ``-a`` options allows to compute averages instead of medians.
 
 ## Dependencies
 
