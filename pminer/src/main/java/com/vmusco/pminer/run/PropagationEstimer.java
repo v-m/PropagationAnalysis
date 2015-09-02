@@ -108,7 +108,7 @@ public class PropagationEstimer implements MutantTestProcessingListener<Statisti
 			MutantIfos ifos = (MutantIfos) ms.getMutationStats(mutation);
 
 			// relevant IS list of tests impacted by the introduced bug (determined using mutation)
-			String[] relevantArray = ExploreMutants.purifyFailAndHangResultSetForMutant(ps, ifos);
+			String[] relevantArray = ifos.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps);
 
 			if(relevantArray == null)
 				continue;
@@ -125,19 +125,14 @@ public class PropagationEstimer implements MutantTestProcessingListener<Statisti
 
 			if(mta != null)
 				pe.analyzeListeners.remove(mta);
-			mta = new GraphDisplayAnalyzerAndExporter(
-					propaGraph.getBasinGraph(), 
-					/*new File(visusFolder, mutation).getAbsolutePath()*/null, false, false);
+			mta = new GraphDisplayAnalyzerAndExporter(propaGraph.getBasinGraph(), null);
 
 			//mta.setBuggyNodeAndOriginalGraph(ifos.getMutationIn(), usegraph);
 			pe.analyzeListeners.add(mta);
 
-			// retrieved IS list of tests impacted by the introduced bug (determined using basin)
-			String[] retrievedArray = ExploreMutants.getRetrievedTests(propaGraph, ps.getTestCases());
-
 			for(MutantTestAnalyzer aListerner : pe.analyzeListeners){
 				//TODO: default value of -1 is set here -- maybe change it further
-				aListerner.fireIntersectionFound(ps, mutation, ifos, retrievedArray, propaGraph, -1);
+				aListerner.fireIntersectionFound(ps, ifos, propaGraph);
 
 				if(!forceStop && aListerner.forceStop()){
 					forceStop = true;

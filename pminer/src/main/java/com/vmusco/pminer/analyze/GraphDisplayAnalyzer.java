@@ -17,32 +17,31 @@ import com.vmusco.softminer.graphs.Graph.NodeSize;
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
-	private static final String BUGGY_NODE_COLOR = "red";
-	private static final String INTERSECTED_NODES_COLOR = "blue";
-	private static final String NODES_ONLY_WITH_GRAPH_COLOR = "orange";
+	private static final String BUGGY_NODE_COLOR = "blue";
+	private static final String INTERSECTED_NODES_COLOR = "green";
+	private static final String NODES_ONLY_WITH_GRAPH_COLOR = "red";
 	private static final String NODES_ONLY_WITH_EXEC_COLOR = "purple";
 	
 	private static final Graph.NodeShape BUGGY_NODE_SHAPE = NodeShape.CROSS;
-	private static final Graph.NodeShape INTERSECTED_NODES_SHAPE = NodeShape.DIAMOND;
-	private static final Graph.NodeShape NODES_ONLY_WITH_GRAPH_SHAPE = NodeShape.BOX;
+	private static final Graph.NodeShape INTERSECTED_NODES_SHAPE = NodeShape.BOX;
+	private static final Graph.NodeShape NODES_ONLY_WITH_GRAPH_SHAPE = NodeShape.DIAMOND;
 	private static final Graph.NodeShape NODES_ONLY_WITH_EXEC_SHAPE = NodeShape.ROUNDED_BOX;
 	
-	protected boolean requireResave = false;
 	protected Graph g;
-	protected boolean showLinkDetailsOnConsole = false;
-	protected boolean displayWindow;
 	
-	public GraphDisplayAnalyzer(Graph makeUpGraph, boolean showLinkDetailsOnConsole, boolean displayWindow) {
+	public GraphDisplayAnalyzer(Graph makeUpGraph) {
 		this.g = makeUpGraph;
-		this.showLinkDetailsOnConsole = showLinkDetailsOnConsole;
-		this.displayWindow = displayWindow;
+	}
+	
+	@Override
+	public void fireExecutionEnded() {
+		g.bestDisplay();
 	}
 
-	protected void makeUp(ProcessStatistics ps,
-			MutantIfos mi,
-			String[] graphDetermined, UseGraph basin) throws MutationNotRunException {
+	protected void makeUp(ProcessStatistics ps, MutantIfos mi, UseGraph graph) throws MutationNotRunException {
+		String[] mutationDetermined = mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps);
+		String[] graphDetermined = ExploreMutants.getRetrievedTests(graph, ps.getTestCases());
 		
-		String[] mutationDetermined = ExploreMutants.purifyFailAndHangResultSetForMutant(ps, mi); 
 		String mutationInsertionPosition = mi.getMutationIn();
 
 		CIAEstimationSets sets = new CIAEstimationSets(graphDetermined, mutationDetermined);
@@ -54,26 +53,25 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 		
 		// MATCHING CASES
 		for(String aTest : sets.getFoundImpactedSet()){
-        	g.colorNode(aTest+"()", INTERSECTED_NODES_COLOR);
-        	g.shapeNode(aTest+"()", INTERSECTED_NODES_SHAPE);
+        	g.colorNode(aTest, INTERSECTED_NODES_COLOR);
+        	g.shapeNode(aTest, INTERSECTED_NODES_SHAPE);
 		}
 		
 		for(String aTest : sets.getFalsePositivesImpactedSet()){
-        	g.colorNode(aTest+"()", NODES_ONLY_WITH_GRAPH_COLOR);
-        	g.shapeNode(aTest+"()", NODES_ONLY_WITH_GRAPH_SHAPE);
+        	g.colorNode(aTest, NODES_ONLY_WITH_GRAPH_COLOR);
+        	g.shapeNode(aTest, NODES_ONLY_WITH_GRAPH_SHAPE);
 		}
 		
 		for(String aTest : sets.getDiscoveredImpactedSet()){
-			//g.addNode(aTest+"()", false);
-			g.colorNode(aTest+"()", NODES_ONLY_WITH_EXEC_COLOR);
-			g.shapeNode(aTest+"()", NODES_ONLY_WITH_EXEC_SHAPE);
+			//g.addNode(aTest, false);
+			g.colorNode(aTest, NODES_ONLY_WITH_EXEC_COLOR);
+			g.shapeNode(aTest, NODES_ONLY_WITH_EXEC_SHAPE);
 		}
 	}
 	
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propatime) throws MutationNotRunException{
-		makeUp(ps, mi, graphDetermined, basin);
-		basin.getBasinGraph().bestDisplay();
+	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, UseGraph graph) throws MutationNotRunException{
+		makeUp(ps, mi, graph);
 	}
 	
 	public void changeEdgesWeights(Map<EdgeIdentity, Float> weights){

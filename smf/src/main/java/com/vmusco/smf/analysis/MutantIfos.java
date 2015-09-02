@@ -1,8 +1,12 @@
 package com.vmusco.smf.analysis;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
+import com.vmusco.smf.utils.MutationsSetTools;
 
 /**
  * This class bundles all informations relatives to one mutation

@@ -64,7 +64,7 @@ public abstract class JavaPDGImpactPredictionScore {
 
 			}, Long.toString(bugs.get(mi.getMutationIn())));
 
-			String[] ais = mi.getExecutedTestsResults().getMutantFailingAndHangingTestCases();
+			String[] ais = mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ms.getRelatedProcessStatisticsObject());
 			String[] cis = impactedAccordingToJavaPdg.toArray(new String[0]);
 			prf.cumulate(ais, cis);
 			ipl.fireOneMutantResults(PRFStatistics.precision(ais, cis), 

@@ -33,22 +33,25 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 
 	}
 
+	public void declareNewTime(long propatime){
+		times.add(propatime * 1d);
+	}
+	
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, String mutationId,
-			MutantIfos mi, String[] graphDetermined, UseGraph basin,
-			long propatime) throws MutationNotRunException {
+	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, UseGraph graph) throws MutationNotRunException {
 
-		lastMutantId = mutationId;
-		lastUseGraph = basin;
+		String[] cis = ExploreMutants.getRetrievedTests(graph, ps.getTestCases());
+		
+		lastMutantId = mi.getId();
+		lastUseGraph = graph;
 		lastProcessStatistics = ps;
 		lastMutantIfos = mi;
-		lastGraphDetermined = graphDetermined;
-		times.add(propatime * 1d);
+		lastGraphDetermined = cis;
 
-		String[] ais = ExploreMutants.purifyFailAndHangResultSetForMutant(ps, mi);
+		String[] ais = mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps);
 
-		prf.cumulate(ais, graphDetermined);
-		soud.cumulate(mutationId, ais, graphDetermined);
+		prf.cumulate(ais, cis);
+		soud.cumulate(mi.getId(), ais, cis);
 
 		if(mtpl != null)
 			mtpl.aMutantHasBeenProceeded(this);

@@ -74,10 +74,10 @@ public class StatisticsMutantAnalyzer extends MutantTestAnalyzer {
 	}
 
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propatime) throws MutationNotRunException{
+	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, UseGraph basin) throws MutationNotRunException{
 		UseGraphMutantStats mutstat = new UseGraphMutantStats();
 
-		mutstat.fillIn(ps, mutationId, mi, graphDetermined, basin, propatime);
+		mutstat.fillIn(ps, mi, basin, -1);
 		mutstat.calculate();
 		
 		updateStructure(mutstat);

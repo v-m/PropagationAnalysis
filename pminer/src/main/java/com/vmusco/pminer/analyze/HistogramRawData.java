@@ -26,7 +26,7 @@ public class HistogramRawData extends MutantTestAnalyzer {
 	}
 
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propatime){
+	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, UseGraph basin){
 		
 		try {
 			int bassinSize = basin.getBasinGraph().getNbNodes();

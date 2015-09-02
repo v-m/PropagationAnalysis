@@ -50,6 +50,9 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 		this.fos = locked_fos;
 	}
 
+	/**
+	 * Do not use directly this method. Pass through the MutationStatistics object to get a coherent instance !
+	 */
 	@Override
 	public MutantIfos loadState() throws PersistenceException {
 		MutantIfos ifos = new MutantIfos();
@@ -75,16 +78,16 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 
 		Element e = new Element(ProcessXMLPersistence.FAILING_TC_3);
 		mutations.addContent(e);
-		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TS_4, mei.getMutantErrorOnTestSuite());
-		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getMutantFailingTestCases());
+		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TS_4, mei.getRawMutantErrorOnTestSuite());
+		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getRawMutantFailingTestCases());
 
 		e = new Element(ProcessXMLPersistence.IGNORED_TC_3);
 		mutations.addContent(e);
-		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getMutantIgnoredTestCases());
+		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getRawMutantIgnoredTestCases());
 
 		e = new Element(ProcessXMLPersistence.HANGING_TC_3);
 		mutations.addContent(e);
-		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getMutantHangingTestCases());
+		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getRawMutantHangingTestCases());
 		
 		XMLOutputter output = new XMLOutputter(Format.getPrettyFormat());
 		try {

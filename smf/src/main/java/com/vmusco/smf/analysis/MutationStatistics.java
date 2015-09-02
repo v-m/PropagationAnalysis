@@ -394,8 +394,8 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	public boolean isMutantAlive(String mutid) throws MutationNotRunException, PersistenceException {
 		MutantIfos mutationStats = loadMutationStats(mutid);
 
-		return MutationsSetTools.areSetsSimilars(ps.getFailingTestCases(), mutationStats.getExecutedTestsResults().getMutantFailingTestCases()) &&
-				MutationsSetTools.areSetsSimilars(ps.getHangingTestCases(), mutationStats.getExecutedTestsResults().getMutantHangingTestCases());
+		return MutationsSetTools.areSetsSimilars(ps.getFailingTestCases(), mutationStats.getExecutedTestsResults().getRawMutantFailingTestCases()) &&
+				MutationsSetTools.areSetsSimilars(ps.getHangingTestCases(), mutationStats.getExecutedTestsResults().getRawMutantHangingTestCases());
 	}
 
 	public boolean isMutantKilled(String mutid) throws MutationNotRunException, PersistenceException {

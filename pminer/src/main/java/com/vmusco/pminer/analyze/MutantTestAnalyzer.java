@@ -23,11 +23,7 @@ public abstract class MutantTestAnalyzer {
 	 */
 	public void fireExecutionEnded(){}
 
-	public abstract void fireIntersectionFound(ProcessStatistics ps, 
-			String mutationId,
-			MutantIfos mi,
-			String[] graphDetermined, 
-			UseGraph basin, long propatime) throws MutationNotRunException;
+	public abstract void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, UseGraph graph) throws MutationNotRunException;
 	
 	/***
 	 * This method can be invoked to order the runner to interrupt its execution and discard remaining set

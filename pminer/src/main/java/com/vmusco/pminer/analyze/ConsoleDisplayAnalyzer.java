@@ -12,22 +12,12 @@ import com.vmusco.softminer.graphs.Graph;
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public class ConsoleDisplayAnalyzer extends MutantTestAnalyzer {
-	protected boolean requireResave = false;
-	protected Graph g;
-	protected boolean showLinkDetailsOnConsole = false;
-	protected boolean displayWindow;
-
-	public ConsoleDisplayAnalyzer(Graph makeUpGraph, boolean showLinkDetailsOnConsole, boolean displayWindow) {
-		this.g = makeUpGraph;
-		this.showLinkDetailsOnConsole = showLinkDetailsOnConsole;
-		this.displayWindow = displayWindow;
-	}
-
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propatime) throws MutationNotRunException{
-		String[] mutationDetermined = ExploreMutants.purifyFailAndHangResultSetForMutant(ps, mi); 
-
-		CIAEstimationSets sets = new CIAEstimationSets(graphDetermined, mutationDetermined);
+	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, UseGraph graph) throws MutationNotRunException{
+		String[] ais = mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps); 
+		String[] cis = ExploreMutants.getRetrievedTests(graph, ps.getTestCases());
+		
+		CIAEstimationSets sets = new CIAEstimationSets(cis, ais);
 
 		for(String aTest : sets.getFoundImpactedSet()){
 			System.out.println("\u001b[32m"+"\t"+aTest+"\u001b[0m");

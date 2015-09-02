@@ -47,7 +47,7 @@ public class ExploreMutants {
 			MutantIfos ifos = ms.getMutationStats(mutation);
 
 			// relevant IS list of tests impacted by the introduced bug (determined using mutation)
-			String[] relevantArray = purifyFailAndHangResultSetForMutant(ps, ifos);
+			String[] relevantArray = ifos.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps);
 
 			if(relevantArray == null){
 				continue;
@@ -56,10 +56,7 @@ public class ExploreMutants {
 			UseGraph propaGraph = new UseGraph(usegraph);
 			long duration = usegraph.visitDirectedByGraphNodeVisitor(propaGraph, ifos.getMutationIn());
 
-			// retrieved IS list of tests impacted by the introduced bug (determined use graph)
-			String[] retrievedArray = getRetrievedTests(propaGraph, ps.getTestCases());
-
-			forceStop = fireIntersectionFound(ps, mutation, ifos, retrievedArray, propaGraph, duration);
+			forceStop = fireIntersectionFound(ps, ifos, propaGraph, duration);
 
 			if(forceStop)
 				break;
@@ -69,9 +66,13 @@ public class ExploreMutants {
 
 	}
 
-	public boolean fireIntersectionFound(ProcessStatistics ps, String mutation, MutantIfos ifos, String[] retrievedArray, UseGraph propaGraph, long propatime) throws MutationNotRunException {
+	public boolean fireIntersectionFound(ProcessStatistics ps, MutantIfos ifos, UseGraph propaGraph, long duration) throws MutationNotRunException {
 		for(MutantTestAnalyzer aListerner : this.analyzeListeners){
-			aListerner.fireIntersectionFound(ps, mutation, ifos, retrievedArray, propaGraph, propatime);
+			if(aListerner instanceof MutationStatisticsCollecter){
+				((MutationStatisticsCollecter) aListerner).declareNewTime(duration);
+			}
+			
+			aListerner.fireIntersectionFound(ps, ifos, propaGraph);
 
 			if(aListerner.forceStop()){
 				return true;
@@ -116,102 +117,5 @@ public class ExploreMutants {
 		}
 
 		return retrieved.toArray(new String[retrieved.size()]);
-	}
-
-	/*public static String[] purifyResultSetForMutant(String[] mutantSet, String[] globalSet){
-		Set<String> al = new HashSet<String>();
-		Set<String> al2 = new HashSet<String>();
-
-		for(String s : mutantSet){
-			al.add(s);
-		}
-
-		for(String s : globalSet){
-			al2.add(s);
-		}
-
-		al.removeAll(al2);
-
-		return al.toArray(new String[0]); 
-	}*/
-
-	private static String[] includeTestSuiteGlobalFailingCases(ProcessStatistics ps, String[] testsuites, String[] include){
-		Set<String> cases = new HashSet<String>();
-
-		if(include != null){
-			for(String s : include){
-				cases.add(s);
-			}
-		}
-
-		for(String ts : testsuites){
-			for(String s : ps.getTestCases()){
-				if(s.startsWith(ts)){
-					cases.add(s);
-				}
-			}
-		}
-
-		return cases.toArray(new String[0]);
-	}
-
-	public static String[] purifyFailingResultSetForMutant(ProcessStatistics ps, MutantIfos mi) throws MutationNotRunException {
-		MutantExecutionIfos mei = mi.getExecutedTestsResults();
-		String[] mutset = includeTestSuiteGlobalFailingCases(ps, mei.getMutantErrorOnTestSuite(), mei.getMutantFailingTestCases());
-		String[] glbset = includeTestSuiteGlobalFailingCases(ps, ps.getErrorOnTestSuite(), ps.getFailingTestCases());
-
-		return MutationsSetTools.setDifference(mutset, glbset);
-		//return purifyResultSetForMutant(mutset, glbset);
-	}
-
-	public static String[] purifyIgnoredResultSetForMutant(ProcessStatistics ps, MutantIfos mi) throws MutationNotRunException {
-		MutantExecutionIfos mei = mi.getExecutedTestsResults();
-		String[] mutset = mei.getMutantIgnoredTestCases();
-		String[] glbset = ps.getIgnoredTestCases();
-
-		return MutationsSetTools.setDifference(mutset, glbset);
-		//return purifyResultSetForMutant(mutset, glbset);
-	}
-
-	public static String[] purifyHangingResultSetForMutant(ProcessStatistics ps, MutantIfos mi) throws MutationNotRunException {
-		MutantExecutionIfos mei = mi.getExecutedTestsResults();
-		String[] mutset = mei.getMutantHangingTestCases();
-		String[] glbset = ps.getHangingTestCases();
-
-		return MutationsSetTools.setDifference(mutset, glbset);
-		//return purifyResultSetForMutant(mutset, glbset);
-	}
-
-	public static String[] purifyFailAndHangResultSetForMutant(ProcessStatistics ps, MutantIfos mi) throws MutationNotRunException {
-		MutantExecutionIfos mei = mi.getExecutedTestsResults();
-		
-		Set<String> cases = new HashSet<String>();
-
-		for(String ts : mei.getMutantErrorOnTestSuite()){
-			for(String s : ps.getTestCases()){
-				if(s.startsWith(ts)){
-					cases.add(s);
-				}
-			}
-		}
-
-		for(String s:mei.getMutantHangingTestCases()){
-			cases.add(s);
-		}
-
-		for(String s:mei.getMutantFailingTestCases()){
-			cases.add(s);
-		}
-
-		for(String s : mei.getMutantErrorOnTestSuite()){
-			for(String ss : ps.getTestCases()){
-				if(ss.startsWith(s)){
-					cases.add(ss);
-				}
-			}
-		}
-
-		return MutationsSetTools.setDifference(cases.toArray(new String[0]), ps.getUnmutatedFailAndHang());
-		//return purifyResultSetForMutant(cases.toArray(new String[0]), ps.getUnmutatedFailAndHang());
 	}
 }

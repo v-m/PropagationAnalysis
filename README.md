@@ -102,6 +102,14 @@ To generate other type of graphs and more options, just add the ``--help`` param
 
 *(more details soon...)*
 
+### Visualize the propagation on a graph
+
+```
+$ ./pminer-visualize-propagation mut_result/soft1/mutations/main/ABS/ mutant_52 mut_result/soft1/graph_cha.xml
+```
+
+Add the ``-c`` option to display the sets on terminal.
+
 ### Obtain propagation statistics
 
 Let consider the following hierarchy:

@@ -1,11 +1,9 @@
 package com.vmusco.pminer.run;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.HashMap;
 
 import org.apache.commons.cli.CommandLine;
@@ -82,7 +80,7 @@ public class MutationStatsRunner{
 		// Select related mutations
 		String[] allMutations = selectMutations(ms, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("only-killed"));
 
-		// Load the UseGraph
+		// Load the graph
 		Graph aGraph = loadGraph(cmd.getArgs()[0]);
 
 		printDataHeader(sep);
@@ -192,7 +190,7 @@ public class MutationStatsRunner{
 			MutantIfos ifos = (MutantIfos) ms.getMutationStats(mutation);
 
 			// relevant IS list of tests impacted by the introduced bug (determined using mutation)
-			String[] relevantArray = ExploreMutants.purifyFailAndHangResultSetForMutant(ps, ifos);
+			String[] relevantArray = ifos.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps);
 
 			if(relevantArray == null)
 				continue;
@@ -206,11 +204,7 @@ public class MutationStatsRunner{
 				aGraph.visitTo(propaGraph, ifos.getMutationIn());
 			}
 
-
-			// retrieved IS list of tests impacted by the introduced bug (determined using basin)
-			String[] retrievedArray = ExploreMutants.getRetrievedTests(propaGraph, ps.getTestCases());
-
-			sd.fireIntersectionFound(ps, mutation, ifos, retrievedArray, propaGraph, -1);
+			sd.fireIntersectionFound(ps, ifos, propaGraph);
 
 			if(!forceStop && sd.forceStop()){
 				forceStop = true;

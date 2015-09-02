@@ -17,8 +17,8 @@ public class GraphDisplayAnalyzerAndExporter extends GraphDisplayAnalyzer{
 	private String persistTo;
 	
 	
-	public GraphDisplayAnalyzerAndExporter(Graph makeUpGraph, String persistingName, boolean showLinkDetailsOnConsole, boolean displayWindow) {
-		super(makeUpGraph, showLinkDetailsOnConsole, displayWindow);
+	public GraphDisplayAnalyzerAndExporter(Graph makeUpGraph, String persistingName) {
+		super(makeUpGraph);
 		
 		initMakeuping(makeUpGraph);
 		
@@ -34,13 +34,10 @@ public class GraphDisplayAnalyzerAndExporter extends GraphDisplayAnalyzer{
 	}
 
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, String mutationId, MutantIfos mi, String[] graphDetermined, UseGraph basin, long propatime) throws MutationNotRunException {
+	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, UseGraph basin) throws MutationNotRunException {
 		
-		super.makeUp(ps, mi, graphDetermined, basin);
+		super.makeUp(ps, mi, basin);
 		super.g.persistAsImage(this.persistTo);
-		super.fireIntersectionFound(ps, mutationId, mi, graphDetermined, basin, propatime);
-		
-		if(super.displayWindow)
-			super.g.persistAsImage(this.persistTo+"_custom", false);
+		super.fireIntersectionFound(ps, mi, basin);
 	}
 }
