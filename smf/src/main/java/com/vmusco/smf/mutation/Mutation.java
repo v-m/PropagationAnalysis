@@ -101,7 +101,7 @@ public final class Mutation {
 	 * @param factory
 	 * @return
 	 */
-	public static CtElement[] getMutations(ProcessStatistics ps, MutationStatistics ms, Factory factory){
+	public static CtElement[] getMutations(ProcessStatistics ps, MutationStatistics<?> ms, Factory factory){
 		SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
 
 		String[] mutateFrom = ms.getClassToMutate(true);
