@@ -1,5 +1,6 @@
 package com.vmusco.pminer.analyze;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.vmusco.pminer.UseGraph;
@@ -74,6 +75,16 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 		makeUp(ps, mi, graph);
 	}
 	
+	/**
+	 * Example:
+	 * 
+	 * Map<EdgeIdentity, Float> edgesw = new HashMap<>();
+	 * edgesw.put(new EdgeIdentity("src", "dst"), 0.36850484606864875f);
+	 * (...)
+	 * gda.changeEdgesWeights(edgesw);
+	 * 
+	 * @param weights
+	 */
 	public void changeEdgesWeights(Map<EdgeIdentity, Float> weights){
 		for(EdgeIdentity k : weights.keySet()){
 			float w = weights.get(k);
