@@ -75,7 +75,7 @@ public class AllMutationsStatsRunner{
 			formatter.printHelp(thisclass.getCanonicalName()+" [options] <software["+File.pathSeparator+"...]> <relativepathtograph["+File.pathSeparator+"...]>", 
 					"Run statistics on all softwares describes in <software> separated by "+File.pathSeparator+". <software> can be a software directly containing a "+ProcessStatistics.DEFAULT_CONFIGFILE+" file or folder containing projects folders which contains a "+ProcessStatistics.DEFAULT_CONFIGFILE+" file. "+
 							"The name of the folder is used as project name. "+
-							"The graphs used are those supplied by <relativepathtograph> which are path relatives to project folder",
+							"The graphs used are those supplied by <relativepathtograph> which are path relatives to project folder. If the --javapdg option is supplied, <relativepathtograph> must point to one folder which contains subfolders, one for each considered project (with the same folder name)",
 							options,
 					"");
 			System.exit(0);
@@ -155,7 +155,7 @@ public class AllMutationsStatsRunner{
 			if(!gf.exists()){
 				throw new FileNotFoundException("Unable to locate the graph file "+gf.getAbsolutePath());
 			}else{
-				explorers.put("pdg_"+gf.getName(), new SoftMinerPropagationExplorer(MutationStatsRunner.loadGraph(gf.getAbsolutePath())));
+				explorers.put(gf.getName(), new SoftMinerPropagationExplorer(MutationStatsRunner.loadGraph(gf.getAbsolutePath())));
 			}
 		}
 		
@@ -174,7 +174,7 @@ public class AllMutationsStatsRunner{
 		if(!gf.exists()){
 			throw new FileNotFoundException("Unable to locate the javapdg database "+gf.getAbsolutePath());
 		}else{
-			explorers.put(gf.getName(), new JavapdgPropagationExplorer(gf.getAbsolutePath()));
+			explorers.put("pdg_"+gf.getName(), new JavapdgPropagationExplorer(gf.getAbsolutePath()));
 		}
 		
 		return explorers;
