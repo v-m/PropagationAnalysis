@@ -1,4 +1,4 @@
-package com.vmusco.pminer.compute;
+package com.vmusco.pminer.analyze;
 
 import com.vmusco.smf.utils.MutationsSetTools;
 

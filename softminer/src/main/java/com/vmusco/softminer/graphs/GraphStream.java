@@ -23,19 +23,16 @@ import org.graphstream.ui.view.ViewerPipe;
 public class GraphStream extends Graph {
 	private Viewer lastViewer;
 	
-	private GraphStream() {
-
-	}
-
-	public static Graph instantiate(){
-		Graph g = new GraphStream();
-		g.graph = new SingleGraph("Untitled Graph");
-
+	public GraphStream() {
+		this.graph = new SingleGraph("Untitled Graph");
 		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
-
-		return g;
 	}
 
+	@Override
+	public Graph createNewLikeThis() {
+		return new GraphStream();
+	}
+	
 	@Override
 	public void addNode(String name, boolean displayLabel){
 		if(!this.hasNode(name)){
@@ -542,7 +539,7 @@ public class GraphStream extends Graph {
 
 	@Override
 	public Graph keepOnly(NodeTypes[] nt, NodeMarkers[] nm, EdgeTypes[] et, EdgeMarkers[] em) {
-		Graph g = instantiate();
+		Graph g = new GraphStream();
 		
 		for(String n : getNodesNames()){
 			for(NodeTypes nt2 : nt){

@@ -14,7 +14,6 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import com.vmusco.pminer.UseGraph;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
 
@@ -32,10 +31,10 @@ public class HistogramForSizesOfSubgraphs extends MutantTestAnalyzer {
 	}
 
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, UseGraph basin) {
+	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) {
 		
-		int bassinSize = basin.getBasinGraph().getNbNodes();
-		double putInBin = Math.ceil(bassinSize/this.binSize);
+		int propagationSize = impactedNodes.length;
+		double putInBin = Math.ceil(propagationSize/this.binSize);
 		
 		if(putInBin < 0)
 			return;

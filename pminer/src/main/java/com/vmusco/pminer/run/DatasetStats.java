@@ -8,8 +8,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.NumberFormat;
 
-import com.vmusco.pminer.analyze.StatisticsMutantAnalyzer;
-import com.vmusco.pminer.persistence.UseGraphStatsXml;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.softminer.graphs.EdgeTypes;
@@ -61,8 +59,6 @@ public class DatasetStats {
 			for(File f : muts.listFiles()){
 				if(f.isDirectory()){
 					File fimp = new File(f, "impact_A.xml");
-					StatisticsMutantAnalyzer sma = UseGraphStatsXml.restoreResults(new FileInputStream(fimp));
-					med =+ sma.getMedianExecTime();
 					nb++;
 				}
 			}

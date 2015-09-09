@@ -1,10 +1,7 @@
 package com.vmusco.pminer.analyze;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import com.vmusco.pminer.UseGraph;
-import com.vmusco.pminer.compute.CIAEstimationSets;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
@@ -39,9 +36,9 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 		g.bestDisplay();
 	}
 
-	protected void makeUp(ProcessStatistics ps, MutantIfos mi, UseGraph graph) throws MutationNotRunException {
+	protected void makeUp(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) throws MutationNotRunException {
 		String[] mutationDetermined = mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps);
-		String[] graphDetermined = ExploreMutants.getRetrievedTests(graph, ps.getTestCases());
+		String[] graphDetermined = impactedTests;
 		
 		String mutationInsertionPosition = mi.getMutationIn();
 
@@ -71,8 +68,8 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 	}
 	
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, UseGraph graph) throws MutationNotRunException{
-		makeUp(ps, mi, graph);
+	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) throws MutationNotRunException{
+		makeUp(ps, mi, impactedNodes, impactedTests);
 	}
 	
 	/**

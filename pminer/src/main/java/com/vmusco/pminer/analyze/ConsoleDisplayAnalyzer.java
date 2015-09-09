@@ -1,7 +1,6 @@
 package com.vmusco.pminer.analyze;
 
-import com.vmusco.pminer.UseGraph;
-import com.vmusco.pminer.compute.CIAEstimationSets;
+import com.vmusco.pminer.impact.PropagationExplorer;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
@@ -13,9 +12,9 @@ import com.vmusco.softminer.graphs.Graph;
  */
 public class ConsoleDisplayAnalyzer extends MutantTestAnalyzer {
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, UseGraph graph) throws MutationNotRunException{
+	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) throws MutationNotRunException{
 		String[] ais = mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps); 
-		String[] cis = ExploreMutants.getRetrievedTests(graph, ps.getTestCases());
+		String[] cis = impactedTests;
 		
 		CIAEstimationSets sets = new CIAEstimationSets(cis, ais);
 

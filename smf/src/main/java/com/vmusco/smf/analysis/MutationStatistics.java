@@ -60,7 +60,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	public static MutationStatistics<?> loadState(String persistFile) throws PersistenceException {
 		return loadState(persistFile, false);
 	}
-	
+
 	/**
 	 * This method loads the last saved instance of the object
 	 * Take care: the content of the execution is NOT loaded !
@@ -108,7 +108,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	public String[] listViableAndRunnedMutants(boolean load) throws PersistenceException{
 		return listViableAndRunnedMutants(load, false);
 	}
-	
+
 	/**
 	 * List all viables mutants which has been tested (and eventually load them and force reload)
 	 * @param load true if the structure must be loaded at the same time
@@ -122,7 +122,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		for(String s : listViableMutants()){
 			if(load){
 				boolean mustBeLoaded = false;
-				
+
 				if(forceReload){
 					mustBeLoaded = true;
 				}else{
@@ -155,15 +155,21 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	 * @throws PersistenceException 
 	 */
 	public String[] listViableButKilledMutants() throws PersistenceException{
+		try {
+			return removeAliveMutants(listViableAndRunnedMutants(true));
+		} catch (MutationNotRunException e) {
+			// Should never occurs...
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public String[] removeAliveMutants(String[] mutants) throws PersistenceException, MutationNotRunException{
 		ArrayList<String> re = new ArrayList<String>();
 
-		for(String s : listViableAndRunnedMutants(true)){
-			try{
-				if(isMutantKilled(s)){
-					re.add(s);
-				}
-			}catch(MutationNotRunException e){
-				// Should never occurs !
+		for(String s : mutants){
+			if(isMutantKilled(s)){
+				re.add(s);
 			}
 		}
 
@@ -302,7 +308,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		if(!mutations.get(mutationId).isExecutionKnown()){
 			if(!isMutantExecutionPersisted(mutationId))
 				throw new MutationNotRunException();
-	
+
 			MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(getMutantExecutionFile(mutationId));
 			pers.loadState(mutations.get(mutationId));
 		}

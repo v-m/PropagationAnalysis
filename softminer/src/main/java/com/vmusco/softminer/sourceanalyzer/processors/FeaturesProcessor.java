@@ -52,11 +52,7 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 		 * Here we create a bridge between 
 		 * a declared method and its abstract signature
 		 */
-		//try{
 		bridgeMethodAndAbstract(execElement, src);
-		//}catch(Exception ex){
-		//	exceptionOccured(ex);
-		//}
 
 		/**********************************
 		 * Treating executable references
@@ -94,7 +90,7 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 	}
 
 	private void exceptionOccured(Exception ex){
-		System.err.println("Exception has occured -- skipping for paper rush");
+		System.err.println("Exception has occured");
 		ex.printStackTrace();
 	}
 

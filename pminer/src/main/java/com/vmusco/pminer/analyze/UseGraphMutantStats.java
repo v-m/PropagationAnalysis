@@ -3,7 +3,7 @@ package com.vmusco.pminer.analyze;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.vmusco.pminer.UseGraph;
+import com.vmusco.pminer.impact.PropagationExplorer;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
@@ -96,19 +96,16 @@ public class UseGraphMutantStats {
 		}
 	}
 
-	public void fillIn(ProcessStatistics ps, MutantIfos mi, UseGraph graph, long propagraphtime) throws MutationNotRunException {
+	public void fillIn(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests, long propagraphtime) throws MutationNotRunException {
 		this.mutationId = mi.getId();
 		mutationInsertionPoint = mi.getMutationIn();
-		String[] graphDetermined = ExploreMutants.getRetrievedTests(graph, ps.getTestCases());
-
-		//System.out.print(this.mutationId+"\t");
 		
 		data_basin = new HashSet<String>();
-		for(String node : graph.getBasinGraph().getNodesNames()){
+		for(String node : impactedNodes){
 			data_basin.add(node);
 		}
 		data_basin_testnodes = new HashSet<String>();
-		for(String node : graph.getTestNodes(ps.getTestCases())){
+		for(String node : impactedTests){
 			data_basin_testnodes.add(node);
 		}
 		
@@ -121,13 +118,13 @@ public class UseGraphMutantStats {
 		}
 
 		data_retrieved = new HashSet<String>();
-		for(String t : graphDetermined){
+		for(String t : impactedTests){
 			data_retrieved.add(t);
 		}
 
 		// inter IS list of tests impacted by the introduced bug (determined by BOTH)
 		data_inter = new HashSet<String>();
-		for(String tt : MutationsSetTools.setIntersection(graphDetermined, mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps))){
+		for(String tt : MutationsSetTools.setIntersection(impactedTests, mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps))){
 			data_inter.add(tt);
 		}
 
@@ -146,22 +143,10 @@ public class UseGraphMutantStats {
 		nb_boths = data_inter.size();
 		nb_mores = data_graphOnly.size();
 		nb_lesss = data_mutationOnly.size();
-		//System.out.print(nb_graph+"\t");
-		//System.out.print(nb_mutat+"\t");
-		//System.out.print(nb_boths+"\t");
-		//System.out.print(nb_mores+"\t");
-		//System.out.print(nb_lesss+"\t");
 		
 		prediction_time = propagraphtime;
 		
 		calculate();
-		//System.out.print(precision+"\t");
-		//System.out.print(recall+"\t");
-		//System.out.print(fscore+"\t");
 		calculateAndExcludeNulls();
-		//System.out.print(precision_notnull+"\t");
-		//System.out.print(recall_notnull+"\t");
-		//System.out.print(fscore_notnull+"\t");
-		//System.out.print("\n");
 	}
 }

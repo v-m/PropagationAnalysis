@@ -7,10 +7,11 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
-import com.vmusco.pminer.UseGraph;
 import com.vmusco.pminer.analyze.ConsoleDisplayAnalyzer;
 import com.vmusco.pminer.analyze.GraphDisplayAnalyzer;
 import com.vmusco.pminer.analyze.MutantTestAnalyzer;
+import com.vmusco.pminer.impact.PropagationExplorer;
+import com.vmusco.pminer.impact.SoftMinerPropagationExplorer;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.softminer.graphs.Graph;
@@ -52,18 +53,19 @@ public class MutationVisualizationRunner{
 
 		// Load a graph
 		Graph aGraph = MutationStatsRunner.loadGraph(cmd.getArgs()[2]);
-		UseGraph propaGraph = new UseGraph(aGraph);
-		aGraph.visitTo(propaGraph, mi.getMutationIn());
+		PropagationExplorer propaGraph = new SoftMinerPropagationExplorer(aGraph);
+		String id = mi.getMutationIn();
+		propaGraph.visitTo(id);
 
 		MutantTestAnalyzer mta;
 		
 		if(cmd.hasOption("console")){
 			mta = new ConsoleDisplayAnalyzer();
 		}else{
-			mta = new GraphDisplayAnalyzer(propaGraph.getBasinGraph());
+			mta = new GraphDisplayAnalyzer(propaGraph.getPropagationGraph(id));
 		}
 
-		mta.fireIntersectionFound(ms.getRelatedProcessStatisticsObject(), mi, propaGraph);
+		mta.fireIntersectionFound(ms.getRelatedProcessStatisticsObject(), mi, propaGraph.getImpactedNodes(id), propaGraph.getImpactedTestNodes(id, ms.getRelatedProcessStatisticsObject().getTestCases()));
 		mta.fireExecutionEnded();
 		System.exit(0);
 	}

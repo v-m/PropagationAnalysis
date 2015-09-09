@@ -1,6 +1,6 @@
 package com.vmusco.pminer.analyze;
 
-import com.vmusco.pminer.UseGraph;
+import com.vmusco.pminer.impact.PropagationExplorer;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
@@ -34,10 +34,10 @@ public class GraphDisplayAnalyzerAndExporter extends GraphDisplayAnalyzer{
 	}
 
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, UseGraph basin) throws MutationNotRunException {
+	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) throws MutationNotRunException {
 		
-		super.makeUp(ps, mi, basin);
+		super.makeUp(ps, mi,impactedNodes, impactedTests);
 		super.g.persistAsImage(this.persistTo);
-		super.fireIntersectionFound(ps, mi, basin);
+		super.fireIntersectionFound(ps, mi, impactedNodes, impactedTests);
 	}
 }

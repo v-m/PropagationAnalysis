@@ -1,10 +1,27 @@
-package com.vmusco.pminer.compute;
+package com.vmusco.pminer.impact;
 
 public class JavaPDGTriplet {
 	String method;
 	String signature;
 	String packg;
 
+	@Override
+	public String toString() {
+		String r = getPackageName()+"."+getMethodName()+"(";
+		boolean first = true;
+		for(String p : getParameters()){
+			r += p;
+			if(!first)
+				r += ", ";
+			else
+				first = false;
+		}
+		
+		r += r+")";
+		
+		return r;
+	}
+	
 	public String getMethodName(){
 		return packg.substring(packg.lastIndexOf("/") + 1);
 	}
@@ -69,5 +86,17 @@ public class JavaPDGTriplet {
 
 		System.err.println("Resolving failed !!");
 		return "???";
+	}
+	
+	public void setMethod(String method) {
+		this.method = method;
+	}
+	
+	public void setSignature(String signature) {
+		this.signature = signature;
+	}
+	
+	public void setPackage(String packg) {
+		this.packg = packg;
 	}
 }

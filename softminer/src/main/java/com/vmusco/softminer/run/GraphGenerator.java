@@ -21,7 +21,7 @@ import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
 
 public class GraphGenerator {
-	private static final String DEFAULT_USEGRAPH_FILENAME = "usegraph.xml";
+	private static final String DEFAULT_USEGRAPH_FILENAME = "callgraph.xml";
 	public static Graph generatedGraph = null;
 
 	public static void main(String[] args) throws Exception {
@@ -67,7 +67,7 @@ public class GraphGenerator {
 			HelpFormatter formatter = new HelpFormatter();
 			String header = "Generate a graph for the project pointed in <working-dir>.";
 			String footer = "";
-			formatter.printHelp(GraphGenerator.class.getCanonicalName()+" [options] <working-dir> <output-file>", header, options, footer);
+			formatter.printHelp(GraphGenerator.class.getCanonicalName()+" [options] <working-dir>", header, options, footer);
 
 
 			System.exit(0);

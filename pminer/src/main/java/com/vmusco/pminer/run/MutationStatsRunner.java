@@ -3,9 +3,6 @@ package com.vmusco.pminer.run;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.HashMap;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -13,10 +10,12 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
-import com.vmusco.pminer.UseGraph;
-import com.vmusco.pminer.analyze.ExploreMutants;
 import com.vmusco.pminer.analyze.MutantTestProcessingListener;
 import com.vmusco.pminer.analyze.MutationStatisticsCollecter;
+import com.vmusco.pminer.exceptions.NoEntryPointException;
+import com.vmusco.pminer.impact.JavapdgPropagationExplorer;
+import com.vmusco.pminer.impact.PropagationExplorer;
+import com.vmusco.pminer.impact.SoftMinerPropagationExplorer;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
@@ -33,8 +32,6 @@ import com.vmusco.softminer.graphs.persistance.GraphML;
 public class MutationStatsRunner{
 	private static final Class<?> thisclass = MutationStatsRunner.class;
 
-	private static final DecimalFormat nf = new DecimalFormat("0.00");
-
 	private MutationStatsRunner() {
 	}
 
@@ -42,11 +39,15 @@ public class MutationStatsRunner{
 		Options options = new Options();
 
 		Option opt;
-		opt = new Option("k", "only-killed", false, "include only killed mutants in the analysis");
+		opt = new Option("a", "include-alives", false, "include all mutants mutants in the analysis even if they are not killed");
 		options.addOption(opt);
-		opt = new Option("r", "remove-nulls", false, "if set, remove nulls from the medians");
+		opt = new Option("o", "include-nulls", false, "include nulls values in precision, recalls and fscores medians computation");
+		options.addOption(opt);
+		opt = new Option("u", "include-unbounded", false, "include mutant which have no entry point in the graph");
 		options.addOption(opt);
 		opt = new Option("n", "nb-mutants", true, "filter out if more than n mutants are present");
+		options.addOption(opt);
+		opt = new Option("j", "javapdg", false, "<graph> is a javapdg database instead of a softminer call-graph");
 		options.addOption(opt);
 		opt = new Option("c", "csv", true, "export in csv format with such a separator");
 		options.addOption(opt);
@@ -60,9 +61,9 @@ public class MutationStatsRunner{
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp(thisclass.getCanonicalName()+" [options] <graph> <mutationFile>", 
 					"Run detailed statistics (ie at mutant level) on software related to a <mutationFile> using the graphml file <graph>. "+
-					"The name of the folder is used as project name. "+
-					"The graphs used are those supplied by <relativepathtograph> which are path relatives to project folder",
-					options,
+							"The name of the folder is used as project name. "+
+							"The graphs used are those supplied by <relativepathtograph> which are path relatives to project folder",
+							options,
 					"");
 			System.exit(0);
 		}
@@ -77,20 +78,17 @@ public class MutationStatsRunner{
 		// Load mutations and executions informations from the project
 		MutationStatistics<?> ms = MutationStatistics.loadState(cmd.getArgs()[1]); 
 
-		// Select related mutations
-		String[] allMutations = selectMutations(ms, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("only-killed"));
-
 		// Load the graph
-		Graph aGraph = loadGraph(cmd.getArgs()[0]);
 
-		printDataHeader(sep);
+		System.out.println(getDataHeader(sep));
+		printLine(sep);
 
 		final Character ssep = sep;
 		MutantTestProcessingListener<MutationStatisticsCollecter> listener = new MutantTestProcessingListener<MutationStatisticsCollecter>() {
 			@Override
 			public void aMutantHasBeenProceeded(MutationStatisticsCollecter a) {
 				if(ssep == null){
-					System.out.printf("%20s             %7d %7d %7d %7d %7d %7.2f %7.2f %7.2f\n",
+					System.out.printf("%20s.........................%7d %7d %7d %7d %7d %7.2f %7.2f %7.2f\n",
 							a.getLastMutantId(),
 							(int)a.getSoud().getLastCandidateImpactSetSize(),
 							(int)a.getSoud().getLastActualImpactSetSize(),
@@ -101,8 +99,8 @@ public class MutationStatsRunner{
 							a.getPrecisionRecallFscore().getLastRecall(),
 							a.getPrecisionRecallFscore().getLastFscore());
 				}else{
-					System.out.printf("\"%s\"%c%c%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%c%c%c%c\n",
-							a.getLastMutantId(),ssep,ssep,ssep,
+					System.out.printf("\"%s\"%c%c%c%c%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%c%c%c%c\n",
+							a.getLastMutantId(),ssep,ssep,ssep,ssep,ssep,
 							(int)a.getSoud().getLastCandidateImpactSetSize(),ssep,
 							(int)a.getSoud().getLastActualImpactSetSize(),ssep,
 							(int)a.getSoud().getLastIntersectedImpactSetSize(),ssep,
@@ -116,15 +114,32 @@ public class MutationStatsRunner{
 			}
 		};
 
-		String[] ret = processMutants(ms, allMutations, aGraph, sep, cmd.hasOption("remove-nulls"), listener); 
+		PropagationExplorer pgp;
+		String pth = cmd.getArgs()[0];
+		
+		if(cmd.hasOption("javapdg")){
+			pgp = new JavapdgPropagationExplorer(pth);
+		}else{
+			pgp = new SoftMinerPropagationExplorer(loadGraph(pth));
+		}
+		
+		String[] ret = processMutants(ms, pgp, sep, cmd.hasOption("include-nulls"), listener, cmd.hasOption("include-unbounded"), cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives")); 
 
 		printLine(sep);
 
-		System.out.printf("%20s %s", "MEDIAN", ret[0]);
-		System.out.printf("%20s %s", "MEAN", ret[1]);
+		if(ssep == null){
+			System.out.printf("%20s %s", "MEDIAN", ret[0]);
+			System.out.printf("%20s %s", "MEAN", ret[1]);
+		}else{
+			System.out.printf("\"%s\"%c%s", "MEDIAN", ssep, ret[0]);
+			System.out.printf("\"%s\"%c%s", "MEAN", ssep, ret[1]);
+		}
+
+
 
 		if(sep == null){
-			printDataHeader(sep);
+			System.out.println(getDataHeader(sep));
+			printLine(sep);
 		}
 	}
 
@@ -135,96 +150,97 @@ public class MutationStatsRunner{
 		return aGraph;
 	}
 
-	public static String[] selectMutations(MutationStatistics<?> ms, int nb, boolean onlyKilled) throws PersistenceException {
-		String[] allMutations;
-
-		if(onlyKilled){
-			allMutations = ms.listViableButKilledMutants();
-		}else{
-			allMutations = ms.listViableAndRunnedMutants(true);
-		}
-
-		if(nb > 0){
-			int nbm = nb;
-
-			if(allMutations.length > nbm){
-				String[] tmp = new String[nbm];
-
-				for(int i=0; i<nbm; i++){
-					tmp[i] = allMutations[i];
-				}
-
-				allMutations = tmp;
-			}
-		}
-
-		return allMutations;
-	}
-
-	private static void printDataHeader(Character sep){
+	protected static String getDataHeader(Character sep){
 		printLine(sep);
 		if(sep == null){
-			System.out.printf("           Mutant id    Op  #mut     CIS     AIS   C^AIS    FPIS     DIS    prec  recall  fscore       S       C       O       U       D\n");
+			return String.format("           Mutant id    Op  #mut #aliv #unbo     CIS     AIS   C^AIS    FPIS     DIS    prec  recall  fscore       S       C       O       U       D");
 		}else{
-			System.out.printf("MutId%cOp%cnbmut%cCIS%cAIS%cCAIS%cFPIS%cDIS%cprec%crecall%cfscore%cS%cC%cO%cU%cD\n", sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep);
+			return String.format("\"MutId\"%c\"Op\"%c\"nbmut\"%c\"nbalives\"%c\"nunbound\"%c\"CIS\"%c\"AIS\"%c\"CAIS\"%c\"FPIS\"%c\"DIS\"%c\"prec\"%c\"recall\"%c\"fscore\"%c\"S\"%c\"C\"%c\"O\"%c\"U\"%c\"D\"", sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep);
 		}
-		printLine(sep);
 	}
 
 	private static void printLine(Character sep) {
 		if(sep == null){
-			System.out.println("----------------------------------------------------------------------------------------------------------------------------");
+			System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------");
 		}
 	}
 
-	public static String[] processMutants(MutationStatistics<?> ms, String[] allMutations, Graph aGraph, Character sep, boolean removeNulls, MutantTestProcessingListener<MutationStatisticsCollecter> listener) throws MutationNotRunException{
+	public static String[] processMutants(MutationStatistics<?> ms, PropagationExplorer pgp, 
+			Character sep, boolean includeNulls, MutantTestProcessingListener<MutationStatisticsCollecter> listener, 
+			boolean includeUnbounded, int nb, boolean includeAlives) throws MutationNotRunException, PersistenceException{
 		String[] ret = new String[2];
+		int nbunbounded = 0;
 
 		ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
-		HashMap<String, UseGraph> cache = new HashMap<String, UseGraph>();
-
 		MutationStatisticsCollecter sd = new MutationStatisticsCollecter(listener);
 
-		for(String mutation : allMutations){											// For each mutant...
+
+		/**
+		 * Compute the mutants entry set...
+		 */
+		String[] allMutations;
+		allMutations = ms.listViableAndRunnedMutants(true);
+
+		if(!includeAlives){
+			allMutations = ms.removeAliveMutants(allMutations);
+		}
+
+		
+		int nbentry = (nb > 0 && allMutations.length>nb)?nb:allMutations.length;
+		int cpt = 0;
+		
+		for(String mutation : allMutations){											// For each mutant...				
 			boolean forceStop = false;
 			MutantIfos ifos = (MutantIfos) ms.getMutationStats(mutation);
-
 			// relevant IS list of tests impacted by the introduced bug (determined using mutation)
 			String[] relevantArray = ifos.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps);
 
 			if(relevantArray == null)
 				continue;
 
-			UseGraph propaGraph;
+			String id = ifos.getMutationIn();
+			pgp.visitTo(id);
 
-			if(cache.containsKey(ifos.getMutationIn())){
-				propaGraph = cache.get(ifos.getMutationIn());
-			}else{
-				propaGraph = new UseGraph(aGraph);
-				aGraph.visitTo(propaGraph, ifos.getMutationIn());
+			try{
+				sd.fireIntersectionFound(ps, ifos, pgp.getImpactedNodes(id), pgp.getImpactedTestNodes(id, ps.getTestCases()));
+				cpt++;
+			}catch(NoEntryPointException e){
+				// No entry point here !
+				nbunbounded++;
+
+				if(!includeUnbounded){
+					continue;
+				}else{
+					sd.fireIntersectionFound(ps, ifos, new String[0], new String[0]);
+				}
 			}
-
-			sd.fireIntersectionFound(ps, ifos, propaGraph);
 
 			if(!forceStop && sd.forceStop()){
 				forceStop = true;
 				break;
 			}
 
-			if(forceStop)
+			if(cpt >= nbentry){
+				forceStop = true;
+			}
+			
+			if(forceStop){
 				break;
+			}
 		}
 
 		sd.fireExecutionEnded();
 
-		if(removeNulls){
+		if(!includeNulls){
 			sd.getPrecisionRecallFscore().removesNulls();
 		}
 
 		if(sep == null){
-			ret[0] = String.format("%5s %5d %7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
+			ret[0] = String.format("%5s %5d %5d %5d %7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
 					ms.getMutationId(),
+					cpt,
 					allMutations.length,
+					nbunbounded,
 					(int)sd.getSoud().getCurrentMedianCandidateImpactSetSize(),
 					(int)sd.getSoud().getCurrentMedianActualImpactSetSize(),
 					(int)sd.getSoud().getCurrentMedianIntersectedImpactSetSize(),
@@ -239,9 +255,11 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbUnderestimatedProportion(),
 					sd.getSoud().getNbDifferentProportion());
 
-			ret[1] = String.format("%5s %5d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
+			ret[1] = String.format("%5s %5d %5d %5d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
 					ms.getMutationId(),
+					cpt,
 					allMutations.length,
+					nbunbounded,
 					sd.getSoud().getCurrentMeanCandidateImpactSetSize(),
 					sd.getSoud().getCurrentMeanActualImpactSetSize(),
 					sd.getSoud().getCurrentMeanIntersectedImpactSetSize(),
@@ -256,9 +274,11 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbUnderestimatedProportion(),
 					sd.getSoud().getNbDifferentProportion());
 		}else{
-			ret[0] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
+			ret[0] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
 					ms.getMutationId(),sep,
+					cpt,sep,
 					allMutations.length,sep,
+					nbunbounded,sep,
 					(int)sd.getSoud().getCurrentMedianCandidateImpactSetSize(),sep,
 					(int)sd.getSoud().getCurrentMedianActualImpactSetSize(),sep,
 					(int)sd.getSoud().getCurrentMedianIntersectedImpactSetSize(),sep,
@@ -273,9 +293,11 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbUnderestimatedProportion(),sep,
 					sd.getSoud().getNbDifferentProportion());
 
-			ret[1] = String.format("\"%s\"%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
+			ret[1] = String.format("\"%s\"%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
 					ms.getMutationId(),sep,
+					cpt,sep,
 					allMutations.length,sep,
+					nbunbounded,sep,
 					sd.getSoud().getCurrentMeanCandidateImpactSetSize(),sep,
 					sd.getSoud().getCurrentMeanActualImpactSetSize(),sep,
 					sd.getSoud().getCurrentMeanIntersectedImpactSetSize(),sep,

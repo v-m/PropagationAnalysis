@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.vmusco.pminer.UseGraph;
+import com.vmusco.pminer.impact.PropagationExplorer;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
 
@@ -26,10 +26,10 @@ public class HistogramRawData extends MutantTestAnalyzer {
 	}
 
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, UseGraph basin){
+	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests){
 		
 		try {
-			int bassinSize = basin.getBasinGraph().getNbNodes();
+			int bassinSize = impactedNodes.length;
 
 			if(firstWrite){
 				firstWrite = false;

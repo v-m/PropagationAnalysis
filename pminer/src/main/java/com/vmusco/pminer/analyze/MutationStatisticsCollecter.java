@@ -3,7 +3,6 @@ package com.vmusco.pminer.analyze;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vmusco.pminer.UseGraph;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
@@ -17,7 +16,6 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 
 	// Last values retainer
 	private String lastMutantId = null;
-	private UseGraph lastUseGraph = null;
 	private ProcessStatistics lastProcessStatistics = null;
 	private MutantIfos lastMutantIfos = null;
 	private String[] lastGraphDetermined = null;
@@ -38,12 +36,10 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	}
 	
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, UseGraph graph) throws MutationNotRunException {
-
-		String[] cis = ExploreMutants.getRetrievedTests(graph, ps.getTestCases());
+	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) throws MutationNotRunException {
+		String[] cis = impactedTests;
 		
 		lastMutantId = mi.getId();
-		lastUseGraph = graph;
 		lastProcessStatistics = ps;
 		lastMutantIfos = mi;
 		lastGraphDetermined = cis;
@@ -85,10 +81,6 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 
 	public ProcessStatistics getLastProcessStatistics() {
 		return lastProcessStatistics;
-	}
-
-	public UseGraph getLastUseGraph() {
-		return lastUseGraph;
 	}
 
 	public double getMedianTimes(){

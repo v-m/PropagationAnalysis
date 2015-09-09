@@ -19,6 +19,7 @@ public abstract class Graph {
 	 */
 	public abstract Graph keepOnly(NodeTypes[] nt, NodeMarkers[] nm, EdgeTypes[] et, EdgeMarkers[] em);
 	
+	public abstract Graph createNewLikeThis();
 	public abstract void addNode(String name, boolean displayLabel);
 	public abstract void addDirectedEdge(String from, String to, boolean displayLabel);
 	public abstract void bestDisplay();
@@ -92,7 +93,7 @@ public abstract class Graph {
 
 		switch(anApi){
 		case GRAPH_STREAM:
-			g = GraphStream.instantiate();
+			g = new GraphStream();
 		}
 
 		return g;
