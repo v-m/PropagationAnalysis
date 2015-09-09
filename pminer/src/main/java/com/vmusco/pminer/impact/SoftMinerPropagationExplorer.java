@@ -23,33 +23,28 @@ public class SoftMinerPropagationExplorer extends PropagationExplorer{
 	}
 
 	@Override
-	public boolean visitTo(String id) {
+	public void visitTo(String id) throws NoEntryPointException {
 		try {
-			if(!base.hasNode(id))
-				return false;
+			if(!base.hasNode(id)){
+				throw new NoEntryPointException();
+			}
 			
 			base.visitTo(populateNew(id), id);
 		} catch (AlreadyGeneratedException e) {
 			// If already generated, nothing to do...
 		}
-		
-		return true;
+	}
+
+	
+	
+	@Override
+	public String[] getLastImpactedNodes() throws NoEntryPointException{
+		return getLastPropagationGraph().getNodesNames();
 	}
 
 	@Override
-	public String[] getImpactedNodes(String id) throws NoEntryPointException{
-		if(getPropagationGraph(id) == null)
-			throw new NoEntryPointException();
-		
-		return getPropagationGraph(id).getNodesNames();
-	}
-
-	@Override
-	public String[] getImpactedTestNodes(String id, String[] tests) throws NoEntryPointException{
-		if(getPropagationGraph(id) == null)
-			throw new NoEntryPointException();
-		
-		String[] nodesNames = getPropagationGraph(id).getNodesNames();
+	public String[] getLastImpactedTestNodes(String[] tests) throws NoEntryPointException{
+		String[] nodesNames = getLastPropagationGraph().getNodesNames();
 		Set<String> r = new HashSet<String>();
 
 		for(String n : nodesNames){

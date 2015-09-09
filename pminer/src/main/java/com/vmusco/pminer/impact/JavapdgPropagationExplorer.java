@@ -39,7 +39,7 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 	}
 	
 	@Override
-	public boolean visitTo(String id) {
+	public void visitTo(String id) throws NoEntryPointException {
 		Long node;
 		
 		if(!bugs.containsKey(id)){
@@ -51,7 +51,7 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 		}
 		
 		if(node == null){
-			return false;
+			throw new NoEntryPointException();
 		}
 		
 		try{
@@ -59,8 +59,6 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 		} catch (AlreadyGeneratedException e) {
 			// Already generated, nothing to do...
 		}
-		
-		return true;
 	}
 	
 	/**
@@ -68,25 +66,22 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 	 * TODO: Propose an alternative writing type...
 	 */
 	@Override
-	public String[] getImpactedNodes(String id) throws NoEntryPointException {
-		if(getPropagationGraph(id) == null)
-			throw new NoEntryPointException();
-		
-		return getPropagationGraph(id).getNodesNames();
+	public String[] getLastImpactedNodes() throws NoEntryPointException {
+		return getLastPropagationGraph().getNodesNames();
 	}
 
 	@Override
-	public String[] getImpactedTestNodes(String id, String[] tests) throws NoEntryPointException {
+	public String[] getLastImpactedTestNodes(String[] tests) throws NoEntryPointException {
 		if(this.testsMapped == null){
 			getMappingsForTests(tests);
 		}
 		
-		if(bugs.get(id) == null)
+		if(bugs.get(last_entryid) == null)
 			 throw new NoEntryPointException();
 		
 		ArrayList<String> ret = new ArrayList<String>();
 		
-		for(String node : getPropagationGraph(id).getNodesNames()){
+		for(String node : getLastPropagationGraph().getNodesNames()){
 			if(testsMapped.containsKey(Long.parseLong(node))){
 				ret.add(testsMapped.get(Long.parseLong(node)));
 			}

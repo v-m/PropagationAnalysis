@@ -56,7 +56,7 @@ public class AllMutationsStatsRunner{
 		options.addOption(opt);
 		opt = new Option("m", "mutation-filename", true, "specify the mutation summary file if different (default: "+MutationStatistics.DEFAULT_CONFIGFILE+")");
 		options.addOption(opt);
-		opt = new Option("a", "average", true, "compute the average/mean (default: median)");
+		opt = new Option("v", "average", false, "compute the average/mean (default: median)");
 		options.addOption(opt);
 		opt = new Option("p", "mutation-project", true, "specify the mutation project if different (default: "+MutationStatistics.DEFAULT_ID_NAME+")");
 		options.addOption(opt);

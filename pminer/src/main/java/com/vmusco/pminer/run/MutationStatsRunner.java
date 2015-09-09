@@ -181,17 +181,27 @@ public class MutationStatsRunner{
 		String[] allMutations;
 		allMutations = ms.listViableAndRunnedMutants(true);
 
-		if(!includeAlives){
+		/*if(!includeAlives){
 			allMutations = ms.removeAliveMutants(allMutations);
-		}
+		}*/
 
 		
 		int nbentry = (nb > 0 && allMutations.length>nb)?nb:allMutations.length;
 		int cpt = 0;
+		int nbalives = 0;
 		
 		for(String mutation : allMutations){											// For each mutant...				
 			boolean forceStop = false;
+			
 			MutantIfos ifos = (MutantIfos) ms.getMutationStats(mutation);
+
+			if(ms.isMutantAlive(mutation)){
+				nbalives++;
+				
+				if(!includeAlives){
+					continue;
+				}
+			}
 			// relevant IS list of tests impacted by the introduced bug (determined using mutation)
 			String[] relevantArray = ifos.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps);
 
@@ -199,10 +209,10 @@ public class MutationStatsRunner{
 				continue;
 
 			String id = ifos.getMutationIn();
-			pgp.visitTo(id);
 
 			try{
-				sd.fireIntersectionFound(ps, ifos, pgp.getImpactedNodes(id), pgp.getImpactedTestNodes(id, ps.getTestCases()));
+				pgp.visitTo(id);
+				sd.fireIntersectionFound(ps, ifos, pgp.getLastImpactedNodes(), pgp.getLastImpactedTestNodes(ps.getTestCases()));
 				cpt++;
 			}catch(NoEntryPointException e){
 				// No entry point here !
@@ -212,6 +222,7 @@ public class MutationStatsRunner{
 					continue;
 				}else{
 					sd.fireIntersectionFound(ps, ifos, new String[0], new String[0]);
+					cpt++;
 				}
 			}
 
@@ -239,7 +250,7 @@ public class MutationStatsRunner{
 			ret[0] = String.format("%5s %5d %5d %5d %7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
 					ms.getMutationId(),
 					cpt,
-					allMutations.length,
+					nbalives,
 					nbunbounded,
 					(int)sd.getSoud().getCurrentMedianCandidateImpactSetSize(),
 					(int)sd.getSoud().getCurrentMedianActualImpactSetSize(),
@@ -258,7 +269,7 @@ public class MutationStatsRunner{
 			ret[1] = String.format("%5s %5d %5d %5d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
 					ms.getMutationId(),
 					cpt,
-					allMutations.length,
+					nbalives,
 					nbunbounded,
 					sd.getSoud().getCurrentMeanCandidateImpactSetSize(),
 					sd.getSoud().getCurrentMeanActualImpactSetSize(),
@@ -277,7 +288,7 @@ public class MutationStatsRunner{
 			ret[0] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
 					ms.getMutationId(),sep,
 					cpt,sep,
-					allMutations.length,sep,
+					nbalives,sep,
 					nbunbounded,sep,
 					(int)sd.getSoud().getCurrentMedianCandidateImpactSetSize(),sep,
 					(int)sd.getSoud().getCurrentMedianActualImpactSetSize(),sep,
@@ -296,7 +307,7 @@ public class MutationStatsRunner{
 			ret[1] = String.format("\"%s\"%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
 					ms.getMutationId(),sep,
 					cpt,sep,
-					allMutations.length,sep,
+					nbalives,sep,
 					nbunbounded,sep,
 					sd.getSoud().getCurrentMeanCandidateImpactSetSize(),sep,
 					sd.getSoud().getCurrentMeanActualImpactSetSize(),sep,

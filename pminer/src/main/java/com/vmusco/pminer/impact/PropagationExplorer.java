@@ -14,36 +14,45 @@ import com.vmusco.softminer.graphs.Graph.NodesNamesForEdge;
 
 /**
  * This class manage subgraphs representing the propagation from a node.
- * A cache is used by this class in order to increase efficiency.
+ * Cache removed due to over memory consumption
  * @author Vincenzo Musco - http://www.vmusco.com
  *
  */
 public abstract class PropagationExplorer{
 	final protected Graph base;
-	HashMap<String, Graph> cache = new HashMap<String, Graph>();
-
-	public abstract boolean visitTo(String id);
-	public abstract String[] getImpactedNodes(String id) throws NoEntryPointException;
-	public abstract String[] getImpactedTestNodes(String id, String[] tests) throws NoEntryPointException;
+	//HashMap<String, Graph> cache = new HashMap<String, Graph>();
+	protected Graph last_propa;
+	protected String last_entryid;
+	
+	public abstract void visitTo(String id) throws NoEntryPointException;
+	//public abstract String[] getImpactedNodes(String id) throws NoEntryPointException;
+	//public abstract String[] getImpactedTestNodes(String id, String[] tests) throws NoEntryPointException;
+	public abstract String[] getLastImpactedNodes() throws NoEntryPointException;
+	public abstract String[] getLastImpactedTestNodes(String[] tests) throws NoEntryPointException;
 
 	public PropagationExplorer(Graph base) {
 		this.base = base;
 	}
 	
-	public Graph getPropagationGraph(String id){
+	/*public Graph getPropagationGraph(String id){
 		return cache.get(id);
 	}
 
 	public boolean hasSubGraph(String id){
 		return cache.containsKey(id);
+	}*/
+	
+	public Graph getLastPropagationGraph(){
+		return last_propa;
 	}
 	
 	protected GraphNodeVisitor populateNew(String id) throws AlreadyGeneratedException{
-		if(hasSubGraph(id))
-			throw new AlreadyGeneratedException();
-		
+		//if(hasSubGraph(id))
+		//	throw new AlreadyGeneratedException();
+		last_entryid = id;
 		final Graph newgraph = base.createNewLikeThis();
-		cache.put(id, newgraph);
+		last_propa = newgraph;
+		//cache.put(id, newgraph);
 		
 		return new GraphNodeVisitor() {
 
@@ -108,13 +117,22 @@ public abstract class PropagationExplorer{
 	}
 
 
-	public int getNbTestNodes(String id, String[] tests) throws NoEntryPointException{
+	/*public int getNbTestNodes(String id, String[] tests) throws NoEntryPointException{
 		return getImpactedTestNodes(id, tests).length;
 	}
 
 
 	public int getNbNodes(String id) throws NoEntryPointException {
 		return getImpactedNodes(id).length;
+	}*/
+	
+	public int getLastNbTestNodes(String id, String[] tests) throws NoEntryPointException{
+		return getLastImpactedTestNodes(tests).length;
+	}
+
+
+	public int getLastNbNodes(String id) throws NoEntryPointException {
+		return getLastImpactedNodes().length;
 	}
 
 }

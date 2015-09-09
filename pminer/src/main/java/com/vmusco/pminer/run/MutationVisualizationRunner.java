@@ -62,10 +62,10 @@ public class MutationVisualizationRunner{
 		if(cmd.hasOption("console")){
 			mta = new ConsoleDisplayAnalyzer();
 		}else{
-			mta = new GraphDisplayAnalyzer(propaGraph.getPropagationGraph(id));
+			mta = new GraphDisplayAnalyzer(propaGraph.getLastPropagationGraph());
 		}
 
-		mta.fireIntersectionFound(ms.getRelatedProcessStatisticsObject(), mi, propaGraph.getImpactedNodes(id), propaGraph.getImpactedTestNodes(id, ms.getRelatedProcessStatisticsObject().getTestCases()));
+		mta.fireIntersectionFound(ms.getRelatedProcessStatisticsObject(), mi, propaGraph.getLastImpactedNodes(), propaGraph.getLastImpactedTestNodes(ms.getRelatedProcessStatisticsObject().getTestCases()));
 		mta.fireExecutionEnded();
 		System.exit(0);
 	}
