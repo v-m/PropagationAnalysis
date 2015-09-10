@@ -41,7 +41,7 @@ public class MutationStatsRunner{
 		Option opt;
 		opt = new Option("a", "include-alives", false, "include all mutants mutants in the analysis even if they are not killed");
 		options.addOption(opt);
-		opt = new Option("o", "include-nulls", false, "include nulls values in precision, recalls and fscores medians computation");
+		opt = new Option("o", "exclude-nulls", false, "exclude nulls values in precision, recalls and fscores medians computation");
 		options.addOption(opt);
 		opt = new Option("u", "include-unbounded", false, "include mutant which have no entry point in the graph");
 		options.addOption(opt);
@@ -123,7 +123,7 @@ public class MutationStatsRunner{
 			pgp = new SoftMinerPropagationExplorer(loadGraph(pth));
 		}
 		
-		String[] ret = processMutants(ms, pgp, sep, cmd.hasOption("include-nulls"), listener, cmd.hasOption("include-unbounded"), cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives")); 
+		String[] ret = processMutants(ms, pgp, sep, cmd.hasOption("exclude-nulls"), listener, cmd.hasOption("include-unbounded"), cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives")); 
 
 		printLine(sep);
 
@@ -166,7 +166,7 @@ public class MutationStatsRunner{
 	}
 
 	public static String[] processMutants(MutationStatistics<?> ms, PropagationExplorer pgp, 
-			Character sep, boolean includeNulls, MutantTestProcessingListener<MutationStatisticsCollecter> listener, 
+			Character sep, boolean excludeNulls, MutantTestProcessingListener<MutationStatisticsCollecter> listener, 
 			boolean includeUnbounded, int nb, boolean includeAlives) throws MutationNotRunException, PersistenceException{
 		String[] ret = new String[2];
 		int nbunbounded = 0;
@@ -242,7 +242,7 @@ public class MutationStatsRunner{
 
 		sd.fireExecutionEnded();
 
-		if(!includeNulls){
+		if(excludeNulls){
 			sd.getPrecisionRecallFscore().removesNulls();
 		}
 

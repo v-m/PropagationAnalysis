@@ -95,13 +95,6 @@ $ ./softminer-creategraph /tmp/myproject/
 
 To generate other type of graphs and more options, just add the ``--help`` parameter to the program.
 
-### Use JavaPDG as a graph data source
-
-- Extract a JavaPDG
-- Use the ``pminer-javapdg`` command.
-
-*(more details soon...)*
-
 ### Visualize the propagation on a graph
 
 ```
@@ -140,10 +133,11 @@ To get the performances of mutation using the CHA graph for soft1 software and t
 ./pminer-mutop-perf mut_result/soft1/graph_cha.xml mut_result/soft1/mutations/main/ABS/mutations.xml
 ```
 
-Following options are availables:
+Following options are available:
 
-- ``-k``: include only killed mutants in the analysis;
-- ``-r``: remove nulls from the medians calculation;
+- ``-a``: include also alive mutants (instead of considering only killed ones) in the analysis;
+- ``-o``: exclude nulls from the medians calculation;
+- ``-u``: include unbounded mutants in the computation (an unbounded mutant is a mutant which the mutation point occurs on a node which is not declared in the graph (can occurs in some methods not directly used such as ``compare``));
 - ``-n <nb>``: filter out if more than <nb> mutants are present;
 - ``-c <sep>``: export in csv format with <sep> separator.
 
@@ -161,7 +155,11 @@ If there is only the two softwares listed above the following command is equival
 ./pminer-global-perf mut_result/soft1:mut_result/soft2 graph.xml:graph_cha.xml
 ```
 
-Similar options than for ``pminer-mutop-perf`` can be used. Moreover, the ``-a`` options allows to compute averages instead of medians.
+Similar options than for ``pminer-mutop-perf`` can be used. Moreover, the ``-v`` options allows to compute averages instead of medians.
+
+## Use JavaPDG as a graph data source
+
+Both commands (``pminer-global-perf`` and ``pminer-mutop-perf``) accepts as option ``--javapdg`` (or ``-j``). Those enable to pass as an argument the path to a javapdg database. For ``pminer-global-perf``, pass the path to a folder containing subfolders for databases, one for each project (named similarly as the project folders itself). For ``pminer-mutop-perf``, pass the path to the software database.
 
 ## Dependencies
 
