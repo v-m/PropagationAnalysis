@@ -1,7 +1,6 @@
 package com.vmusco.softminer.sourceanalyzer.processors;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -27,24 +26,31 @@ import spoon.reflect.visitor.filter.AbstractFilter;
 import spoon.reflect.visitor.filter.AbstractReferenceFilter;
 
 import com.vmusco.smf.mutation.Mutation;
-import com.vmusco.softminer.graphs.EdgeTypes;
-import com.vmusco.softminer.graphs.NodeMarkers;
-import com.vmusco.softminer.graphs.NodeTypes;
 import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 
-/**
- * 
- * @author Vincenzo Musco - http://www.vmusco.com
- * @see SimpleFeaturesProcessor
- */
 @SuppressWarnings({"rawtypes","unchecked"})
-@Deprecated
-public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
-	private HashSet<String> tagAsReflexion = new HashSet<String>();
-
-	private static String getNodeForItemKey(CtExecutable anExecutable){
+public abstract class AbstractFeaturesProcessor extends AbstractProcessor<CtNamedElement>{
+	public abstract void newReadFieldAccess(CtExecutable<?> src, CtFieldAccess<?> anAccess);
+	public abstract void newWriteFieldAccess(CtExecutable<?> src, CtFieldAccess<?> anAccess);
+	public abstract void newReflexionUsage(CtExecutable<?> src);
+	public abstract void newMethodCall(CtExecutable<?> src, CtExecutable<?> aReferenceExecutable);
+	public abstract void newIfceImplementation(CtExecutable<?> src, CtMethod<?> exo);
+	public abstract void newAbstractImplementation(CtExecutable<?> src, CtMethod<?> exo);
+	
+	/**
+	 * A default constructor is invoked by a declaration in a class
+	 * @param src
+	 * @param declaration
+	 */
+	public abstract void newDeclarationMethodCall(CtField<?> src, CtExecutable<?> declaration);
+	
+	public static String getNodeForItemKey(CtExecutable anExecutable){
 		return Mutation.resolveName((CtTypeMember)anExecutable);
 	}
+	
+	
+	
+	
 	
 	@Override
 	public void process(CtNamedElement element){
@@ -52,13 +58,12 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 			return;
 
 		CtExecutable execElement = (CtExecutable) element;
-		String src = getNodeForItemKey(execElement);
 
 		/**********************************
 		 * Here we create a bridge between 
 		 * a declared method and its abstract signature
 		 */
-		bridgeMethodAndAbstract(execElement, src);
+		bridgeMethodAndAbstract(execElement);
 
 		/**********************************
 		 * Treating executable references
@@ -71,7 +76,7 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 
 		for(CtExecutableReference aReference : refs){
 			try{
-				treatExecutableReferences(aReference, src);
+				treatExecutableReferences(aReference, execElement);
 			}catch(Exception ex){
 				exceptionOccured(ex);
 			}
@@ -90,7 +95,7 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 			List<CtFieldAccess> refs2 = Query.getElements(element, af);
 	
 			for(CtFieldAccess anAccess : refs2){
-				treatFieldReferences(anAccess, src);
+				treatFieldReferences(anAccess, execElement);
 			}
 		}
 	}
@@ -106,21 +111,17 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 
 		if(element instanceof CtField){
 			CtField field = (CtField) element;
-			String src = field.getReference().getQualifiedName();
 
 			if(field.getDefaultExpression() != null){
 				if(field.getDefaultExpression() instanceof CtInvocation){
 					CtInvocation invok = (CtInvocation) field.getDefaultExpression();
 					if(invok.getExecutable().getDeclaration() != null){
-						String dst = getNodeForItemKey(invok.getExecutable().getDeclaration());
-						ProcessorCommunicator.addIfAllowed(src, dst, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.METHOD_CALL);
+						newDeclarationMethodCall(field, invok.getExecutable().getDeclaration());
 					}
-
 				}else if(field.getDefaultExpression() instanceof CtConstructorCall){
 					CtConstructorCall ccc = (CtConstructorCall) field.getDefaultExpression();
 					if(ccc.getExecutable().getDeclaration() != null){
-						String dst = getNodeForItemKey(ccc.getExecutable().getDeclaration());
-						ProcessorCommunicator.addIfAllowed(src, dst, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.METHOD_CALL);
+						newDeclarationMethodCall(field, ccc.getExecutable().getDeclaration());
 					}
 				}
 			}
@@ -129,38 +130,28 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 
 		return true;
 	}
-
-	private void treatFieldReferences(CtFieldAccess anAccess, String src) {
-		EdgeTypes et = null;
-		
+	
+	private void treatFieldReferences(CtFieldAccess anAccess, CtExecutable src) {
 		if(anAccess instanceof CtFieldRead){
-			et = EdgeTypes.READ_OPERATION;
+			newReadFieldAccess(src, anAccess);
 		}else if(anAccess instanceof CtFieldWrite){
-			et = EdgeTypes.WRITE_OPERATION;
+			newWriteFieldAccess(src, anAccess);
 		}else{
 			return;
 		}
-		
-		String dst = anAccess.getSignature().split(" ")[1];
-		
-		if(et == EdgeTypes.WRITE_OPERATION)
-			ProcessorCommunicator.addIfAllowed(dst, src, NodeTypes.METHOD, NodeTypes.FIELD, et);
-		else
-			ProcessorCommunicator.addIfAllowed(src, dst, NodeTypes.METHOD, NodeTypes.FIELD, et);
 	}
 
-	private void treatExecutableReferences(CtExecutableReference aReference, String src) {
-		String dst = null;
 
+	private void treatExecutableReferences(CtExecutableReference aReference, CtExecutable src) {
 		try{
 			if(aReference.getDeclaration() == null){
 				// This is an exodependency => not useful
 	
-				//But before, let's see if there is reflexion in it...
+				//But before, let's see if there is reflection in it...
 				if(aReference.toString().startsWith("java.lang.reflect.") ||
 						aReference.toString().startsWith("java.lang.Class.") ||
 						aReference.toString().startsWith("java.lang.Class<?>.")){
-					tagAsReflexion.add(src);
+					newReflexionUsage(src);
 				}
 	
 				return;
@@ -173,10 +164,9 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 
 		CtExecutable aReferenceExecutable = aReference.getDeclaration();
 
-		dst = getNodeForItemKey(aReferenceExecutable);
-		ProcessorCommunicator.addIfAllowed(src, dst, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.METHOD_CALL);
+		newMethodCall(src, aReferenceExecutable);
 	}
-	
+
 	private CtMethod<?> isMethodComingFrom(CtMethod aMethod, CtTypeReference anElement){
 		List<CtTypeReference<?>> resolveFrom = anElement.getDeclaration().getFormalTypeParameters();
 		List<CtTypeReference<?>> resolveTo = anElement.getActualTypeArguments();
@@ -229,9 +219,7 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 	}
 	
 	
-	private void bridgeMethodAndAbstract(CtExecutable execElement, String src) {
-		String dst = "";
-
+	private void bridgeMethodAndAbstract(CtExecutable execElement) {
 		if(ProcessorCommunicator.resolveInterfacesAndClasses && execElement instanceof CtMethod){
 			CtMethod casted = (CtMethod) execElement;
 
@@ -262,10 +250,7 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 							CtMethod<?> exo = isMethodComingFrom(casted, ctr);
 							
 							if(exo != null){
-								dst = getNodeForItemKey(exo);
-								if(ProcessorCommunicator.addIfAllowed(dst, src, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION)){
-									//System.out.println(dst+" --I--> "+src);
-								}
+								newIfceImplementation(execElement, exo);
 							}
 						}
 						
@@ -279,10 +264,7 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 							CtMethod<?> exo = isMethodComingFrom(casted, parentClass);
 							
 							if(exo != null){
-								dst = getNodeForItemKey(exo);
-								if(ProcessorCommunicator.addIfAllowed(dst, src, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION)){
-									//System.out.println(dst+" --A--> "+src);
-								}
+								newAbstractImplementation(execElement, exo);
 							}
 							
 							if(parentClass.getSuperclass() != null && parentClass.getSuperclass().getDeclaration() != null)
@@ -292,22 +274,6 @@ public class FeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 						}
 					}
 				}
-			}
-		}
-	}
-
-	@Override
-	public void processingDone() {
-		tagNodesAsReflexion();
-		super.processingDone();
-	}
-
-	private void tagNodesAsReflexion(){
-		for(String node : tagAsReflexion){
-			if(ProcessorCommunicator.outputgraph.hasNode(node)){
-				ProcessorCommunicator.markNode(node, NodeMarkers.USES_REFLEXION);
-			}else{
-				System.out.println("Node "+node+" missing !!!");
 			}
 		}
 	}
