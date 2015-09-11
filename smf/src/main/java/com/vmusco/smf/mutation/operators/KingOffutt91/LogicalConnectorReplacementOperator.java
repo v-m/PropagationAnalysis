@@ -1,7 +1,5 @@
 package com.vmusco.smf.mutation.operators.KingOffutt91;
 
-import java.util.function.BinaryOperator;
-
 import com.vmusco.smf.mutation.ManualProcessingStep;
 import com.vmusco.smf.mutation.operators.AbstractBinaryOperator;
 

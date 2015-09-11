@@ -25,7 +25,6 @@ import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.Query;
 import spoon.reflect.visitor.filter.AbstractFilter;
 import spoon.reflect.visitor.filter.AbstractReferenceFilter;
-import sun.security.util.Length;
 
 import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;

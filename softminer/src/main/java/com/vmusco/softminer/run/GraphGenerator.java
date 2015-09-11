@@ -51,6 +51,7 @@ public class GraphGenerator {
 		options.addOption(new Option("o", "output-file", true, "Describes the output file absolute if start with / else relative from <working-dir>. This parameter is used only in case of using a smf project as input."));
 		options.addOption(new Option("d", "delete-previous", false, "Delete the file if it already exists."));
 		options.addOption(new Option("F", "out-format", true, "set the output format. Set help or h as a type to get the list of types"));
+		options.addOption(new Option("c", "cp", true, "add entries in classpath. Can be separated by "+File.pathSeparator));
 		
 		options.addOption(new Option("t", "type", true, "select a specific type of call graph (override -r, -f and -c). Set help or h as a type to get the list of types."));
 		options.addOption(new Option("c", "cha", false, "resolve interfaces and classes"));
@@ -107,7 +108,7 @@ public class GraphGenerator {
 
 		if((cmd.getArgs().length != 1 && cmd.getArgs().length != 3) || cmd.hasOption("help")){
 			HelpFormatter formatter = new HelpFormatter();
-			String header = "Generate a call graph for the smf project pointed in <smf-project-dir> and output it to this project folder or a source code described in maven project <maven-dir> with resolving dependencies and using sources relatives a maven dir in <source-dir> (eventually separated by "+File.pathSeparator+", can be xxx! to indicate the defaults xxx/src/main|xxx/test/java folders) and output it in <output-file>.";
+			String header = "Generate a call graph for the smf project pointed in <smf-project-dir> and output it to this project folder or a source code described in maven project <maven-dir> with resolving dependencies and using sources relatives a maven dir in <source-dir> (eventually separated by "+File.pathSeparator+", can be xxx@ to indicate the defaults xxx/src/main|xxx/test/java folders) and output it in <output-file>.";
 			String footer = "";
 			formatter.printHelp(" [options] <smf-project-dir> | <<maven-dir> <source-dir> <output-file>>", header, options, footer);
 
@@ -126,17 +127,23 @@ public class GraphGenerator {
 		if(cmd.getArgs().length == 3){
 			String mvn_dir = cmd.getArgs()[0];
 			
+			HashSet<String> srcsh = new HashSet<String>();
 			String[] srcs;
 			
-			if(cmd.getArgs()[1].endsWith("!")){
-				if(cmd.getArgs()[1].equals("!"))
-					srcs = new String[]{"src/main/java", "src/test/java"};
-				else
-					srcs = new String[]{cmd.getArgs()[1].substring(0, cmd.getArgs()[1].length()-1)+"/src/main/java", 
-						cmd.getArgs()[1].substring(0, cmd.getArgs()[1].length()-1)+"/src/test/java"};
-			}else{
-				srcs = cmd.getArgs()[1].split(File.pathSeparator);
+			srcs = cmd.getArgs()[1].split(File.pathSeparator);
+			for(String s: srcs){
+				if(s.endsWith("@")){
+					if(s.equals("@")){
+						srcsh.add("src/main/java");
+						srcsh.add("src/test/java");
+					}else{
+						srcsh.add(s.substring(0, s.length()-1)+"/src/main/java");
+						srcsh.add(s.substring(0, s.length()-1)+"/src/test/java");
+					}
+				}
+				
 			}
+			srcs = srcsh.toArray(new String[0]);
 			
 			Set<String> finalcp = new HashSet<String>();
 
@@ -210,14 +217,23 @@ public class GraphGenerator {
 		}
 		
 		
-
+		if(cmd.hasOption("cp")){
+			Set<String> entries = new HashSet<String>();
+			
+			for(String c : classpath){
+				entries.add(c);
+			}
+			for(String c : cmd.getOptionValue("cp").split(File.pathSeparator)){
+				entries.add(c);
+			}
+			
+			classpath = entries.toArray(new String[0]);
+		}
 		
 
-		
-
-		
-
-		
+		for(String cp : classpath){
+			System.out.println("+CP: "+cp);
+		}
 
 		GraphBuilder gb;
 

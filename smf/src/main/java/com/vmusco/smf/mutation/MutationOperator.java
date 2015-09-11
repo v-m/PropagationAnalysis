@@ -53,7 +53,7 @@ public abstract class MutationOperator<T extends CtElement> extends AbstractProc
 		};
 	}
 	
-	public static TargetObtainer createParentTarget(int nb) {
+	public static TargetObtainer createParentTarget(final int nb) {
 		return new TargetObtainer() {
 			
 			@Override

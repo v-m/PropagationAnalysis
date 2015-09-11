@@ -24,7 +24,6 @@ import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
-import com.vmusco.softminer.graphs.Graph;
 
 /**
  * Compute performances for all mutants of all softs and all op

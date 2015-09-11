@@ -23,7 +23,6 @@ import com.vmusco.smf.utils.ConsoleTools;
  * It create all required working resources and attempts a first resolution of 
  * the project maven resource in order to determine the appropriated classpath.
  * @author Vincenzo Musco - http://www.vmusco.com
- *
  */
 public class NewProject extends GlobalTestRunning {	
 	private static final Class<?> thisclass = NewProject.class;
@@ -206,7 +205,6 @@ public class NewProject extends GlobalTestRunning {
 		}else{
 			System.out.println("SKIP");
 		}
-
 
 		System.out.print("Building tests.....");
 		if(ps.currentStateIsBefore(STATE.BUILD_TESTS)){
