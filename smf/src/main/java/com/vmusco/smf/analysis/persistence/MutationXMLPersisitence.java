@@ -40,19 +40,22 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 	protected static String CLASS_TO_MUTATE_2 = "class-to-mutate";	// MUTATION
 	protected static String CLASS_TO_MUTATE_3 = "class";				// MUTATION
 
-	private static String MUTATION_2 = "mutants";
-	private static String MUTATION_3 = "mutant";
-	//private static final String MUTATION_CLASS_3 = "operator-class";
+	private static final String MUTATION_2 = "mutants";
+	private static final String MUTATION_3 = "mutant";
 	private static final String MUTATION_OPERATOR_3 = "operator-id";
 	private static final String MUTANT_HASH_4 = "hash";
 
-	private static String MUTANT_ID_4 = "id";
-	private static String MUTANT_IN_4 = "in";
-	private static String MUTANT_VIABLE_4 = "viable";
-	private static String MUTANT_TO_4 = "to";
-	private static String MUTANT_FROM_4 = "from";
+	private static final String MUTANT_ID_4 = "id";
+	private static final String MUTANT_IN_4 = "in";
+	private static final String MUTANT_VIABLE_4 = "viable";
+	private static final String MUTANT_TO_4 = "to";
+	private static final String MUTANT_FROM_4 = "from";
+	private static final String MUTANT_SRCCOL_4 = "src-columns";
+	private static final String MUTANT_SRCLINE_4 = "src-lines";
+	private static final String MUTANT_SRC_4 = "src-pos";
+	private static final String MUTANT_FILE_4 = "src-file";
 
-	private static String CONFIG_FILE = "config-file";
+	private static final String CONFIG_FILE = "config-file";
 
 	private SAXBuilder sxb;
 	private Document document;
@@ -173,6 +176,22 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 			
 			if(ifos.getHash() != null)
 				amutant.setAttribute(new Attribute(MUTANT_HASH_4, ifos.getHash()));
+			
+			if(ifos.getStartColumn() != -1 && ifos.getEndColumn() != -1){
+				amutant.setAttribute(new Attribute(MUTANT_SRCCOL_4, ifos.getStartColumn()+"-"+ifos.getEndColumn()));
+			}
+			
+			if(ifos.getStartLine() != -1 && ifos.getEndLine() != -1){
+				amutant.setAttribute(new Attribute(MUTANT_SRCLINE_4, ifos.getStartLine()+"-"+ifos.getEndLine()));
+			}
+
+			if(ifos.getStartSource() != -1 && ifos.getEndSource() != -1){
+				amutant.setAttribute(new Attribute(MUTANT_SRC_4, ifos.getStartSource()+"-"+ifos.getEndSource()));
+			}
+
+			if(ifos.getSourceFile() != null){
+				amutant.setAttribute(new Attribute(MUTANT_FILE_4, ifos.getSourceFile()));
+			}
 
 			setSensitiveAttribute(amutant, MUTANT_IN_4, ifos.getMutationIn()==null?"?":ifos.getMutationIn());
 			try{
@@ -263,6 +282,29 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 				if(e.getAttribute(MUTANT_HASH_4) != null){
 					ifos.setHash(e.getAttribute(MUTANT_HASH_4).getValue());
 				}
+				
+				if(e.getAttribute(MUTANT_SRCCOL_4) != null){
+					String[] vals = e.getAttribute(MUTANT_SRCCOL_4).getValue().split("-");
+					ifos.setStartColumn(Integer.parseInt(vals[0]));
+					ifos.setEndColumn(Integer.parseInt(vals[1]));
+				}
+				
+				if(e.getAttribute(MUTANT_SRCLINE_4) != null){
+					String[] vals = e.getAttribute(MUTANT_SRCLINE_4).getValue().split("-");
+					ifos.setStartLine(Integer.parseInt(vals[0]));
+					ifos.setEndLine(Integer.parseInt(vals[1]));
+				}
+				
+				if(e.getAttribute(MUTANT_SRC_4) != null){
+					String[] vals = e.getAttribute(MUTANT_SRC_4).getValue().split("-");
+					ifos.setStartSource(Integer.parseInt(vals[0]));
+					ifos.setEndSource(Integer.parseInt(vals[1]));
+				}
+
+				if(e.getAttribute(MUTANT_FILE_4) != null){
+					ifos.setSourceFile(e.getAttribute(MUTANT_FILE_4).getValue());
+				}
+				
 				String id = e.getAttribute(MUTANT_ID_4).getValue();
 				ms.setMutationStats(id, ifos);
 			}

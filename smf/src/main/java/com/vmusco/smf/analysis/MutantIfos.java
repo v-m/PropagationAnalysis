@@ -1,12 +1,8 @@
 package com.vmusco.smf.analysis;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
-import com.vmusco.smf.utils.MutationsSetTools;
 
 /**
  * This class bundles all informations relatives to one mutation
@@ -33,11 +29,85 @@ public class MutantIfos{
 	 */
 	private boolean viable;
 	
+	
+	/*
+	 * Informations under identifies the mutant
+	 */
 	/**
 	 * The hash of the source generated.
 	 * Obtained via {@link Mutation#getHashForMutationSource(java.io.File)}
 	 */
 	private String hash = null;
+	private int startcolumn = -1;
+	private int endcolumn = -1;
+	private int startline = -1;
+	private int endline = -1;
+	private int startsource = -1;
+	private int endsource = -1;
+	private String file = null;
+
+	public void setStartColumn(int startcolumn) {
+		this.startcolumn = startcolumn;
+	}
+	
+	public int getStartColumn() {
+		return startcolumn;
+	}
+	
+	public void setEndColumn(int endcolumn) {
+		this.endcolumn = endcolumn;
+	}
+	
+	public int getEndColumn() {
+		return endcolumn;
+	}
+	
+	public void setStartLine(int startline) {
+		this.startline = startline;
+	}
+	
+	public int getStartLine() {
+		return startline;
+	}
+	
+	public void setEndLine(int endline) {
+		this.endline = endline;
+	}
+	
+	public int getEndLine() {
+		return endline;
+	}
+	
+	public void setStartSource(int startsource) {
+		this.startsource = startsource;
+	}
+	
+	public int getStartSource() {
+		return startsource;
+	}
+	
+	public void setEndSource(int endsource) {
+		this.endsource = endsource;
+	}
+	
+	public int getEndSource() {
+		return endsource;
+	}
+	
+	public void setSourceFile(String file){
+		this.file = file;
+	}
+	
+	public String getSourceFile() {
+		return file;
+	}
+	
+	
+	
+	
+	
+	
+	
 	
 	private MutantExecutionIfos execution = null;
 	
