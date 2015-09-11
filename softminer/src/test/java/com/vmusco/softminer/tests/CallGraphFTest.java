@@ -8,10 +8,10 @@ import com.vmusco.softminer.graphs.EdgeTypes;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
 
-public class UseGraphBTest extends UseGraphAbstractTest{
+public class CallGraphFTest extends CallGraphAbstractTest{
 	
-	public UseGraphBTest() {
-		setGraphBuilderObtainer(DepGraphTestHelper.testPkgAndGenerateBuilderUseGraphBFactory());
+	public CallGraphFTest() {
+		super(DepGraphTestHelper.testPkgAndGenerateBuilderFCallGraphFactory());
 	}
 	
 	@Test
@@ -189,6 +189,74 @@ public class UseGraphBTest extends UseGraphAbstractTest{
 		dgth.fullAssertNode(
 				c_foo, 
 				new String[]{z_main}, 
+				new String[]{});
+	}
+
+	@Override
+	public void testSimpleInheritanceConnectedToAbstract() throws Exception {
+		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testSimpleInheritanceConnectedToAbstract.Impl.class);
+		Graph dg = dgth.getGraph();
+		
+		String abs = dgth.formatAtom("Abs()");
+		String impl = dgth.formatAtom("Impl()");
+		String impl_fct = dgth.formatAtom("Impl.fct()");
+		String abs_foo = dgth.formatAtom("Abs.foo()");
+		String impl_foo = dgth.formatAtom("Impl.foo()");
+		
+		dgth.fullAssertGraph(4, 3);
+		dgth.fullAssertNode(
+				abs_foo, 
+				new String[]{impl_fct}, 
+				new String[]{});
+		
+		dgth.fullAssertNode(
+				impl_fct, 
+				new String[]{}, 
+				new String[]{abs_foo, impl});
+
+		dgth.fullAssertNode(
+				impl, 
+				new String[]{impl_fct}, 
+				new String[]{abs});
+		
+
+		dgth.fullAssertNode(
+				abs, 
+				new String[]{impl}, 
+				new String[]{});
+	}
+
+	@Override
+	public void testSimpleInheritanceConnectedToImplementation() throws Exception {
+		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testSimpleInheritanceConnectedToImplementation.Impl.class);
+		Graph dg = dgth.getGraph();
+		
+		String abs = dgth.formatAtom("Abs()");
+		String impl = dgth.formatAtom("Impl()");
+		String impl_fct = dgth.formatAtom("Impl.fct()");
+		String abs_foo = dgth.formatAtom("Abs.foo()");
+		String impl_foo = dgth.formatAtom("Impl.foo()");
+
+		dgth.fullAssertGraph(4, 3);
+		dgth.fullAssertNode(
+				impl_foo, 
+				new String[]{impl_fct}, 
+				new String[]{});
+		
+		dgth.fullAssertNode(
+				impl_fct, 
+				new String[]{}, 
+				new String[]{impl_foo, impl});
+
+		dgth.fullAssertNode(
+				impl, 
+				new String[]{impl_fct}, 
+				new String[]{abs});
+		
+
+		dgth.fullAssertNode(
+				abs, 
+				new String[]{impl}, 
 				new String[]{});
 	}
 }

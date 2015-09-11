@@ -6,9 +6,13 @@ import org.junit.Test;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
 
-public abstract class UseGraphAbstractTest {
-	private GraphBuilderObtainer gbo = DepGraphTestHelper.testPkgAndGenerateBuilderUseGraphBFactory();
+public abstract class CallGraphAbstractTest {
+	private GraphBuilderObtainer gbo = null;
 	
+	public CallGraphAbstractTest(GraphBuilderObtainer gbo) {
+		this.gbo = gbo;
+	}
+
 	public void setGraphBuilderObtainer(GraphBuilderObtainer gbo) {
 		this.gbo = gbo;
 	}
@@ -31,6 +35,22 @@ public abstract class UseGraphAbstractTest {
 	 */
 	@Test
 	public abstract void testInterfaceAndLinking() throws Exception;
+
+
+	/**
+	 * Test a simple inheritence case
+	 * Status: Finished
+	 * @throws Exception
+	 */
+	@Test
+	public abstract void testSimpleInheritanceConnectedToAbstract() throws Exception;
+	/**
+	 * Test a simple inheritence case
+	 * Status: Finished
+	 * @throws Exception
+	 */
+	@Test
+	public abstract void testSimpleInheritanceConnectedToImplementation() throws Exception;
 	
 	/**
 	 * Test abstract class inheritance and links
@@ -42,8 +62,6 @@ public abstract class UseGraphAbstractTest {
 	
 	@Test
 	public abstract void testInterfaceAndInheritance() throws Exception;
-	
-	
 	
 	
 	@Ignore

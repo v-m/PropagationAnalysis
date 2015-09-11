@@ -32,6 +32,7 @@ public abstract class ProcessorCommunicator {
 	 */
 	public static boolean resolveInterfacesAndClasses = false;
 	public static boolean includesFields = false;
+	public static boolean removeOverridenMethods = false;
 	
 	public static void reset(){
 		inpackage = "";

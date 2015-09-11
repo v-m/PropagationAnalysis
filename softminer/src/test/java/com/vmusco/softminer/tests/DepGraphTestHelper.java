@@ -41,7 +41,7 @@ public class DepGraphTestHelper {
 	 * @return
 	 * @throws Exception
 	 */
-	public static GraphBuilderObtainer testPkgAndGenerateBuilderUseGraphAFactory(){
+	public static GraphBuilderObtainer testPkgAndGenerateBuilderCallGraphFactory(){
 		return new GraphBuilderObtainer() {
 			@Override
 			public GraphBuilder getGraphBuilder(String[] items) {
@@ -50,7 +50,16 @@ public class DepGraphTestHelper {
 		};
 	}
 	
-	public static GraphBuilderObtainer testPkgAndGenerateBuilderUseGraphBFactory(){
+	public static GraphBuilderObtainer testPkgAndGenerateBuilderMinusCallGraphFactory(){
+		return new GraphBuilderObtainer() {
+			@Override
+			public GraphBuilder getGraphBuilder(String[] items) {
+				return GraphBuilder.newGraphBuilderOnlyWithDependenciesWithoutInheritence("test", items); 
+			}
+		};
+	}
+	
+	public static GraphBuilderObtainer testPkgAndGenerateBuilderFCallGraphFactory(){
 		return new GraphBuilderObtainer() {
 			@Override
 			public GraphBuilder getGraphBuilder(String[] items) {
@@ -59,7 +68,7 @@ public class DepGraphTestHelper {
 		};
 	}
 	
-	public static GraphBuilderObtainer testPkgAndGenerateBuilderUseGraphCFactory(){
+	public static GraphBuilderObtainer testPkgAndGenerateBuilderCHACallGraphFactory(){
 		return new GraphBuilderObtainer() {
 			@Override
 			public GraphBuilder getGraphBuilder(String[] items) {
@@ -68,7 +77,7 @@ public class DepGraphTestHelper {
 		};
 	}
 	
-	public static GraphBuilderObtainer testPkgAndGenerateBuilderUseGraphDFactory(){
+	public static GraphBuilderObtainer testPkgAndGenerateBuilderFCHACallGraphFactory(){
 		return new GraphBuilderObtainer() {
 			@Override
 			public GraphBuilder getGraphBuilder(String[] items) {

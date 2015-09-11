@@ -25,6 +25,11 @@ public class GraphBuilder {
 
 	//FACTORIES TO GET GRAPHBUILDER CONFIGURED OBJECTS
 
+
+	public static GraphBuilder newGraphBuilderOnlyWithDependenciesWithoutInheritence(String projectName, String[] inputSources){
+		return newGraphBuilderOnlyWithDependenciesWithoutOverriden(projectName, inputSources, null);
+	}
+	
 	/**
 	 * Get a use graph type A without class path
 	 * @see GraphBuilder#newGraphBuilderOnlyWithDependencies(String, String[])
@@ -59,10 +64,38 @@ public class GraphBuilder {
 		return newGraphBuilderWithFieldsAndInheritence(projectName, inputSources, null);
 	}
 	
-	
+	/**
+	 * Get a simple call graph on which overriden methods are totally removed
+	 * @param projectName a project name
+	 * @param inputSources the list of sources to include in the use graph
+	 * @param cp the list of class path entries to build the sources
+	 * @return the builder object
+	 */
+	public static GraphBuilder newGraphBuilderManuallyConfigured(String projectName, String[] inputSources, String[] cp, boolean resolveIfcesAndAbstract, boolean fields, boolean removeOverriden){
+		GraphBuilder gb = new GraphBuilder(projectName, inputSources, cp);
+		ProcessorCommunicator.resolveInterfacesAndClasses = resolveIfcesAndAbstract;
+		ProcessorCommunicator.includesFields = fields;
+		ProcessorCommunicator.removeOverridenMethods = removeOverriden;
+		return gb;
+	}
 	
 	/**
-	 * Get a use graph type A
+	 * Get a simple call graph on which overriden methods are totally removed
+	 * @param projectName a project name
+	 * @param inputSources the list of sources to include in the use graph
+	 * @param cp the list of class path entries to build the sources
+	 * @return the builder object
+	 */
+	public static GraphBuilder newGraphBuilderOnlyWithDependenciesWithoutOverriden(String projectName, String[] inputSources, String[] cp){
+		GraphBuilder gb = new GraphBuilder(projectName, inputSources, cp);
+		ProcessorCommunicator.resolveInterfacesAndClasses = false;
+		ProcessorCommunicator.includesFields = false;
+		ProcessorCommunicator.removeOverridenMethods = true;
+		return gb;
+	}
+	
+	/**
+	 * Get a simple call graph
 	 * @param projectName a project name
 	 * @param inputSources the list of sources to include in the use graph
 	 * @param cp the list of class path entries to build the sources
@@ -72,11 +105,12 @@ public class GraphBuilder {
 		GraphBuilder gb = new GraphBuilder(projectName, inputSources, cp);
 		ProcessorCommunicator.resolveInterfacesAndClasses = false;
 		ProcessorCommunicator.includesFields = false;
+		ProcessorCommunicator.removeOverridenMethods = false;
 		return gb;
 	}
 	
 	/**
-	 * Get a use graph type B
+	 * Get a call graph with fields
 	 * @param projectName a project name
 	 * @param inputSources the list of sources to include in the use graph
 	 * @param cp the list of class path entries to build the sources
@@ -86,12 +120,13 @@ public class GraphBuilder {
 		GraphBuilder gb = new GraphBuilder(projectName, inputSources, cp);
 		ProcessorCommunicator.resolveInterfacesAndClasses = false;
 		ProcessorCommunicator.includesFields = true;
+		ProcessorCommunicator.removeOverridenMethods = false;
 		return gb;
 	}
 	
 
 	/**
-	 * Get a use graph type C
+	 * Get a call graph with Class Hierarchy Analysis
 	 * @param projectName a project name
 	 * @param inputSources the list of sources to include in the use graph
 	 * @param cp the list of class path entries to build the sources
@@ -101,11 +136,12 @@ public class GraphBuilder {
 		GraphBuilder gb = new GraphBuilder(projectName, inputSources, cp);
 		ProcessorCommunicator.resolveInterfacesAndClasses = true;
 		ProcessorCommunicator.includesFields = false;
+		ProcessorCommunicator.removeOverridenMethods = false;
 		return gb;
 	}
 	
 	/**
-	 * Get a use graph type D
+	 * Get a call graph with Class Hierarchy Analysis and Fields
 	 * @param projectName a project name
 	 * @param inputSources the list of sources to include in the use graph
 	 * @param cp the list of class path entries to build the sources
@@ -115,6 +151,7 @@ public class GraphBuilder {
 		GraphBuilder gb = new GraphBuilder(projectName, inputSources, cp);
 		ProcessorCommunicator.resolveInterfacesAndClasses = true;
 		ProcessorCommunicator.includesFields = true;
+		ProcessorCommunicator.removeOverridenMethods = false;
 		return gb;
 	}
 	
@@ -171,4 +208,6 @@ public class GraphBuilder {
 	public void afterGraphGeneration(){
 		// Override this method to apply special treatment to the created graph (after generation)
 	}
+
+
 }
