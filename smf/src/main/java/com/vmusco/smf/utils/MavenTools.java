@@ -22,9 +22,6 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
  */
 public abstract class MavenTools {
 
-	@Deprecated
-	public static String MAVEN_DIR = "/home/vince/.m2/repository";
-	
 	private MavenTools(){
 
 	}
@@ -183,10 +180,5 @@ public abstract class MavenTools {
 			System.out.println("EOF reached -- no classpath !");
 			return "";
 		}
-	}
-	
-	@Deprecated
-	public static String extractClassPathFromPom(String projectRoot) throws FileNotFoundException, IOException, XmlPullParserException, InterruptedException{
-		return extractClassPathFromPom(projectRoot, MAVEN_DIR);
 	}
 }

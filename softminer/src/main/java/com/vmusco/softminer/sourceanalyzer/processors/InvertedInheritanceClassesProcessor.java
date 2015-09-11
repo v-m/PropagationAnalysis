@@ -4,6 +4,10 @@ import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.reference.CtTypeReference;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class InvertedInheritanceClassesProcessor extends ClassesProcessor {
 	@Override
 	public String[] processEntry(CtType<?> element, CtTypeReference<?> aReference) {

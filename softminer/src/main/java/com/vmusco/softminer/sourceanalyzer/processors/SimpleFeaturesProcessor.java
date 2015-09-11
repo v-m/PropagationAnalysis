@@ -12,6 +12,10 @@ import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 	private HashSet<String> tagAsReflexion = new HashSet<String>();
 	

@@ -5,7 +5,7 @@ import java.util.HashSet;
 
 /***
  * This interface represent an abstract graph representation
- * @author Vincenzo Musco - vincenzo.musco@inria.fr
+ * @author Vincenzo Musco - http://www.vmusco.com
  *
  */
 public abstract class Graph {

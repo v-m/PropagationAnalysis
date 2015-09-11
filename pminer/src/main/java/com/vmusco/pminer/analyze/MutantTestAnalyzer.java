@@ -1,14 +1,13 @@
 package com.vmusco.pminer.analyze;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import com.vmusco.pminer.impact.PropagationExplorer;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 
-
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public abstract class MutantTestAnalyzer {
 	
 	/***

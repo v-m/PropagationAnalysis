@@ -5,10 +5,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.vmusco.pminer.impact.PropagationExplorer;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class HistogramRawData extends MutantTestAnalyzer {
 	private File f;
 	private FileOutputStream fos;
@@ -39,7 +42,6 @@ public class HistogramRawData extends MutantTestAnalyzer {
 
 			fos.write(Integer.toString(bassinSize).getBytes());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

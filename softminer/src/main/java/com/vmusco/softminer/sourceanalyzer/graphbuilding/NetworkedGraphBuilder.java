@@ -4,6 +4,10 @@ import org.graphstream.stream.gephi.JSONSender;
 
 import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class NetworkedGraphBuilder extends GraphBuilder{
 
 	public String getHost() {

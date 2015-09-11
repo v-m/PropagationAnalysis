@@ -7,11 +7,13 @@ import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator.PatternBehavior;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuildLogic;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
-import com.vmusco.softminer.sourceanalyzer.graphbuilding.JeantessierGraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
-import com.vmusco.softminer.sourceanalyzer.processors.FeaturesProcessor;
 import com.vmusco.softminer.sourceanalyzer.processors.GraphItemRenamer;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 @Deprecated
 public abstract class DepGraphTest {
 	protected static String currTestedPakg = "";
@@ -23,7 +25,7 @@ public abstract class DepGraphTest {
 	protected static final String STRING_CANONICAL_NAME = java.lang.String.class.getCanonicalName();
 	protected static final String CLASS_CANONICAL_NAME = java.lang.Class.class.getCanonicalName();
 	
-	public abstract GraphBuilder getGraphBuilder(Class c) throws Exception;
+	public abstract GraphBuilder getGraphBuilder(Class<?> c) throws Exception;
 	
 	/**
 	 * Prepare the test for a specific test package
@@ -31,35 +33,35 @@ public abstract class DepGraphTest {
 	 * @return
 	 * @throws Exception
 	 */
-	protected static GraphBuilder setTestPkgAndGenerateBuilderUseGraphA(Class packageInto) throws Exception{
+	protected static GraphBuilder setTestPkgAndGenerateBuilderUseGraphA(Class<?> packageInto) throws Exception{
 		String[] sources = preSetTestPkgAndGenerateBuilder(packageInto);
 		GraphBuilder instForTestCase = GraphBuilder.newGraphBuilderOnlyWithDependencies("test", sources); 
 		postSetTestPkgAndGenerateBuilder();
 		return instForTestCase;
 	}
 	
-	protected static GraphBuilder setTestPkgAndGenerateBuilderUseGraphB(Class packageInto) throws Exception{
+	protected static GraphBuilder setTestPkgAndGenerateBuilderUseGraphB(Class<?> packageInto) throws Exception{
 		String[] sources = preSetTestPkgAndGenerateBuilder(packageInto);
 		GraphBuilder instForTestCase = GraphBuilder.newGraphBuilderWithFields("test", sources); 
 		postSetTestPkgAndGenerateBuilder();
 		return instForTestCase;
 	}
 	
-	protected static GraphBuilder setTestPkgAndGenerateBuilderUseGraphC(Class packageInto) throws Exception{
+	protected static GraphBuilder setTestPkgAndGenerateBuilderUseGraphC(Class<?> packageInto) throws Exception{
 		String[] sources = preSetTestPkgAndGenerateBuilder(packageInto);
 		GraphBuilder instForTestCase = GraphBuilder.newGraphBuilderWithInheritence("test", sources); 
 		postSetTestPkgAndGenerateBuilder();
 		return instForTestCase;
 	}
 	
-	protected static GraphBuilder setTestPkgAndGenerateBuilderUseGraphD(Class packageInto) throws Exception{
+	protected static GraphBuilder setTestPkgAndGenerateBuilderUseGraphD(Class<?> packageInto) throws Exception{
 		String[] sources = preSetTestPkgAndGenerateBuilder(packageInto);
 		GraphBuilder instForTestCase = GraphBuilder.newGraphBuilderWithFieldsAndInheritence("test", sources); 
 		postSetTestPkgAndGenerateBuilder();
 		return instForTestCase;
 	}
 	
-	protected static String[] preSetTestPkgAndGenerateBuilder(Class packageInto) throws Exception{
+	protected static String[] preSetTestPkgAndGenerateBuilder(Class<?> packageInto) throws Exception{
 		System.out.println("\nCurrent test: "+packageInto.getPackage().getName());
 		System.out.println("*************");
 		DepGraphTest.currTestedPakg = packageInto.getPackage().getName();

@@ -1,5 +1,9 @@
 package com.vmusco.smf.utils;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class InterruptionDemander extends Thread {
 	private static Object lock = new Object();
 

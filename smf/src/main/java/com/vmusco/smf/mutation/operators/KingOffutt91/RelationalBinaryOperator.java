@@ -8,6 +8,10 @@ import spoon.reflect.code.CtLiteral;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class RelationalBinaryOperator extends AbstractBinaryOperator{
 
 	@Override
@@ -24,7 +28,7 @@ public class RelationalBinaryOperator extends AbstractBinaryOperator{
 				new ManualProcessingStep() {
 					@Override
 					public CtElement mutate(CtElement anElement, Factory f) {
-						CtLiteral ctl = f.Core().createLiteral();
+						CtLiteral<Boolean> ctl = f.Core().createLiteral();
 						ctl.setValue(true);
 						return ctl;
 					}
@@ -32,7 +36,7 @@ public class RelationalBinaryOperator extends AbstractBinaryOperator{
 				new ManualProcessingStep() {
 					@Override
 					public CtElement mutate(CtElement anElement, Factory f) {
-						CtLiteral ctl = f.Core().createLiteral();
+						CtLiteral<Boolean> ctl = f.Core().createLiteral();
 						ctl.setValue(false);
 						return ctl;
 					}

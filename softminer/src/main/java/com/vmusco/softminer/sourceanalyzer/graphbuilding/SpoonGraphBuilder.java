@@ -9,6 +9,10 @@ import com.vmusco.softminer.sourceanalyzer.processors.SimpleFeaturesProcessor;
 
 import spoon.compiler.SpoonCompiler;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class SpoonGraphBuilder extends GraphBuildLogic {
 	private Class<?> aProcessor;
 	
@@ -31,9 +35,5 @@ public class SpoonGraphBuilder extends GraphBuildLogic {
 	@Override
 	public String formatAtom(String atom) {
 		return atom;
-	}
-	
-	private Class<?> getProcessor() {
-		return aProcessor;
 	}
 }

@@ -4,8 +4,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /***
  * 
- * @author Vincenzo Musco - vincenzo.musco@inria.fr
- *
+ * @author Vincenzo Musco - http://www.vmusco.com
  */
 public class MyClass {
 	public static <L> void bar(Class<L> param1, L param2) {

@@ -1,10 +1,14 @@
-package com.vmusco.smf.mutation.operators.pitest;
+package com.vmusco.smf.mutation.operators.misc;
 
 import com.vmusco.smf.mutation.ManualProcessingStep;
 import com.vmusco.smf.mutation.operators.AbstractBinaryOperator;
 
 import spoon.reflect.code.BinaryOperatorKind;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class LogicalBinaryOperator extends AbstractBinaryOperator{
 
 	@Override

@@ -2,9 +2,10 @@ package com.vmusco.softminer.tests;
 
 import org.junit.Test;
 
-import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
-
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class CallGraphCHATest extends CallGraphAbstractTest {
 	
 	public CallGraphCHATest() {
@@ -14,7 +15,6 @@ public class CallGraphCHATest extends CallGraphAbstractTest {
 	@Test
 	public void testVariableUsage() throws Exception{
 		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testVariableUsage.MyClass.class);
-		Graph dg = dgth.getGraph();
 		
 		dgth.fullAssertGraph(0, 0);
 	}
@@ -26,9 +26,7 @@ public class CallGraphCHATest extends CallGraphAbstractTest {
 	@Test
 	public void testInterfaceAndLinking() throws Exception{
 		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testInterfaceAndLinking.T.class);
-		Graph dg = dgth.getGraph();
 
-		//dgth.executionInspect(dg);
 		dgth.fullAssertGraph(7, 6);
 		
 		String t_biz = dgth.formatAtom("T.biz("+com.vmusco.softminer.tests.cases.testInterfaceAndLinking.A.class.getCanonicalName()+")");
@@ -83,9 +81,7 @@ public class CallGraphCHATest extends CallGraphAbstractTest {
 	@Test
 	public void testAbstractAndInheritanceClasses() throws Exception{
 		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testAbstractAndInheritance.A.class);
-		Graph dg = dgth.getGraph();
 
-		//dgth.executionInspect(dg);
 		dgth.fullAssertGraph(11, 11);
 
 		String a = dgth.formatAtom("A()");
@@ -159,10 +155,6 @@ public class CallGraphCHATest extends CallGraphAbstractTest {
 	@Test
 	public void testInterfaceAndInheritance() throws Exception{
 		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testInterfaceAndInheritance.Z.class);
-		Graph dg = dgth.getGraph();
-		
-		//dgth.executionInspect();
-		//System.out.println(stateAsATestCase());	
 
 		String z_main = dgth.formatAtom("Z.main("+DepGraphTestHelper.STRING_CANONICAL_NAME+"[])");
 		String b_bar = dgth.formatAtom("B.bar()");
@@ -207,7 +199,6 @@ public class CallGraphCHATest extends CallGraphAbstractTest {
 	@Override
 	public void testSimpleInheritanceConnectedToAbstract() throws Exception {
 		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testSimpleInheritanceConnectedToAbstract.Impl.class);
-		Graph dg = dgth.getGraph();
 		
 		String abs = dgth.formatAtom("Abs()");
 		String impl = dgth.formatAtom("Impl()");
@@ -246,7 +237,6 @@ public class CallGraphCHATest extends CallGraphAbstractTest {
 	@Override
 	public void testSimpleInheritanceConnectedToImplementation() throws Exception {
 		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testSimpleInheritanceConnectedToImplementation.Impl.class);
-		Graph dg = dgth.getGraph();
 		
 		String abs = dgth.formatAtom("Abs()");
 		String impl = dgth.formatAtom("Impl()");

@@ -15,8 +15,8 @@ import org.junit.runner.notification.RunListener;
 /**
  * This entry point is used to do test cases executions.
  * Used in {@link Testing#runTestCases(com.vmusco.smf.analysis.ProcessStatistics, com.vmusco.smf.analysis.MutationStatistics, String, TestsExecutionListener)}
- * @author Vincenzo Musco - http://www.vmusco.com
  * @see Testing#runTestCases(com.vmusco.smf.analysis.ProcessStatistics, com.vmusco.smf.analysis.MutationStatistics, String, TestsExecutionListener)
+ * @author Vincenzo Musco - http://www.vmusco.com
  */
 public class TestExecutor {
 	public static final String TEST_MARKER = "(vmdtest)";

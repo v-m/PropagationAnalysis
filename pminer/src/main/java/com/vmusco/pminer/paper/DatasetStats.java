@@ -1,4 +1,4 @@
-package com.vmusco.pminer.run;
+package com.vmusco.pminer.paper;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,6 +16,10 @@ import com.vmusco.softminer.graphs.NodeTypes;
 import com.vmusco.softminer.graphs.Graph.GraphApi;
 import com.vmusco.softminer.graphs.persistance.GraphML;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class DatasetStats {
 	public static int totalLOC = 0;
 	public static int totalNodes = 0;
@@ -58,7 +62,6 @@ public class DatasetStats {
 			
 			for(File f : muts.listFiles()){
 				if(f.isDirectory()){
-					File fimp = new File(f, "impact_A.xml");
 					nb++;
 				}
 			}

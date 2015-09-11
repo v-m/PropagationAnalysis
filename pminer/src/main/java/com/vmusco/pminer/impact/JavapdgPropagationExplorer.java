@@ -19,7 +19,6 @@ import com.vmusco.softminer.graphs.Graph.GraphApi;
 /**
  * Using a JavaPDG database
  * @author Vincenzo Musco - http://www.vmusco.com
- *
  */
 public class JavapdgPropagationExplorer extends PropagationExplorer {
 	private Map<Long, JavaPDGTriplet> dbentries;
@@ -63,7 +62,7 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 	
 	/**
 	 * This function returns the numerals nodes only !!!
-	 * TODO: Propose an alternative writing type...
+	 * TODO: Propose an alternative writing type?
 	 */
 	@Override
 	public String[] getLastImpactedNodes() throws NoEntryPointException {
@@ -101,7 +100,7 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 				Long searchAdaptedMethod = searchAdaptedMethod(t);
 
 				if(searchAdaptedMethod != null){
-					JavaPDGTriplet triplet = dbentries.get(searchAdaptedMethod);
+					//JavaPDGTriplet triplet = dbentries.get(searchAdaptedMethod);
 					testsMapped.put(searchAdaptedMethod, t);
 				}else{
 					//System.err.println("Unable to find candidate for "+t);

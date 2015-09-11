@@ -1,4 +1,4 @@
-package com.vmusco.smf.mutation.operators.pitest;
+package com.vmusco.smf.mutation.operators.misc;
 
 import java.util.ArrayList;
 
@@ -10,7 +10,11 @@ import spoon.reflect.code.CtExpression;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 
-public class ArithmeticMutatorOperator extends MutationOperator<CtBinaryOperator>{
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
+public class ArithmeticMutatorOperator extends MutationOperator<CtBinaryOperator<?>>{
 
 	private BinaryOperatorKind[] operators = new BinaryOperatorKind[]{
 			BinaryOperatorKind.DIV, 
@@ -21,7 +25,7 @@ public class ArithmeticMutatorOperator extends MutationOperator<CtBinaryOperator
 	};
 	
 	@Override
-	public void process(CtBinaryOperator element) {
+	public void process(CtBinaryOperator<?> element) {
 		for(BinaryOperatorKind kind : operators){
 			if(element.getKind() == kind){
 				addElement(element);
@@ -31,7 +35,7 @@ public class ArithmeticMutatorOperator extends MutationOperator<CtBinaryOperator
 	}
 
 	@Override
-	public CtElement[] getMutatedEntries(CtBinaryOperator element, Factory factory) {
+	public CtElement[] getMutatedEntries(CtBinaryOperator<?> element, Factory factory) {
 		ArrayList<CtElement> ret = new ArrayList<CtElement>();
 
 		if(element == null)
@@ -39,9 +43,9 @@ public class ArithmeticMutatorOperator extends MutationOperator<CtBinaryOperator
 		
 		for(BinaryOperatorKind kind : operators){
 			if(element.getKind() != kind){
-				CtExpression right_c = factory.Core().clone(element.getRightHandOperand());
-				CtExpression left_c = factory.Core().clone(element.getLeftHandOperand());
-				CtBinaryOperator binaryOp = factory.Code().createBinaryOperator(left_c, right_c, kind);
+				CtExpression<?> right_c = factory.Core().clone(element.getRightHandOperand());
+				CtExpression<?> left_c = factory.Core().clone(element.getLeftHandOperand());
+				CtBinaryOperator<?> binaryOp = factory.Code().createBinaryOperator(left_c, right_c, kind);
 				// Set parent
 				right_c.setParent(binaryOp);
 				left_c.setParent(binaryOp);

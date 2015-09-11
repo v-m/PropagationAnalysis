@@ -13,7 +13,12 @@ import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.GraphApi;
 import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class GraphBuilder {
+	@SuppressWarnings("unused")
 	final private String projectName;
 	final private String[] inputSources;
 	final private String[] cp;

@@ -10,7 +10,6 @@ import com.vmusco.softminer.graphs.Graph;
 /**
  * Uses softminer exported call graph
  * @author Vincenzo Musco - http://www.vmusco.com
- *
  */
 public class SoftMinerPropagationExplorer extends PropagationExplorer{
 	public SoftMinerPropagationExplorer(Graph base) {

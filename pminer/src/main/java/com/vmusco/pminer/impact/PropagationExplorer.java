@@ -12,7 +12,6 @@ import com.vmusco.softminer.graphs.NodeMarkers;
  * This class manage subgraphs representing the propagation from a node.
  * Cache removed due to over memory consumption
  * @author Vincenzo Musco - http://www.vmusco.com
- *
  */
 public abstract class PropagationExplorer{
 	final protected Graph base;

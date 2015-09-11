@@ -2,6 +2,10 @@ package com.vmusco.softminer.tests;
 
 import org.junit.Test;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class CallGraphFCHATest extends CallGraphAbstractTest {
 	public CallGraphFCHATest() {
 		super(null);

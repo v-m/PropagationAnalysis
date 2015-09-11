@@ -10,6 +10,10 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtTypeReference;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public abstract class AbstractMethodsCallsOperator extends MutationOperator<CtInvocation<?>>{
 	
 	@Override

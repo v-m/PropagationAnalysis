@@ -1,34 +1,27 @@
 package com.vmusco.smf.mutation.operators.KingOffutt91;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import com.vmusco.smf.mutation.MutationGateway;
-import com.vmusco.smf.mutation.MutationOperator;
-import com.vmusco.smf.mutation.TargetObtainer;
-
 import spoon.reflect.code.BinaryOperatorKind;
-import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtInvocation;
-import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtUnaryOperator;
-import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
-import spoon.reflect.reference.CtExecutableReference;
-import spoon.reflect.reference.CtTypeReference;
-import spoon.support.reflect.code.CtInvocationImpl;
-import spoon.support.reflect.code.CtVariableReadImpl;
 
-public class UnaryOperatorInsertionMutator extends MutationOperator<CtBinaryOperator>{
+import com.vmusco.smf.mutation.MutationGateway;
+import com.vmusco.smf.mutation.MutationOperator;
+
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
+public class UnaryOperatorInsertionMutator extends MutationOperator<CtBinaryOperator<?>>{
 
 	@Override
-	public void process(CtBinaryOperator element) {
+	public void process(CtBinaryOperator<?> element) {
 		if(element.getKind() == BinaryOperatorKind.PLUS ||
 				element.getKind() == BinaryOperatorKind.MINUS ||
 				element.getKind() == BinaryOperatorKind.MUL ||
@@ -40,8 +33,9 @@ public class UnaryOperatorInsertionMutator extends MutationOperator<CtBinaryOper
 		}
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public CtElement[] getMutatedEntries(CtBinaryOperator element, Factory factory) {
+	public CtElement[] getMutatedEntries(CtBinaryOperator<?> element, Factory factory) {
 		List<CtElement> aList = new ArrayList<CtElement>();
 		
 		if(element.getKind() == BinaryOperatorKind.PLUS ||

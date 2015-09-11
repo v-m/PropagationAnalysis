@@ -21,7 +21,7 @@ import com.vmusco.softminer.graphs.NodeTypes;
 
 /**
  * 
- * @author Vincenzo Musco - vincenzo.musco@inria.fr
+ * @author Vincenzo Musco - http://www.vmusco.com
  *
  */
 public class GraphML implements GraphPersistence{

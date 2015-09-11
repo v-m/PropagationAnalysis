@@ -1,4 +1,4 @@
-package com.vmusco.smf.mutation.operators.pitest;
+package com.vmusco.smf.mutation.operators.misc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +9,14 @@ import spoon.reflect.code.CtLiteral;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 
-public class ConstantMutationOperator extends MutationOperator<CtLiteral>{
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
+public class ConstantMutationOperator extends MutationOperator<CtLiteral<?>>{
 
 	@Override
-	public void process(CtLiteral element) {
+	public void process(CtLiteral<?> element) {
 		if(element.getType() == null)
 			return;
 
@@ -26,13 +30,13 @@ public class ConstantMutationOperator extends MutationOperator<CtLiteral>{
 	}
 
 	@Override
-	public CtElement[] getMutatedEntries(CtLiteral element, Factory factory) {
+	public CtElement[] getMutatedEntries(CtLiteral<?> element, Factory factory) {
 		List<CtElement> result = new ArrayList<CtElement>();
 
 		if(element == null || !(element instanceof CtLiteral))
 			return emptySet();
 		
-		CtLiteral mutationTo = determineMutation(element, factory);
+		CtLiteral<?> mutationTo = determineMutation(element, factory);
 
 		if(mutationTo != null){
 			mutationTo.setParent(element.getParent());
@@ -42,7 +46,7 @@ public class ConstantMutationOperator extends MutationOperator<CtLiteral>{
 		return result.toArray(new CtElement[0]);
 	}
 	
-	public CtLiteral determineMutation(CtLiteral<?> elem, Factory factory){
+	public CtLiteral<?> determineMutation(CtLiteral<?> elem, Factory factory){
 		String qname = elem.getType().getQualifiedName();
 		if(qname.equals("long")){
 			return handleLongMutation(elem, factory);
@@ -60,11 +64,11 @@ public class ConstantMutationOperator extends MutationOperator<CtLiteral>{
 		}
 	}
 
-	private CtLiteral handleBooleanMutation(CtLiteral elem, Factory factory){
+	private CtLiteral<?> handleBooleanMutation(CtLiteral<?> elem, Factory factory){
 		boolean analyzedValue = (boolean) elem.getValue();
 		boolean mutateTo = !analyzedValue;
 
-		CtLiteral createLiteral = factory.Code().createLiteral(mutateTo);
+		CtLiteral<?> createLiteral = factory.Code().createLiteral(mutateTo);
 		return createLiteral;
 	}
 
@@ -73,7 +77,7 @@ public class ConstantMutationOperator extends MutationOperator<CtLiteral>{
 	 * @param elem
 	 * @param par
 	 */
-	private CtLiteral handleIntMutation(CtLiteral elem, Factory factory){
+	private CtLiteral<?> handleIntMutation(CtLiteral<?> elem, Factory factory){
 		int analyzedValue = (int)elem.getValue();
 
 		int mutateTo;
@@ -88,7 +92,7 @@ public class ConstantMutationOperator extends MutationOperator<CtLiteral>{
 			mutateTo = analyzedValue + 1;
 
 
-		CtLiteral createLiteral;
+		CtLiteral<?> createLiteral;
 
 		if(elem.getType().getQualifiedName().equals("int")){
 			createLiteral = factory.Code().createLiteral((int)mutateTo);
@@ -108,14 +112,14 @@ public class ConstantMutationOperator extends MutationOperator<CtLiteral>{
 	 * @param elem
 	 * @param par
 	 */
-	private CtLiteral handleLongMutation(CtLiteral elem, Factory factory){
+	private CtLiteral<?> handleLongMutation(CtLiteral<?> elem, Factory factory){
 		long analyzedValue = (long) elem.getValue();
 		long mutateTo = 0;
 		
 		if(analyzedValue != 1)
 			mutateTo = analyzedValue + 1;
 
-		CtLiteral createLiteral = factory.Code().createLiteral(mutateTo);
+		CtLiteral<?> createLiteral = factory.Code().createLiteral(mutateTo);
 		return createLiteral;
 	}
 
@@ -126,7 +130,7 @@ public class ConstantMutationOperator extends MutationOperator<CtLiteral>{
 	 * @return
 	 */
 	
-	private CtLiteral handleDoubleMutation(CtLiteral elem, Factory factory){
+	private CtLiteral<?> handleDoubleMutation(CtLiteral<?> elem, Factory factory){
 		double analyzedValue = 0.0d;
 
 		if(elem.getValue() instanceof Double)
@@ -143,7 +147,7 @@ public class ConstantMutationOperator extends MutationOperator<CtLiteral>{
 			}
 		}
 
-		CtLiteral createLiteral;
+		CtLiteral<?> createLiteral;
 
 		if(elem.getType().getQualifiedName().equals("double")){
 			createLiteral = factory.Code().createLiteral((double)mutateTo);

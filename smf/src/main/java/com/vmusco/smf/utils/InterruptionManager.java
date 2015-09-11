@@ -1,5 +1,9 @@
 package com.vmusco.smf.utils;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public abstract class InterruptionManager {
 	private static InterruptionDemander demander = null;
 	

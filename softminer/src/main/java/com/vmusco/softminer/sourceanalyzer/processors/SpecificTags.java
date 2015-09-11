@@ -1,5 +1,9 @@
 package com.vmusco.softminer.sourceanalyzer.processors;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public abstract class SpecificTags {
 	private SpecificTags(){
 		

@@ -17,6 +17,10 @@ import org.jfree.data.xy.XYSeriesCollection;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class HistogramForSizesOfSubgraphs extends MutantTestAnalyzer {
 	private HashMap<Double, Double> histogramData = new HashMap<Double, Double>();
 	private String project;
@@ -48,19 +52,12 @@ public class HistogramForSizesOfSubgraphs extends MutantTestAnalyzer {
 			max = putInBin;
 	}
 
+	@SuppressWarnings("serial")
 	@Override
 	public void fireExecutionEnded() {
 		XYSeries series = new XYSeries(project);
 
-		/*System.out.println("===HISTOGRAM DATA END===");
-		System.out.println("");
-		System.out.println("Resumes:");*/
-
-		//Integer[] ii = (Integer[]) histogramData.keySet().toArray(new Integer[histogramData.keySet().size()]);
-		//Arrays.sort(ii);
-
 		for(double k : histogramData.keySet()){
-			//System.out.println(k+" => "+histogramData.get(k));
 			series.add(k, histogramData.get(k));
 		}
 		

@@ -1,4 +1,4 @@
-package com.vmusco.smf.mutation.operators.pitest;
+package com.vmusco.smf.mutation.operators.misc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,21 +12,26 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.factory.Factory;
 
-public class NegationUnaryOperatorConditionOperator extends MutationOperator<CtTypedElement>{
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
+public class NegationUnaryOperatorConditionOperator extends MutationOperator<CtTypedElement<?>>{
 
 	@Override
-	public void process(CtTypedElement element) {
+	public void process(CtTypedElement<?> element) {
 		addElement(element);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public CtElement[] getMutatedEntries(CtTypedElement toMutate, Factory factory) {
+	public CtElement[] getMutatedEntries(CtTypedElement<?> toMutate, Factory factory) {
 		List<CtElement> result = new ArrayList<CtElement>();
 
 		if (toMutate instanceof CtUnaryOperator<?>) {
 			CtUnaryOperator<?> unary = (CtUnaryOperator<?>) toMutate;
 			if (unary.getKind() == UnaryOperatorKind.NOT) {
-				CtExpression expIF = factory.Core().clone(unary.getOperand());
+				CtExpression<?> expIF = factory.Core().clone(unary.getOperand());
 				result.add(expIF);
 			}
 		}else{

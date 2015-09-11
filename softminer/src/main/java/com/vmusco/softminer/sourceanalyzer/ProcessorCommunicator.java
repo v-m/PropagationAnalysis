@@ -13,7 +13,7 @@ import com.vmusco.softminer.sourceanalyzer.processors.GraphItemRenamer;
  * This class is used as a pipe of communication between the spoon processor
  * and the test. This is the easiest way to proceed with spoon as the processor
  * is instantiated by the spoon launcher, we can pass no parameter to this.
- * @author Vincenzo Musco - vincenzo.musco@inria.fr
+ * @author Vincenzo Musco - http://www.vmusco.com
  *
  */
 public abstract class ProcessorCommunicator {

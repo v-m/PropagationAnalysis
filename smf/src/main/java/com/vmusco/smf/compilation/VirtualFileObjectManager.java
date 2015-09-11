@@ -16,6 +16,10 @@ import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
 import javax.tools.StandardLocation;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class VirtualFileObjectManager extends ForwardingJavaFileManager<JavaFileManager> {
 
 	private Map<URI, SourceCodeFileObject> sourceFiles;

@@ -9,6 +9,10 @@ import java.net.URI;
 
 import javax.tools.SimpleJavaFileObject;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class CompiledObjectFileObject extends SimpleJavaFileObject {
 
 	protected ByteArrayOutputStream byteCodes;

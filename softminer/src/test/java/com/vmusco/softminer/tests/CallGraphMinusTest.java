@@ -2,8 +2,10 @@ package com.vmusco.softminer.tests;
 
 import org.junit.Test;
 
-import com.vmusco.softminer.graphs.Graph;
-
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class CallGraphMinusTest extends CallGraphAbstractTest {
 
 	private GraphBuilderObtainer localHelper() {
@@ -44,13 +46,10 @@ public class CallGraphMinusTest extends CallGraphAbstractTest {
 	@Override
 	public void testSimpleInheritanceConnectedToImplementation() throws Exception {
 		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testSimpleInheritanceConnectedToImplementation.Impl.class);
-		Graph dg = dgth.getGraph();
 		
 		String abs = dgth.formatAtom("Abs()");
 		String impl = dgth.formatAtom("Impl()");
 		String impl_fct = dgth.formatAtom("Impl.fct()");
-		String abs_foo = dgth.formatAtom("Abs.foo()");
-		String impl_foo = dgth.formatAtom("Impl.foo()");
 		
 		dgth.fullAssertGraph(3, 2);
 		

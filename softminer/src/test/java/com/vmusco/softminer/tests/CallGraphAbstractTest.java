@@ -3,9 +3,10 @@ package com.vmusco.softminer.tests;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
-
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public abstract class CallGraphAbstractTest {
 	private GraphBuilderObtainer gbo = null;
 	

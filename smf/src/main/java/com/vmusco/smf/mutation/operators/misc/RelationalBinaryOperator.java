@@ -1,13 +1,14 @@
-package com.vmusco.smf.mutation.operators.pitest;
+package com.vmusco.smf.mutation.operators.misc;
+
+import spoon.reflect.code.BinaryOperatorKind;
 
 import com.vmusco.smf.mutation.ManualProcessingStep;
 import com.vmusco.smf.mutation.operators.AbstractBinaryOperator;
 
-import spoon.reflect.code.BinaryOperatorKind;
-import spoon.reflect.code.CtLiteral;
-import spoon.reflect.declaration.CtElement;
-import spoon.reflect.factory.Factory;
-
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class RelationalBinaryOperator extends AbstractBinaryOperator{
 
 	@Override

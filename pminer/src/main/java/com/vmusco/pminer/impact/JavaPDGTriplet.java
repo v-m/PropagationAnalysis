@@ -1,5 +1,9 @@
 package com.vmusco.pminer.impact;
 
+/**
+ * Class grouping parts of a javapdg entry
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class JavaPDGTriplet {
 	String method;
 	String signature;

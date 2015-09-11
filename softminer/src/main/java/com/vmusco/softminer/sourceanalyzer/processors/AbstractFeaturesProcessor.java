@@ -29,6 +29,10 @@ import spoon.reflect.visitor.filter.AbstractReferenceFilter;
 import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 @SuppressWarnings({"rawtypes","unchecked"})
 public abstract class AbstractFeaturesProcessor extends AbstractProcessor<CtNamedElement>{
 	public abstract void newReadFieldAccess(CtExecutable<?> src, CtFieldAccess<?> anAccess);

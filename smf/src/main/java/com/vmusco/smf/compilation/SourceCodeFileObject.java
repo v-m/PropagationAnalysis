@@ -4,6 +4,10 @@ import java.net.URI;
 
 import javax.tools.SimpleJavaFileObject;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class SourceCodeFileObject extends SimpleJavaFileObject {
 
 	private String sourceContent;

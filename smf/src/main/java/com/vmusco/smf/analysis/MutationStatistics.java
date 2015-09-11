@@ -1,14 +1,10 @@
 package com.vmusco.smf.analysis;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
 
 import com.vmusco.smf.analysis.persistence.ExecutionPersistence;
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;

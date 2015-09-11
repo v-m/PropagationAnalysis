@@ -15,6 +15,10 @@ import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.Query;
 import spoon.reflect.visitor.filter.AbstractReferenceFilter;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class ClassesProcessor extends AbstractProcessor<CtType<?>>{
 
 	

@@ -1,5 +1,9 @@
 package com.vmusco.softminer.utils;
 
+/**
+ *
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class TypeWithInfo<T> implements Comparable<TypeWithInfo<T>>{
 	private T value;
 	private T info;
@@ -9,8 +13,9 @@ public class TypeWithInfo<T> implements Comparable<TypeWithInfo<T>>{
 		this.info = info;
 	}
 
+	@SuppressWarnings("unchecked")
 	public int compareTo(TypeWithInfo<T> o) {
-		return ((Comparable)this.value).compareTo(o.value);
+		return ((Comparable<T>)this.value).compareTo((T)o.value);
 	}
 
 	public T getValue() {

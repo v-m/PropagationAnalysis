@@ -8,7 +8,6 @@ import java.io.PrintStream;
 /**
  * This class is used to redirect and restore the stdout and stderr
  * @author Vincenzo Musco - http://www.vmusco.com
- *
  */
 public class LogToFile {
 	private PrintStream retainer_out = null;

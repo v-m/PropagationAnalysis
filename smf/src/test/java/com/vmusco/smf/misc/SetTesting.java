@@ -5,6 +5,10 @@ import org.junit.Test;
 
 import com.vmusco.smf.utils.MutationsSetTools;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class SetTesting {
 
 	private static String[] set1 = new String[]{"a", "b", "c"};

@@ -2,7 +2,6 @@ package com.vmusco.smf.analysis;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InvalidClassException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;

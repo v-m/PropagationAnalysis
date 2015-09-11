@@ -5,6 +5,10 @@ import java.util.HashMap;
 import org.graphstream.ui.view.Viewer;
 import org.graphstream.ui.view.ViewerListener;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class MyViewerListener implements ViewerListener{
 	private boolean alive = true;
 	

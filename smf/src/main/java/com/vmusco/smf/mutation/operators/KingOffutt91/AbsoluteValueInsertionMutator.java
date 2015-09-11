@@ -1,11 +1,6 @@
 package com.vmusco.smf.mutation.operators.KingOffutt91;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
-
-import com.vmusco.smf.mutation.MutationGateway;
-import com.vmusco.smf.mutation.MutationOperator;
-import com.vmusco.smf.mutation.TargetObtainer;
 
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -19,15 +14,22 @@ import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.factory.Factory;
-import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
 
+import com.vmusco.smf.mutation.MutationGateway;
+import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.TargetObtainer;
+
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class AbsoluteValueInsertionMutator extends MutationOperator<CtElement>{
 
 	@Override
 	public void process(CtElement element) {
 		if(element instanceof CtInvocation<?>){
-			CtInvocation srcinv = (CtInvocation) element;
+			CtInvocation<?> srcinv = (CtInvocation<?>) element;
 
 			if(!addAbsolute(srcinv) && !isJavaAbsolute(srcinv.getSignature()))
 				return;
@@ -37,7 +39,7 @@ public class AbsoluteValueInsertionMutator extends MutationOperator<CtElement>{
 			
 			MutationGateway.addElement(element);
 		}else if(element instanceof CtLiteral<?> || element instanceof CtVariableRead<?> || element instanceof CtVariableAccess<?>){
-			CtTypedElement anElem = (CtTypedElement) element;
+			CtTypedElement<?> anElem = (CtTypedElement<?>) element;
 
 			CtElement findPar = anElem;
 			while(findPar != null){
@@ -62,22 +64,22 @@ public class AbsoluteValueInsertionMutator extends MutationOperator<CtElement>{
 		HashMap<CtElement, TargetObtainer> ret = new HashMap<CtElement, TargetObtainer>();
 		
 		if(element instanceof CtInvocation && isJavaAbsolute(element.getSignature())){
-			CtInvocation srcinv = (CtInvocation) element;
+			CtInvocation<?> srcinv = (CtInvocation<?>) element;
 			
 			CtElement newElement = (CtElement) factory.Core().clone(srcinv.getArguments().get(0));
 			newElement.setParent(srcinv.getParent());
 			ret.put(newElement, MutationOperator.createParentTarget(1));
 			
-			CtConditional<?> inv = createConditionalAbs(factory, (CtExpression) srcinv.getArguments().get(0), true);
+			CtConditional<?> inv = createConditionalAbs(factory, (CtExpression<?>) srcinv.getArguments().get(0), true);
 			inv.setParent(srcinv.getParent());
 			ret.put(inv, MutationOperator.createParentTarget(1));
 		}else{
-			CtTypedElement anElem = (CtTypedElement) element;
+			//CtTypedElement<?> anElem = (CtTypedElement<?>) element;
 			CtElement clonedElement = factory.Core().clone(element);
 
 			if(element instanceof CtLiteral){
-				CtLiteral lit = factory.Code().createLiteral(-1);
-				CtBinaryOperator<Object> createBinaryOperator = factory.Code().createBinaryOperator(lit, (CtLiteral)clonedElement, BinaryOperatorKind.MUL);
+				CtLiteral<?> lit = factory.Code().createLiteral(-1);
+				CtBinaryOperator<Object> createBinaryOperator = factory.Code().createBinaryOperator(lit, (CtLiteral<?>)clonedElement, BinaryOperatorKind.MUL);
 				clonedElement.setParent(createBinaryOperator);
 				lit.setParent(createBinaryOperator);
 				ret.put(createBinaryOperator, MutationOperator.createSelfTarget());
@@ -94,12 +96,13 @@ public class AbsoluteValueInsertionMutator extends MutationOperator<CtElement>{
 		return ret;
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private CtConditional createConditionalAbs(Factory f, CtElement e, boolean invabs){
 		CtElement cloned_e = f.Core().clone(e);
 
-		CtConditional cond = f.Core().createConditional();
+		CtConditional<?> cond = f.Core().createConditional();
 
-		CtExpression condition = f.Code().createBinaryOperator((CtExpression<?>) cloned_e, f.Code().createLiteral(0), BinaryOperatorKind.GE);
+		CtExpression<Boolean> condition = f.Code().createBinaryOperator((CtExpression<?>) cloned_e, f.Code().createLiteral(0), BinaryOperatorKind.GE);
 		CtExpression negate = f.Code().createBinaryOperator((CtExpression<?>) cloned_e, f.Code().createLiteral(-1), BinaryOperatorKind.MUL);
 
 		cond.setCondition(condition);
@@ -118,7 +121,7 @@ public class AbsoluteValueInsertionMutator extends MutationOperator<CtElement>{
 		return cond;
 	}
 
-	private CtInvocation<?> createInvocation(Factory f, CtElement element) {
+	/*private CtInvocation<?> createInvocation(Factory f, CtElement element) {
 		CtExpression<?> anExpr = (CtExpression<?>) element;
 
 		Method t = null; 
@@ -129,7 +132,7 @@ public class AbsoluteValueInsertionMutator extends MutationOperator<CtElement>{
 		}
 		CtExecutableReference<?> met = f.Method().createReference(t);
 		return f.Code().createInvocation(null, met, f.Core().clone(anExpr));
-	}
+	}*/
 
 	@Override
 	public CtElement[] getMutatedEntries(CtElement element, Factory factory) {

@@ -9,9 +9,8 @@ import spoon.reflect.factory.Factory;
 
 /**
  * Defines a mutation operator
+ * @param <T> the types on which the mutation occurs (ie. the types to match with the processor)
  * @author Vincenzo Musco - http://www.vmusco.com
- *
- * @param <T> the types on which the mutation occurs (ie the types to match with the processor)
  */
 public abstract class MutationOperator<T extends CtElement> extends AbstractProcessor<T>{
 	

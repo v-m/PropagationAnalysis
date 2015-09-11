@@ -23,6 +23,10 @@ import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuildLogic;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class GraphGenerator {
 	public static Graph generatedGraph = null;
 

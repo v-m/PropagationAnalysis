@@ -1,4 +1,4 @@
-package com.vmusco.smf.mutation.operators.pitest;
+package com.vmusco.smf.mutation.operators.misc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,9 +9,12 @@ import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
-import spoon.support.reflect.code.CtUnaryOperatorImpl;
 
-public class InDecrementMutationOperator extends MutationOperator<CtUnaryOperatorImpl>{
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
+public class InDecrementMutationOperator extends MutationOperator<CtUnaryOperator<?>>{
 	private boolean prepost;
 	private boolean incdec;
 
@@ -33,9 +36,7 @@ public class InDecrementMutationOperator extends MutationOperator<CtUnaryOperato
 	}
 
 	@Override
-	public void process(CtUnaryOperatorImpl element) {
-		CtUnaryOperatorImpl ex = (CtUnaryOperatorImpl) element;
-
+	public void process(CtUnaryOperator<?> element) {
 		if(element.getKind() == UnaryOperatorKind.POSTDEC || 
 				element.getKind() == UnaryOperatorKind.PREDEC ||
 				element.getKind() == UnaryOperatorKind.POSTINC ||
@@ -46,19 +47,17 @@ public class InDecrementMutationOperator extends MutationOperator<CtUnaryOperato
 	}
 
 	@Override
-	public CtElement[] getMutatedEntries(CtUnaryOperatorImpl toMutate, Factory factory) {
+	public CtElement[] getMutatedEntries(CtUnaryOperator<?> toMutate, Factory factory) {
 		List<CtElement> result = new ArrayList<CtElement>();
 
 		if(toMutate instanceof CtUnaryOperator){
-			CtUnaryOperator t = (CtUnaryOperator) toMutate;
-
-
+			
 			if(prepost && incdec){
 				for(UnaryOperatorKind type : types){
-					if(type == t.getKind())
+					if(type == toMutate.getKind())
 						continue;
 
-					CtUnaryOperator e = (CtUnaryOperator) factory.Core().clone(toMutate);
+					CtUnaryOperator<?> e = (CtUnaryOperator<?>) factory.Core().clone(toMutate);
 					e.setKind(type);
 					e.setParent(toMutate.getParent());
 					result.add(e);
@@ -68,22 +67,22 @@ public class InDecrementMutationOperator extends MutationOperator<CtUnaryOperato
 
 				if(prepost){
 					// Invert pre/post
-					if(t.getKind() == UnaryOperatorKind.POSTDEC){
+					if(toMutate.getKind() == UnaryOperatorKind.POSTDEC){
 						target = UnaryOperatorKind.PREDEC;
-					}else if(t.getKind() == UnaryOperatorKind.PREDEC){
+					}else if(toMutate.getKind() == UnaryOperatorKind.PREDEC){
 						target = UnaryOperatorKind.POSTDEC;
-					}else if(t.getKind() == UnaryOperatorKind.POSTINC){
+					}else if(toMutate.getKind() == UnaryOperatorKind.POSTINC){
 						target = UnaryOperatorKind.PREINC;
 					}else{
 						target = UnaryOperatorKind.POSTINC;
 					}
 				}else if(incdec){
 					// Invert inc/dec
-					if(t.getKind() == UnaryOperatorKind.POSTDEC){
+					if(toMutate.getKind() == UnaryOperatorKind.POSTDEC){
 						target = UnaryOperatorKind.POSTINC;
-					}else if(t.getKind() == UnaryOperatorKind.PREDEC){
+					}else if(toMutate.getKind() == UnaryOperatorKind.PREDEC){
 						target = UnaryOperatorKind.PREINC;
-					}else if(t.getKind() == UnaryOperatorKind.POSTINC){
+					}else if(toMutate.getKind() == UnaryOperatorKind.POSTINC){
 						target = UnaryOperatorKind.POSTDEC;
 					}else{
 						target = UnaryOperatorKind.PREDEC;
@@ -92,7 +91,7 @@ public class InDecrementMutationOperator extends MutationOperator<CtUnaryOperato
 					return result.toArray(new CtElement[0]);
 				}
 
-				CtUnaryOperator e = (CtUnaryOperator) factory.Core().clone(toMutate);
+				CtUnaryOperator<?> e = (CtUnaryOperator<?>) factory.Core().clone(toMutate);
 				e.setKind(target);
 				e.setParent(toMutate.getParent());
 				result.add(e);

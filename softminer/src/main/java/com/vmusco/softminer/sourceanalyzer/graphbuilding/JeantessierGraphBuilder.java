@@ -17,9 +17,15 @@ import com.jeantessier.dependency.FeatureNode;
 import com.jeantessier.dependency.NodeFactory;
 import com.jeantessier.dependency.PackageNode;
 import com.jeantessier.dependency.SelectionCriteria;
+import com.vmusco.softminer.graphs.EdgeTypes;
 import com.vmusco.softminer.graphs.Graph;
+import com.vmusco.softminer.graphs.NodeTypes;
 import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class JeantessierGraphBuilder extends GraphBuildLogic {
 
 	@Override
@@ -48,37 +54,31 @@ public class JeantessierGraphBuilder extends GraphBuildLogic {
 			
 			@Override
 			public boolean matchesPackageName(String name) {
-				// TODO Auto-generated method stub
 				return false;
 			}
 			
 			@Override
 			public boolean matchesFeatureName(String name) {
-				// TODO Auto-generated method stub
 				return true;
 			}
 			
 			@Override
 			public boolean matchesClassName(String name) {
-				// TODO Auto-generated method stub
 				return false;
 			}
 			
 			@Override
 			public boolean matches(FeatureNode node) {
-				// TODO Auto-generated method stub
 				return true;
 			}
 			
 			@Override
 			public boolean matches(ClassNode node) {
-				// TODO Auto-generated method stub
 				return false;
 			}
 			
 			@Override
 			public boolean matches(PackageNode node) {
-				// TODO Auto-generated method stub
 				return false;
 			}
 			
@@ -120,7 +120,10 @@ public class JeantessierGraphBuilder extends GraphBuildLogic {
 
 		@Override
 		public void dependency(DependencyEvent event) {
-			ProcessorCommunicator.addIfAllowed(event.getDependent().getName().replaceAll(" ", ""), event.getDependable().getName().replaceAll(" ", ""));
+			String src = event.getDependent().getName().replaceAll(" ", "");
+			String dst = event.getDependable().getName().replaceAll(" ", "");
+			
+			ProcessorCommunicator.addIfAllowed(src, dst, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.METHOD_CALL);
 		}
 
 		@Override

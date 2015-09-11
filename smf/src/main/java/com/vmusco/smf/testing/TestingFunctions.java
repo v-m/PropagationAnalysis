@@ -93,7 +93,7 @@ public abstract class TestingFunctions {
 
 						if(tn != null)	tn.mutantPersisting(mut);
 
-						MutantIfos mi = ms.getMutationStats(mut);
+						//MutantIfos mi = ms.getMutationStats(mut);
 						
 						try{
 							MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(fos, mut);

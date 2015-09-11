@@ -1,13 +1,17 @@
-package com.vmusco.smf.mutation.operators.pitest;
+package com.vmusco.smf.mutation.operators.misc;
 
 import com.vmusco.smf.mutation.operators.AbstractMethodsCallsOperator;
 
 import spoon.reflect.code.CtInvocation;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class VoidsMethodInvocationOperator extends AbstractMethodsCallsOperator{
 
 	@Override
-	public void process(CtInvocation element) {
+	public void process(CtInvocation<?> element) {
 		if(element.getExecutable().isConstructor())
 			return;
 

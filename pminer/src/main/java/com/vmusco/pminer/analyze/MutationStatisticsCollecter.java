@@ -8,6 +8,10 @@ import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.softminer.utils.Tools;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 
 	private PRFStatistics prf = new PRFStatistics();

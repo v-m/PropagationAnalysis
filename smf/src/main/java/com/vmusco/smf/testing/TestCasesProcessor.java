@@ -153,9 +153,7 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass<?>> {
 			}
 		}
 
-		/*for(CtClass aClass : TestCasesFinderProcessor.rw_classes){
-
-		}*/
+		/*for(CtClass aClass : TestCasesFinderProcessor.rw_classes){ }*/
 
 		return ret.toArray(new String[0]);
 	}
@@ -197,9 +195,7 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass<?>> {
 			}
 		}
 
-		/*for(CtClass aClass : TestCasesFinderProcessor.rw_classes){
-
-		}*/
+		/*for(CtClass aClass : TestCasesFinderProcessor.rw_classes){ }*/
 
 		return ret.toArray(new CtMethod[0]);
 	}

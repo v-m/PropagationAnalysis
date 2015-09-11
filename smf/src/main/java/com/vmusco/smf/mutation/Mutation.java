@@ -49,19 +49,18 @@ import com.vmusco.smf.utils.NewReportedStandardEnvironment;
 /**
  * This class contains tools for performing mutant generation
  * @author Vincenzo Musco - http://www.vmusco.com
- *
  */
 public final class Mutation {
 	private static final String MUTANT_FILE_PREFIX = "mutant_";
 
 	private Mutation() {}
 
-	public static MutationStatistics createMutationElement(ProcessStatistics ps, Class<MutationOperator<?>> mutatorClass) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
+	public static MutationStatistics<?> createMutationElement(ProcessStatistics ps, Class<MutationOperator<?>> mutatorClass) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
 		return createMutationElement(ps, mutatorClass, null, null);
 	}
 
-	public static MutationStatistics createMutationElement(ProcessStatistics ps, Class<MutationOperator<?>> mutatorClass, String mutationid, String[] classToMutate) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
-		MutationStatistics ms = new MutationStatistics(ps, mutatorClass);
+	public static MutationStatistics<?> createMutationElement(ProcessStatistics ps, Class<MutationOperator<?>> mutatorClass, String mutationid, String[] classToMutate) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
+		MutationStatistics<?> ms = new MutationStatistics<MutationOperator<?>>(ps, mutatorClass);
 
 		if(classToMutate != null){
 			ms.setClassToMutate(classToMutate);
@@ -74,12 +73,12 @@ public final class Mutation {
 		return ms;
 	}
 
-	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset) throws PersistenceException {
+	public static void createMutants(ProcessStatistics ps, MutationStatistics<?> ms, MutationCreationListener mcl, boolean reset) throws PersistenceException {
 		createMutants(ps, ms, mcl, reset, 0);
 	}
 	
 
-	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset, int safepersist) throws PersistenceException {
+	public static void createMutants(ProcessStatistics ps, MutationStatistics<?> ms, MutationCreationListener mcl, boolean reset, int safepersist) throws PersistenceException {
 		createMutants(ps, ms, mcl, reset, -1, safepersist);
 	}
 
@@ -143,7 +142,7 @@ public final class Mutation {
 		return MutationGateway.getMutationCandidates();
 	}
 	
-	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset, int nb, int safepersist) throws PersistenceException{
+	public static void createMutants(ProcessStatistics ps, MutationStatistics<?> ms, MutationCreationListener mcl, boolean reset, int nb, int safepersist) throws PersistenceException{
 		try{
 			Factory factory = obtainFactory();
 			
@@ -212,10 +211,10 @@ public final class Mutation {
 				if(mutatedEntriesWithTargets == null)
 					continue;
 				
-				Iterator iterator = mutatedEntriesWithTargets.keySet().iterator();
+				Iterator<CtElement> iterator = mutatedEntriesWithTargets.keySet().iterator();
 	
 				while(iterator.hasNext()){
-					CtElement m = (CtElement) iterator.next();
+					CtElement m = iterator.next();
 					TargetObtainer to = mutatedEntriesWithTargets.get(m);
 	
 					Object[] o = new Object[]{ e, m, to };
@@ -326,7 +325,7 @@ public final class Mutation {
 	
 						FileOutputStream fos = new FileOutputStream(boutp+".debug.txt");
 	
-						for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
+						for (Diagnostic<?> diagnostic : diagnostics.getDiagnostics()) {
 							if(diagnostic.getCode() != null){
 								fos.write(diagnostic.getCode().getBytes());
 								fos.write("\n".getBytes());
@@ -381,6 +380,7 @@ public final class Mutation {
 		}
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static HashMap<CtElement, TargetObtainer> obtainsMutationCandidates(MutationStatistics ms, CtElement e, Factory factory, boolean debug) {
 		CtClass<?> theClass = findAssociatedClass(e);
 
@@ -391,8 +391,6 @@ public final class Mutation {
 			ConsoleTools.endLine(2);
 			return null;
 		}
-
-		HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = null;
 
 		try{
 			return ms.getMutationObject().getMutatedEntriesWithTarget(e, factory);
@@ -471,7 +469,7 @@ public final class Mutation {
 			return null;
 	}
 
-	public static void persistMutantClass(CtClass aClass, String outputPath, Factory f){
+	public static void persistMutantClass(CtClass<?> aClass, String outputPath, Factory f){
 		StandardEnvironment env = new NewReportedStandardEnvironment();
 		JavaOutputProcessor fileOutput = new JavaOutputProcessor(new File(outputPath), new DefaultJavaPrettyPrinter(env));
 		fileOutput.setFactory(f);
@@ -490,14 +488,14 @@ public final class Mutation {
 		}
 	}
 
-	static private CtClass findAssociatedClass(CtElement e){
+	static private CtClass<?> findAssociatedClass(CtElement e){
 		CtElement c = e;
 
-		while(c != null && (!(c instanceof CtClass) || (c instanceof CtClass && !((CtClass)c).isTopLevel()))){
+		while(c != null && (!(c instanceof CtClass) || (c instanceof CtClass && !((CtClass<?>)c).isTopLevel()))){
 			c = c.getParent();
 		}
 
-		return (CtClass)c;
+		return (CtClass<?>)c;
 	}
 
 	/**
@@ -505,7 +503,7 @@ public final class Mutation {
 	 * @param anElement
 	 * @return as a string the source ready for compilation
 	 */
-	static private String generateAssociatedClassContent(CtClass anElement){
+	static private String generateAssociatedClassContent(CtClass<?> anElement){
 		DefaultJavaPrettyPrinter prettyPrinter = new DefaultJavaPrettyPrinter(new StandardEnvironment());
 		prettyPrinter.scan(anElement);
 		String sourceCode = ("package "+anElement.getPackage().getQualifiedName()+"; "+prettyPrinter.toString());

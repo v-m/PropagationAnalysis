@@ -11,6 +11,10 @@ import spoon.reflect.code.CtExpression;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public abstract class AbstractBinaryOperator extends MutationOperator<CtBinaryOperator<?>> {
 	
 	public abstract BinaryOperatorKind[] operatorsToUse();

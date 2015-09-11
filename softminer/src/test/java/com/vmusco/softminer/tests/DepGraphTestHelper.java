@@ -10,6 +10,10 @@ import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.processors.GraphItemRenamer;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class DepGraphTestHelper {
 	private String currTestedPakg = "";
 	private GraphBuildLogic buildingLogicToUse = SpoonGraphBuilder.getFeatureGranularityGraphBuilder();
@@ -23,7 +27,7 @@ public class DepGraphTestHelper {
 		return buildingLogicToUse.formatAtom(atom);
 	}
 	
-	public DepGraphTestHelper(GraphBuilderObtainer gbo, Class packageInto) throws Exception {
+	public DepGraphTestHelper(GraphBuilderObtainer gbo, Class<?> packageInto) throws Exception {
 		currTestedPakg = packageInto.getPackage().getName();
 		String[] sources = getFullPath(currTestedPakg); 
 		graphBuilder = gbo.getGraphBuilder(sources);

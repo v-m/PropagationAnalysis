@@ -8,7 +8,7 @@ import com.vmusco.smf.utils.MutationsSetTools;
 
 /**
  * This class contains all informations related to a mutant run 
- * @author Vincenzo Musco - vincenzo.musco@inria.fr
+ * @author Vincenzo Musco - http://www.vmusco.com
  *
  */
 public class MutantExecutionIfos {

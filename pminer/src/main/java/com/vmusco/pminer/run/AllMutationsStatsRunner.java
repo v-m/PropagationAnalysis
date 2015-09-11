@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +30,6 @@ import com.vmusco.smf.exceptions.PersistenceException;
  */
 public class AllMutationsStatsRunner{
 	private static final Class<?> thisclass = AllMutationsStatsRunner.class;
-
-	private static final DecimalFormat nf = new DecimalFormat("0.00");
 
 	private AllMutationsStatsRunner() {
 	}

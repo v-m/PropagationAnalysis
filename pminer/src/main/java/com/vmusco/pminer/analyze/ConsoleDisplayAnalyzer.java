@@ -1,10 +1,8 @@
 package com.vmusco.pminer.analyze;
 
-import com.vmusco.pminer.impact.PropagationExplorer;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
-import com.vmusco.softminer.graphs.Graph;
 
 /**
  * This class is used to display to the console the impacts

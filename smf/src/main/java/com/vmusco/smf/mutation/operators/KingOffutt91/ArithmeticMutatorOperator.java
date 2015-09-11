@@ -1,11 +1,6 @@
 package com.vmusco.smf.mutation.operators.KingOffutt91;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-
-import com.vmusco.smf.mutation.MutationGateway;
-import com.vmusco.smf.mutation.MutationOperator;
 
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -13,6 +8,12 @@ import spoon.reflect.code.CtExpression;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 
+import com.vmusco.smf.mutation.MutationOperator;
+
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public class ArithmeticMutatorOperator extends MutationOperator<CtBinaryOperator<?>>{
 
 	private BinaryOperatorKind[] operators = new BinaryOperatorKind[]{

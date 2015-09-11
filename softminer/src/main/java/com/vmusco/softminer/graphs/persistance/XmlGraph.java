@@ -13,9 +13,14 @@ import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.NodeMarkers;
 import com.vmusco.softminer.graphs.NodeTypes;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 @Deprecated
 public class XmlGraph implements GraphPersistence{
 
+	@SuppressWarnings("unused")
 	private Graph target;
 
 	public XmlGraph(Graph aGraph) {
@@ -125,15 +130,11 @@ public class XmlGraph implements GraphPersistence{
 
 	@Override
 	public void save(OutputStream os) throws IOException {
-		// TODO Auto-generated method stub
-		
 	}
 
 
 	@Override
 	public void load(InputStream is) throws IOException {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

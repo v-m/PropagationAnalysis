@@ -1,19 +1,22 @@
-package com.vmusco.smf.mutation.operators.pitest;
+package com.vmusco.smf.mutation.operators.misc;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vmusco.smf.mutation.MutationOperator;
-
-import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 
-public class NegateConstantsOperator extends MutationOperator<CtLiteral>{
+import com.vmusco.smf.mutation.MutationOperator;
+
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
+public class NegateConstantsOperator extends MutationOperator<CtLiteral<?>>{
 
 	@Override
-	public void process(CtLiteral element) {
+	public void process(CtLiteral<?> element) {
 		if(element.getType() == null)
 			return;
 
@@ -25,7 +28,7 @@ public class NegateConstantsOperator extends MutationOperator<CtLiteral>{
 	}
 
 	@Override
-	public CtElement[] getMutatedEntries(CtLiteral toMutate, Factory factory) {
+	public CtElement[] getMutatedEntries(CtLiteral<?> toMutate, Factory factory) {
 		List<CtElement> result = new ArrayList<CtElement>();
 
 		CtElement mutationTo = determineMutation(toMutate, factory);
@@ -56,11 +59,11 @@ public class NegateConstantsOperator extends MutationOperator<CtLiteral>{
 	 * @param elem
 	 * @param par
 	 */
-	private CtLiteral handleIntMutation(CtLiteral elem, Factory factory){
+	private CtLiteral<?> handleIntMutation(CtLiteral<?> elem, Factory factory){
 		int analyzedValue = (int)elem.getValue();
 		int mutateTo = -1 * analyzedValue;
 
-		CtLiteral createLiteral;
+		CtLiteral<?> createLiteral;
 
 		if(elem.getType().getQualifiedName().equals("int")){
 			createLiteral = factory.Code().createLiteral((int)mutateTo);
@@ -75,17 +78,16 @@ public class NegateConstantsOperator extends MutationOperator<CtLiteral>{
 		return createLiteral;
 	}
 
-	private CtLiteral handleFloatMutation(CtLiteral elem, Factory factory){
+	private CtLiteral<?> handleFloatMutation(CtLiteral<?> elem, Factory factory){
 		float analyzedValue = (float) elem.getValue();
 		float mutateTo = -1 * analyzedValue;
 		
-		CtLiteral createLiteral = factory.Code().createLiteral(mutateTo);
+		CtLiteral<?> createLiteral = factory.Code().createLiteral(mutateTo);
 		return createLiteral;
 	}
 	
 	@Override
 	public String operatorId() {
-		// TODO Auto-generated method stub
 		return "NegateConstantsOperator";
 	}
 }

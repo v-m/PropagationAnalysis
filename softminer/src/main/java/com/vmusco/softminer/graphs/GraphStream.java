@@ -20,6 +20,10 @@ import org.graphstream.stream.file.FileSinkImages.Resolutions;
 import org.graphstream.ui.view.Viewer;
 import org.graphstream.ui.view.ViewerPipe;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public class GraphStream extends Graph {
 	private Viewer lastViewer;
 	

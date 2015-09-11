@@ -1,11 +1,13 @@
 package com.vmusco.softminer.utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
+/**
+*
+* @author Vincenzo Musco - http://www.vmusco.com
+*/
 public abstract class Tools {
 	public static double median(double[] alist){
 		Arrays.sort(alist);
@@ -40,15 +42,15 @@ public abstract class Tools {
 		}
 	}
 	
-	public static TypeWithInfo[] medianWithInfo(List<TypeWithInfo> alist){
+	public static TypeWithInfo<?>[] medianWithInfo(List<TypeWithInfo<?>> alist){
 		Collections.sort(alist);
 		
 		if(alist.size() == 0)
 			return null;
 		
 		if(alist.size()%2==0){
-			TypeWithInfo a = alist.get(alist.size()/2);
-			TypeWithInfo b = alist.get((alist.size()/2)-1);
+			TypeWithInfo<?> a = alist.get(alist.size()/2);
+			TypeWithInfo<?> b = alist.get((alist.size()/2)-1);
 			
 			return new TypeWithInfo[]{a, b};
 		}else{
