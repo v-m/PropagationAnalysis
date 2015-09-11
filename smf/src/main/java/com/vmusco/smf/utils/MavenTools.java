@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.model.Dependency;
@@ -26,6 +27,30 @@ public abstract class MavenTools {
 	
 	private MavenTools(){
 
+	}
+	
+	public static File[] findAllPomsFiles(String entry){
+		ArrayList<File> poms = new ArrayList<File>();
+
+		File f = new File(entry);
+		ArrayList<File> treat = new ArrayList<File>();
+		treat.add(f);
+
+		while(treat.size() > 0){
+			File cur = treat.remove(0);
+
+			if(cur.isDirectory()){
+				for(File tt : cur.listFiles()){
+					treat.add(tt);
+				}
+			}else{
+				if(cur.getName().equals("pom.xml")){
+					poms.add(cur);
+				}
+			}
+		}
+
+		return poms.toArray(new File[0]);
 	}
 
 	public static void exportDependenciesUsingMaven(String projectRoot, String where, String consoleout) throws IOException{

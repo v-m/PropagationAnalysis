@@ -1,16 +1,12 @@
 package com.vmusco.pminer.impact;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.vmusco.pminer.exceptions.AlreadyGeneratedException;
 import com.vmusco.pminer.exceptions.NoEntryPointException;
 import com.vmusco.softminer.graphs.EdgeMarkers;
 import com.vmusco.softminer.graphs.Graph;
+import com.vmusco.softminer.graphs.Graph.NodesNamesForEdge;
 import com.vmusco.softminer.graphs.GraphNodeVisitor;
 import com.vmusco.softminer.graphs.NodeMarkers;
-import com.vmusco.softminer.graphs.Graph.NodesNamesForEdge;
 
 /**
  * This class manage subgraphs representing the propagation from a node.
@@ -134,5 +130,16 @@ public abstract class PropagationExplorer{
 	public int getLastNbNodes(String id) throws NoEntryPointException {
 		return getLastImpactedNodes().length;
 	}
+	
+	public Graph getBaseGraph() {
+		return base;
+	}
 
+	public int getBaseGraphNodesCount(){
+		return base.getNbNodes();
+	}
+	
+	public int getBaseGraphEdgesCount(){
+		return base.getNbEdges();
+	}
 }

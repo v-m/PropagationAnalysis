@@ -88,7 +88,7 @@ public class MutationStatsRunner{
 			@Override
 			public void aMutantHasBeenProceeded(MutationStatisticsCollecter a) {
 				if(ssep == null){
-					System.out.printf("%20s.........................%7d %7d %7d %7d %7d %7.2f %7.2f %7.2f\n",
+					System.out.printf("%20s.....................................%7d %7d %7d %7d %7d %7.2f %7.2f %7.2f\n",
 							a.getLastMutantId(),
 							(int)a.getSoud().getLastCandidateImpactSetSize(),
 							(int)a.getSoud().getLastActualImpactSetSize(),
@@ -99,8 +99,8 @@ public class MutationStatsRunner{
 							a.getPrecisionRecallFscore().getLastRecall(),
 							a.getPrecisionRecallFscore().getLastFscore());
 				}else{
-					System.out.printf("\"%s\"%c%c%c%c%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%c%c%c%c\n",
-							a.getLastMutantId(),ssep,ssep,ssep,ssep,ssep,
+					System.out.printf("\"%s\"%c%c%c%c%c%c%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%c%c%c%c\n",
+							a.getLastMutantId(),ssep,ssep,ssep,ssep,ssep, ssep, ssep,
 							(int)a.getSoud().getLastCandidateImpactSetSize(),ssep,
 							(int)a.getSoud().getLastActualImpactSetSize(),ssep,
 							(int)a.getSoud().getLastIntersectedImpactSetSize(),ssep,
@@ -153,9 +153,9 @@ public class MutationStatsRunner{
 	protected static String getDataHeader(Character sep){
 		printLine(sep);
 		if(sep == null){
-			return String.format("           Mutant id    Op  #mut #aliv #unbo     CIS     AIS   C^AIS    FPIS     DIS    prec  recall  fscore       S       C       O       U       D");
+			return String.format("           Mutant id    Op  #mut #aliv #unbo #node #edge    CIS     AIS   C^AIS    FPIS     DIS    prec  recall  fscore       S       C       O       U       D");
 		}else{
-			return String.format("\"MutId\"%c\"Op\"%c\"nbmut\"%c\"nbalives\"%c\"nunbound\"%c\"CIS\"%c\"AIS\"%c\"CAIS\"%c\"FPIS\"%c\"DIS\"%c\"prec\"%c\"recall\"%c\"fscore\"%c\"S\"%c\"C\"%c\"O\"%c\"U\"%c\"D\"", sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep);
+			return String.format("\"MutId\"%c\"Op\"%c\"nbmut\"%c\"nbalives\"%c\"nunbound\"%c\"nbnodes\"%c\"nbedges\"%c\"CIS\"%c\"AIS\"%c\"CAIS\"%c\"FPIS\"%c\"DIS\"%c\"prec\"%c\"recall\"%c\"fscore\"%c\"S\"%c\"C\"%c\"O\"%c\"U\"%c\"D\"", sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep);
 		}
 	}
 
@@ -247,11 +247,13 @@ public class MutationStatsRunner{
 		}
 
 		if(sep == null){
-			ret[0] = String.format("%5s %5d %5d %5d %7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
+			ret[0] = String.format("%5s %5d %5d %5d %5d %5d %7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
 					ms.getMutationId(),
 					cpt,
 					nbalives,
 					nbunbounded,
+					pgp.getBaseGraphNodesCount(),
+					pgp.getBaseGraphEdgesCount(),
 					(int)sd.getSoud().getCurrentMedianCandidateImpactSetSize(),
 					(int)sd.getSoud().getCurrentMedianActualImpactSetSize(),
 					(int)sd.getSoud().getCurrentMedianIntersectedImpactSetSize(),
@@ -266,11 +268,13 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbUnderestimatedProportion(),
 					sd.getSoud().getNbDifferentProportion());
 
-			ret[1] = String.format("%5s %5d %5d %5d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
+			ret[1] = String.format("%5s %5d %5d %5d %5d %5d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
 					ms.getMutationId(),
 					cpt,
 					nbalives,
 					nbunbounded,
+					pgp.getBaseGraphNodesCount(),
+					pgp.getBaseGraphEdgesCount(),
 					sd.getSoud().getCurrentMeanCandidateImpactSetSize(),
 					sd.getSoud().getCurrentMeanActualImpactSetSize(),
 					sd.getSoud().getCurrentMeanIntersectedImpactSetSize(),
@@ -285,11 +289,13 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbUnderestimatedProportion(),
 					sd.getSoud().getNbDifferentProportion());
 		}else{
-			ret[0] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
+			ret[0] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
 					ms.getMutationId(),sep,
 					cpt,sep,
 					nbalives,sep,
 					nbunbounded,sep,
+					pgp.getBaseGraphNodesCount(),sep,
+					pgp.getBaseGraphEdgesCount(),sep,
 					(int)sd.getSoud().getCurrentMedianCandidateImpactSetSize(),sep,
 					(int)sd.getSoud().getCurrentMedianActualImpactSetSize(),sep,
 					(int)sd.getSoud().getCurrentMedianIntersectedImpactSetSize(),sep,
@@ -304,11 +310,13 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbUnderestimatedProportion(),sep,
 					sd.getSoud().getNbDifferentProportion());
 
-			ret[1] = String.format("\"%s\"%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
+			ret[1] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
 					ms.getMutationId(),sep,
 					cpt,sep,
 					nbalives,sep,
 					nbunbounded,sep,
+					pgp.getBaseGraphNodesCount(),sep,
+					pgp.getBaseGraphEdgesCount(),sep,
 					sd.getSoud().getCurrentMeanCandidateImpactSetSize(),sep,
 					sd.getSoud().getCurrentMeanActualImpactSetSize(),sep,
 					sd.getSoud().getCurrentMeanIntersectedImpactSetSize(),sep,

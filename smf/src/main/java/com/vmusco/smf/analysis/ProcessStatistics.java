@@ -401,7 +401,7 @@ public class ProcessStatistics implements Serializable{
 
 		Set<String> finalcp = new HashSet<String>();
 
-		for(File fp : findAllPomsFiles()){
+		for(File fp : MavenTools.findAllPomsFiles(this.getProjectIn(true))){
 			String fromthisfile = MavenTools.extractClassPathUsingMvnV2(fp.getParentFile().getAbsolutePath(), false);
 			for(String item : fromthisfile.split(":")){
 				if(item != null && item.length() > 0)
@@ -871,32 +871,10 @@ public class ProcessStatistics implements Serializable{
 		MavenTools.exportDependenciesUsingMaven(this.getProjectIn(true), dst.getAbsolutePath(), this.buildPath("mvn_copy.log"));
 	}
 
-	private File[] findAllPomsFiles(){
-		ArrayList<File> poms = new ArrayList<File>();
-
-		File f = new File(this.getProjectIn(true));
-		ArrayList<File> treat = new ArrayList<File>();
-		treat.add(f);
-
-		while(treat.size() > 0){
-			File cur = treat.remove(0);
-
-			if(cur.isDirectory()){
-				for(File tt : cur.listFiles()){
-					treat.add(tt);
-				}
-			}else{
-				if(cur.getName().equals("pom.xml")){
-					poms.add(cur);
-				}
-			}
-		}
-
-		return poms.toArray(new File[0]);
-	}
+	
 
 	public void exportClassPathOnAll() throws IOException {
-		for(File fp : findAllPomsFiles()){
+		for(File fp : MavenTools.findAllPomsFiles(this.getProjectIn(true))){
 			System.out.println("Handling "+fp.getAbsolutePath());
 			MavenTools.exportDependenciesUsingMaven(fp.getParentFile().getAbsolutePath(), this.buildPath(this.cpLocalFolder), this.buildPath("maven.log"));
 		}

@@ -1,19 +1,14 @@
 package com.vmusco.pminer.impact;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.vmusco.pminer.exceptions.AlreadyGeneratedException;
 import com.vmusco.pminer.exceptions.NoEntryPointException;
-import com.vmusco.softminer.graphs.EdgeMarkers;
 import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softminer.graphs.GraphNodeVisitor;
-import com.vmusco.softminer.graphs.NodeMarkers;
-import com.vmusco.softminer.graphs.Graph.NodesNamesForEdge;
 
 /**
- * Uses softmner exported call graph
+ * Uses softminer exported call graph
  * @author Vincenzo Musco - http://www.vmusco.com
  *
  */

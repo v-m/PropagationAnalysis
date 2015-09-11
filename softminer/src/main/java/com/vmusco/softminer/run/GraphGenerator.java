@@ -3,6 +3,8 @@ package com.vmusco.softminer.run;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -13,6 +15,7 @@ import org.apache.commons.cli.PosixParser;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.utils.ConsoleTools;
+import com.vmusco.smf.utils.MavenTools;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.persistance.GraphML;
 import com.vmusco.softminer.graphs.persistance.GraphPersistence;
@@ -21,23 +24,38 @@ import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
 
 public class GraphGenerator {
-	private static final String DEFAULT_USEGRAPH_FILENAME = "callgraph.xml";
 	public static Graph generatedGraph = null;
 
+	private static String defaultFilename(String type_graph){
+		if(type_graph == null){
+			return "callgraph.xml";
+		}else if(type_graph.equals("cha")){
+			return "cha_callgraph.xml";
+		}else if(type_graph.equals("f")){
+			return "f_callgraph.xml";
+		}else if(type_graph.equals("chaf")){
+			return "chaf_callgraph.xml";
+		}else if(type_graph.equals("m")){
+			return "m_callgraph.xml";
+		}else{
+			return "callgraph.xml";
+		}
+	}
+	
 	public static void main(String[] args) throws Exception {
 		generatedGraph = null;
 
 		Options options = new Options();
 
 		options.addOption(new Option("h", "help", false, "print this message"));
-		options.addOption(new Option("o", "output-file", true, "Describes the output file absolute if start with / else relative from <working-dir> (default: working-dir/"+DEFAULT_USEGRAPH_FILENAME+")."));
-		Option delprev = new Option("d", "delete-previous", false, "Delete the file if it already exists.");
-		options.addOption(delprev);
+		options.addOption(new Option("o", "output-file", true, "Describes the output file absolute if start with / else relative from <working-dir>. This parameter is used only in case of using a smf project as input."));
+		options.addOption(new Option("d", "delete-previous", false, "Delete the file if it already exists."));
 		options.addOption(new Option("F", "out-format", true, "set the output format. Set help or h as a type to get the list of types"));
+		
+		options.addOption(new Option("t", "type", true, "select a specific type of call graph (override -r, -f and -c). Set help or h as a type to get the list of types."));
 		options.addOption(new Option("c", "cha", false, "resolve interfaces and classes"));
 		options.addOption(new Option("f", "fields", false, "resolve interfaces and classes"));
 		options.addOption(new Option("r", "no-overridden-calls", false, "resolve calls to overriden methods"));
-		options.addOption(new Option("t", "type", true, "select a specific type of call graph (override -r, -f and -c). Set help or h as a type to get the list of types."));
 
 		CommandLineParser parser = new PosixParser();
 		CommandLine cmd = parser.parse(options, args);
@@ -85,22 +103,94 @@ public class GraphGenerator {
 				ConsoleTools.endLine();
 				System.exit(0);
 			}
+		}
+
+		if((cmd.getArgs().length != 1 && cmd.getArgs().length != 3) || cmd.hasOption("help")){
+			HelpFormatter formatter = new HelpFormatter();
+			String header = "Generate a call graph for the smf project pointed in <smf-project-dir> and output it to this project folder or a source code described in maven project <maven-dir> with resolving dependencies and using sources relatives a maven dir in <source-dir> (eventually separated by "+File.pathSeparator+", can be xxx! to indicate the defaults xxx/src/main|xxx/test/java folders) and output it in <output-file>.";
+			String footer = "";
+			formatter.printHelp(" [options] <smf-project-dir> | <<maven-dir> <source-dir> <output-file>>", header, options, footer);
 
 
+			System.exit(0);
+		}
 
-			if(cmd.getArgs().length < 1 || cmd.hasOption("help")){
-				HelpFormatter formatter = new HelpFormatter();
-				String header = "Generate a graph for the project pointed in <working-dir>.";
-				String footer = "";
-				formatter.printHelp(GraphGenerator.class.getCanonicalName()+" [options] <working-dir>", header, options, footer);
+		GraphBuildLogic builder = SpoonGraphBuilder.getFeatureGranularityGraphBuilder();
+		
+		ArrayList<String> sources = new ArrayList<String>();
+		String projname = null;
+		String[] classpath = null;
+		
+		File output_path = new File(defaultFilename(type_graph));
+		
+		if(cmd.getArgs().length == 3){
+			String mvn_dir = cmd.getArgs()[0];
+			
+			String[] srcs;
+			
+			if(cmd.getArgs()[1].endsWith("!")){
+				if(cmd.getArgs()[1].equals("!"))
+					srcs = new String[]{"src/main/java", "src/test/java"};
+				else
+					srcs = new String[]{cmd.getArgs()[1].substring(0, cmd.getArgs()[1].length()-1)+"/src/main/java", 
+						cmd.getArgs()[1].substring(0, cmd.getArgs()[1].length()-1)+"/src/test/java"};
+			}else{
+				srcs = cmd.getArgs()[1].split(File.pathSeparator);
+			}
+			
+			Set<String> finalcp = new HashSet<String>();
 
-
-				System.exit(0);
+			for(File fp : MavenTools.findAllPomsFiles(mvn_dir)){
+				String fromthisfile = MavenTools.extractClassPathUsingMvnV2(fp.getParentFile().getAbsolutePath(), false);
+				for(String item : fromthisfile.split(":")){
+					if(item != null && item.length() > 0)
+						finalcp.add(item);
+				}
 			}
 
-			ProcessStatistics ps = ProcessStatistics.rawLoad(cmd.getArgs()[0]);
+			classpath = finalcp.toArray(new String[0]);
+			
+			for(String s : srcs){
+				File f = new File(mvn_dir, s);
+				
+				if(!f.exists()){
+					System.err.println("Unable to locate "+f.getAbsolutePath());
+				}
+				
+				sources.add(f.getAbsolutePath());
+			}
+			
+			output_path = new File(cmd.getArgs()[2]);
 
-			File output_path = new File(ps.getWorkingDir(), DEFAULT_USEGRAPH_FILENAME);
+			if(output_path.exists()){
+				if(output_path.isDirectory()){
+					output_path = new File(output_path, defaultFilename(type_graph));
+				}
+			}
+			
+			if(output_path.exists()){
+				if(!cmd.hasOption("delete-previous")){
+					System.out.println("The file "+output_path.getAbsolutePath()+" already exist. To force its overwriting use -d flag.");
+					return;
+				}else{
+					output_path.delete();
+				}
+			}
+		}else{
+			ProcessStatistics ps = ProcessStatistics.rawLoad(cmd.getArgs()[0]);
+			
+			for(String s : ps.getSrcToCompile(true)){
+				sources.add(s);
+			}
+
+			for(String s : ps.getSrcTestsToTreat(true)){
+				sources.add(s);
+			}
+			
+			projname = ps.getProjectName();
+			classpath = ps.getClasspath();
+			
+			output_path = new File(ps.getWorkingDir(), defaultFilename(type_graph));
 			if(cmd.hasOption("output-file")){
 				String s = cmd.getOptionValue("output-file");
 				if(s.startsWith("/"))
@@ -111,55 +201,54 @@ public class GraphGenerator {
 
 			if(output_path.exists()){
 				if(!cmd.hasOption("delete-previous")){
-					System.out.println("The file "+output_path.getAbsolutePath()+" already exist. To force its overwriting use "+delprev.getOpt()+" flag.");
+					System.out.println("The file "+output_path.getAbsolutePath()+" already exist. To force its overwriting use -d flag.");
 					return;
 				}else{
 					output_path.delete();
 				}
 			}
-
-			GraphBuildLogic builder = SpoonGraphBuilder.getFeatureGranularityGraphBuilder();
-
-			ArrayList<String> sources = new ArrayList<String>();
-
-			for(String s : ps.getSrcToCompile(true)){
-				sources.add(s);
-			}
-
-			for(String s : ps.getSrcTestsToTreat(true)){
-				sources.add(s);
-			}
-
-			GraphBuilder gb;
-
-			if(type_graph != null){
-				if(type_graph.equals("cha")){
-					gb = GraphBuilder.newGraphBuilderWithInheritence(ps.getProjectName(), sources.toArray(new String[0]), ps.getClasspath());
-				}else if(type_graph.equals("f")){
-					gb = GraphBuilder.newGraphBuilderWithFields(ps.getProjectName(), sources.toArray(new String[0]), ps.getClasspath());
-				}else if(type_graph.equals("chaf")){
-					gb = GraphBuilder.newGraphBuilderWithFieldsAndInheritence(ps.getProjectName(), sources.toArray(new String[0]), ps.getClasspath());
-				}else if(type_graph.equals("m")){
-					gb = GraphBuilder.newGraphBuilderOnlyWithDependenciesWithoutOverriden(ps.getProjectName(), sources.toArray(new String[0]), ps.getClasspath());
-				}else{
-					gb = GraphBuilder.newGraphBuilderOnlyWithDependencies(ps.getProjectName(), sources.toArray(new String[0]), ps.getClasspath());
-				}
-			}else{
-				gb = GraphBuilder.newGraphBuilderManuallyConfigured(ps.getProjectName(), sources.toArray(new String[0]), ps.getClasspath(), cmd.hasOption("cha"), cmd.hasOption("fields"), cmd.hasOption("no-overridden-calls"));
-			}
-
-			Graph aGraph = gb.generateDependencyGraph(builder);
-
-			GraphPersistence gp = null;
-
-			if(out_format.equals("graphml")){
-				gp = new GraphML(aGraph);
-			}
-
-
-			gp.save(new FileOutputStream(output_path));
-
-			generatedGraph = aGraph;
 		}
+		
+		
+
+		
+
+		
+
+		
+
+		
+
+		GraphBuilder gb;
+
+		if(type_graph != null){
+			if(type_graph.equals("cha")){
+				gb = GraphBuilder.newGraphBuilderWithInheritence(projname, sources.toArray(new String[0]), classpath);
+			}else if(type_graph.equals("f")){
+				gb = GraphBuilder.newGraphBuilderWithFields(projname, sources.toArray(new String[0]), classpath);
+			}else if(type_graph.equals("chaf")){
+				gb = GraphBuilder.newGraphBuilderWithFieldsAndInheritence(projname, sources.toArray(new String[0]), classpath);
+			}else if(type_graph.equals("m")){
+				gb = GraphBuilder.newGraphBuilderOnlyWithDependenciesWithoutOverriden(projname, sources.toArray(new String[0]), classpath);
+			}else{
+				gb = GraphBuilder.newGraphBuilderOnlyWithDependencies(projname, sources.toArray(new String[0]), classpath);
+			}
+		}else{
+			gb = GraphBuilder.newGraphBuilderManuallyConfigured(projname, sources.toArray(new String[0]), classpath, cmd.hasOption("cha"), cmd.hasOption("fields"), cmd.hasOption("no-overridden-calls"));
+		}
+
+		Graph aGraph = gb.generateDependencyGraph(builder);
+
+		GraphPersistence gp = null;
+
+		if(out_format.equals("graphml")){
+			gp = new GraphML(aGraph);
+		}
+
+
+		gp.save(new FileOutputStream(output_path));
+
+		generatedGraph = aGraph;
+
 	}
 }

@@ -148,8 +148,6 @@ public class AllMutationsStatsRunner{
 		 */
 		Map<String, PropagationExplorer> explorers = new HashMap<>();
 
-		Graph[] allGraphs = new Graph[graphs.length];
-
 		for(int i = 0; i<graphs.length; i++){
 			File gf = new File(f.getParentFile(), graphs[i]);
 			if(!gf.exists()){
