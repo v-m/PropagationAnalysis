@@ -12,6 +12,7 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
+import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
 
 import com.vmusco.smf.analysis.MutantExecutionIfos;
@@ -89,7 +90,10 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 		mutations.addContent(e);
 		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getRawMutantHangingTestCases());
 		
-		XMLOutputter output = new XMLOutputter(Format.getPrettyFormat());
+		Format format = Format.getPrettyFormat();
+		format.setLineSeparator(LineSeparator.UNIX);
+		XMLOutputter output = new XMLOutputter(format);
+
 		try {
 			output.output(document, fos);
 		} catch (IOException e1) {

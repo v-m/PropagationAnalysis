@@ -59,7 +59,7 @@ public class NegateConstantsOperator extends MutationOperator<CtLiteral<?>>{
 	 * @param elem
 	 * @param par
 	 */
-	private CtLiteral<?> handleIntMutation(CtLiteral<?> elem, Factory factory){
+	private CtLiteral<?> handleIntMutation(CtLiteral elem, Factory factory){
 		int analyzedValue = (int)elem.getValue();
 		int mutateTo = -1 * analyzedValue;
 
@@ -78,7 +78,7 @@ public class NegateConstantsOperator extends MutationOperator<CtLiteral<?>>{
 		return createLiteral;
 	}
 
-	private CtLiteral<?> handleFloatMutation(CtLiteral<?> elem, Factory factory){
+	private CtLiteral<?> handleFloatMutation(CtLiteral elem, Factory factory){
 		float analyzedValue = (float) elem.getValue();
 		float mutateTo = -1 * analyzedValue;
 		

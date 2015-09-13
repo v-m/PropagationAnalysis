@@ -42,7 +42,7 @@ public abstract class Tools {
 		}
 	}
 	
-	public static TypeWithInfo<?>[] medianWithInfo(List<TypeWithInfo<?>> alist){
+	public static TypeWithInfo<?>[] medianWithInfo(List<TypeWithInfo> alist){
 		Collections.sort(alist);
 		
 		if(alist.size() == 0)

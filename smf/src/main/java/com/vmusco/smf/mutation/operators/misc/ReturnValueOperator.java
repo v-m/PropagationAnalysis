@@ -97,22 +97,22 @@ public class ReturnValueOperator extends MutationOperator<CtReturn<?>> {
 		return retExpr;
 	}
 
-	private CtExpression<?> handleBooleanMutation(CtExpression<?> elem, CtMethod<?> par, Factory factory){
+	private CtExpression<?> handleBooleanMutation(CtExpression elem, CtMethod par, Factory factory){
 		boolean analyzedValue = false;
 
 		if(elem instanceof CtLiteral){
-			CtLiteral<?> tt = (CtLiteral<?>)elem;
+			CtLiteral tt = (CtLiteral)elem;
 			analyzedValue = (boolean) tt.getValue();
 		}else if(elem instanceof CtNewClass){
-			CtNewClass<?> tt = (CtNewClass<?>)elem;
+			CtNewClass tt = (CtNewClass)elem;
 
 			if(tt.getArguments().size() == 1){
 				CtElement param = (CtElement) tt.getArguments().get(0);
 
 				if(param instanceof CtLiteral){
-					CtLiteral<?> lit = ((CtLiteral<?>)param);
+					CtLiteral<?> lit = ((CtLiteral)param);
 					if(lit.getValue() instanceof Boolean)
-						analyzedValue = (boolean) ((CtLiteral<?>)param).getValue();
+						analyzedValue = (boolean) ((CtLiteral)param).getValue();
 					else if(lit.getValue() instanceof String){
 						try{
 							analyzedValue = (boolean) Boolean.parseBoolean((String) lit.getValue());
@@ -153,31 +153,31 @@ public class ReturnValueOperator extends MutationOperator<CtReturn<?>> {
 	 * @param elem
 	 * @param par
 	 */
-	private CtExpression<?> handleLongMutation(CtExpression<?> elem, CtMethod<?> par, Factory factory){
+	private CtExpression<?> handleLongMutation(CtExpression elem, CtMethod par, Factory factory){
 		boolean isLong = par.getType().getQualifiedName().equals("long");
 		long analyzedValue = isLong?0:1;
 
 		if(elem instanceof CtLiteral){
-			CtLiteral<?> tt = (CtLiteral<?>)elem;
+			CtLiteral tt = (CtLiteral)elem;
 			if(tt.getValue() instanceof Long){
 				analyzedValue = (long) tt.getValue();
 			}else{
 				analyzedValue = new Long((int)tt.getValue()).longValue();
 			}
 		}else if(elem instanceof CtNewClass){
-			CtNewClass<?> tt = (CtNewClass<?>)elem;
+			CtNewClass tt = (CtNewClass)elem;
 
 			if(tt.getArguments().size() == 1){
 				CtElement param = (CtElement) tt.getArguments().get(0);
 
 				if(param instanceof CtLiteral){
-					CtLiteral<?> lit = ((CtLiteral<?>)param);
+					CtLiteral<?> lit = ((CtLiteral)param);
 					if(lit.getValue() instanceof Long)
-						analyzedValue = (long) ((CtLiteral<?>)param).getValue();
+						analyzedValue = (long) ((CtLiteral)param).getValue();
 					else if(lit.getValue() instanceof Integer || 
 							lit.getValue() instanceof Short ||
 							lit.getValue() instanceof Byte)
-						analyzedValue = (long) new Long((int)((CtLiteral<?>)param).getValue()).longValue();
+						analyzedValue = (long) new Long((int)((CtLiteral)param).getValue()).longValue();
 					else if(lit.getValue() instanceof String){
 						try{
 							analyzedValue = (long) Long.parseLong((String) lit.getValue());
@@ -233,26 +233,26 @@ public class ReturnValueOperator extends MutationOperator<CtReturn<?>> {
 		//System.out.println("Mutate "+analyzedValue+" => "+ mutateTo);
 	}
 
-	private CtExpression<?> handleDoubleMutation(CtExpression<?> elem, CtMethod<?> par, Factory factory){
+	private CtExpression<?> handleDoubleMutation(CtExpression elem, CtMethod<?> par, Factory factory){
 		double analyzedValue = 0.0d;
 
 		if(elem instanceof CtLiteral){
-			CtLiteral<?> tt = (CtLiteral<?>)elem;
+			CtLiteral tt = (CtLiteral)elem;
 			if(tt.getValue() instanceof Double)
 				analyzedValue = (double) tt.getValue();
 			else
 				analyzedValue = new Double((float) tt.getValue()).doubleValue();
 		}else if(elem instanceof CtNewClass){
-			CtNewClass<?> tt = (CtNewClass<?>)elem;
+			CtNewClass<?> tt = (CtNewClass)elem;
 
 			if(tt.getArguments().size() == 1){
 				CtElement param = (CtElement) tt.getArguments().get(0);
 
 				if(param instanceof CtLiteral){
-					CtLiteral<?> lit = ((CtLiteral<?>)param);
+					CtLiteral<?> lit = ((CtLiteral)param);
 					if(lit.getValue() instanceof Double
 							|| lit.getValue() instanceof Float)
-						analyzedValue = (double) ((CtLiteral<?>)param).getValue();
+						analyzedValue = (double) ((CtLiteral)param).getValue();
 					else if(lit.getValue() instanceof String){
 						try{
 							analyzedValue = (long) Double.parseDouble((String) lit.getValue());
@@ -265,7 +265,7 @@ public class ReturnValueOperator extends MutationOperator<CtReturn<?>> {
 						return null;
 					}
 				}else if(param instanceof CtFieldAccess){
-					CtFieldAccess<?> field = (CtFieldAccess<?>) param;
+					CtFieldAccess field = (CtFieldAccess) param;
 					if(field.getVariable().getQualifiedName().endsWith("#NaN")){
 						analyzedValue = Double.NaN;
 					}else{
@@ -278,7 +278,7 @@ public class ReturnValueOperator extends MutationOperator<CtReturn<?>> {
 				}
 			}
 		}else if(elem instanceof CtFieldAccess){
-			CtFieldAccess<?> field = (CtFieldAccess<?>) elem;
+			CtFieldAccess field = (CtFieldAccess) elem;
 			if(field.getVariable().getQualifiedName().endsWith("#NaN")){
 				analyzedValue = Double.NaN;
 			}else{

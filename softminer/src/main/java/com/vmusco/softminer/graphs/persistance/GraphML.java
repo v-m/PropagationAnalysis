@@ -11,6 +11,7 @@ import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
+import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
 
 import com.vmusco.softminer.graphs.EdgeMarkers;
@@ -171,7 +172,9 @@ public class GraphML implements GraphPersistence{
 		Element graphml = generateXmlNodes(target, xmlns);
 		root.addContent(graphml);
 
-		XMLOutputter output = new XMLOutputter(Format.getPrettyFormat());
+		Format format = Format.getPrettyFormat();
+		format.setLineSeparator(LineSeparator.UNIX);
+		XMLOutputter output = new XMLOutputter(format);
 		output.output(d, os);
 	}
 

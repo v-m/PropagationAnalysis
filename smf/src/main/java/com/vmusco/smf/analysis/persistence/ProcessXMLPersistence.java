@@ -14,6 +14,7 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
+import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
@@ -289,8 +290,10 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 			}
 		}
 
-		//FileOutputStream fos = new FileOutputStream(f);
-		XMLOutputter output = new XMLOutputter(Format.getPrettyFormat());
+		Format format = Format.getPrettyFormat();
+		format.setLineSeparator(LineSeparator.UNIX);
+		XMLOutputter output = new XMLOutputter(format);
+		
 		try {
 			output.output(document, new FileOutputStream(ffinal));
 		} catch (Exception e) {

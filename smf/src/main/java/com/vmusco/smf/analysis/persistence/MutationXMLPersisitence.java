@@ -13,6 +13,7 @@ import org.jdom2.IllegalDataException;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
+import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
 
 import com.vmusco.smf.analysis.MutantIfos;
@@ -202,7 +203,11 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 
 		try{
 			FileOutputStream fos = new FileOutputStream(f);
-			XMLOutputter output = new XMLOutputter(Format.getPrettyFormat());
+			
+			Format format = Format.getPrettyFormat();
+			format.setLineSeparator(LineSeparator.UNIX);
+			XMLOutputter output = new XMLOutputter(format);
+
 			output.output(document, fos);
 			fos.close();
 		}catch(Exception e){

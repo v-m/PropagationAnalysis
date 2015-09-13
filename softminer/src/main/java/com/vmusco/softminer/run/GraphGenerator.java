@@ -144,8 +144,9 @@ public class GraphGenerator {
 						srcsh.add(s.substring(0, s.length()-1)+"/src/main/java");
 						srcsh.add(s.substring(0, s.length()-1)+"/src/test/java");
 					}
+				}else{
+					srcsh.add(s);
 				}
-				
 			}
 			srcs = srcsh.toArray(new String[0]);
 			
