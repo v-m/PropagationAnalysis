@@ -48,10 +48,6 @@ public class AllMutationsStatsRunner{
 		options.addOption(opt);
 		opt = new Option("c", "csv", true, "export in csv format with such a separator");
 		options.addOption(opt);
-		opt = new Option("s", "smfrun-filename", true, "specify the smf running config file if different (default: "+ProcessStatistics.DEFAULT_CONFIGFILE+")");
-		options.addOption(opt);
-		opt = new Option("m", "mutation-filename", true, "specify the mutation summary file if different (default: "+MutationStatistics.DEFAULT_CONFIGFILE+")");
-		options.addOption(opt);
 		opt = new Option("v", "average", false, "compute the average/mean (default: median)");
 		options.addOption(opt);
 		opt = new Option("p", "mutation-project", true, "specify the mutation project if different (default: "+MutationStatistics.DEFAULT_ID_NAME+")");
@@ -80,12 +76,6 @@ public class AllMutationsStatsRunner{
 		String smfrun = ProcessStatistics.DEFAULT_CONFIGFILE;
 		String mutationrun = MutationStatistics.DEFAULT_CONFIGFILE;
 		String projectrun = MutationStatistics.DEFAULT_ID_NAME;
-
-		if(cmd.hasOption("smfrun-filename"))
-			smfrun = cmd.getOptionValue("smfrun-filename");
-
-		if(cmd.hasOption("mutation-filename"))
-			mutationrun = cmd.getOptionValue("mutation-filename");
 
 		if(cmd.hasOption("mutation-project"))
 			projectrun = cmd.getOptionValue("mutation-project");

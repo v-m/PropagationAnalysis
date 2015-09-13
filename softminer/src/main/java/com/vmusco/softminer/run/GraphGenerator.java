@@ -31,18 +31,20 @@ public class GraphGenerator {
 	public static Graph generatedGraph = null;
 
 	private static String defaultFilename(String type_graph){
+		String def_filename = "callgraph%s.xml";
+		
 		if(type_graph == null){
-			return "callgraph.xml";
+			return String.format(def_filename, "");
 		}else if(type_graph.equals("cha")){
-			return "cha_callgraph.xml";
+			return String.format(def_filename, "_cha");
 		}else if(type_graph.equals("f")){
-			return "f_callgraph.xml";
+			return String.format(def_filename, "_f");
 		}else if(type_graph.equals("chaf")){
-			return "chaf_callgraph.xml";
+			return String.format(def_filename, "_f_cha");
 		}else if(type_graph.equals("m")){
-			return "m_callgraph.xml";
+			return String.format(def_filename, "_m");
 		}else{
-			return "callgraph.xml";
+			return String.format(def_filename, "");
 		}
 	}
 	
