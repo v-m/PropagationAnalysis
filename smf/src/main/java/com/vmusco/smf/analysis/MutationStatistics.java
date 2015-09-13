@@ -40,7 +40,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	 */
 	private String[] classToMutate = new String[]{};
 	private String mutator;			// The mutator to use for mutation
-	private String configFile;
+	//private String configFile;
 	private HashMap<String, MutantIfos> mutations = new HashMap<String, MutantIfos>();
 	private Long mutantsGenerationTime = null;
 
@@ -174,7 +174,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 
 	public MutationStatistics(ProcessStatistics ps, Class<T> mutator, String name) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		this.ps = ps;
-		this.configFile = DEFAULT_CONFIGFILE;
+		//this.configFile = DEFAULT_CONFIGFILE;
 		this.mutator = mutator.getCanonicalName();
 		this.mutationName = name;
 		resolveWithMutator();
@@ -239,13 +239,13 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		this.mutator = mutator;
 	}
 
-	public String getConfigFile() {
+	/*public String getConfigFile() {
 		return configFile;
 	}
 
 	public void setConfigFile(String configFile) {
 		this.configFile = configFile;
-	}
+	}*/
 
 	public String resolveName(String resolving){
 		return ps.getWorkingDir() + File.separator + ps.getMutantsBasedir().replace("{id}", this.mutationName).replace("{op}", this.mutationOpId) + File.separator + resolving;
@@ -264,7 +264,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	}
 
 	public String getConfigFileResolved(){
-		return resolveName(this.configFile);
+		return resolveName(this.DEFAULT_CONFIGFILE);
 	}
 
 	public String getMutantFileResolved(String mutid){

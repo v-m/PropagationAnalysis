@@ -56,8 +56,8 @@ public class NewProject extends GlobalTestRunning {
 		options.addOption(opt);
 		opt = new Option("h", "help", false, "print this message");
 		options.addOption(opt);
-		opt = new Option("p", "persist-file", true, "generation file (default: "+ProcessStatistics.DEFAULT_CONFIGFILE+")");
-		options.addOption(opt);
+		/*opt = new Option("p", "persist-file", true, "generation file (default: "+ProcessStatistics.DEFAULT_CONFIGFILE+")");
+		options.addOption(opt);*/
 		opt = new Option("l", "do-not-copy", false, "do not copy the content in the project (not recommended !)");
 		options.addOption(opt);
 		opt = new Option("F", "force", false, "Overwritte the working directory if it already exists !");
@@ -135,9 +135,9 @@ public class NewProject extends GlobalTestRunning {
 				ps.setTestTimeOut(0);
 			}
 			
-			if(cmd.hasOption("persist-file")){
+			/*if(cmd.hasOption("persist-file")){
 				ps.setPersistFile(cmd.getOptionValue("persist-file"));
-			}
+			}*/
 			
 			ProcessStatistics.saveState(ps);
 			

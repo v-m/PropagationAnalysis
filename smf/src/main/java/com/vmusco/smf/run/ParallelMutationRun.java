@@ -93,8 +93,6 @@ public class ParallelMutationRun implements TestingNotification{
 
 		Option opt;
 
-		opt = new Option("b", "basefile", true, "specify the mutation file name");
-		options.addOption(opt);
 		opt = new Option("s", "slicesize", true, "specify the number of tests to execute for each project before switching to the next one (default: 1)");
 		options.addOption(opt);
 		opt = new Option("h", "help", false, "display this message");
@@ -119,10 +117,6 @@ public class ParallelMutationRun implements TestingNotification{
 		pmr.slicesize = (cmd.hasOption("slicesize"))?Integer.parseInt(cmd.getOptionValue("slicesize")):1;
 
 		String basefile = MutationStatistics.DEFAULT_CONFIGFILE;
-
-		if(cmd.hasOption("basefile"))
-			basefile = cmd.getOptionValue("basefile");
-
 
 		String[] parts = cmd.getArgs()[0].split(File.pathSeparator); 
 

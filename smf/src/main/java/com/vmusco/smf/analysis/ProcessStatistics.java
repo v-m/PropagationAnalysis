@@ -87,11 +87,6 @@ public class ProcessStatistics implements Serializable{
 	private String projectIn;
 
 	/**
-	 * The file on which this object has to be persisted
-	 */
-	private String persistFile = null;
-
-	/**
 	 * The folders/files in projectIn of files to compile
 	 */
 	private String[] srcToCompile;
@@ -212,7 +207,6 @@ public class ProcessStatistics implements Serializable{
 		ps.testTimeOut = Testing.MAX_TEST_TIMEOUT;
 		ps.testTimeOut_auto = true;
 
-		ps.persistFile = DEFAULT_CONFIGFILE;
 		ps.currentState = STATE.NEW;
 
 		return ps;
@@ -229,7 +223,6 @@ public class ProcessStatistics implements Serializable{
 			// Load the object...
 			try{
 				ps =  ProcessStatistics.loadState(f.getAbsolutePath());
-				ps.persistFile = f.getName();
 			}catch(Exception e){
 				System.out.println("Exception on loading state. Creating new...");
 				e.printStackTrace();
@@ -241,24 +234,11 @@ public class ProcessStatistics implements Serializable{
 
 	public String getPersistFile(boolean resolve) {
 		if(!resolve){
-			return this.persistFile;
+			return this.DEFAULT_CONFIGFILE;
 		}
 
-		if(this.persistFile.charAt(0) == File.separatorChar){
-			// Absolute path !
-			return this.persistFile;
-		}else{
-			// Relative path !
-			return this.workingDir + File.separatorChar + this.persistFile;
-		}
-	}
-
-	/**
-	 * Set th persistance file value
-	 * @param persistFile a relative path
-	 */
-	public void setPersistFile(String persistFile) {
-		this.persistFile = persistFile;
+		// Relative path !
+		return this.workingDir + File.separatorChar + this.DEFAULT_CONFIGFILE;
 	}
 
 	public static String fromStateToString(STATE aState){
@@ -316,7 +296,7 @@ public class ProcessStatistics implements Serializable{
 	 * @throws IOException 
 	 */
 	public static void saveState(ProcessStatistics ps) throws PersistenceException {
-		File f = new File(ps.buildPath(ps.persistFile));
+		File f = new File(ps.buildPath(ps.DEFAULT_CONFIGFILE));
 		ExecutionPersistence<ProcessStatistics> persist = new ProcessXMLPersistence(f);
 		persist.saveState(ps);
 	}
@@ -332,10 +312,6 @@ public class ProcessStatistics implements Serializable{
 
 		ProcessStatistics loadState = persist.loadState();
 		return loadState;
-	}
-
-	public boolean isPersistanceEnabled(){
-		return this.persistFile != null;
 	}
 
 	public boolean currentStateIsBefore(STATE aState){

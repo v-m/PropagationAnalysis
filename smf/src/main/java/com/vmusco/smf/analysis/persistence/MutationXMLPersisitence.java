@@ -55,8 +55,6 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 	private static final String MUTANT_SRC_4 = "src-pos";
 	private static final String MUTANT_FILE_4 = "src-file";
 
-	private static final String CONFIG_FILE = "config-file";
-
 	private SAXBuilder sxb;
 	private Document document;
 
@@ -149,7 +147,6 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 		
 		mutations.setAttribute(new Attribute(MUTATIONS_PARENT_2, parent));
 		mutations.setAttribute(new Attribute(MUTATION_NAME, ms.getMutationName()));
-		mutations.setAttribute(new Attribute(CONFIG_FILE, ms.getConfigFile()));
 
 		if(ms.getMutantsGenerationTime() != null){
 			mutations.setAttribute(new Attribute(ProcessXMLPersistence.TIME_ATTRIBUTE, Long.toString(ms.getMutantsGenerationTime())));
@@ -248,8 +245,6 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 		} catch (IOException e1) {
 			throw new PersistenceException(e1);
 		}
-		
-		ms.setConfigFile(root.getAttribute(CONFIG_FILE).getValue());
 
 		Attribute att = root.getAttribute(ProcessXMLPersistence.TIME_ATTRIBUTE);
 

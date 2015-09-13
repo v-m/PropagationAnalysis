@@ -1,6 +1,7 @@
 package com.vmusco.smf.analysis.persistence;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 	protected static String SKIP_MVN_CLASS_2 = "skip-mvn-cp";			// CONFIG
 	
 	protected static String GLOBAL_ELEMENT_1 = "global";
-	protected static String PERSISTENCE_FILE_2 = "persistance-file";
 	protected static String HANGTIMEOUT_2 = "testhang-timeout";
 	protected static String PROJECT_IN_2 = "project-root";
 	protected static String ORIGINAL_PROJECT_IN_2 = "originalproject-root";
@@ -94,17 +94,12 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 	 */
 	@Override
 	public void saveState(ProcessStatistics ps) throws PersistenceException {
-
-		if(!ps.isPersistanceEnabled()){
-		}
-
 		File ffinal;
 		
 		if(f.isDirectory()){
 			ffinal = new File(f, ps.getPersistFile(false));
 		}else{
-			ps.setPersistFile(f.getName());
-			ffinal = f;
+			throw new PersistenceException(new FileNotFoundException("Unable to locate persistence file"));
 		}
 
 		if(ffinal.exists())
@@ -144,12 +139,6 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 			run.addContent(tmp);
 		}
 
-		if(ps.getPersistFile(false) != null){
-			tmp = new Element(PERSISTENCE_FILE_2);
-			tmp.setText(ps.getPersistFile(false));
-			run.addContent(tmp);
-		}
-		
 		if(ps.getTestTimeOut() > 0){
 			tmp = new Element(HANGTIMEOUT_2);
 			tmp.setText(Integer.toString(ps.getTestTimeOut()));
@@ -346,15 +335,10 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 		String datasetRepository = global.getChild(PROJECT_IN_2).getText();
 		//String workingDir = global.getChild(WORKING_DIR_2).getText();
 		ProcessStatistics ps = ProcessStatistics.rawCreateProject(datasetRepository, this.f.getParentFile().getAbsolutePath());
-		ps.setPersistFile(f.getName());
-		
 		ps.setSkipMvnClassDetermination(config.getAttribute(SKIP_MVN_CLASS_2).getValue().equals("true")?true:false);
 
 		Element tmp;
 		List<Element> tmplist;
-
-		if((tmp = global.getChild(PERSISTENCE_FILE_2)) != null)
-			ps.setPersistFile(tmp.getText());
 
 		if((tmp = global.getChild(HANGTIMEOUT_2)) != null){
 			ps.setTestTimeOut(Integer.parseInt(tmp.getText()));
