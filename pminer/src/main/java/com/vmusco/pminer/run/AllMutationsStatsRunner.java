@@ -50,7 +50,9 @@ public class AllMutationsStatsRunner{
 		options.addOption(opt);
 		opt = new Option("c", "csv", true, "export in csv format with such a separator");
 		options.addOption(opt);
-		opt = new Option("v", "average", false, "compute the average/mean (default: median)");
+		opt = new Option("v", "average", false, "compute only the average");
+		options.addOption(opt);
+		opt = new Option("m", "median", false, "compute only the median");
 		options.addOption(opt);
 		opt = new Option("p", "mutation-project", true, "specify the mutation project if different (default: "+MutationStatistics.DEFAULT_ID_NAME+")");
 		options.addOption(opt);
@@ -74,6 +76,9 @@ public class AllMutationsStatsRunner{
 					"");
 			System.exit(0);
 		}
+
+		boolean avg = cmd.hasOption("average");
+		boolean med = cmd.hasOption("median");
 
 		String smfrun = ProcessStatistics.DEFAULT_CONFIGFILE;
 		String mutationrun = MutationStatistics.DEFAULT_CONFIGFILE;
@@ -99,7 +104,7 @@ public class AllMutationsStatsRunner{
 			File fp = new File(f, smfrun);
 
 			Map<String, PropagationExplorer> explorers = null;
-			
+
 			if(fp.exists()){
 				// This is a project
 				if(cmd.hasOption("javapdg")){
@@ -107,8 +112,8 @@ public class AllMutationsStatsRunner{
 				}else{
 					explorers = getExplorers(fp, graphs);
 				}
-				
-				processProject(f.getName(), fp, explorers, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives"), cmd.hasOption("exclude-nulls"), sep, mutationrun, projectrun, cmd.hasOption("average"), cmd.hasOption("exclude-unbounded"));
+
+				processProject(f.getName(), fp, explorers, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives"), cmd.hasOption("exclude-nulls"), sep, mutationrun, projectrun, cmd.hasOption("average"), cmd.hasOption("exclude-unbounded"), avg, med);
 			}else{
 				for(File ff : f.listFiles()){
 					fp = new File(ff, smfrun);
@@ -119,11 +124,11 @@ public class AllMutationsStatsRunner{
 						}else{
 							explorers = getExplorers(fp, graphs);
 						}
-						
+
 						String name = f.getName()+"-"+ff.getName();
 						if(cmd.hasOption("short-names"))
 							name = ff.getName();
-						processProject(name, fp, explorers, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives"), cmd.hasOption("exclude-nulls"), sep, mutationrun, projectrun, cmd.hasOption("average"), cmd.hasOption("exclude-unbounded"));
+						processProject(name, fp, explorers, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives"), cmd.hasOption("exclude-nulls"), sep, mutationrun, projectrun, cmd.hasOption("average"), cmd.hasOption("exclude-unbounded"), avg, med);
 					}
 				}
 			}
@@ -144,7 +149,7 @@ public class AllMutationsStatsRunner{
 				explorers.put(gf.getName(), new SoftMinerPropagationExplorer(MutationStatsRunner.loadGraph(gf.getAbsolutePath())));
 			}
 		}
-		
+
 		return explorers;
 	}
 
@@ -162,19 +167,19 @@ public class AllMutationsStatsRunner{
 		}else{
 			explorers.put("pdg_"+gf.getName(), new JavapdgPropagationExplorer(gf.getAbsolutePath()));
 		}
-		
+
 		return explorers;
 	}
 
 	private static String getHeader(Character sep) {
 		if(sep == null){
-			return String.format("%25s %25s    %s", "Project", "Graph", MutationStatsRunner.getDataHeader(sep).substring(24));
+			return String.format("%25s %25s %3s   %s", "Project", "Graph", MutationStatsRunner.getDataHeader(sep).substring(24));
 		}else{
-			return String.format("\"Project\"%c\"graph\"%c%s", sep, sep, MutationStatsRunner.getDataHeader(sep).substring(8));
+			return String.format("\"Project\"%c\"graph\"%c\"Type\"%c%s", sep, sep, sep, MutationStatsRunner.getDataHeader(sep).substring(8));
 		}
 	}
 
-	private static void processProject(String name, File f, Map<String, PropagationExplorer> explorers, int nbmut, boolean includeAlives, boolean excludeNulls, Character sep, String mutationrun, String projectrun, boolean average, boolean excludeUnbounded) throws IOException, PersistenceException, MutationNotRunException {
+	private static void processProject(String name, File f, Map<String, PropagationExplorer> explorers, int nbmut, boolean includeAlives, boolean excludeNulls, Character sep, String mutationrun, String projectrun, boolean average, boolean excludeUnbounded, boolean avg, boolean med) throws IOException, PersistenceException, MutationNotRunException {
 
 		/****************
 		 * Load mutations
@@ -202,11 +207,20 @@ public class AllMutationsStatsRunner{
 				//String[] ret = MutationStatsRunner.processMutants(ms, allMutations, aGraph, sep, removeNulls, null);
 				String[] ret = MutationStatsRunner.processMutants(ms, pgp, sep, excludeNulls, null, excludeUnbounded, nbmut, includeAlives);
 
-				int display = average?1:0;
-				if(sep==null){
-					System.out.printf("%25s %25s %s", (name.length()>25?"..."+name.substring(name.length()-22):name), graphTitle.endsWith(".xml")?graphTitle.substring(0, graphTitle.length()-4):graphTitle, ret[display]);
-				}else{
-					System.out.printf("\"%s\"%c\"%s\"%c%s", name, sep, graphTitle, sep, ret[display]);
+				if(avg || (!avg && !med)){
+					if(sep==null){
+						System.out.printf("%25s %25s %3s %s", (name.length()>25?"..."+name.substring(name.length()-22):name), graphTitle.endsWith(".xml")?graphTitle.substring(0, graphTitle.length()-4):graphTitle, "avg", ret[1]);
+					}else{
+						System.out.printf("\"%s\"%c\"%s\"%c\"%s\"%c%s", name, sep, graphTitle, sep, "avg", ret[1]);
+					}
+				}
+
+				if(med || (!avg && !med)){
+					if(sep==null){
+						System.out.printf("%25s %25s %3s %s", (name.length()>25?"..."+name.substring(name.length()-22):name), graphTitle.endsWith(".xml")?graphTitle.substring(0, graphTitle.length()-4):graphTitle, "avg", ret[0]);
+					}else{
+						System.out.printf("\"%s\"%c\"%s\"%c\"%s\"%c%s", name, sep, graphTitle, sep, "avg", ret[0]);
+					}
 				}
 			}
 		}
