@@ -24,6 +24,7 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	private MutantIfos lastMutantIfos = null;
 	private String[] lastGraphDetermined = null;
 	private List<Double> times = new ArrayList<Double>();
+	private boolean lastUnbounded = false;
 	
 	public MutationStatisticsCollecter(MutantTestProcessingListener<MutationStatisticsCollecter> mtpl) {
 		this.mtpl  = mtpl;
@@ -48,7 +49,8 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		lastProcessStatistics = ps;
 		lastMutantIfos = mi;
 		lastGraphDetermined = cis;
-
+		lastUnbounded  = impactedNodes == null || impactedTests == null;
+		
 		String[] ais = mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps);
 
 		prf.cumulate(ais, cis);
@@ -84,6 +86,10 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		return lastMutantIfos;
 	}
 
+	public boolean isLastUnbounded(){
+		return lastUnbounded;
+	}
+	
 	public ProcessStatistics getLastProcessStatistics() {
 		return lastProcessStatistics;
 	}

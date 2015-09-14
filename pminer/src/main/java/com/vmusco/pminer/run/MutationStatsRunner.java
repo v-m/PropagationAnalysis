@@ -88,8 +88,9 @@ public class MutationStatsRunner{
 			@Override
 			public void aMutantHasBeenProceeded(MutationStatisticsCollecter a) {
 				if(ssep == null){
-					System.out.printf("%20s.....................................%7d %7d %7d %7d %7d %7.2f %7.2f %7.2f\n",
+					System.out.printf("%20s%s.........................%7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %s\n",
 							a.getLastMutantId(),
+							(a.isLastUnbounded()?" (unbounded)":"............"),
 							(int)a.getSoud().getLastCandidateImpactSetSize(),
 							(int)a.getSoud().getLastActualImpactSetSize(),
 							(int)a.getSoud().getLastIntersectedImpactSetSize(),
@@ -97,10 +98,12 @@ public class MutationStatsRunner{
 							(int)a.getSoud().getLastDiscoveredImpactSetSize(),
 							a.getPrecisionRecallFscore().getLastPrecision(),
 							a.getPrecisionRecallFscore().getLastRecall(),
-							a.getPrecisionRecallFscore().getLastFscore());
+							a.getPrecisionRecallFscore().getLastFscore(),
+							(a.isLastUnbounded()?a.getLastMutantIfos().getMutationIn():""));
 				}else{
 					System.out.printf("\"%s\"%c%c%c%c%c%c%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%c%c%c%c\n",
-							a.getLastMutantId(),ssep,ssep,ssep,ssep,ssep, ssep, ssep,
+							a.getLastMutantId()+(a.isLastUnbounded()?" (unbounded)":"")
+							,ssep,ssep,ssep,ssep,ssep, ssep, ssep,
 							(int)a.getSoud().getLastCandidateImpactSetSize(),ssep,
 							(int)a.getSoud().getLastActualImpactSetSize(),ssep,
 							(int)a.getSoud().getLastIntersectedImpactSetSize(),ssep,
@@ -153,7 +156,7 @@ public class MutationStatsRunner{
 	protected static String getDataHeader(Character sep){
 		printLine(sep);
 		if(sep == null){
-			return String.format("           Mutant id    Op  #mut #aliv #unbo #node #edge    CIS     AIS   C^AIS    FPIS     DIS    prec  recall  fscore       S       C       O       U       D");
+			return String.format("           Mutant id    Op  #mut #aliv #unbo #node #edge     CIS     AIS   C^AIS    FPIS     DIS    prec  recall  fscore       S       C       O       U       D");
 		}else{
 			return String.format("\"MutId\"%c\"Op\"%c\"nbmut\"%c\"nbalives\"%c\"nunbound\"%c\"nbnodes\"%c\"nbedges\"%c\"CIS\"%c\"AIS\"%c\"CAIS\"%c\"FPIS\"%c\"DIS\"%c\"prec\"%c\"recall\"%c\"fscore\"%c\"S\"%c\"C\"%c\"O\"%c\"U\"%c\"D\"", sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep);
 		}
