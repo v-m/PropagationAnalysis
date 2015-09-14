@@ -239,14 +239,6 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		this.mutator = mutator;
 	}
 
-	/*public String getConfigFile() {
-		return configFile;
-	}
-
-	public void setConfigFile(String configFile) {
-		this.configFile = configFile;
-	}*/
-
 	public String resolveName(String resolving){
 		return ps.getWorkingDir() + File.separator + ps.getMutantsBasedir().replace("{id}", this.mutationName).replace("{op}", this.mutationOpId) + File.separator + resolving;
 	}

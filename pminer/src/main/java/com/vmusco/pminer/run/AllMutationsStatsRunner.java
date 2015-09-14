@@ -42,7 +42,9 @@ public class AllMutationsStatsRunner{
 		options.addOption(opt);
 		opt = new Option("o", "exclude-nulls", false, "exclude nulls values in precision, recalls and fscores medians computation");
 		options.addOption(opt);
-		opt = new Option("u", "include-unbounded", false, "include mutant which have no entry point in the graph");
+		opt = new Option("u", "exclude-unbounded", false, "exclude mutant which have no entry point in the graph");
+		options.addOption(opt);
+		opt = new Option("i", "intersect-mutants", true, "consider only killed and bounded mutants in all graphs (ovverride -u and -a) using the mutation.kb file");
 		options.addOption(opt);
 		opt = new Option("n", "nb-mutants", true, "filter out if more than n mutants are present");
 		options.addOption(opt);
@@ -106,7 +108,7 @@ public class AllMutationsStatsRunner{
 					explorers = getExplorers(fp, graphs);
 				}
 				
-				processProject(f.getName(), fp, explorers, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives"), cmd.hasOption("exclude-nulls"), sep, mutationrun, projectrun, cmd.hasOption("average"), cmd.hasOption("include-unbounded"));
+				processProject(f.getName(), fp, explorers, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives"), cmd.hasOption("exclude-nulls"), sep, mutationrun, projectrun, cmd.hasOption("average"), cmd.hasOption("exclude-unbounded"));
 			}else{
 				for(File ff : f.listFiles()){
 					fp = new File(ff, smfrun);
@@ -121,14 +123,14 @@ public class AllMutationsStatsRunner{
 						String name = f.getName()+"-"+ff.getName();
 						if(cmd.hasOption("short-names"))
 							name = ff.getName();
-						processProject(name, fp, explorers, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives"), cmd.hasOption("exclude-nulls"), sep, mutationrun, projectrun, cmd.hasOption("average"), cmd.hasOption("include-unbounded"));
+						processProject(name, fp, explorers, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives"), cmd.hasOption("exclude-nulls"), sep, mutationrun, projectrun, cmd.hasOption("average"), cmd.hasOption("exclude-unbounded"));
 					}
 				}
 			}
 		}
 	}
 
-	private static Map<String, PropagationExplorer> getExplorers(File f, String[] graphs) throws IOException{
+	public static Map<String, PropagationExplorer> getExplorers(File f, String[] graphs) throws IOException{
 		/*************
 		 * Load graphs
 		 */
@@ -147,7 +149,7 @@ public class AllMutationsStatsRunner{
 	}
 
 
-	private static Map<String, PropagationExplorer> getExplorers(File projPath, String javapdgroot) throws FileNotFoundException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public static Map<String, PropagationExplorer> getExplorers(File projPath, String javapdgroot) throws FileNotFoundException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		/*************
 		 * Load graphs
 		 */
@@ -172,7 +174,7 @@ public class AllMutationsStatsRunner{
 		}
 	}
 
-	private static void processProject(String name, File f, Map<String, PropagationExplorer> explorers, int nbmut, boolean includeAlives, boolean excludeNulls, Character sep, String mutationrun, String projectrun, boolean average, boolean includeUnbounded) throws IOException, PersistenceException, MutationNotRunException {
+	private static void processProject(String name, File f, Map<String, PropagationExplorer> explorers, int nbmut, boolean includeAlives, boolean excludeNulls, Character sep, String mutationrun, String projectrun, boolean average, boolean excludeUnbounded) throws IOException, PersistenceException, MutationNotRunException {
 
 		/****************
 		 * Load mutations
@@ -198,7 +200,7 @@ public class AllMutationsStatsRunner{
 			for(MutationStatistics<?> ms : mss){
 				//String[] allMutations = MutationStatsRunner.selectMutations(ms, nbmut, onlyKilled);
 				//String[] ret = MutationStatsRunner.processMutants(ms, allMutations, aGraph, sep, removeNulls, null);
-				String[] ret = MutationStatsRunner.processMutants(ms, pgp, sep, excludeNulls, null, includeUnbounded, nbmut, includeAlives);
+				String[] ret = MutationStatsRunner.processMutants(ms, pgp, sep, excludeNulls, null, excludeUnbounded, nbmut, includeAlives);
 
 				int display = average?1:0;
 				if(sep==null){

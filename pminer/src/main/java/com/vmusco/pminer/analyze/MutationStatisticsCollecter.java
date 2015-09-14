@@ -41,6 +41,7 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	
 	@Override
 	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) throws MutationNotRunException {
+		// To declare an unbounded case, pass impactedNodes = null and impactedTests = null
 		String[] cis = impactedTests;
 		
 		lastMutantId = mi.getId();

@@ -43,7 +43,7 @@ public class MutationStatsRunner{
 		options.addOption(opt);
 		opt = new Option("o", "exclude-nulls", false, "exclude nulls values in precision, recalls and fscores medians computation");
 		options.addOption(opt);
-		opt = new Option("u", "include-unbounded", false, "include mutant which have no entry point in the graph");
+		opt = new Option("u", "exclude-unbounded", false, "exclude mutant which have no entry point in the graph");
 		options.addOption(opt);
 		opt = new Option("n", "nb-mutants", true, "filter out if more than n mutants are present");
 		options.addOption(opt);
@@ -167,24 +167,24 @@ public class MutationStatsRunner{
 
 	public static String[] processMutants(MutationStatistics<?> ms, PropagationExplorer pgp, 
 			Character sep, boolean excludeNulls, MutantTestProcessingListener<MutationStatisticsCollecter> listener, 
-			boolean includeUnbounded, int nb, boolean includeAlives) throws MutationNotRunException, PersistenceException{
-		String[] ret = new String[2];
-		int nbunbounded = 0;
-
-		ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
-		MutationStatisticsCollecter sd = new MutationStatisticsCollecter(listener);
-
-
+			boolean excludeUnbounded, int nb, boolean includeAlives) throws MutationNotRunException, PersistenceException{
 		/**
 		 * Compute the mutants entry set...
 		 */
 		String[] allMutations;
 		allMutations = ms.listViableAndRunnedMutants(true);
 
-		/*if(!includeAlives){
-			allMutations = ms.removeAliveMutants(allMutations);
-		}*/
+		return processMutants(ms, pgp, sep, excludeNulls, listener, excludeUnbounded, nb, includeAlives, allMutations);
+	}
+	
+	public static String[] processMutants(MutationStatistics<?> ms, PropagationExplorer pgp, 
+			Character sep, boolean excludeNulls, MutantTestProcessingListener<MutationStatisticsCollecter> listener, 
+			boolean excludeUnbounded, int nb, boolean includeAlives, String[] allMutations) throws MutationNotRunException, PersistenceException{
+		String[] ret = new String[2];
+		//int nbunbounded = 0;
 
+		ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
+		MutationStatisticsCollecter sd = new MutationStatisticsCollecter(listener);
 		
 		int nbentry = (nb > 0 && allMutations.length>nb)?nb:allMutations.length;
 		int cpt = 0;
@@ -216,12 +216,12 @@ public class MutationStatsRunner{
 				cpt++;
 			}catch(NoEntryPointException e){
 				// No entry point here !
-				nbunbounded++;
+				//nbunbounded++;
 
-				if(!includeUnbounded){
+				if(excludeUnbounded){
 					continue;
 				}else{
-					sd.fireIntersectionFound(ps, ifos, new String[0], new String[0]);
+					sd.fireIntersectionFound(ps, ifos, null, null);
 					cpt++;
 				}
 			}
@@ -251,7 +251,7 @@ public class MutationStatsRunner{
 					ms.getMutationId(),
 					cpt,
 					nbalives,
-					nbunbounded,
+					sd.getSoud().getNbUnbounded(),
 					pgp.getBaseGraphNodesCount(),
 					pgp.getBaseGraphEdgesCount(),
 					(int)sd.getSoud().getCurrentMedianCandidateImpactSetSize(),
@@ -272,7 +272,7 @@ public class MutationStatsRunner{
 					ms.getMutationId(),
 					cpt,
 					nbalives,
-					nbunbounded,
+					sd.getSoud().getNbUnbounded(),
 					pgp.getBaseGraphNodesCount(),
 					pgp.getBaseGraphEdgesCount(),
 					sd.getSoud().getCurrentMeanCandidateImpactSetSize(),
@@ -293,7 +293,7 @@ public class MutationStatsRunner{
 					ms.getMutationId(),sep,
 					cpt,sep,
 					nbalives,sep,
-					nbunbounded,sep,
+					sd.getSoud().getNbUnbounded(),sep,
 					pgp.getBaseGraphNodesCount(),sep,
 					pgp.getBaseGraphEdgesCount(),sep,
 					(int)sd.getSoud().getCurrentMedianCandidateImpactSetSize(),sep,
@@ -314,7 +314,7 @@ public class MutationStatsRunner{
 					ms.getMutationId(),sep,
 					cpt,sep,
 					nbalives,sep,
-					nbunbounded,sep,
+					sd.getSoud().getNbUnbounded(),sep,
 					pgp.getBaseGraphNodesCount(),sep,
 					pgp.getBaseGraphEdgesCount(),sep,
 					sd.getSoud().getCurrentMeanCandidateImpactSetSize(),sep,

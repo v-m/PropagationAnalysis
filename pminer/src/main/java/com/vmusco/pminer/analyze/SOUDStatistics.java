@@ -24,10 +24,16 @@ public class SOUDStatistics {
 	private List<String> overestimate = new ArrayList<String>();
 	private List<String> underestimate = new ArrayList<String>();
 	private List<String> different = new ArrayList<String>();
+	private List<String> unbounded = new ArrayList<String>();
 	
 	private int cases = 0;
 	
 	public void cumulate(String mutationid, String[] ais, String[] cis){
+		if(cis == null){
+			unbounded.add(mutationid);
+			return;
+		}
+		
 		int cis_size = cis.length;
 		int ais_size = ais.length;
 		
@@ -108,6 +114,10 @@ public class SOUDStatistics {
 
 	public int getNbDifferent(){
 		return different.size();
+	}
+
+	public int getNbUnbounded(){
+		return unbounded.size();
 	}
 	
 	public double getNbSameProportion(){

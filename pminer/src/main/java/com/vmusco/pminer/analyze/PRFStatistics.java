@@ -18,14 +18,20 @@ public class PRFStatistics {
 	public void cumulate(String[] ais, String[] cis){
 		double computed;
 
-		computed = precision(ais, cis);
-		this.precisions.add(computed);
-
-		computed = recall(ais, cis);
-		this.recalls.add(computed);
-
-		computed = fscore(ais, cis);
-		this.fscores.add(computed);
+		if(cis == null){
+			this.precisions.add(0d);
+			this.recalls.add(0d);
+			this.fscores.add(0d);
+		}else{
+			computed = precision(ais, cis);
+			this.precisions.add(computed);
+	
+			computed = recall(ais, cis);
+			this.recalls.add(computed);
+	
+			computed = fscore(ais, cis);
+			this.fscores.add(computed);
+		}
 	}
 	
 	public void removesNulls(){
