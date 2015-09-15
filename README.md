@@ -63,13 +63,7 @@ $ git reset --hard 6965455
 Create a new project
 
 ```
-$ ./smf-newproject /tmp/myproject /tmp/commons-lang/
-```
-
-Build and test the project
-
-```
-$ ./smf-newproject /tmp/myproject
+$ ./smf-newproject /tmp/myproject commons-lang /tmp/commons-lang/
 ```
 
 Choose and create a mutation for a specific operator:

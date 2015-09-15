@@ -52,7 +52,7 @@ public class ProcessStatistics implements Serializable{
 		 * On this state, the project has been created and has STRONGLY BEEN SET (cp, mutation, ...)
 		 * STATE: preparation
 		 */
-		READY,
+		DEFINED,
 		/**
 		 * On this state, the project has been created and has strongly been set (cp, mutation, ...) and BUILT
 		 * STATE: preparation
@@ -67,10 +67,10 @@ public class ProcessStatistics implements Serializable{
 		 * On this state, the test has been run (not mutated ones)
 		 * STATE: preparation
 		 */
-		DRY_TESTS
+		READY
 	};
 
-	private static STATE[] orderStates = new STATE[]{ STATE.NEW, STATE.READY, STATE.BUILD, STATE.BUILD_TESTS, STATE.DRY_TESTS };
+	private static STATE[] orderStates = new STATE[]{ STATE.NEW, STATE.DEFINED, STATE.BUILD, STATE.BUILD_TESTS, STATE.READY };
 
 	/***************
 	 ** Variables **
@@ -247,11 +247,11 @@ public class ProcessStatistics implements Serializable{
 			return "BUILD";
 		case BUILD_TESTS:
 			return "BUILD_TESTS";
-		case DRY_TESTS:
+		case READY:
 			return "DRY_TESTS";
 		case NEW:
 			return "NEW";
-		case READY:
+		case DEFINED:
 			return "READY";
 		}
 
@@ -264,11 +264,11 @@ public class ProcessStatistics implements Serializable{
 		else if(aState.equals("BUILD_TESTS"))
 			return STATE.BUILD_TESTS;
 		else if(aState.equals("DRY_TESTS"))
-			return STATE.DRY_TESTS;
+			return STATE.READY;
 		else if(aState.equals("NEW"))
 			return STATE.NEW;
 		else if(aState.equals("READY"))
-			return STATE.READY;
+			return STATE.DEFINED;
 		else 
 			return null;
 	}
@@ -855,20 +855,8 @@ public class ProcessStatistics implements Serializable{
 		}
 	}
 
-	public void addRessources(String[] split) {
-		Set<String> res = new HashSet<String>();
-
-		if(this.testingRessources != null){
-			for(String s : testingRessources){
-				res.add(s);
-			}
-		}
-
-		for(String s : split){
-			res.add(s);
-		}
-
-		testingRessources = res.toArray(new String[0]);
+	public void setRessources(String[] split) {
+		testingRessources = split;
 	}
 
 	public boolean isSubversionProject(){

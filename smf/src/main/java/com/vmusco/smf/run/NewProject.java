@@ -25,8 +25,6 @@ import com.vmusco.smf.utils.ConsoleTools;
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public class NewProject extends GlobalTestRunning {	
-	private static final Class<?> thisclass = NewProject.class;
-	
 	private NewProject(String logging) throws FileNotFoundException{
 		super(logging);
 	}
@@ -37,15 +35,25 @@ public class NewProject extends GlobalTestRunning {
 		Options options = new Options();
 
 		Option opt;
-		opt = new Option("R", "reset", false, "reset the execution state (return to build phase)");
-		options.addOption(opt);
-		opt = new Option("T", "reset-tests", false, "reset without rebuilding (return to test phase)");
-		options.addOption(opt);
+		
+		// OPTIONS FOR PHASE 1
 		opt = new Option("c", "classpath", true, "use this classpath instead of determining it automatically ("+useAsSepString+")");
 		opt.setArgName("path");
 		options.addOption(opt);
 		opt = new Option(null, "no-classpath", false, "do not determine classpath automatically (no classpath)");
 		options.addOption(opt);
+		opt = new Option("l", "do-not-copy", false, "do not copy the content in the project (not recommended !)");
+		options.addOption(opt);
+		opt = new Option("F", "force", false, "Overwritte the working directory if it already exists !");
+		options.addOption(opt);
+		
+		// OPTIONS FOR PHASE 2
+		opt = new Option("R", "reset", false, "reset the execution state (return to build phase)");
+		options.addOption(opt);
+		opt = new Option("T", "reset-tests", false, "reset without rebuilding (return to test phase)");
+		options.addOption(opt);
+		
+		// OPTIONS FOR BOTH PHASES
 		opt = new Option("r", "ressources", true, "ressources used for testing ("+useAsSepString+")");
 		options.addOption(opt);
 		opt = new Option("s", "sources", true, "sources to compile ("+useAsSepString+" - default: "+ProcessStatistics.DEFAULT_SOURCE_FOLDER+")");
@@ -54,29 +62,37 @@ public class NewProject extends GlobalTestRunning {
 		options.addOption(opt);
 		opt = new Option(null, "no-tests", false, "Defines there is no tests in this project (debugging purposes)");
 		options.addOption(opt);
+		
+		
+		
+		
+		
+		
 		opt = new Option("h", "help", false, "print this message");
 		options.addOption(opt);
-		/*opt = new Option("p", "persist-file", true, "generation file (default: "+ProcessStatistics.DEFAULT_CONFIGFILE+")");
-		options.addOption(opt);*/
-		opt = new Option("l", "do-not-copy", false, "do not copy the content in the project (not recommended !)");
-		options.addOption(opt);
-		opt = new Option("F", "force", false, "Overwritte the working directory if it already exists !");
-		options.addOption(opt);
+		
 		opt = new Option("H", "testhang-timeout", true, "set the test timeout to a specific value in seconds (default: 0 - dynamic reseach of the timeout)");
 		options.addOption(opt);
 		
 		CommandLineParser parser = new PosixParser();
 		CommandLine cmd = parser.parse(options, args);
 
-		if(cmd.getArgs().length < 1 || cmd.hasOption("help")){
+		if( (cmd.getArgs().length != 1 && cmd.getArgs().length != 3) || cmd.hasOption("help")){
 			HelpFormatter formatter = new HelpFormatter();
 			
-			formatter.printHelp(thisclass.getCanonicalName()+" [options] <working-dir> [<project-in>]", options );
-		}else if(cmd.getArgs().length >= 2){
-			File f = new File(cmd.getArgs()[0]);
-			File f2 = new File(cmd.getArgs()[1]);
+			String head = "Create a new project in <working-dir> based on <project-in> named <name>. Copy, resolve dependencies, build source and tests in order to use with further parts.";
+			String foot = "";
+					
+			formatter.printHelp("[options] <working-dir> <name> <project-in>", head, options, foot);
+		}
+		
+		File f = new File(cmd.getArgs()[0]);
+		ProcessStatistics ps;
+		
+		if(cmd.getArgs().length == 3){
+			File f2 = new File(cmd.getArgs()[2]);
 			
-			ProcessStatistics ps = ProcessStatistics.rawCreateProject(ProcessStatistics.SOURCES_COPY, f.getAbsolutePath());
+			ps = ProcessStatistics.rawCreateProject(ProcessStatistics.SOURCES_COPY, f.getAbsolutePath());
 			
 			if(ps.workingDirAlreadyExists()){
 				if(!cmd.hasOption("force")){
@@ -96,7 +112,6 @@ public class NewProject extends GlobalTestRunning {
 			}
 			
 			if(!cmd.hasOption("classpath") && !cmd.hasOption("no-classpath")){
-				//ps.determineClassPathOnAll();
 				ps.setCpLocalFolder(ProcessStatistics.CLASSPATH_PACK);
 				ps.setSkipMvnClassDetermination(false);
 				ps.exportClassPath();
@@ -108,75 +123,59 @@ public class NewProject extends GlobalTestRunning {
 					for(String s : cmd.getOptionValue("classpath").split(File.pathSeparator)){
 						set.add(s);
 					}
-
+	
 					ps.setOriginalClasspath(set.toArray(new String[0]));
 				}
 				ps.setCpLocalFolder(null);
 			}
 			
-			if(cmd.hasOption("ressources")){
-				ps.addRessources(cmd.getOptionValue("ressources").split(File.pathSeparator));
-			}
-
-			if(cmd.hasOption("sources")){
-				ps.setSrcToCompile(cmd.getOptionValue("sources").split(File.pathSeparator));
-			}
-
-			if(cmd.hasOption("tests")){
-				ps.setSrcTestsToTreat(cmd.getOptionValue("tests").split(File.pathSeparator));
-			}else if(cmd.hasOption("no-tests")){
-				ps.setSrcTestsToTreat(new String[]{});
-			}
+			ps.setProjectName(cmd.getArgs()[0]);
 			
-			if(cmd.hasOption("testhang-timeout")){
-				ps.setTestTimeOut(Integer.parseInt(cmd.getOptionValue("testhang-timeout")));
-			}else{
-				// Dynamic research
-				ps.setTestTimeOut(0);
-			}
-			
-			/*if(cmd.hasOption("persist-file")){
-				ps.setPersistFile(cmd.getOptionValue("persist-file"));
-			}*/
-			
-			ProcessStatistics.saveState(ps);
-			
-			if(!ps.changeState(STATE.READY)){
+			if(!ps.changeState(STATE.DEFINED)){
 				System.out.println("Error changing state !");
 				System.exit(1);
 				return;
 			}
 			
-			ConsoleTools.write("Project generated in: ");
-			ConsoleTools.write(ps.getWorkingDir(), ConsoleTools.BOLD);
-			ConsoleTools.endLine();
-		}else if(cmd.getArgs().length == 1){
-			File f = new File(cmd.getArgs()[0]);
-			
-			ProcessStatistics ps = ProcessStatistics.rawLoad(f.getAbsolutePath());
-
-			if(cmd.hasOption("ressources")){
-				ps.addRessources(cmd.getOptionValue("ressources").split(File.pathSeparator));
-			}
-			
-			if(cmd.hasOption("testhang-timeout")){
-				ps.setTestTimeOut(Integer.parseInt(cmd.getOptionValue("testhang-timeout")));
-			}else if(ps.isAutoTestTimeOut()){
-				// Dynamic research
-				ps.setTestTimeOut(0);
-			}
+			System.out.printf("Project generated in: %s\n", ps.getWorkingDir());
+		}else{
+			ps = ProcessStatistics.rawLoad(f.getAbsolutePath());
 			
 			if(cmd.hasOption("reset")){
-				ps.setCurrentState(STATE.READY);
+				ps.setCurrentState(STATE.DEFINED);
 			}else if(cmd.hasOption("reset-tests")){
 				ps.setCurrentState(STATE.BUILD_TESTS);
 			}
-			
-			runWithPs(ps);
-			
-			System.out.println("Your project working directory is successfuly created.");
-			System.out.println("Have a nice day :-)");
 		}
+		
+		if(cmd.hasOption("ressources")){
+			ps.setRessources(cmd.getOptionValue("ressources").split(File.pathSeparator));
+			ps.setCurrentState(STATE.DEFINED);
+		}
+
+		if(cmd.hasOption("sources")){
+			ps.setSrcToCompile(cmd.getOptionValue("sources").split(File.pathSeparator));
+			ps.setCurrentState(STATE.DEFINED);
+		}
+
+		if(cmd.hasOption("tests")){
+			ps.setSrcTestsToTreat(cmd.getOptionValue("tests").split(File.pathSeparator));
+			ps.setCurrentState(STATE.DEFINED);
+		}else if(cmd.hasOption("no-tests")){
+			ps.setSrcTestsToTreat(new String[]{});
+			ps.setCurrentState(STATE.DEFINED);
+		}
+		
+		if(cmd.hasOption("testhang-timeout")){
+			ps.setTestTimeOut(Integer.parseInt(cmd.getOptionValue("testhang-timeout")));
+		}else{
+			// Dynamic research
+			ps.setTestTimeOut(0);
+		}
+		
+		runWithPs(ps);
+		
+		System.out.println("Done.");
 	}
 
 	private static void runWithPs(ProcessStatistics ps) throws Exception{
@@ -224,12 +223,12 @@ public class NewProject extends GlobalTestRunning {
 		}
 
 		System.out.print("Running tests.....");
-		if(ps.currentStateIsBefore(STATE.DRY_TESTS)){
+		if(ps.currentStateIsBefore(STATE.READY)){
 			System.out.println();
 			Testing.findTestClassesString(ps);
 			Testing.runTestCases(ps, np);
 
-			if(!ps.changeState(STATE.DRY_TESTS)){
+			if(!ps.changeState(STATE.READY)){
 				System.out.println("Error changing state !");
 				return;
 			}
