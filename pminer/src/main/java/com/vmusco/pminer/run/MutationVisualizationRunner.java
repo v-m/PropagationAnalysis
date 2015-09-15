@@ -40,7 +40,7 @@ public class MutationVisualizationRunner{
 
 		if(cmd.getArgs().length < 3 || cmd.hasOption("help")){
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp(thisclass.getCanonicalName()+" [options] <mutationFile> <mutantId> <graphFile>", 
+			formatter.printHelp("[options] <mutantId> <graphFile> <mutationFile>", 
 					"",
 					options,
 					"");
@@ -48,11 +48,11 @@ public class MutationVisualizationRunner{
 		}
 
 		// Load mutations and executions informations from the project
-		MutationStatistics<?> ms = MutationStatistics.loadState(cmd.getArgs()[0]);
-		MutantIfos mi = ms.loadMutationStats(cmd.getArgs()[1]);
+		MutationStatistics<?> ms = MutationStatistics.loadState(cmd.getArgs()[1]);
+		MutantIfos mi = ms.loadMutationStats(cmd.getArgs()[2]);
 
 		// Load a graph
-		Graph aGraph = MutationStatsRunner.loadGraph(cmd.getArgs()[2]);
+		Graph aGraph = MutationStatsRunner.loadGraph(cmd.getArgs()[0]);
 		PropagationExplorer propaGraph = new SoftMinerPropagationExplorer(aGraph);
 		String id = mi.getMutationIn();
 		propaGraph.visitTo(id);
