@@ -123,7 +123,7 @@ public class JeantessierGraphBuilder extends GraphBuildLogic {
 			String src = event.getDependent().getName().replaceAll(" ", "");
 			String dst = event.getDependable().getName().replaceAll(" ", "");
 			
-			ProcessorCommunicator.addIfAllowed(src, dst, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.METHOD_CALL);
+			ProcessorCommunicator.addIfAllowed(src, dst, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.METHOD_CALL, null);
 		}
 
 		@Override

@@ -6,6 +6,9 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import spoon.reflect.cu.SourcePosition;
+import spoon.support.reflect.declaration.CtElementImpl;
+
 import com.vmusco.smf.analysis.persistence.ExecutionPersistence;
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
 import com.vmusco.smf.analysis.persistence.MutationXMLPersisitence;
@@ -16,6 +19,7 @@ import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.utils.InterruptionManager;
 import com.vmusco.smf.utils.MutationsSetTools;
+import com.vmusco.smf.utils.SourceReference;
 
 /**
  * This class contains the mutations information for one project and one mutation operator
@@ -394,5 +398,20 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 
 	public boolean isMutantKilled(String mutid) throws MutationNotRunException, PersistenceException {
 		return !isMutantAlive(mutid);
+	}
+
+	/**
+	 * Create a SourceReference from a SourcePosition with resolving the file source path
+	 * @param toReplace
+	 * @return
+	 */
+	public SourceReference generateSourceReferenceForMutation(CtElementImpl toReplace) {
+		SourceReference sr = new SourceReference(toReplace.getPosition());
+
+		if(toReplace.getPosition().getFile().getAbsolutePath().startsWith(ps.resolveThis(ps.getOriginalSrc()))){
+			sr.setFile(toReplace.getPosition().getFile().getAbsolutePath().substring(ps.resolveThis(ps.getOriginalSrc()).length()));
+		}
+		
+		return sr;
 	}
 }

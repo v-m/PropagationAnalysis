@@ -259,17 +259,7 @@ public final class Mutation {
 	
 				MutantIfos ifos = new MutantIfos();
 				ifos.setMutationIn(Mutation.getMethodFullSignatureForParent(toReplace));
-				ifos.setStartColumn(toReplace.getPosition().getColumn());
-				ifos.setStartLine(toReplace.getPosition().getLine());
-				ifos.setStartSource(toReplace.getPosition().getSourceStart());
-				ifos.setEndColumn(toReplace.getPosition().getEndColumn());
-				ifos.setEndLine(toReplace.getPosition().getEndLine());
-				ifos.setEndSource(toReplace.getPosition().getSourceEnd());
-				if(toReplace.getPosition().getFile().getAbsolutePath().startsWith(ps.resolveThis(ps.getOriginalSrc()))){
-					ifos.setSourceFile(toReplace.getPosition().getFile().getAbsolutePath().substring(ps.resolveThis(ps.getOriginalSrc()).length()));
-				}else{
-					ifos.setSourceFile(toReplace.getPosition().getFile().getAbsolutePath());
-				}
+				ifos.setSourceReference(ms.generateSourceReferenceForMutation(toReplace));
 				
 				if(ifos.getMutationIn() == null)
 					continue;

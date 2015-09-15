@@ -3,6 +3,8 @@ package com.vmusco.softminer.graphs;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import com.vmusco.smf.utils.SourceReference;
+
 /***
  * This interface represent an abstract graph representation
  * @author Vincenzo Musco - http://www.vmusco.com
@@ -33,7 +35,7 @@ public abstract class Graph {
 	public abstract String[] getNodesConnectedFrom(String node);
 	public abstract String[] getNodesConnectedTo(String node);
 	public abstract String[] getNodesNames();
-	public abstract NodesNamesForEdge[] getEdges();
+	public abstract EdgeIdentity[] getEdges();
 	public abstract int getOutDegreeFor(String node);
 	public abstract int getInDegreeFor(String node);
 	public int getDegreeFor(String node){
@@ -50,6 +52,8 @@ public abstract class Graph {
 	public abstract void markEdge(String from, String to, EdgeMarkers aMarker);
 	public abstract void setEdgeType(String from, String to, EdgeTypes aType);
 	public abstract boolean isEdgeMarked(String from, String to, EdgeMarkers aMarker);
+	public abstract void bindEdgeToSourcePosition(String from, String to, SourceReference sp);
+	public abstract SourceReference[] getSourcePositionForEdge(String from, String to);
 	public abstract EdgeTypes getEdgeType(String from, String to);
 	public abstract void markNode(String node, NodeMarkers aMarker);
 	public abstract void setNodeType(String node, NodeTypes aType);
@@ -126,15 +130,6 @@ public abstract class Graph {
 
 	public Object getGraph() {
 		return graph;
-	}
-
-	public class NodesNamesForEdge{
-		public String from;
-		public String to;
-	}
-
-	public void visitAllNodes(GraphNodeVisitor aVisitor){
-
 	}
 
 	/***

@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 
+import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.EdgeMarkers;
 import com.vmusco.softminer.graphs.EdgeTypes;
 import com.vmusco.softminer.graphs.Graph;
@@ -78,8 +79,8 @@ public class XmlGraph implements GraphPersistence{
 		Element edges = new Element("edges");
 		root.addContent(edges);
 
-		for(Graph.NodesNamesForEdge e : aGraph.getEdges()){
-			EdgeTypes edgeType = aGraph.getEdgeType(e.from, e.to);
+		for(EdgeIdentity e : aGraph.getEdges()){
+			EdgeTypes edgeType = aGraph.getEdgeType(e.getFrom(), e.getTo());
 			String edgename = "edge";
 
 			if(edgeType != null){
@@ -107,12 +108,12 @@ public class XmlGraph implements GraphPersistence{
 
 			Element anEdge = new Element(edgename);
 			edges.addContent(anEdge);
-			attr = new Attribute("source", e.from);
+			attr = new Attribute("source", e.getFrom());
 			anEdge.setAttribute(attr);
-			attr = new Attribute("target", e.to);
+			attr = new Attribute("target", e.getTo());
 			anEdge.setAttribute(attr);
 
-			for(EdgeMarkers em : aGraph.getEdgeMarkers(e.from, e.to)){
+			for(EdgeMarkers em : aGraph.getEdgeMarkers(e.getFrom(), e.getTo())){
 				//attr = null;
 
 				switch(em){

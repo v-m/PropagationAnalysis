@@ -2,9 +2,9 @@ package com.vmusco.pminer.impact;
 
 import com.vmusco.pminer.exceptions.AlreadyGeneratedException;
 import com.vmusco.pminer.exceptions.NoEntryPointException;
+import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.EdgeMarkers;
 import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softminer.graphs.Graph.NodesNamesForEdge;
 import com.vmusco.softminer.graphs.GraphNodeVisitor;
 import com.vmusco.softminer.graphs.NodeMarkers;
 
@@ -90,8 +90,8 @@ public abstract class PropagationExplorer{
 			propagateMarkersAndTypesForNode(node, newGraph, accordingTo);
 		}
 
-		for(NodesNamesForEdge nnfe : newGraph.getEdges()){
-			propagateMarkersAndTypesForEdge(nnfe.from, nnfe.to, newGraph, accordingTo);
+		for(EdgeIdentity nnfe : newGraph.getEdges()){
+			propagateMarkersAndTypesForEdge(nnfe.getFrom(), nnfe.getTo(), newGraph, accordingTo);
 		}
 	}
 

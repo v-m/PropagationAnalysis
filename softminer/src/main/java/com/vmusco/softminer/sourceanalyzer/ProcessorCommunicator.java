@@ -2,6 +2,9 @@ package com.vmusco.softminer.sourceanalyzer;
 
 import java.util.ArrayList;
 
+import spoon.reflect.cu.SourcePosition;
+
+import com.vmusco.smf.utils.SourceReference;
 import com.vmusco.softminer.graphs.EdgeMarkers;
 import com.vmusco.softminer.graphs.EdgeTypes;
 import com.vmusco.softminer.graphs.Graph;
@@ -97,7 +100,7 @@ public abstract class ProcessorCommunicator {
 		return false;
 	}
 	
-	public static boolean addIfAllowed(String src, String dst, NodeTypes src_type, NodeTypes dst_type, EdgeTypes edgeType){
+	public static boolean addIfAllowed(String src, String dst, NodeTypes src_type, NodeTypes dst_type, EdgeTypes edgeType, SourcePosition originator){
 		if(allowedByPattern(src, dst)){
 			if(outputgraph != null){
 				String finalsrc = src;
@@ -112,6 +115,10 @@ public abstract class ProcessorCommunicator {
 				outputgraph.setNodeType(finalsrc, src_type);
 				outputgraph.setNodeType(finaldst, dst_type);
 				outputgraph.setEdgeType(finalsrc, finaldst, edgeType);
+				
+				if(originator != null){
+					outputgraph.bindEdgeToSourcePosition(finalsrc, finaldst, new SourceReference(originator));
+				}
 				return true;
 			}
 		}

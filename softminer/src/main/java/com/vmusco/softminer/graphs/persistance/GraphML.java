@@ -14,6 +14,8 @@ import org.jdom2.output.Format;
 import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
 
+import com.vmusco.smf.utils.SourceReference;
+import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.EdgeMarkers;
 import com.vmusco.softminer.graphs.EdgeTypes;
 import com.vmusco.softminer.graphs.Graph;
@@ -74,11 +76,11 @@ public class GraphML implements GraphPersistence{
 
 		int i = 1;
 
-		for(Graph.NodesNamesForEdge e : aGraph.getEdges()){
+		for(EdgeIdentity e : aGraph.getEdges()){
 			Element anEdge = new Element("edge", xmlns);
 			g.addContent(anEdge);
 			
-			EdgeTypes edgeType = aGraph.getEdgeType(e.from, e.to);
+			EdgeTypes edgeType = aGraph.getEdgeType(e.getFrom(), e.getTo());
 			
 			if(edgeType != null){
 				Element data = new Element("data", xmlns);
@@ -87,15 +89,30 @@ public class GraphML implements GraphPersistence{
 				data.setText(edgeType.name());
 				anEdge.addContent(data);
 			}
+			
+			SourceReference[] sourcePositionForEdge = aGraph.getSourcePositionForEdge(e.getFrom(), e.getTo());
+			String sourcetxt="";
+			
+			for(SourceReference sr : sourcePositionForEdge){
+				sourcetxt += sr.getFile()+";["+sr.getSourceRange()+";"+sr.getLineRange()+";"+sr.getColumnRange()+"];";
+			}
+			
+			if(sourcetxt.length() > 0){
+				Element data = new Element("data", xmlns);
+				attr = new Attribute("key", "sourcecode");
+				data.setAttribute(attr);
+				data.setText(sourcetxt);
+				anEdge.addContent(data);
+			}
 
 			attr = new Attribute("id", "e"+i++);
 			anEdge.setAttribute(attr);
-			attr = new Attribute("source", e.from);
+			attr = new Attribute("source", e.getFrom());
 			anEdge.setAttribute(attr);
-			attr = new Attribute("target", e.to);
+			attr = new Attribute("target", e.getTo());
 			anEdge.setAttribute(attr);
 
-			for(EdgeMarkers em : aGraph.getEdgeMarkers(e.from, e.to)){
+			for(EdgeMarkers em : aGraph.getEdgeMarkers(e.getFrom(), e.getTo())){
 				Element data = new Element("data", xmlns);
 				attr = new Attribute("key", em.name());
 				data.setAttribute(attr);
@@ -134,6 +151,14 @@ public class GraphML implements GraphPersistence{
 		tmp.setAttribute(new Attribute("id", "type"));
 		tmp.setAttribute(new Attribute("for", "edge"));
 		tmp.setAttribute(new Attribute("attr.name", "type"));
+		tmp.setAttribute(new Attribute("attr.type", "string"));
+		root.addContent(tmp);
+		
+		// <key id="type" for="edge" attr.name="sourcecode" attr.type="string" />
+		tmp = new Element("key", xmlns);
+		tmp.setAttribute(new Attribute("id", "type"));
+		tmp.setAttribute(new Attribute("for", "edge"));
+		tmp.setAttribute(new Attribute("attr.name", "sourcecode"));
 		tmp.setAttribute(new Attribute("attr.type", "string"));
 		root.addContent(tmp);
 		
@@ -232,13 +257,42 @@ public class GraphML implements GraphPersistence{
 					// This is the edge type declaration
 					String type = ee.getValue();
 					g.setEdgeType(source, target, EdgeTypes.valueOf(type));
-				}else{
+				}else if(tmp.equals("marker")){
 					// This is an edge marker
 					String isEnabled = ee.getText().toLowerCase();
 					if(!isEnabled.equals("true"))
 						continue;
 					String marker = tmp; 
 					g.markEdge(source, target, EdgeMarkers.valueOf(marker));
+				}else if(tmp.equals("sourcecode")){
+					String srcs = ee.getText();
+					String[] srcs_grps = srcs.split("];");
+					
+					for(String src : srcs_grps){
+						String[] prt = src.split(";\\[");
+						SourceReference sr = new SourceReference();
+						
+						String[] vals = prt[1].split(";");
+						sr.setFile(prt[0]);
+						
+						// Source
+						int pos1 = Integer.valueOf(vals[0].split("-")[0]);
+						int pos2 = Integer.valueOf(vals[0].split("-")[1]);
+						sr.setSourceRange(pos1, pos2);
+
+						// Line
+						pos1 = Integer.valueOf(vals[1].split("-")[0]);
+						pos2 = Integer.valueOf(vals[1].split("-")[1]);
+						sr.setLineRange(pos1, pos2);
+						
+
+						// Column
+						pos1 = Integer.valueOf(vals[2].split("-")[0]);
+						pos2 = Integer.valueOf(vals[2].split("-")[1]);
+						sr.setColumnRange(pos1, pos2);
+						
+						g.bindEdgeToSourcePosition(source, target, sr);
+					}
 				}
 			}
 		}

@@ -22,6 +22,7 @@ import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.mutation.MutatorsFactory;
+import com.vmusco.smf.utils.SourceReference;
 
 
 /**
@@ -175,22 +176,13 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 			if(ifos.getHash() != null)
 				amutant.setAttribute(new Attribute(MUTANT_HASH_4, ifos.getHash()));
 			
-			if(ifos.getStartColumn() != -1 && ifos.getEndColumn() != -1){
-				amutant.setAttribute(new Attribute(MUTANT_SRCCOL_4, ifos.getStartColumn()+"-"+ifos.getEndColumn()));
+			if(ifos.getSourceReference() != null){
+				amutant.setAttribute(new Attribute(MUTANT_SRCCOL_4, ifos.getSourceReference().getColumnRange()));
+				amutant.setAttribute(new Attribute(MUTANT_SRCLINE_4, ifos.getSourceReference().getLineRange()));
+				amutant.setAttribute(new Attribute(MUTANT_SRC_4, ifos.getSourceReference().getSourceRange()));
+				amutant.setAttribute(new Attribute(MUTANT_FILE_4, ifos.getSourceReference().getFile()));
 			}
 			
-			if(ifos.getStartLine() != -1 && ifos.getEndLine() != -1){
-				amutant.setAttribute(new Attribute(MUTANT_SRCLINE_4, ifos.getStartLine()+"-"+ifos.getEndLine()));
-			}
-
-			if(ifos.getStartSource() != -1 && ifos.getEndSource() != -1){
-				amutant.setAttribute(new Attribute(MUTANT_SRC_4, ifos.getStartSource()+"-"+ifos.getEndSource()));
-			}
-
-			if(ifos.getSourceFile() != null){
-				amutant.setAttribute(new Attribute(MUTANT_FILE_4, ifos.getSourceFile()));
-			}
-
 			setSensitiveAttribute(amutant, MUTANT_IN_4, ifos.getMutationIn()==null?"?":ifos.getMutationIn());
 			try{
 				setSensitiveAttribute(amutant, MUTANT_FROM_4, ifos.getMutationFrom());
@@ -283,26 +275,28 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 					ifos.setHash(e.getAttribute(MUTANT_HASH_4).getValue());
 				}
 				
+				ifos.setSourceReference(new SourceReference());
+				
 				if(e.getAttribute(MUTANT_SRCCOL_4) != null){
 					String[] vals = e.getAttribute(MUTANT_SRCCOL_4).getValue().split("-");
-					ifos.setStartColumn(Integer.parseInt(vals[0]));
-					ifos.setEndColumn(Integer.parseInt(vals[1]));
+					ifos.getSourceReference().setColumnStart(Integer.parseInt(vals[0]));
+					ifos.getSourceReference().setColumnEnd(Integer.parseInt(vals[1]));
 				}
 				
 				if(e.getAttribute(MUTANT_SRCLINE_4) != null){
 					String[] vals = e.getAttribute(MUTANT_SRCLINE_4).getValue().split("-");
-					ifos.setStartLine(Integer.parseInt(vals[0]));
-					ifos.setEndLine(Integer.parseInt(vals[1]));
+					ifos.getSourceReference().setLineStart(Integer.parseInt(vals[0]));
+					ifos.getSourceReference().setLineEnd(Integer.parseInt(vals[1]));
 				}
 				
 				if(e.getAttribute(MUTANT_SRC_4) != null){
 					String[] vals = e.getAttribute(MUTANT_SRC_4).getValue().split("-");
-					ifos.setStartSource(Integer.parseInt(vals[0]));
-					ifos.setEndSource(Integer.parseInt(vals[1]));
+					ifos.getSourceReference().setSourceStart(Integer.parseInt(vals[0]));
+					ifos.getSourceReference().setSourceEnd(Integer.parseInt(vals[1]));
 				}
 
 				if(e.getAttribute(MUTANT_FILE_4) != null){
-					ifos.setSourceFile(e.getAttribute(MUTANT_FILE_4).getValue());
+					ifos.getSourceReference().setFile(e.getAttribute(MUTANT_FILE_4).getValue());
 				}
 				
 				String id = e.getAttribute(MUTANT_ID_4).getValue();
