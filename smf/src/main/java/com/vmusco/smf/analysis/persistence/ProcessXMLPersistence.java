@@ -100,7 +100,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 		if(f.isDirectory()){
 			ffinal = new File(f, ps.getPersistFile(false));
 		}else{
-			throw new PersistenceException(new FileNotFoundException("Unable to locate persistence file"));
+			ffinal = f;
 		}
 
 		if(ffinal.exists())

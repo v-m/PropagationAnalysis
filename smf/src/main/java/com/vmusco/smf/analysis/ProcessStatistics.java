@@ -234,11 +234,11 @@ public class ProcessStatistics implements Serializable{
 
 	public String getPersistFile(boolean resolve) {
 		if(!resolve){
-			return this.DEFAULT_CONFIGFILE;
+			return DEFAULT_CONFIGFILE;
 		}
 
 		// Relative path !
-		return this.workingDir + File.separatorChar + this.DEFAULT_CONFIGFILE;
+		return this.workingDir + File.separatorChar + DEFAULT_CONFIGFILE;
 	}
 
 	public static String fromStateToString(STATE aState){
@@ -296,7 +296,7 @@ public class ProcessStatistics implements Serializable{
 	 * @throws IOException 
 	 */
 	public static void saveState(ProcessStatistics ps) throws PersistenceException {
-		File f = new File(ps.buildPath(ps.DEFAULT_CONFIGFILE));
+		File f = new File(ps.buildPath(DEFAULT_CONFIGFILE));
 		ExecutionPersistence<ProcessStatistics> persist = new ProcessXMLPersistence(f);
 		persist.saveState(ps);
 	}
@@ -425,7 +425,7 @@ public class ProcessStatistics implements Serializable{
 		if(f.exists())
 			FileUtils.deleteDirectory(f);
 
-		(new File(workingDir)).mkdirs();
+		f.mkdirs();
 	}
 
 	/**************************************************************************************************

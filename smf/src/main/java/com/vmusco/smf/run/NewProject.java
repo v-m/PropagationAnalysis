@@ -46,6 +46,8 @@ public class NewProject extends GlobalTestRunning {
 		options.addOption(opt);
 		opt = new Option("F", "force", false, "Overwritte the working directory if it already exists !");
 		options.addOption(opt);
+		opt = new Option("j", "just-prepare", false, "Just prepare the project directory. Do not execute any build/tests/...");
+		options.addOption(opt);
 		
 		// OPTIONS FOR PHASE 2
 		opt = new Option("R", "reset", false, "reset the execution state (return to build phase)");
@@ -67,7 +69,6 @@ public class NewProject extends GlobalTestRunning {
 		
 		
 		
-		
 		opt = new Option("h", "help", false, "print this message");
 		options.addOption(opt);
 		
@@ -84,10 +85,13 @@ public class NewProject extends GlobalTestRunning {
 			String foot = "";
 					
 			formatter.printHelp("[options] <working-dir> <name> <project-in>", head, options, foot);
+			System.exit(0);
 		}
 		
 		File f = new File(cmd.getArgs()[0]);
 		ProcessStatistics ps;
+		
+		boolean skipRunWithPs = false;
 		
 		if(cmd.getArgs().length == 3){
 			File f2 = new File(cmd.getArgs()[2]);
@@ -129,13 +133,15 @@ public class NewProject extends GlobalTestRunning {
 				ps.setCpLocalFolder(null);
 			}
 			
-			ps.setProjectName(cmd.getArgs()[0]);
+			ps.setProjectName(cmd.getArgs()[1]);
 			
 			if(!ps.changeState(STATE.DEFINED)){
 				System.out.println("Error changing state !");
 				System.exit(1);
 				return;
 			}
+			
+			skipRunWithPs = cmd.hasOption("just-prepare");
 			
 			System.out.printf("Project generated in: %s\n", ps.getWorkingDir());
 		}else{
@@ -173,7 +179,11 @@ public class NewProject extends GlobalTestRunning {
 			ps.setTestTimeOut(0);
 		}
 		
-		runWithPs(ps);
+		if(!skipRunWithPs){
+			runWithPs(ps);
+		}else{
+			ProcessStatistics.saveState(ps);
+		}
 		
 		System.out.println("Done.");
 	}
