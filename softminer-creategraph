@@ -1,1 +1,2 @@
-java -cp softminer/target/*-jar-with-dependencies.jar com.vmusco.softminer.run.GraphGenerator "$@"
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+java -cp $DIR/softminer/target/*-jar-with-dependencies.jar com.vmusco.softminer.run.GraphGenerator "$@"
