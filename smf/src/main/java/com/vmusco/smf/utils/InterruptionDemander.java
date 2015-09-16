@@ -11,7 +11,7 @@ public class InterruptionDemander extends Thread {
 	public void run() {
 		synchronized (lock) {
 
-			System.out.println("Interruption demanded... Please wait, clean exiting...");
+			System.out.println("Received interrupt... Please wait, clean exiting...");
 			InterruptionManager.interruptDemanded(this);
 			try {
 				lock.wait();

@@ -1,5 +1,7 @@
 package com.vmusco.smf.utils;
 
+import com.vmusco.smf.exceptions.MalformedSourcePositionException;
+
 import spoon.reflect.cu.SourcePosition;
 
 /**
@@ -12,11 +14,28 @@ public class SourceReference {
 	private int column_start, column_end;
 	private int line_start, line_end;
 	private int source_start, source_end;
+	private int parentsearch;
 	
 	public SourceReference() {
 	}
 	
-	public SourceReference(SourcePosition sp) {
+	/**
+	 * Build a SourceReference based on a source position object. 
+	 * If the position object is not correctly built, return an exception 
+	 * (may occurs if the element point to an implicit element of the code, 
+	 * ie. a super() call in a new object via hierarchy, the returned 
+	 * position could be negative).
+	 * @param sp
+	 */
+	public SourceReference(SourcePosition sp) throws MalformedSourcePositionException {
+		if(sp.getColumn() < 0 ||
+				sp.getEndColumn() < 0 ||
+				sp.getLine() < 0 ||
+				sp.getEndLine() < 0 ||
+				sp.getSourceStart() < 0 ||
+				sp.getSourceEnd() < 0)
+			throw new MalformedSourcePositionException(); 
+				
 		setFile(sp.getFile().getAbsolutePath());
 		setColumnRange(sp.getColumn(), sp.getEndColumn());
 		setLineRange(sp.getLine(), sp.getEndLine());
@@ -108,4 +127,16 @@ public class SourceReference {
 		return String.format("%d-%d", getColumnStart(), getColumnEnd());
 	}
 
+	public void setParentSearch(int parentsearch) {
+		this.parentsearch = parentsearch;
+	}
+
+	/**
+	 * Returns the number of getParents() required on the object to get a
+	 * coherent SourcePosition. 
+	 * @return
+	 */
+	public int getParentSearch() {
+		return parentsearch;
+	}
 }

@@ -261,13 +261,15 @@ public final class Mutation {
 				ifos.setMutationIn(Mutation.getMethodFullSignatureForParent(toReplace));
 				ifos.setSourceReference(ms.generateSourceReferenceForMutation(toReplace));
 				
-				if(ifos.getMutationIn() == null)
+				if(mcl != null) mcl.newMutationProposal(e, m);
+				
+				if(ifos.getMutationIn() == null){
+					//TODO: Logger info?
 					continue;
+				}
 	
 				ifos.setMutationFrom(toReplace.toString());
 				ifos.setMutationTo(m.toString());
-	
-				if(mcl != null) mcl.newMutationProposal(e, m);
 	
 				m.setParent(toReplace.getParent());
 				toReplace.replace(m);

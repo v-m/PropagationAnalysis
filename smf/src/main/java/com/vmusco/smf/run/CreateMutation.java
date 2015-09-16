@@ -151,6 +151,8 @@ public class CreateMutation implements MutationCreationListener{
 			ms.setMutationName(cmd.getOptionValue("name"));
 		
 		ms.loadOrCreateMutants(cmd.hasOption("reset"), cm, nbmut, safepersist);
+		
+		Runtime.getRuntime().removeShutdownHook(id);
 	}
 
 	private int nbchecks = 0;

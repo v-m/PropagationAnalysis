@@ -4,6 +4,7 @@ import spoon.reflect.cu.SourcePosition;
 import spoon.support.reflect.declaration.CtElementImpl;
 
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
+import com.vmusco.smf.exceptions.MalformedSourcePositionException;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.utils.SourceReference;
@@ -45,7 +46,7 @@ public class MutantIfos{
 	private SourceReference sourceRef = null;
 	private MutantExecutionIfos execution = null;
 	
-	public void setSourceReference(SourcePosition sp) {
+	public void setSourceReference(SourcePosition sp) throws MalformedSourcePositionException {
 		this.sourceRef = new SourceReference(sp);
 	}
 	

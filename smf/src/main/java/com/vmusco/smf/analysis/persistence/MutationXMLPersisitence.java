@@ -55,6 +55,7 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 	private static final String MUTANT_SRCCOL_4 = "src-columns";
 	private static final String MUTANT_SRCLINE_4 = "src-lines";
 	private static final String MUTANT_SRC_4 = "src-pos";
+	private static final String MUTANT_SRC_PARENT_4 = "src-parent";
 	private static final String MUTANT_FILE_4 = "src-file";
 
 	private SAXBuilder sxb;
@@ -181,6 +182,9 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 				amutant.setAttribute(new Attribute(MUTANT_SRCLINE_4, ifos.getSourceReference().getLineRange()));
 				amutant.setAttribute(new Attribute(MUTANT_SRC_4, ifos.getSourceReference().getSourceRange()));
 				amutant.setAttribute(new Attribute(MUTANT_FILE_4, ifos.getSourceReference().getFile()));
+				if(ifos.getSourceReference().getParentSearch() > 0){
+					amutant.setAttribute(new Attribute(MUTANT_SRC_PARENT_4, Integer.toString(ifos.getSourceReference().getParentSearch())));
+				}
 			}
 			
 			setSensitiveAttribute(amutant, MUTANT_IN_4, ifos.getMutationIn()==null?"?":ifos.getMutationIn());
@@ -293,6 +297,11 @@ public class MutationXMLPersisitence extends ExecutionPersistence<MutationStatis
 					String[] vals = e.getAttribute(MUTANT_SRC_4).getValue().split("-");
 					ifos.getSourceReference().setSourceStart(Integer.parseInt(vals[0]));
 					ifos.getSourceReference().setSourceEnd(Integer.parseInt(vals[1]));
+				}
+				
+				if(e.getAttribute(MUTANT_SRC_PARENT_4) != null){
+					int val = Integer.valueOf(e.getAttribute(MUTANT_SRC_PARENT_4).getValue());
+					ifos.getSourceReference().setParentSearch(val);
 				}
 
 				if(e.getAttribute(MUTANT_FILE_4) != null){

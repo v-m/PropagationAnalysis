@@ -7,11 +7,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import spoon.reflect.cu.SourcePosition;
+import spoon.reflect.declaration.CtElement;
 import spoon.support.reflect.declaration.CtElementImpl;
 
 import com.vmusco.smf.analysis.persistence.ExecutionPersistence;
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
 import com.vmusco.smf.analysis.persistence.MutationXMLPersisitence;
+import com.vmusco.smf.exceptions.MalformedSourcePositionException;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.mutation.Mutation;
@@ -402,11 +404,35 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 
 	/**
 	 * Create a SourceReference from a SourcePosition with resolving the file source path
+	 * If the position for the element in source file is malformed see {@link SourceReference#SourceReference(SourcePosition)},
+	 * try to resolve with parent until finding a good match. If none found, return null... 
 	 * @param toReplace
 	 * @return
+	 * @throws MalformedSourcePositionException 
 	 */
-	public SourceReference generateSourceReferenceForMutation(CtElementImpl toReplace) {
-		SourceReference sr = new SourceReference(toReplace.getPosition());
+	public SourceReference generateSourceReferenceForMutation(CtElement toReplace) {
+		SourceReference sr = null;
+		CtElement search = toReplace;
+		
+		boolean again = true;
+		int parentsearch = 0;
+		
+		while(again && search != null){
+			try {
+				sr = new SourceReference(search.getPosition());
+				again = false;
+			} catch (MalformedSourcePositionException e) {
+				search = search.getParent();
+				again = true;
+				parentsearch++;
+			}
+		}
+		
+		if(search == null){
+			return null;
+		}else{
+			sr.setParentSearch(parentsearch);
+		}
 
 		if(toReplace.getPosition().getFile().getAbsolutePath().startsWith(ps.resolveThis(ps.getOriginalSrc()))){
 			sr.setFile(toReplace.getPosition().getFile().getAbsolutePath().substring(ps.resolveThis(ps.getOriginalSrc()).length()));
