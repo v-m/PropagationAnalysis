@@ -677,4 +677,31 @@ public class GraphStream extends Graph {
 		return attribute.toArray(new SourceReference[0]);
 	}
 
+	@Override
+	public void bindNodeToSourcePosition(String n, SourceReference sp) {
+		Node node = this.getGraph().getNode(n);
+
+		List<SourceReference> attribute = node.getAttribute("sps");
+
+		if(attribute == null){
+			attribute = new ArrayList<SourceReference>();
+			node.setAttribute("sps", attribute);
+		}
+
+		attribute.add(sp);
+	}
+
+	@Override
+	public SourceReference[] getSourcePositionForNode(String n) {
+		Node node = this.getGraph().getNode(n);
+		
+		List<SourceReference> attribute = node.getAttribute("sps");
+
+		if(attribute == null){
+			return new SourceReference[0];
+		}
+
+		return attribute.toArray(new SourceReference[0]);
+	}
+
 }

@@ -28,7 +28,7 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		String src_txt = getNodeForItemKey(src); 
 		String dst_txt = anAccess.getSignature().split(" ")[1];
 		
-		ProcessorCommunicator.addIfAllowed(src_txt, dst_txt, NodeTypes.METHOD, NodeTypes.FIELD, EdgeTypes.READ_OPERATION, src.getPosition());
+		ProcessorCommunicator.addEdgeIfAllowed(src_txt, dst_txt, NodeTypes.METHOD, NodeTypes.FIELD, EdgeTypes.READ_OPERATION, src.getPosition());
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		String src_txt = getNodeForItemKey(src); 
 		String dst_txt = anAccess.getSignature().split(" ")[1];
 		
-		ProcessorCommunicator.addIfAllowed(dst_txt, src_txt, NodeTypes.METHOD, NodeTypes.FIELD, EdgeTypes.WRITE_OPERATION, src.getPosition());
+		ProcessorCommunicator.addEdgeIfAllowed(dst_txt, src_txt, NodeTypes.METHOD, NodeTypes.FIELD, EdgeTypes.WRITE_OPERATION, src.getPosition());
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		String src_txt = getNodeForItemKey(src); 
 		String dst_txt = getNodeForItemKey(aReferenceExecutable);
 		
-		ProcessorCommunicator.addIfAllowed(src_txt, dst_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.METHOD_CALL, src.getPosition());
+		ProcessorCommunicator.addEdgeIfAllowed(src_txt, dst_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.METHOD_CALL, src.getPosition());
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		String src_txt = getNodeForItemKey(src); 
 		String dst_txt = getNodeForItemKey(exo);
 		
-		ProcessorCommunicator.addIfAllowed(dst_txt, src_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION, src.getPosition());
+		ProcessorCommunicator.addEdgeIfAllowed(dst_txt, src_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION, src.getPosition());
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		String src_txt = getNodeForItemKey(src); 
 		String dst_txt = getNodeForItemKey(exo);
 
-		ProcessorCommunicator.addIfAllowed(dst_txt, src_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION, src.getPosition());
+		ProcessorCommunicator.addEdgeIfAllowed(dst_txt, src_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION, src.getPosition());
 	}
 
 	@Override
@@ -93,6 +93,12 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		String src_txt = src.getReference().getQualifiedName();
 		String dst_txt = getNodeForItemKey(declaration);
 		
-		ProcessorCommunicator.addIfAllowed(src_txt, dst_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INLINE_CONSTRUCTOR_CALL, src.getPosition());
+		ProcessorCommunicator.addEdgeIfAllowed(src_txt, dst_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INLINE_CONSTRUCTOR_CALL, src.getPosition());
+	}
+
+	@Override
+	public void methodVisited(CtExecutable<?> execElement) {
+		String node_txt = getNodeForItemKey(execElement);
+		ProcessorCommunicator.addNode(node_txt, NodeTypes.METHOD, execElement.getPosition());
 	}
 }

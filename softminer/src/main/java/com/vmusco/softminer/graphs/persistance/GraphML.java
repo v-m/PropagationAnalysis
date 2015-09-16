@@ -3,6 +3,10 @@ package com.vmusco.softminer.graphs.persistance;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -35,6 +39,83 @@ public class GraphML implements GraphPersistence{
 		this.target = aGraph;
 	}
 
+	private static Element generateElementForSourcecode(SourceReference[] sourcePosition){
+		String sourcetxt="";
+		Set<String> files = new HashSet<>();
+		
+		for(SourceReference sr : sourcePosition){
+			files.add(sr.getFile());
+		}
+		
+		for(String filename : files){
+			sourcetxt += filename+";[";
+			
+			boolean first = true;
+			for(SourceReference sr : sourcePosition){
+				if(sr.getFile().equals(filename)){
+					if(!first){
+						sourcetxt += "/";
+					}else{
+						first = false;
+					}
+					
+					sourcetxt += sr.getSourceRange()+";"+sr.getLineRange()+";"+sr.getColumnRange();
+				}
+			}
+			
+			sourcetxt += "];";
+		}
+		
+		if(sourcetxt.length() > 0){
+			Element data = new Element("data", xmlns);
+			Attribute attr = new Attribute("key", "sourcecode");
+			data.setAttribute(attr);
+			data.setText(sourcetxt);
+			return data;
+		}
+		
+		return null;
+	}
+	
+	private static SourceReference[] generateSourceCodeFromElement(Element ee){
+		String srcs = ee.getText();
+		String[] srcs_grps = srcs.split("];");
+		List<SourceReference> ret = new ArrayList<>();
+		
+		for(String src : srcs_grps){
+			String[] prt = src.split(";\\[");
+			String[] ent = prt[1].split("/");
+			
+			for(String entt : ent){
+				SourceReference sr = new SourceReference();
+				String[] vals = entt.split(";");
+				
+				sr.setFile(prt[0]);
+				
+				// Source
+				int pos1 = Integer.valueOf(vals[0].split("-")[0]);
+				int pos2 = Integer.valueOf(vals[0].split("-")[1]);
+				sr.setSourceRange(pos1, pos2);
+				
+				// Line
+				pos1 = Integer.valueOf(vals[1].split("-")[0]);
+				pos2 = Integer.valueOf(vals[1].split("-")[1]);
+				sr.setLineRange(pos1, pos2);
+				
+				
+				// Column
+				pos1 = Integer.valueOf(vals[2].split("-")[0]);
+				pos2 = Integer.valueOf(vals[2].split("-")[1]);
+				sr.setColumnRange(pos1, pos2);
+				
+				ret.add(sr);
+			}
+			
+		}
+		
+		return ret.toArray(new SourceReference[0]);
+	}
+	
 	public static Element generateXmlNodes(Graph aGraph, Namespace xmlns){
 		Element g = new Element("graph", xmlns);
 		Attribute attr;
@@ -53,9 +134,15 @@ public class GraphML implements GraphPersistence{
 			g.addContent(aNode);
 
 			NodeTypes nodeType = aGraph.getNodeType(n);
+			
+			Element data;
+			
+			if((data = generateElementForSourcecode(aGraph.getSourcePositionForNode(n))) != null){
+				aNode.addContent(data);
+			}
 
 			if(nodeType != null){
-				Element data = new Element("data", xmlns);
+				data = new Element("data", xmlns);
 				attr = new Attribute("key", "type");
 				data.setAttribute(attr);
 				data.setText(nodeType.name());
@@ -66,7 +153,7 @@ public class GraphML implements GraphPersistence{
 			aNode.setAttribute(attr);
 
 			for(NodeMarkers nm : aGraph.getNodeMarkers(n)){
-				Element data = new Element("data", xmlns);
+				data = new Element("data", xmlns);
 				attr = new Attribute("key", nm.name());
 				data.setAttribute(attr);
 				data.setText("true");
@@ -89,19 +176,10 @@ public class GraphML implements GraphPersistence{
 				data.setText(edgeType.name());
 				anEdge.addContent(data);
 			}
+
+			Element data;
 			
-			SourceReference[] sourcePositionForEdge = aGraph.getSourcePositionForEdge(e.getFrom(), e.getTo());
-			String sourcetxt="";
-			
-			for(SourceReference sr : sourcePositionForEdge){
-				sourcetxt += sr.getFile()+";["+sr.getSourceRange()+";"+sr.getLineRange()+";"+sr.getColumnRange()+"];";
-			}
-			
-			if(sourcetxt.length() > 0){
-				Element data = new Element("data", xmlns);
-				attr = new Attribute("key", "sourcecode");
-				data.setAttribute(attr);
-				data.setText(sourcetxt);
+			if((data = generateElementForSourcecode(aGraph.getSourcePositionForEdge(e.getFrom(), e.getTo()))) != null){
 				anEdge.addContent(data);
 			}
 
@@ -113,7 +191,7 @@ public class GraphML implements GraphPersistence{
 			anEdge.setAttribute(attr);
 
 			for(EdgeMarkers em : aGraph.getEdgeMarkers(e.getFrom(), e.getTo())){
-				Element data = new Element("data", xmlns);
+				data = new Element("data", xmlns);
 				attr = new Attribute("key", em.name());
 				data.setAttribute(attr);
 				data.setText("true");
@@ -157,7 +235,7 @@ public class GraphML implements GraphPersistence{
 		// <key id="type" for="edge" attr.name="sourcecode" attr.type="string" />
 		tmp = new Element("key", xmlns);
 		tmp.setAttribute(new Attribute("id", "type"));
-		tmp.setAttribute(new Attribute("for", "edge"));
+		tmp.setAttribute(new Attribute("for", "all"));
 		tmp.setAttribute(new Attribute("attr.name", "sourcecode"));
 		tmp.setAttribute(new Attribute("attr.type", "string"));
 		root.addContent(tmp);
@@ -234,13 +312,19 @@ public class GraphML implements GraphPersistence{
 					// This is the node type declaration
 					String type = ee.getValue();
 					g.setNodeType(nodename, NodeTypes.valueOf(type));
-				}else{
+				}else if(tmp.equals("marker")){
 					// This is a node marker
 					String isEnabled = ee.getText().toLowerCase();
 					if(!isEnabled.equals("true"))
 						continue;
 					String marker = tmp; 
 					g.markNode(nodename, NodeMarkers.valueOf(marker));
+				}else if(tmp.equals("sourcecode")){
+					SourceReference[] sc = generateSourceCodeFromElement(ee);
+					
+					for(SourceReference sr : sc){
+						g.bindNodeToSourcePosition(nodename, sr);
+					}
 				}
 			}
 		}
@@ -265,32 +349,9 @@ public class GraphML implements GraphPersistence{
 					String marker = tmp; 
 					g.markEdge(source, target, EdgeMarkers.valueOf(marker));
 				}else if(tmp.equals("sourcecode")){
-					String srcs = ee.getText();
-					String[] srcs_grps = srcs.split("];");
+					SourceReference[] sc = generateSourceCodeFromElement(ee);
 					
-					for(String src : srcs_grps){
-						String[] prt = src.split(";\\[");
-						SourceReference sr = new SourceReference();
-						
-						String[] vals = prt[1].split(";");
-						sr.setFile(prt[0]);
-						
-						// Source
-						int pos1 = Integer.valueOf(vals[0].split("-")[0]);
-						int pos2 = Integer.valueOf(vals[0].split("-")[1]);
-						sr.setSourceRange(pos1, pos2);
-
-						// Line
-						pos1 = Integer.valueOf(vals[1].split("-")[0]);
-						pos2 = Integer.valueOf(vals[1].split("-")[1]);
-						sr.setLineRange(pos1, pos2);
-						
-
-						// Column
-						pos1 = Integer.valueOf(vals[2].split("-")[0]);
-						pos2 = Integer.valueOf(vals[2].split("-")[1]);
-						sr.setColumnRange(pos1, pos2);
-						
+					for(SourceReference sr : sc){
 						g.bindEdgeToSourcePosition(source, target, sr);
 					}
 				}

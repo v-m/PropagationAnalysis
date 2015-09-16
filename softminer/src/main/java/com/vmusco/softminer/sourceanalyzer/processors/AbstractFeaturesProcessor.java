@@ -35,6 +35,7 @@ import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 */
 @SuppressWarnings({"rawtypes","unchecked"})
 public abstract class AbstractFeaturesProcessor extends AbstractProcessor<CtNamedElement>{
+	public abstract void methodVisited(CtExecutable<?> execElement);
 	public abstract void newReadFieldAccess(CtExecutable<?> src, CtFieldAccess<?> anAccess);
 	public abstract void newWriteFieldAccess(CtExecutable<?> src, CtFieldAccess<?> anAccess);
 	public abstract void newReflexionUsage(CtExecutable<?> src);
@@ -62,17 +63,18 @@ public abstract class AbstractFeaturesProcessor extends AbstractProcessor<CtName
 		if(!preliminarTests(element))
 			return;
 
+		// Up to here, we have only CtElements elements
 		CtExecutable execElement = (CtExecutable) element;
-
-		/**********************************
-		 * Here we create a bridge between 
-		 * a declared method and its abstract signature
-		 */
+		
+		// We add the method node
+		if(ProcessorCommunicator.includeAllNodes){
+			methodVisited(execElement);
+		}
+		
+		 // Bridge between a declared method and its abstract signature
 		bridgeMethodAndAbstract(execElement);
 
-		/**********************************
-		 * Treating executable references
-		 */
+		// Treating executable references
 		List<CtExecutableReference> refs = Query.getReferences(element, new AbstractReferenceFilter<CtExecutableReference>(CtExecutableReference.class) {
 			public boolean matches(CtExecutableReference reference) {
 				return true;
@@ -87,10 +89,7 @@ public abstract class AbstractFeaturesProcessor extends AbstractProcessor<CtName
 			}
 		}
 
-		/**********************************
-		 * Treating fields references
-		 */
-
+		// Treating fields references
 		if(ProcessorCommunicator.includesFields){
 			AbstractFilter af = new AbstractFilter<CtFieldAccess>(CtFieldAccess.class) {
 				public boolean matches(CtFieldAccess element) {
@@ -111,40 +110,40 @@ public abstract class AbstractFeaturesProcessor extends AbstractProcessor<CtName
 	}
 
 	private boolean preliminarTests(CtElement element) {
-		if(!(element instanceof CtExecutable) && !(element instanceof CtField)){
-			return false;
-		}
-
-		if(element instanceof CtField){
-			CtField field = (CtField) element;
-
-			if(field.getDefaultExpression() != null){
-				if(field.getDefaultExpression() instanceof CtInvocation){
-					CtInvocation invok = (CtInvocation) field.getDefaultExpression();
-					if(invok.getExecutable().getDeclaration() != null){
-						newDeclarationMethodCall(field, invok.getExecutable().getDeclaration());
+		if(element instanceof CtExecutable || (ProcessorCommunicator.includesFields && element instanceof CtField)){
+			if(element instanceof CtField){
+				CtField field = (CtField) element;
+	
+				if(field.getDefaultExpression() != null){
+					if(field.getDefaultExpression() instanceof CtInvocation){
+						CtInvocation invok = (CtInvocation) field.getDefaultExpression();
+						if(invok.getExecutable().getDeclaration() != null){
+							newDeclarationMethodCall(field, invok.getExecutable().getDeclaration());
+						}
+					}else if(field.getDefaultExpression() instanceof CtConstructorCall){
+						CtConstructorCall ccc = (CtConstructorCall) field.getDefaultExpression();
+						if(ccc.getExecutable().getDeclaration() != null){
+							newDeclarationMethodCall(field, ccc.getExecutable().getDeclaration());
+						}
 					}
-				}else if(field.getDefaultExpression() instanceof CtConstructorCall){
-					CtConstructorCall ccc = (CtConstructorCall) field.getDefaultExpression();
-					if(ccc.getExecutable().getDeclaration() != null){
-						newDeclarationMethodCall(field, ccc.getExecutable().getDeclaration());
+				}
+				return false;
+			}else{
+				CtExecutable method = (CtExecutable) element;
+	
+				if(ProcessorCommunicator.removeOverridenMethods){
+					if(method instanceof CtMethod){
+						if(getAllOverriden(((CtMethod)method)).length > 0){
+							return false;
+						}
 					}
 				}
 			}
-			return false;
+	
+			return true;
 		}else{
-			CtExecutable method = (CtExecutable) element;
-
-			if(ProcessorCommunicator.removeOverridenMethods){
-				if(method instanceof CtMethod){
-					if(getAllOverriden(((CtMethod)method)).length > 0){
-						return false;
-					}
-				}
-			}
+			return false;
 		}
-
-		return true;
 	}
 
 	private void treatFieldReferences(CtFieldAccess anAccess, CtExecutable src) {

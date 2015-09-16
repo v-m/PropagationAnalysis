@@ -13,11 +13,10 @@ import com.vmusco.softminer.graphs.NodeTypes;
 import com.vmusco.softminer.sourceanalyzer.processors.GraphItemRenamer;
 
 /**
- * This class is used as a pipe of communication between the spoon processor
- * and the test. This is the easiest way to proceed with spoon as the processor
+ * This class is used as a pipe of communication with the spoon processor
+ * This is the easiest way to proceed with spoon as the processor
  * is instantiated by the spoon launcher, we can pass no parameter to this.
  * @author Vincenzo Musco - http://www.vmusco.com
- *
  */
 public abstract class ProcessorCommunicator {
 	public static String inpackage = ""; 
@@ -29,6 +28,20 @@ public abstract class ProcessorCommunicator {
 	public static String pattern;
 	public static PatternBehavior patternBehavior;
 	public static GraphItemRenamer nodesRenamer = null;
+	/**
+	 * Change this string to remove (shorten) the file path by removing a common prefix (eg. project directory)
+	 */
+	public static String prefixSourceCodeToRemove = null;
+	
+	public static String formatSourceCodeFilePath(String path){
+		if(prefixSourceCodeToRemove == null)
+			return path;
+		
+		if(path.startsWith(prefixSourceCodeToRemove))
+			return path.substring(prefixSourceCodeToRemove.length());
+		else
+			return path;
+	}
 	
 	/**
 	 * OPTIONS FOR USE GRAPH
@@ -36,6 +49,9 @@ public abstract class ProcessorCommunicator {
 	public static boolean resolveInterfacesAndClasses = false;
 	public static boolean includesFields = false;
 	public static boolean removeOverridenMethods = false;
+	
+	// Include all nodes (even isolated ones)
+	public static boolean includeAllNodes = true;
 	
 	public static void reset(){
 		inpackage = "";
@@ -59,7 +75,6 @@ public abstract class ProcessorCommunicator {
 		if(ProcessorCommunicator.pattern != null && ProcessorCommunicator.patternBehavior != ProcessorCommunicator.PatternBehavior.NO_PATTERN){
 			boolean srcmatch = src.matches(ProcessorCommunicator.pattern);
 			boolean dstmatch = dst.matches(ProcessorCommunicator.pattern);
-		
 			
 			if(ProcessorCommunicator.patternBehavior == ProcessorCommunicator.PatternBehavior.INCLUDE_IF_NONE)
 				patternpass = !srcmatch && !dstmatch;
@@ -80,27 +95,32 @@ public abstract class ProcessorCommunicator {
 		return patternpass;
 	}
 	
-	@Deprecated
-	public static boolean addIfAllowed(String src, String dst){
-		if(allowedByPattern(src, dst)){
-			if(outputgraph != null){
-				String finalsrc = src;
-				String finaldst = dst;
-				
-				if(nodesRenamer != null){
-					finalsrc = nodesRenamer.renamed(src);
-					finaldst = nodesRenamer.renamed(dst);
-				}
-				
-				outputgraph.addDirectedEdgeAndNodeIfNeeded(finalsrc, finaldst, true, false);
-				return true;
+	public static boolean addNode(String src, NodeTypes src_type, SourcePosition originator){
+		if(outputgraph != null){
+			String finalsrc = src;
+			
+			if(nodesRenamer != null){
+				finalsrc = nodesRenamer.renamed(src);
 			}
+			
+			if(!outputgraph.hasNode(finalsrc)){
+				outputgraph.addNode(finalsrc);
+			}
+			
+			outputgraph.setNodeType(finalsrc, src_type);
+			
+			if(originator != null){
+				SourceReference sp = new SourceReference(originator);
+				sp.setFile(formatSourceCodeFilePath(originator.getFile().getAbsolutePath()));
+				outputgraph.bindNodeToSourcePosition(finalsrc, sp);
+			}
+			return true;
 		}
 		
 		return false;
 	}
 	
-	public static boolean addIfAllowed(String src, String dst, NodeTypes src_type, NodeTypes dst_type, EdgeTypes edgeType, SourcePosition originator){
+	public static boolean addEdgeIfAllowed(String src, String dst, NodeTypes src_type, NodeTypes dst_type, EdgeTypes edgeType, SourcePosition originator){
 		if(allowedByPattern(src, dst)){
 			if(outputgraph != null){
 				String finalsrc = src;
@@ -117,7 +137,9 @@ public abstract class ProcessorCommunicator {
 				outputgraph.setEdgeType(finalsrc, finaldst, edgeType);
 				
 				if(originator != null){
-					outputgraph.bindEdgeToSourcePosition(finalsrc, finaldst, new SourceReference(originator));
+					SourceReference sp = new SourceReference(originator);
+					sp.setFile(formatSourceCodeFilePath(originator.getFile().getAbsolutePath()));
+					outputgraph.bindEdgeToSourcePosition(finalsrc, finaldst, sp);
 				}
 				return true;
 			}
@@ -125,50 +147,6 @@ public abstract class ProcessorCommunicator {
 		
 		return false;
 	}
-
-	
-	@Deprecated
-	public static boolean setEdgeType(String src, String dst, EdgeTypes aType){
-		if(outputgraph != null){
-			String finalsrc = src;
-			String finaldst = dst;
-			
-			if(nodesRenamer != null){
-				finalsrc = nodesRenamer.renamed(src);
-				finaldst = nodesRenamer.renamed(dst);
-			}
-			
-			if(outputgraph.hasDirectedEdge(finalsrc, finaldst)){
-				outputgraph.setEdgeType(finalsrc, finaldst, aType);
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	@Deprecated
-	public static boolean setNodeType(String node, NodeTypes aType){
-		if(outputgraph != null){
-			String finalnode = node;
-			
-			if(nodesRenamer != null){
-				finalnode = nodesRenamer.renamed(node);
-			}
-			
-			if(outputgraph.hasNode(finalnode)){
-				outputgraph.setNodeType(finalnode, aType);
-				return true;
-			}
-		}
-
-		return false;
-	}
-	
-	
-	
-	
-	
 	
 	public static boolean markEdge(String src, String dst, EdgeMarkers aMarker){
 		if(outputgraph != null){

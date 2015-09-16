@@ -54,6 +54,8 @@ public abstract class Graph {
 	public abstract boolean isEdgeMarked(String from, String to, EdgeMarkers aMarker);
 	public abstract void bindEdgeToSourcePosition(String from, String to, SourceReference sp);
 	public abstract SourceReference[] getSourcePositionForEdge(String from, String to);
+	public abstract void bindNodeToSourcePosition(String n, SourceReference sp);
+	public abstract SourceReference[] getSourcePositionForNode(String n);
 	public abstract EdgeTypes getEdgeType(String from, String to);
 	public abstract void markNode(String node, NodeMarkers aMarker);
 	public abstract void setNodeType(String node, NodeTypes aType);

@@ -19,12 +19,13 @@ import com.vmusco.smf.utils.MavenTools;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.persistance.GraphML;
 import com.vmusco.softminer.graphs.persistance.GraphPersistence;
+import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuildLogic;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
 
 /**
-*
+* Generate call graphs
 * @author Vincenzo Musco - http://www.vmusco.com
 */
 public class GraphGenerator {
@@ -55,9 +56,11 @@ public class GraphGenerator {
 
 		options.addOption(new Option("h", "help", false, "print this message"));
 		options.addOption(new Option("o", "output-file", true, "Describes the output file absolute if start with / else relative from <working-dir>. This parameter is used only in case of using a smf project as input."));
-		options.addOption(new Option("d", "delete-previous", false, "Delete the file if it already exists."));
+		options.addOption(new Option("d", "overwrite", false, "Delete the file if it already exists."));
 		options.addOption(new Option("F", "out-format", true, "set the output format. Set help or h as a type to get the list of types"));
 		options.addOption(new Option("c", "cp", true, "add entries in classpath. Can be separated by "+File.pathSeparator));
+		options.addOption(new Option("r", "remove-isolated", false, "remove isolated nodes from the final graph"));
+		
 		
 		options.addOption(new Option("t", "type", true, "select a specific type of call graph (override -r, -f and -c). Set help or h as a type to get the list of types."));
 		options.addOption(new Option("c", "cha", false, "resolve interfaces and classes"));
@@ -131,6 +134,23 @@ public class GraphGenerator {
 		File output_path = new File(defaultFilename(type_graph));
 		
 		if(cmd.getArgs().length == 3){
+			output_path = new File(cmd.getArgs()[2]);
+
+			if(output_path.exists()){
+				if(output_path.isDirectory()){
+					output_path = new File(output_path, defaultFilename(type_graph));
+				}
+			}
+			
+			if(output_path.exists()){
+				if(!cmd.hasOption("overwrite")){
+					System.out.println("The file "+output_path.getAbsolutePath()+" already exist. To force its overwriting use -d flag.");
+					return;
+				}else{
+					output_path.delete();
+				}
+			}
+			
 			String mvn_dir = cmd.getArgs()[0];
 			
 			HashSet<String> srcsh = new HashSet<String>();
@@ -173,23 +193,6 @@ public class GraphGenerator {
 				
 				sources.add(f.getAbsolutePath());
 			}
-			
-			output_path = new File(cmd.getArgs()[2]);
-
-			if(output_path.exists()){
-				if(output_path.isDirectory()){
-					output_path = new File(output_path, defaultFilename(type_graph));
-				}
-			}
-			
-			if(output_path.exists()){
-				if(!cmd.hasOption("delete-previous")){
-					System.out.println("The file "+output_path.getAbsolutePath()+" already exist. To force its overwriting use -d flag.");
-					return;
-				}else{
-					output_path.delete();
-				}
-			}
 		}else{
 			ProcessStatistics ps = ProcessStatistics.rawLoad(cmd.getArgs()[0]);
 			
@@ -214,7 +217,7 @@ public class GraphGenerator {
 			}
 
 			if(output_path.exists()){
-				if(!cmd.hasOption("delete-previous")){
+				if(!cmd.hasOption("overwrite")){
 					System.out.println("The file "+output_path.getAbsolutePath()+" already exist. To force its overwriting use -d flag.");
 					return;
 				}else{
@@ -260,6 +263,12 @@ public class GraphGenerator {
 			gb = GraphBuilder.newGraphBuilderManuallyConfigured(projname, sources.toArray(new String[0]), classpath, cmd.hasOption("cha"), cmd.hasOption("fields"), cmd.hasOption("no-overridden-calls"));
 		}
 
+		if(cmd.hasOption("remove-isolated")){
+			ProcessorCommunicator.includeAllNodes = false;
+		}
+		
+		ProcessorCommunicator.prefixSourceCodeToRemove = cmd.getArgs()[0];
+		
 		Graph aGraph = gb.generateDependencyGraph(builder);
 
 		GraphPersistence gp = null;
@@ -268,10 +277,8 @@ public class GraphGenerator {
 			gp = new GraphML(aGraph);
 		}
 
-
 		gp.save(new FileOutputStream(output_path));
 
 		generatedGraph = aGraph;
-
 	}
 }
