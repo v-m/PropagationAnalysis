@@ -1,7 +1,7 @@
 package com.vmusco.pminer.impact;
 
 import com.vmusco.pminer.exceptions.AlreadyGeneratedException;
-import com.vmusco.pminer.exceptions.NoEntryPointException;
+import com.vmusco.pminer.exceptions.SpecialEntryPointException;
 import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.EdgeMarkers;
 import com.vmusco.softminer.graphs.Graph;
@@ -19,11 +19,11 @@ public abstract class PropagationExplorer{
 	protected Graph last_propa;
 	protected String last_entryid;
 	
-	public abstract void visitTo(String id) throws NoEntryPointException;
+	public abstract void visitTo(String id) throws SpecialEntryPointException;
 	//public abstract String[] getImpactedNodes(String id) throws NoEntryPointException;
 	//public abstract String[] getImpactedTestNodes(String id, String[] tests) throws NoEntryPointException;
-	public abstract String[] getLastImpactedNodes() throws NoEntryPointException;
-	public abstract String[] getLastImpactedTestNodes(String[] tests) throws NoEntryPointException;
+	public abstract String[] getLastImpactedNodes();
+	public abstract String[] getLastImpactedTestNodes(String[] tests);
 
 	public PropagationExplorer(Graph base) {
 		this.base = base;
@@ -121,12 +121,12 @@ public abstract class PropagationExplorer{
 		return getImpactedNodes(id).length;
 	}*/
 	
-	public int getLastNbTestNodes(String id, String[] tests) throws NoEntryPointException{
+	public int getLastNbTestNodes(String id, String[] tests) throws SpecialEntryPointException{
 		return getLastImpactedTestNodes(tests).length;
 	}
 
 
-	public int getLastNbNodes(String id) throws NoEntryPointException {
+	public int getLastNbNodes(String id) throws SpecialEntryPointException {
 		return getLastImpactedNodes().length;
 	}
 	

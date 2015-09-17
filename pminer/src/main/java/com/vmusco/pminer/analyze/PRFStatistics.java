@@ -47,7 +47,7 @@ public class PRFStatistics {
 		int nbinter = MutationsSetTools.setIntersection(ais, cis).length;
 
 		if(cis.length == 0){
-			return 1;
+			return (ais.length>0)?1:0;
 		}else{
 			return (nbinter * 1d) /cis.length;
 		}
@@ -57,7 +57,7 @@ public class PRFStatistics {
 		int nbinter = MutationsSetTools.setIntersection(ais, cis).length;
 
 		if(ais.length == 0){
-			return 1;
+			return (cis.length>0)?1:0;
 		}else{
 			return (nbinter * 1d)/ais.length;
 		}

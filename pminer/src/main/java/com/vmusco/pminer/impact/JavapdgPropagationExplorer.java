@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.vmusco.pminer.exceptions.AlreadyGeneratedException;
-import com.vmusco.pminer.exceptions.NoEntryPointException;
+import com.vmusco.pminer.exceptions.SpecialEntryPointException;
+import com.vmusco.pminer.exceptions.SpecialEntryPointException.TYPE;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.GraphApi;
 
@@ -27,7 +28,7 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 
 	public JavapdgPropagationExplorer(String dbpath) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		super(Graph.getNewGraph(GraphApi.GRAPH_STREAM));
-		
+
 		// GETTING METHODS ENTRIES FROM DATABASE
 		dbentries = getMethodsFromDerby(dbpath);
 		bugs = new HashMap<String, Long>();
@@ -36,11 +37,11 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 		populateWithNumericalCallGraphFromDerby(dbpath);
 		//System.out.println(" Has "+base.getNbNodes()+" nodes and "+base.getNbEdges()+" edges.");
 	}
-	
+
 	@Override
-	public void visitTo(String id) throws NoEntryPointException {
+	public void visitTo(String id) throws SpecialEntryPointException {
 		Long node;
-		
+
 		if(!bugs.containsKey(id)){
 			// Search the correspondence
 			node = searchAdaptedMethod(id);
@@ -48,47 +49,44 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 		}else{
 			node = bugs.get(id);
 		}
-		
+
 		if(node == null){
-			throw new NoEntryPointException();
+			throw new SpecialEntryPointException(TYPE.NOT_FOUND);
 		}
-		
+
 		try{
 			base.visitTo(populateNew(id), Long.toString(node));
 		} catch (AlreadyGeneratedException e) {
 			// Already generated, nothing to do...
 		}
 	}
-	
+
 	/**
 	 * This function returns the numerals nodes only !!!
 	 * TODO: Propose an alternative writing type?
 	 */
 	@Override
-	public String[] getLastImpactedNodes() throws NoEntryPointException {
+	public String[] getLastImpactedNodes() {
 		return getLastPropagationGraph().getNodesNames();
 	}
 
 	@Override
-	public String[] getLastImpactedTestNodes(String[] tests) throws NoEntryPointException {
+	public String[] getLastImpactedTestNodes(String[] tests) {
 		if(this.testsMapped == null){
 			getMappingsForTests(tests);
 		}
 		
-		if(bugs.get(last_entryid) == null)
-			 throw new NoEntryPointException();
-		
 		ArrayList<String> ret = new ArrayList<String>();
-		
+
 		for(String node : getLastPropagationGraph().getNodesNames()){
 			if(testsMapped.containsKey(Long.parseLong(node))){
 				ret.add(testsMapped.get(Long.parseLong(node)));
 			}
 		}
-		
+
 		return (String[])ret.toArray(new String[0]);
 	}
-	
+
 	private void getMappingsForTests(String[] tests) {
 		testsMapped = new HashMap<>();
 
@@ -102,13 +100,14 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 				if(searchAdaptedMethod != null){
 					//JavaPDGTriplet triplet = dbentries.get(searchAdaptedMethod);
 					testsMapped.put(searchAdaptedMethod, t);
+					//System.out.println("Find candidate for "+t+" :)");
 				}else{
 					//System.err.println("Unable to find candidate for "+t);
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Check if parameters in params1 and params2 are identicals
 	 * @param params1
@@ -126,7 +125,7 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 
 		return true;
 	}
-	
+
 	/**
 	 * Try to find a possible matching between JVM signature and ours...
 	 * If find ONE signature, return its ID, else return null
@@ -152,10 +151,12 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 					object_tmp[i] = "java.lang.Object";
 			}
 
-			if(q.getPackageName().equals(pkg) && 
-					q.getMethodName().equals(mth) && 
-					sameParameters(q.getParameters(), object_tmp)){
-				candidated.add(l);
+			if(q.getPackageName().equals(pkg)){
+				if(q.getMethodName().equals(mth)){ 
+					if(sameParameters(q.getParameters(), object_tmp)){
+						candidated.add(l);
+					}
+				}
 			}
 		}
 
@@ -164,7 +165,7 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 
 		return null;
 	}
-	
+
 	private void populateWithNumericalCallGraphFromDerby(String dbpath) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		Connection conn = dbconnect(dbpath);
 		Statement createStatement = conn.createStatement();
@@ -177,8 +178,8 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 			base.addDirectedEdgeAndNodeIfNeeded(Long.toString(src), Long.toString(dst));
 		}
 	}
-	
-	
+
+
 	private Map<Long, JavaPDGTriplet> getMethodsFromDerby(String dbpath) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		Map<Long, JavaPDGTriplet> dbentries = new HashMap<>();
 		Connection conn = dbconnect(dbpath);
@@ -193,13 +194,13 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 			q.setMethod(resultSet.getString("METHODNAME"));
 			q.setSignature(resultSet.getString("METHODSIGNATURE"));
 			q.setPackage(resultSet.getString("METHODPACKAGENAME"));
-			
+
 			dbentries.put(resultSet.getLong("METHODID"), q);
 		}
 
 		return dbentries;
 	}
-	
+
 	/**
 	 * Establish a connection with the JavaPDG Derby database
 	 * @return

@@ -173,7 +173,7 @@ public class AllMutationsStatsRunner{
 
 	private static String getHeader(Character sep) {
 		if(sep == null){
-			return String.format("%25s %25s %3s   %s", "Project", "Graph", MutationStatsRunner.getDataHeader(sep).substring(24));
+			return String.format("%25s %25s %3s   %s", "Project", "Graph", "Met", MutationStatsRunner.getDataHeader(sep).substring(24));
 		}else{
 			return String.format("\"Project\"%c\"graph\"%c\"Type\"%c%s", sep, sep, sep, MutationStatsRunner.getDataHeader(sep).substring(8));
 		}
@@ -211,15 +211,15 @@ public class AllMutationsStatsRunner{
 					if(sep==null){
 						System.out.printf("%25s %25s %3s %s", (name.length()>25?"..."+name.substring(name.length()-22):name), graphTitle.endsWith(".xml")?graphTitle.substring(0, graphTitle.length()-4):graphTitle, "avg", ret[1]);
 					}else{
-						System.out.printf("\"%s\"%c\"%s\"%c\"%s\"%c%s", name, sep, graphTitle, sep, "avg", ret[1]);
+						System.out.printf("\"%s\"%c\"%s\"%c\"%s\"%c%s", name, sep, graphTitle, sep, "avg", sep, ret[1]);
 					}
 				}
 
 				if(med || (!avg && !med)){
 					if(sep==null){
-						System.out.printf("%25s %25s %3s %s", (name.length()>25?"..."+name.substring(name.length()-22):name), graphTitle.endsWith(".xml")?graphTitle.substring(0, graphTitle.length()-4):graphTitle, "avg", ret[0]);
+						System.out.printf("%25s %25s %3s %s", (name.length()>25?"..."+name.substring(name.length()-22):name), graphTitle.endsWith(".xml")?graphTitle.substring(0, graphTitle.length()-4):graphTitle, "med", ret[0]);
 					}else{
-						System.out.printf("\"%s\"%c\"%s\"%c\"%s\"%c%s", name, sep, graphTitle, sep, "avg", ret[0]);
+						System.out.printf("\"%s\"%c\"%s\"%c\"%s\"%c%s", name, sep, graphTitle, sep, "med", sep, ret[0]);
 					}
 				}
 			}

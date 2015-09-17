@@ -4,7 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.vmusco.pminer.exceptions.AlreadyGeneratedException;
-import com.vmusco.pminer.exceptions.NoEntryPointException;
+import com.vmusco.pminer.exceptions.SpecialEntryPointException;
+import com.vmusco.pminer.exceptions.SpecialEntryPointException.TYPE;
 import com.vmusco.softminer.graphs.Graph;
 
 /**
@@ -17,10 +18,14 @@ public class SoftMinerPropagationExplorer extends PropagationExplorer{
 	}
 
 	@Override
-	public void visitTo(String id) throws NoEntryPointException {
+	public void visitTo(String id) throws SpecialEntryPointException {
 		try {
 			if(!base.hasNode(id)){
-				throw new NoEntryPointException();
+				throw new SpecialEntryPointException(TYPE.NOT_FOUND);
+			}
+			
+			if(base.getOutDegreeFor(id) <= 0 && base.getInDegreeFor(id) <= 0){
+				throw new SpecialEntryPointException(TYPE.ISOLATED);
 			}
 			
 			base.visitTo(populateNew(id), id);
@@ -32,12 +37,12 @@ public class SoftMinerPropagationExplorer extends PropagationExplorer{
 	
 	
 	@Override
-	public String[] getLastImpactedNodes() throws NoEntryPointException{
+	public String[] getLastImpactedNodes(){
 		return getLastPropagationGraph().getNodesNames();
 	}
 
 	@Override
-	public String[] getLastImpactedTestNodes(String[] tests) throws NoEntryPointException{
+	public String[] getLastImpactedTestNodes(String[] tests){
 		String[] nodesNames = getLastPropagationGraph().getNodesNames();
 		Set<String> r = new HashSet<String>();
 

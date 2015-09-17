@@ -25,6 +25,7 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	private String[] lastGraphDetermined = null;
 	private List<Double> times = new ArrayList<Double>();
 	private boolean lastUnbounded = false;
+	private boolean lastIsolated = false;
 	
 	public MutationStatisticsCollecter(MutantTestProcessingListener<MutationStatisticsCollecter> mtpl) {
 		this.mtpl  = mtpl;
@@ -43,18 +44,26 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	@Override
 	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) throws MutationNotRunException {
 		// To declare an unbounded case, pass impactedNodes = null and impactedTests = null
+		// To declare an isolated case, pass impactedNodes = null and impactedTests = []
 		String[] cis = impactedTests;
 		
 		lastMutantId = mi.getId();
 		lastProcessStatistics = ps;
 		lastMutantIfos = mi;
 		lastGraphDetermined = cis;
-		lastUnbounded  = impactedNodes == null || impactedTests == null;
+		lastUnbounded = impactedNodes == null && impactedTests == null;
+		lastIsolated  = impactedNodes == null && impactedTests != null && impactedTests.length == 0;
 		
 		String[] ais = mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps);
 
-		prf.cumulate(ais, cis);
+		if(lastUnbounded){
+			soud.addUnbounded(mi.getId());
+		}else if(lastIsolated){
+			soud.addIsolated(mi.getId());
+		}
+		
 		soud.cumulate(mi.getId(), ais, cis);
+		prf.cumulate(ais, cis);
 
 		if(mtpl != null)
 			mtpl.aMutantHasBeenProceeded(this);
@@ -88,6 +97,10 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 
 	public boolean isLastUnbounded(){
 		return lastUnbounded;
+	}
+	
+	public boolean isLastIsolated() {
+		return lastIsolated;
 	}
 	
 	public ProcessStatistics getLastProcessStatistics() {

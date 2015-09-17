@@ -3,6 +3,7 @@ package com.vmusco.pminer.run;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -12,7 +13,8 @@ import org.apache.commons.cli.PosixParser;
 
 import com.vmusco.pminer.analyze.MutantTestProcessingListener;
 import com.vmusco.pminer.analyze.MutationStatisticsCollecter;
-import com.vmusco.pminer.exceptions.NoEntryPointException;
+import com.vmusco.pminer.exceptions.SpecialEntryPointException;
+import com.vmusco.pminer.exceptions.SpecialEntryPointException.TYPE;
 import com.vmusco.pminer.impact.JavapdgPropagationExplorer;
 import com.vmusco.pminer.impact.PropagationExplorer;
 import com.vmusco.pminer.impact.SoftMinerPropagationExplorer;
@@ -90,7 +92,7 @@ public class MutationStatsRunner{
 				if(ssep == null){
 					System.out.printf("%20s%s.........................%7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %s\n",
 							a.getLastMutantId(),
-							(a.isLastUnbounded()?" (unbounded)":"............"),
+							(a.isLastUnbounded()?" (unbounded)":((a.isLastIsolated())?"  (isolated)":"............")),
 							(int)a.getSoud().getLastCandidateImpactSetSize(),
 							(int)a.getSoud().getLastActualImpactSetSize(),
 							(int)a.getSoud().getLastIntersectedImpactSetSize(),
@@ -99,11 +101,11 @@ public class MutationStatsRunner{
 							a.getPrecisionRecallFscore().getLastPrecision(),
 							a.getPrecisionRecallFscore().getLastRecall(),
 							a.getPrecisionRecallFscore().getLastFscore(),
-							(a.isLastUnbounded()?a.getLastMutantIfos().getMutationIn():""));
+							((a.isLastUnbounded()||a.isLastIsolated())?a.getLastMutantIfos().getMutationIn():""));
 				}else{
 					System.out.printf("\"%s\"%c%c%c%c%c%c%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%c%c%c%c\n",
-							a.getLastMutantId()+(a.isLastUnbounded()?" (unbounded)":"")
-							,ssep,ssep,ssep,ssep,ssep, ssep, ssep,
+							a.getLastMutantId()+(a.isLastUnbounded()?" (unbounded)":((a.isLastIsolated())?" (isolated)":"")),
+							ssep,ssep,ssep,ssep,ssep, ssep, ssep,
 							(int)a.getSoud().getLastCandidateImpactSetSize(),ssep,
 							(int)a.getSoud().getLastActualImpactSetSize(),ssep,
 							(int)a.getSoud().getLastIntersectedImpactSetSize(),ssep,
@@ -156,9 +158,9 @@ public class MutationStatsRunner{
 	protected static String getDataHeader(Character sep){
 		printLine(sep);
 		if(sep == null){
-			return String.format("           Mutant id    Op  #mut #aliv #unbo #node #edge     CIS     AIS   C^AIS    FPIS     DIS    prec  recall  fscore       S       C       O       U       D");
+			return String.format("           Mutant id    Op  #mut #aliv #unbo  #iso #node #edge     CIS     AIS   C^AIS    FPIS     DIS    prec  recall  fscore       S       C       O       U       D");
 		}else{
-			return String.format("\"MutId\"%c\"Op\"%c\"nbmut\"%c\"nbalives\"%c\"nunbound\"%c\"nbnodes\"%c\"nbedges\"%c\"CIS\"%c\"AIS\"%c\"CAIS\"%c\"FPIS\"%c\"DIS\"%c\"prec\"%c\"recall\"%c\"fscore\"%c\"S\"%c\"C\"%c\"O\"%c\"U\"%c\"D\"", sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep);
+			return String.format("\"MutId\"%c\"Op\"%c\"nbmut\"%c\"nbalives\"%c\"nunbound\"%c\"nisolated\"%c\"nbnodes\"%c\"nbedges\"%c\"CIS\"%c\"AIS\"%c\"CAIS\"%c\"FPIS\"%c\"DIS\"%c\"prec\"%c\"recall\"%c\"fscore\"%c\"S\"%c\"C\"%c\"O\"%c\"U\"%c\"D\"", sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep);
 		}
 	}
 
@@ -174,6 +176,7 @@ public class MutationStatsRunner{
 		/**
 		 * Compute the mutants entry set...
 		 */
+		
 		String[] allMutations;
 		allMutations = ms.listViableAndRunnedMutants(true);
 
@@ -217,14 +220,18 @@ public class MutationStatsRunner{
 				pgp.visitTo(id);
 				sd.fireIntersectionFound(ps, ifos, pgp.getLastImpactedNodes(), pgp.getLastImpactedTestNodes(ps.getTestCases()));
 				cpt++;
-			}catch(NoEntryPointException e){
+			}catch(SpecialEntryPointException e){
 				// No entry point here !
 				//nbunbounded++;
 
 				if(excludeUnbounded){
 					continue;
 				}else{
-					sd.fireIntersectionFound(ps, ifos, null, null);
+					if(e.getType().equals(TYPE.NOT_FOUND)){
+						sd.fireIntersectionFound(ps, ifos, null, null);
+					}else{
+						sd.fireIntersectionFound(ps, ifos, null, new String[0]);
+					}
 					cpt++;
 				}
 			}
@@ -250,11 +257,12 @@ public class MutationStatsRunner{
 		}
 
 		if(sep == null){
-			ret[0] = String.format("%5s %5d %5d %5d %5d %5d %7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
+			ret[0] = String.format("%5s %5d %5d %5d %5d %5d %5d %7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
 					ms.getMutationId(),
 					cpt,
 					nbalives,
 					sd.getSoud().getNbUnbounded(),
+					sd.getSoud().getNbIsolated(),
 					pgp.getBaseGraphNodesCount(),
 					pgp.getBaseGraphEdgesCount(),
 					(int)sd.getSoud().getCurrentMedianCandidateImpactSetSize(),
@@ -271,11 +279,12 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbUnderestimatedProportion(),
 					sd.getSoud().getNbDifferentProportion());
 
-			ret[1] = String.format("%5s %5d %5d %5d %5d %5d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
+			ret[1] = String.format("%5s %5d %5d %5d %5d %5d %5d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
 					ms.getMutationId(),
 					cpt,
 					nbalives,
 					sd.getSoud().getNbUnbounded(),
+					sd.getSoud().getNbIsolated(),
 					pgp.getBaseGraphNodesCount(),
 					pgp.getBaseGraphEdgesCount(),
 					sd.getSoud().getCurrentMeanCandidateImpactSetSize(),
@@ -292,11 +301,12 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbUnderestimatedProportion(),
 					sd.getSoud().getNbDifferentProportion());
 		}else{
-			ret[0] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
+			ret[0] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
 					ms.getMutationId(),sep,
 					cpt,sep,
 					nbalives,sep,
 					sd.getSoud().getNbUnbounded(),sep,
+					sd.getSoud().getNbIsolated(),sep,
 					pgp.getBaseGraphNodesCount(),sep,
 					pgp.getBaseGraphEdgesCount(),sep,
 					(int)sd.getSoud().getCurrentMedianCandidateImpactSetSize(),sep,
@@ -313,11 +323,12 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbUnderestimatedProportion(),sep,
 					sd.getSoud().getNbDifferentProportion());
 
-			ret[1] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
+			ret[1] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
 					ms.getMutationId(),sep,
 					cpt,sep,
 					nbalives,sep,
 					sd.getSoud().getNbUnbounded(),sep,
+					sd.getSoud().getNbIsolated(),sep,
 					pgp.getBaseGraphNodesCount(),sep,
 					pgp.getBaseGraphEdgesCount(),sep,
 					sd.getSoud().getCurrentMeanCandidateImpactSetSize(),sep,
