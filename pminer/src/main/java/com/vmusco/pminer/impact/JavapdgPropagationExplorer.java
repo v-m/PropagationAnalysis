@@ -37,6 +37,10 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 		populateWithNumericalCallGraphFromDerby(dbpath);
 		//System.out.println(" Has "+base.getNbNodes()+" nodes and "+base.getNbEdges()+" edges.");
 	}
+	
+	public JavapdgPropagationExplorer(String archivepath, String dbname) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+		this("jar:("+archivepath+")"+dbname);
+	}
 
 	@Override
 	public void visitTo(String id) throws SpecialEntryPointException {

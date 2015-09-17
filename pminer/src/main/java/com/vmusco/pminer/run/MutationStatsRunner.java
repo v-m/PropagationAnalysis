@@ -49,7 +49,7 @@ public class MutationStatsRunner{
 		options.addOption(opt);
 		opt = new Option("n", "nb-mutants", true, "filter out if more than n mutants are present");
 		options.addOption(opt);
-		opt = new Option("j", "javapdg", false, "<graph> is a javapdg database instead of a softminer call-graph");
+		opt = new Option("j", "javapdg", false, "<graph> is a javapdg database root folder instead of a softminer call-graph. If an archive, end with : and input the database path in the archive");
 		options.addOption(opt);
 		opt = new Option("c", "csv", true, "export in csv format with such a separator");
 		options.addOption(opt);
@@ -123,7 +123,12 @@ public class MutationStatsRunner{
 		String pth = cmd.getArgs()[0];
 		
 		if(cmd.hasOption("javapdg")){
-			pgp = new JavapdgPropagationExplorer(pth);
+			String[] parts = pth.split(":");
+			
+			if(parts.length > 1)
+				pgp = new JavapdgPropagationExplorer(parts[0], parts[1]);
+			else
+				pgp = new JavapdgPropagationExplorer(parts[0]);
 		}else{
 			pgp = new SoftMinerPropagationExplorer(loadGraph(pth));
 		}
