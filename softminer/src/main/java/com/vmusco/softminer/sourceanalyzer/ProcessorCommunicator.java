@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import spoon.reflect.cu.SourcePosition;
 
+import com.vmusco.smf.exceptions.MalformedSourcePositionException;
 import com.vmusco.smf.utils.SourceReference;
 import com.vmusco.softminer.graphs.EdgeMarkers;
 import com.vmusco.softminer.graphs.EdgeTypes;
@@ -95,7 +96,7 @@ public abstract class ProcessorCommunicator {
 		return patternpass;
 	}
 	
-	public static boolean addNode(String src, NodeTypes src_type, SourcePosition originator){
+	public static boolean addNode(String src, NodeTypes src_type, SourcePosition originator) throws MalformedSourcePositionException{
 		if(outputgraph != null){
 			String finalsrc = src;
 			
@@ -120,7 +121,7 @@ public abstract class ProcessorCommunicator {
 		return false;
 	}
 	
-	public static boolean addEdgeIfAllowed(String src, String dst, NodeTypes src_type, NodeTypes dst_type, EdgeTypes edgeType, SourcePosition originator){
+	public static boolean addEdgeIfAllowed(String src, String dst, NodeTypes src_type, NodeTypes dst_type, EdgeTypes edgeType, SourcePosition originator) throws MalformedSourcePositionException{
 		if(allowedByPattern(src, dst)){
 			if(outputgraph != null){
 				String finalsrc = src;

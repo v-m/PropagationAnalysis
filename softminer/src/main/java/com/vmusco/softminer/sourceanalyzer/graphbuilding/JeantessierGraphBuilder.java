@@ -17,6 +17,7 @@ import com.jeantessier.dependency.FeatureNode;
 import com.jeantessier.dependency.NodeFactory;
 import com.jeantessier.dependency.PackageNode;
 import com.jeantessier.dependency.SelectionCriteria;
+import com.vmusco.smf.exceptions.MalformedSourcePositionException;
 import com.vmusco.softminer.graphs.EdgeTypes;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.NodeTypes;
@@ -123,7 +124,13 @@ public class JeantessierGraphBuilder extends GraphBuildLogic {
 			String src = event.getDependent().getName().replaceAll(" ", "");
 			String dst = event.getDependable().getName().replaceAll(" ", "");
 			
-			ProcessorCommunicator.addEdgeIfAllowed(src, dst, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.METHOD_CALL, null);
+			try {
+				ProcessorCommunicator.addEdgeIfAllowed(src, dst, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.METHOD_CALL, null);
+			} catch (MalformedSourcePositionException e) {
+				// TODO Auto-generated catch block
+				// Never occurs
+				e.printStackTrace();
+			}
 		}
 
 		@Override

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmusco.smf.exceptions.MalformedSourcePositionException;
 import com.vmusco.softminer.graphs.EdgeTypes;
 import com.vmusco.softminer.graphs.NodeMarkers;
 import com.vmusco.softminer.graphs.NodeTypes;
@@ -28,7 +29,12 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		String src_txt = getNodeForItemKey(src); 
 		String dst_txt = anAccess.getSignature().split(" ")[1];
 		
-		ProcessorCommunicator.addEdgeIfAllowed(src_txt, dst_txt, NodeTypes.METHOD, NodeTypes.FIELD, EdgeTypes.READ_OPERATION, src.getPosition());
+		try {
+			ProcessorCommunicator.addEdgeIfAllowed(src_txt, dst_txt, NodeTypes.METHOD, NodeTypes.FIELD, EdgeTypes.READ_OPERATION, src.getPosition());
+		} catch (MalformedSourcePositionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -36,7 +42,12 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		String src_txt = getNodeForItemKey(src); 
 		String dst_txt = anAccess.getSignature().split(" ")[1];
 		
-		ProcessorCommunicator.addEdgeIfAllowed(dst_txt, src_txt, NodeTypes.METHOD, NodeTypes.FIELD, EdgeTypes.WRITE_OPERATION, src.getPosition());
+		try {
+			ProcessorCommunicator.addEdgeIfAllowed(dst_txt, src_txt, NodeTypes.METHOD, NodeTypes.FIELD, EdgeTypes.WRITE_OPERATION, src.getPosition());
+		} catch (MalformedSourcePositionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -53,7 +64,12 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		String src_txt = getNodeForItemKey(src); 
 		String dst_txt = getNodeForItemKey(aReferenceExecutable);
 		
-		ProcessorCommunicator.addEdgeIfAllowed(src_txt, dst_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.METHOD_CALL, src.getPosition());
+		try {
+			ProcessorCommunicator.addEdgeIfAllowed(src_txt, dst_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.METHOD_CALL, src.getPosition());
+		} catch (MalformedSourcePositionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -61,7 +77,12 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		String src_txt = getNodeForItemKey(src); 
 		String dst_txt = getNodeForItemKey(exo);
 		
-		ProcessorCommunicator.addEdgeIfAllowed(dst_txt, src_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION, src.getPosition());
+		try {
+			ProcessorCommunicator.addEdgeIfAllowed(dst_txt, src_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION, src.getPosition());
+		} catch (MalformedSourcePositionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -69,7 +90,12 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		String src_txt = getNodeForItemKey(src); 
 		String dst_txt = getNodeForItemKey(exo);
 
-		ProcessorCommunicator.addEdgeIfAllowed(dst_txt, src_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION, src.getPosition());
+		try {
+			ProcessorCommunicator.addEdgeIfAllowed(dst_txt, src_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INTERFACE_IMPLEMENTATION, src.getPosition());
+		} catch (MalformedSourcePositionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -93,12 +119,22 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		String src_txt = src.getReference().getQualifiedName();
 		String dst_txt = getNodeForItemKey(declaration);
 		
-		ProcessorCommunicator.addEdgeIfAllowed(src_txt, dst_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INLINE_CONSTRUCTOR_CALL, src.getPosition());
+		try {
+			ProcessorCommunicator.addEdgeIfAllowed(src_txt, dst_txt, NodeTypes.METHOD, NodeTypes.METHOD, EdgeTypes.INLINE_CONSTRUCTOR_CALL, src.getPosition());
+		} catch (MalformedSourcePositionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void methodVisited(CtExecutable<?> execElement) {
 		String node_txt = getNodeForItemKey(execElement);
-		ProcessorCommunicator.addNode(node_txt, NodeTypes.METHOD, execElement.getPosition());
+		try {
+			ProcessorCommunicator.addNode(node_txt, NodeTypes.METHOD, execElement.getPosition());
+		} catch (MalformedSourcePositionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
