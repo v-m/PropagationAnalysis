@@ -103,6 +103,7 @@ public class DepGraphTestHelper {
 				return popFunction(originalName);
 			}
 		};
+		ProcessorCommunicator.includeAllNodes = false;
 	}
 		
 	

@@ -68,6 +68,39 @@ public class CallGraphMinusTest extends CallGraphAbstractTest {
 				abs, 
 				new String[]{impl}, 
 				new String[]{});
+	}
+	
+	@Override
+	public void testPaperCase() throws Exception {
+		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testPaperCase.B.class);
 		
+		String a = dgth.formatAtom("A()");
+		String b = dgth.formatAtom("B()");
+		String c_biz1 = dgth.formatAtom("C.biz1()");
+		String c_biz2 = dgth.formatAtom("C.biz2()");
+		String a_foo = dgth.formatAtom("A.foo()");
+		
+		//dgth.getGraph().bestDisplay();
+		dgth.fullAssertGraph(5, 4);
+
+		dgth.fullAssertNode(
+				a, 
+				new String[]{b}, 
+				new String[]{});
+
+		dgth.fullAssertNode(
+				b, 
+				new String[]{c_biz1, c_biz2}, 
+				new String[]{a});
+
+		dgth.fullAssertNode(
+				c_biz1, 
+				new String[]{}, 
+				new String[]{b});
+
+		dgth.fullAssertNode(
+				c_biz2, 
+				new String[]{}, 
+				new String[]{b, a_foo});
 	}
 }

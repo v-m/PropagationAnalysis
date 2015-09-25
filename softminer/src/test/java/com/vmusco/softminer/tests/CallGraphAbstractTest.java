@@ -36,7 +36,14 @@ public abstract class CallGraphAbstractTest {
 	 */
 	@Test
 	public abstract void testInterfaceAndLinking() throws Exception;
+	
 
+	/****
+	 * This test illustrates call graphs used in paper
+	 * @throws Exception
+	 */
+	@Test
+	public abstract void testPaperCase() throws Exception;
 
 	/**
 	 * Test a simple inheritence case

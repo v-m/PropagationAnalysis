@@ -271,4 +271,60 @@ public class CallGraphCHATest extends CallGraphAbstractTest {
 				new String[]{impl}, 
 				new String[]{});
 	}
+	
+	@Override
+	public void testPaperCase() throws Exception {
+		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testPaperCase.C.class);
+		
+
+		String a = dgth.formatAtom("A()");
+		String b = dgth.formatAtom("B()");
+		String c_biz1 = dgth.formatAtom("C.biz1()");
+		String c_biz2 = dgth.formatAtom("C.biz2()");
+		String a_foo = dgth.formatAtom("A.foo()");
+		String b_foo = dgth.formatAtom("B.foo()");
+		
+		//dgth.getGraph().bestDisplay();
+		dgth.fullAssertGraph(6, 6);
+
+		dgth.fullAssertNode(
+				b, 
+				new String[]{c_biz1, c_biz2}, 
+				new String[]{a});
+		
+
+		dgth.fullAssertNode(
+				a, 
+				new String[]{b}, 
+				new String[]{});
+		
+
+		dgth.fullAssertNode(
+				a_foo, 
+				new String[]{c_biz2}, 
+				new String[]{b_foo});
+		
+
+		dgth.fullAssertNode(
+				b_foo, 
+				new String[]{a_foo, c_biz1}, 
+				new String[]{});
+		
+
+		dgth.fullAssertNode(
+				c_biz1, 
+				new String[]{}, 
+				new String[]{b_foo, b});
+	
+
+		dgth.fullAssertNode(
+				c_biz2, 
+				new String[]{}, 
+				new String[]{a_foo, b});
+		
+		// Paper Figure (no constructors)
+		dgth.getGraph().removeNode(a);
+		dgth.getGraph().removeNode(b);
+		//dgth.getGraph().bestDisplay();
+	}
 }

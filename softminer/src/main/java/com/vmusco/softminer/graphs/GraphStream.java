@@ -703,5 +703,14 @@ public class GraphStream extends Graph {
 
 		return attribute.toArray(new SourceReference[0]);
 	}
+	
+	@Override
+	public void removeDirectedEdge(String from, String to) {
+		getGraph().removeEdge(from, to);
+	}
 
+	@Override
+	public void removeNode(String id) {
+		getGraph().removeNode(id);
+	}
 }
