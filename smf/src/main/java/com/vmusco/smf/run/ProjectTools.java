@@ -117,7 +117,7 @@ public class ProjectTools {
 					CtElement[] mutations = Mutation.getMutations(ps, ms, factory);
 
 					for(CtElement e : mutations){
-						HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = Mutation.obtainsMutationCandidates(ms, e, factory, false);
+						HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = Mutation.obtainsMutationCandidates(ms.getMutationObject(), e, factory);
 						if(mutatedEntriesWithTargets != null)
 							maxmutat += mutatedEntriesWithTargets.size();
 					}

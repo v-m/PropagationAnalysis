@@ -410,7 +410,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	 * @return
 	 * @throws MalformedSourcePositionException 
 	 */
-	public SourceReference generateSourceReferenceForMutation(CtElement toReplace) {
+	public static SourceReference generateSourceReferenceForMutation(CtElement toReplace) {
 		SourceReference sr = null;
 		CtElement search = toReplace;
 		
@@ -434,8 +434,12 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 			sr.setParentSearch(parentsearch);
 		}
 
-		if(toReplace.getPosition().getFile().getAbsolutePath().startsWith(ps.resolveThis(ps.getOriginalSrc()))){
-			sr.setFile(toReplace.getPosition().getFile().getAbsolutePath().substring(ps.resolveThis(ps.getOriginalSrc()).length()));
+		return sr;
+	}
+	
+	public SourceReference shortenPathForGeneratedSourceReference(SourceReference sr) {
+		if(sr.getFile().startsWith(ps.resolveThis(ps.getOriginalSrc()))){
+			sr.setFile(sr.getFile().substring(ps.resolveThis(ps.getOriginalSrc()).length()));
 		}
 		
 		return sr;

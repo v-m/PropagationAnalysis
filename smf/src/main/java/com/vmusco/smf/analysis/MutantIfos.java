@@ -1,5 +1,7 @@
 package com.vmusco.smf.analysis;
 
+import java.io.File;
+
 import spoon.reflect.cu.SourcePosition;
 import spoon.support.reflect.declaration.CtElementImpl;
 
@@ -34,6 +36,27 @@ public class MutantIfos{
 	 */
 	private boolean viable;
 	
+	/**
+	 * This file describes where generated files are located. This information is NOT persisted in the XML file,
+	 * thus it should not be accurate (only used for generation phase).
+	 */
+	private File generationDirectory;
+	
+	/**
+	 * This file describes where generated files are located. This information is NOT persisted in the XML file,
+	 * thus it should not be accurate (only used for generation phase).
+	 */
+	public File getGenerationDirectory() {
+		return generationDirectory;
+	}
+
+	/**
+	 * This file describes where generated files are located. This information is NOT persisted in the XML file,
+	 * thus it should not be accurate (only used for generation phase).
+	 */
+	public void setGenerationDirectory(File generationDirectory) {
+		this.generationDirectory = generationDirectory;
+	}
 	
 	/*
 	 * Informations under identifies the mutant
