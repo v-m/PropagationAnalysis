@@ -62,5 +62,12 @@
 			<artifactId>maven-artifact</artifactId>
 			<version>3.2.3</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.tmatesoft.svnkit</groupId>
+			<artifactId>svnkit</artifactId>
+			<version>1.8.10</version>
+		</dependency>
+
 	</dependencies>
 </project>

@@ -839,7 +839,7 @@ public class ProcessStatistics implements Serializable{
 		return f.exists();
 	}
 
-	public void exportClassPath() throws IOException, InterruptedException {
+	public void exportClassPath() throws IOException {
 		System.out.println("[MAVEN] Exporting classpath...");
 
 		File dst = new File(this.buildPath(this.cpLocalFolder));

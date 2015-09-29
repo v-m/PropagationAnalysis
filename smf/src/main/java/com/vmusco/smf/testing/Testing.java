@@ -47,7 +47,7 @@ public final class Testing {
 	private Testing() {
 	}
 
-	private static void executeTestDetection(String[] srcFolder, String[] classpath) throws Exception{
+	private static void executeTestDetection(String[] srcFolder, String[] classpath){
 		Factory factory = new FactoryImpl(new DefaultCoreFactory(), new StandardEnvironment());
 		SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
 
@@ -67,18 +67,26 @@ public final class Testing {
 		arg0.add(TestCasesProcessor.class.getName());
 		compiler.process(arg0);
 
-		System.out.println(TestCasesProcessor.getNbFromAnnotations()+" test classes based on Annotation (Junit 4)");
+		/*System.out.println(TestCasesProcessor.getNbFromAnnotations()+" test classes based on Annotation (Junit 4)");
 		System.out.println(TestCasesProcessor.getNbFromTestCases()+" test classes based on inheritance (Junit 3)");
-		System.out.println();
+		System.out.println();*/
 	}
 
 
-
-	public static void findTestClassesString(ProcessStatistics ps) throws Exception{
+	/**
+	 * Search for junit test classes declared by inheritance (junit 3) and annotation (junit 4) and store those in ps
+	 * @param ps
+	 * @return an array with two int, respectively the number of tests classes determined by annotation and by inheritance
+	 */
+	public static int[] findTestClassesString(ProcessStatistics ps){
 		ps.setTestClasses(findTestClassesString(ps.getSrcTestsToTreat(true), ps.getTestingClasspath()));
+		return new int[]{
+				TestCasesProcessor.getNbFromAnnotations(),
+				TestCasesProcessor.getNbFromTestCases()
+		};
 	}
 
-	public static String[] findTestClassesString(String[] srcFolder, String[] classpath) throws Exception{
+	public static String[] findTestClassesString(String[] srcFolder, String[] classpath){
 		executeTestDetection(srcFolder, classpath);
 		return TestCasesProcessor.getTestClassesString();
 	}
@@ -86,14 +94,14 @@ public final class Testing {
 
 
 
-	public static String[] findTestCasesString(String[] srcFolder, String[] classpath) throws Exception{
+	public static String[] findTestCasesString(String[] srcFolder, String[] classpath){
 		executeTestDetection(srcFolder, classpath);
 		return TestCasesProcessor.getTestCasesString();
 	}
 
 
 
-	public static CtClass<?>[] findTestClasses(String[] srcFolder, String[] classpath) throws Exception{
+	public static CtClass<?>[] findTestClasses(String[] srcFolder, String[] classpath){
 		executeTestDetection(srcFolder, classpath);
 		return TestCasesProcessor.getTestClasses();
 	}
@@ -102,7 +110,7 @@ public final class Testing {
 
 
 
-	public static CtMethod<?>[] findTestCases(String[] srcFolder, String[] classpath) throws Exception{
+	public static CtMethod<?>[] findTestCases(String[] srcFolder, String[] classpath){
 		executeTestDetection(srcFolder, classpath);
 		return TestCasesProcessor.getTestCases();
 	}
@@ -121,7 +129,7 @@ public final class Testing {
 		if(frontClassPathEntry != null){
 			cpp += frontClassPathEntry;
 		}
-		
+
 		/*Enumeration<URL> e = Test.class.getClassLoader().getResources("");
 		while (e.hasMoreElements())
 		{
@@ -154,7 +162,7 @@ public final class Testing {
 		if(endClassPathEntry != null){
 			cpp += (cpp.length()==0?"":":")+endClassPathEntry;
 		}
-		
+
 		cmd.add(cpp);
 
 		cmd.add(classToRun.getCanonicalName());
@@ -176,23 +184,23 @@ public final class Testing {
 	 * @throws ClassNotFoundException
 	 * @throws InterruptedException
 	 */
-	public static void runTestCases(ProcessStatistics ps, TestsExecutionListener tn) throws IOException, ClassNotFoundException, InterruptedException{
+	public static void runTestCases(ProcessStatistics ps, TestsExecutionListener tn) throws IOException{
 		runTestCases(ps, null, null, tn);
 	}
 
-	public static void runTestCases(ProcessStatistics ps) throws IOException, ClassNotFoundException, InterruptedException{
+	public static void runTestCases(ProcessStatistics ps) throws IOException{
 		runTestCases(ps, null);
 	}
 
-	public static void runTestCases(MutationStatistics<?> ms, String forMutant) throws IOException, ClassNotFoundException, InterruptedException{
+	public static void runTestCases(MutationStatistics<?> ms, String forMutant) throws IOException{
 		runTestCases(ms, forMutant, null);
 	}
 
-	public static void runTestCases(MutationStatistics<?> ms, String forMutant, TestingNotification tn) throws IOException, ClassNotFoundException, InterruptedException{
+	public static void runTestCases(MutationStatistics<?> ms, String forMutant, TestingNotification tn) throws IOException{
 		runTestCases(ms.getRelatedProcessStatisticsObject(), ms, forMutant, tn);
 	}
 
-	public static void runTestCases(ProcessStatistics ps, MutationStatistics<?> ms, String forMutant, TestsExecutionListener tel) throws IOException, ClassNotFoundException, InterruptedException{
+	public static void runTestCases(ProcessStatistics ps, MutationStatistics<?> ms, String forMutant, TestsExecutionListener tel) throws IOException{
 		//MutationStatistics ms = ps.mutations.get(mutationoperatorid);
 		Set<String> tests = new HashSet<>();
 		Set<String> failing = new HashSet<>();
@@ -203,9 +211,9 @@ public final class Testing {
 
 		long t1 = System.currentTimeMillis();
 		int cpt = 0;
-		
+
 		boolean tweaking_timeout = ms==null && ps.getTestTimeOut() == 0;
-		
+
 		int timeout = MAX_TEST_TIMEOUT;
 		if(tweaking_timeout){
 			timeout = MIN_TEST_TIMEOUT;
@@ -213,8 +221,8 @@ public final class Testing {
 			timeout = ps.getTestTimeOut();
 		}
 
-		tel.currentTimeout(timeout);
-		
+		if(tel != null)		tel.currentTimeout(timeout);
+
 		for(String aTest : ps.getTestClasses()){
 			cpt++;
 			boolean testcase_finished = false;
@@ -248,9 +256,9 @@ public final class Testing {
 				for(String c : cmd)
 					s += c+" ";
 				s = s.trim();
-				
+
 				if(tel != null)		tel.testSuiteExecutionStart(cpt, ps.getTestClasses().length, s);
-				
+
 				ProcessBuilder pb = new ProcessBuilder(cmd);
 				pb.directory(new File(ps.getProjectIn(true)));
 				pb.redirectErrorStream(true);
@@ -334,18 +342,18 @@ public final class Testing {
 				}catch(TimeoutException e){
 					if(tweaking_timeout && timeout < MAX_TEST_TIMEOUT){
 						timeout += INC_TEST_TIMEOUT;
-						tel.newTimeout(timeout);
+						if(tel != null)		tel.newTimeout(timeout);
 					}else{
 						try{
 							String shortcurrent = currentTestCase.substring(currentTestCase.lastIndexOf('.') + 1);
 							hangingTests.add(shortcurrent);
-		
+
 							if(addIfPermited(currentTestCase, ps, infloops)){
 								if(tel != null)		tel.testCaseNewLoop(cpt, line);
 							}else{
 								if(tel != null)		tel.testCaseNotPermitted(cpt, line);
 							}
-		
+
 							future.cancel(true);
 							executor.shutdownNow();
 							proc.destroy();
@@ -373,7 +381,7 @@ public final class Testing {
 
 		if(run_exception_skipped)
 			return;
-		
+
 		if(tweaking_timeout){
 			ps.setTestTimeOut(timeout);
 		}

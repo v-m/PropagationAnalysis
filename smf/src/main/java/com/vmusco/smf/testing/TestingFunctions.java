@@ -118,7 +118,7 @@ public abstract class TestingFunctions {
 						if(tn != null)	tn.mutantLocked();
 						nbproc++;
 					}
-				} catch (IOException | InterruptedException | ClassNotFoundException e) {
+				} catch (IOException e) {
 					if(tn != null)	tn.mutantException(e);
 				}
 			}else{
