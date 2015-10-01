@@ -8,7 +8,7 @@ public class MyClass {
 	}
 
 	public void setaVariable(String aParameter) {
-		this.aVariable = aVariable;
+		this.aVariable = aParameter;
 	}
 	
 	

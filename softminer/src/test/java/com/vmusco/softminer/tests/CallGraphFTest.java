@@ -20,8 +20,8 @@ public class CallGraphFTest extends CallGraphAbstractTest{
 	public void testVariableUsage() throws Exception{
 		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testVariableUsage.MyClass.class);
 		
-		//dgth.executionInspect(dg);
-		//System.out.println(dgth.stateAsATestCase(dg));
+		//dgth.executionInspect();
+		//System.out.println(dgth.stateAsATestCase());
 
 		String set_variable = dgth.formatAtom("MyClass.setaVariable("+DepGraphTestHelper.STRING_CANONICAL_NAME+")");
 		String get_variable = dgth.formatAtom("MyClass.getaVariable()");

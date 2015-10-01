@@ -4,6 +4,10 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+/**
+ * Tools for mutation testing
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public final class TestingTools {
 	
 	private TestingTools() {
@@ -28,12 +32,23 @@ public final class TestingTools {
 	 * @param testClass the class object which is in the desired folder (package)
 	 * @return
 	 */
-	public static String[] getTestClassForCurrentProject(Class testClass){
+	public static String[] getTestClassForCurrentProject(Class testClass, boolean getFolder){
 		File f = new File (System.getProperty("user.dir"));
 		f = new File(f, "src"+File.separator+"test"+File.separator+"java");
 		f = new File(f, testClass.getCanonicalName().replaceAll("\\.", File.separator));
-		f = f.getParentFile();
+		if(getFolder)
+			f = f.getParentFile();
 		
 		return new String[]{f.getAbsolutePath()};
+	}
+	
+	/**
+	 * Return a source folder for a test to compile
+	 * Only works if the executable is run from the project base
+	 * @param testClass the class object which is in the desired folder (package)
+	 * @return
+	 */
+	public static String[] getTestClassForCurrentProject(Class testClass){
+		return getTestClassForCurrentProject(testClass, true);
 	}
 }

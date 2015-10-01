@@ -390,15 +390,15 @@ public final class Mutation {
 						String mutationid = MUTANT_FILE_PREFIX+mutantcounter++;
 						String outp = ms.getSourceMutationResolved() + File.separator + mutationid;
 
-						FileUtils.moveDirectory(new File(tmpmi.getGenerationDirectory(), "src"), new File(outp));
+						FileUtils.moveDirectory(new File(tmpmi.getGenerationDirectory(), "src"), new File(outp, "src"));
 
 						String boutp = ms.getBytecodeMutationResolved() + File.separator + mutationid;
 						if(tmpmi.isViable()){
-							FileUtils.moveDirectory(new File(tmpmi.getGenerationDirectory(), "bytecode"), new File(outp));
+							FileUtils.moveDirectory(new File(tmpmi.getGenerationDirectory(), "bytecode"), new File(outp, "bytecode"));
 							validmutants++;
 							if(mcl != null) mcl.viableMutant((CtElement)o[0], (CtElementImpl)o[1]);
 						}else{
-							FileUtils.moveDirectory(new File(tmpmi.getGenerationDirectory(), "bytecode"), new File(boutp+".debug.txt"));
+							FileUtils.moveFile(new File(tmpmi.getGenerationDirectory(), "bytecode"), new File(boutp+".debug.txt"));
 							if(tmpmi.getMutationIn() == null){
 								tmpmi.setMutationIn("?");
 							}

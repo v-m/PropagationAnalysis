@@ -22,7 +22,7 @@ import com.vmusco.smf.testing.Testing;
  * Tests for projects managing code with Apache Commons Collections - revision 1610049 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class CollectionsProjectTests {
+public class CollectionsProjectTest {
 	private static File temporaryFolder;
 	private static File repoFolder = new File(temporaryFolder, "repo");
 	private static String repoUrl = "http://svn.apache.org/repos/asf/commons/proper/collections/trunk";

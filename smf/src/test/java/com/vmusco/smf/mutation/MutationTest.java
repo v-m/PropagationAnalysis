@@ -18,6 +18,7 @@ import spoon.support.reflect.code.CtLiteralImpl;
 import spoon.support.reflect.code.CtVariableReadImpl;
 import spoon.support.reflect.code.CtVariableWriteImpl;
 
+import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.exceptions.HashClashException;
 import com.vmusco.smf.exceptions.NotValidMutationException;
 import com.vmusco.smf.mutation.operators.KingOffutt91.AbsoluteValueInsertionMutator;
@@ -228,4 +229,35 @@ public class MutationTest {
 		
 		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp());
 	}
+	
+	/**
+	 * Test the mutant generated object
+	 * @throws NotValidMutationException 
+	 * @throws IOException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws HashClashException 
+	 */
+	@Test
+	public void testMutantIfosContent() throws NoSuchAlgorithmException, IOException, NotValidMutationException, HashClashException{
+		Factory factory = Mutation.obtainFactory();
+		Object[] r = getMutationTestingObject(factory);
+		
+		MutantIfos pm = Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp());
+
+		Assert.assertEquals("ab595c23fc91e4d344484f2cb6e8af14", pm.getHash());
+		Assert.assertEquals("i", pm.getMutationFrom());
+		Assert.assertEquals("i >= 0 ? i : i * -1", pm.getMutationTo());
+		Assert.assertEquals("com.vmusco.smf.mutation.testclasses.Class1.main(java.lang.String[])", pm.getMutationIn());
+		Assert.assertTrue(pm.isViable());
+		Assert.assertEquals(6, pm.getSourceReference().getColumnStart());
+		Assert.assertEquals(6, pm.getSourceReference().getColumnEnd());
+		Assert.assertEquals(10, pm.getSourceReference().getLineStart());
+		Assert.assertEquals(10, pm.getSourceReference().getLineEnd());
+		Assert.assertEquals(0, pm.getSourceReference().getParentSearch());
+		Assert.assertEquals(186, pm.getSourceReference().getSourceStart());
+		Assert.assertEquals(186, pm.getSourceReference().getSourceEnd());
+		Assert.assertEquals(TestingTools.getTestClassForCurrentProject(Class1.class, false)[0]+".java", pm.getSourceReference().getFile());
+	}
+	
+	
 }

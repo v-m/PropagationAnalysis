@@ -90,7 +90,7 @@ public class MutationStatsRunner{
 			@Override
 			public void aMutantHasBeenProceeded(MutationStatisticsCollecter a) {
 				if(ssep == null){
-					System.out.printf("%20s%s.........................%7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %s\n",
+					System.out.printf("%20s%s...............................%7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %s\n",
 							a.getLastMutantId(),
 							(a.isLastUnbounded()?" (unbounded)":((a.isLastIsolated())?"  (isolated)":"............")),
 							(int)a.getSoud().getLastCandidateImpactSetSize(),
