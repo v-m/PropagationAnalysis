@@ -50,6 +50,11 @@ public abstract class AbstractFeaturesProcessor extends AbstractProcessor<CtName
 	 */
 	public abstract void newDeclarationMethodCall(CtField<?> src, CtExecutable<?> declaration);
 
+	/**
+	 * Get the full name for an executable (method)
+	 * @param anExecutable
+	 * @return
+	 */
 	public static String getNodeForItemKey(CtExecutable anExecutable){
 		return Mutation.resolveName((CtTypeMember)anExecutable);
 	}

@@ -47,6 +47,7 @@ import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.smf.utils.InterruptionManager;
 import com.vmusco.smf.utils.NewReportedStandardEnvironment;
+import com.vmusco.smf.utils.SpoonHelpers;
 
 /**
  * This class contains tools for performing mutant generation
@@ -82,17 +83,6 @@ public final class Mutation {
 
 	public static void createMutants(ProcessStatistics ps, MutationStatistics<?> ms, MutationCreationListener mcl, boolean reset, int safepersist) throws PersistenceException {
 		createMutants(ps, ms, mcl, reset, -1, safepersist);
-	}
-
-	/**
-	 * Get a factory to work with
-	 * @return
-	 */
-	public static Factory obtainFactory(){
-		StandardEnvironment standardEnvironment = new StandardEnvironment();
-		standardEnvironment.setAutoImports(true);
-
-		return new FactoryImpl(new DefaultCoreFactory(), standardEnvironment);
 	}
 
 	/**
@@ -217,7 +207,7 @@ public final class Mutation {
 
 		// Compile it...
 		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
-		Map<String, byte[]> built = Compilation.compilesUsingJavax(theClass, generateAssociatedClassContent(theClass), testingClassPath, diagnostics);
+		Map<String, byte[]> built = Compilation.compilesUsingJavax(theClass, SpoonHelpers.generateAssociatedClassContent(theClass), testingClassPath, diagnostics);
 
 		File bc = new File(tmpf, "bytecode");
 		if(built != null){
@@ -268,7 +258,7 @@ public final class Mutation {
 
 	public static void createMutants(ProcessStatistics ps, MutationStatistics<?> ms, final MutationCreationListener mcl, boolean reset, int nb, int safepersist) throws PersistenceException{
 		try{
-			Factory factory = obtainFactory();
+			Factory factory = SpoonHelpers.obtainFactory();
 
 			long t1 = System.currentTimeMillis();
 			int mutantcounter = 0;
@@ -557,7 +547,7 @@ public final class Mutation {
 		}
 	}
 
-	static private CtClass<?> findAssociatedClass(CtElement e){
+	public static CtClass<?> findAssociatedClass(CtElement e){
 		CtElement c = e;
 
 		while(c != null && (!(c instanceof CtClass) || (c instanceof CtClass && !((CtClass<?>)c).isTopLevel()))){
@@ -565,18 +555,5 @@ public final class Mutation {
 		}
 
 		return (CtClass<?>)c;
-	}
-
-	/**
-	 * 
-	 * @param anElement
-	 * @return as a string the source ready for compilation
-	 */
-	static private String generateAssociatedClassContent(CtClass<?> anElement){
-		DefaultJavaPrettyPrinter prettyPrinter = new DefaultJavaPrettyPrinter(new StandardEnvironment());
-		prettyPrinter.scan(anElement);
-		String sourceCode = ("package "+anElement.getPackage().getQualifiedName()+"; "+prettyPrinter.toString());
-		return sourceCode;
-		//prettyPrinter.reset();
 	}
 }

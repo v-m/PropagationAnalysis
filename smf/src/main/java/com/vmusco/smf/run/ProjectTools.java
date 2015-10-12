@@ -21,6 +21,7 @@ import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.smf.mutation.TargetObtainer;
 import com.vmusco.smf.utils.ConsoleTools;
+import com.vmusco.smf.utils.SpoonHelpers;
 
 /**
  * This entry point is used to obtain informations about a mutation project
@@ -111,7 +112,7 @@ public class ProjectTools {
 				//int treated = ms.loadResultsForExecutedTestOnMutants(0).length;
 				int maxmutat = 0;
 
-				Factory factory = Mutation.obtainFactory();
+				Factory factory = SpoonHelpers.obtainFactory();
 
 				try{
 					CtElement[] mutations = Mutation.getMutations(ps, ms, factory);

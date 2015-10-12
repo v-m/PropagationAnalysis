@@ -119,7 +119,19 @@ public final class Testing {
 
 
 
-	private static String[] buildExecutionPath(ProcessStatistics ps, Class<?> classToRun, String frontClassPathEntry, String endClassPathEntry, String testClassToRun, String... testcasesToIgnores) throws IOException{
+	public static String[] buildExecutionPath(ProcessStatistics ps, Class<?> classToRun, String frontClassPathEntry, String testClassToRun, String... testcasesToIgnores) throws IOException{
+		String endClassPathEntry = "";
+		
+		// Add JUnit for currently running CP
+		for(String cpadd : System.getProperty("java.class.path").split(":")){
+			if(cpadd.contains("smf") || cpadd.contains("junit")){
+				if(!cpadd.startsWith(File.separator)){
+					cpadd = System.getProperty("user.dir") + File.separator + cpadd;
+				}
+				endClassPathEntry += ((endClassPathEntry==null || endClassPathEntry.length()==0)?"":File.pathSeparator)+cpadd;
+			}
+		}
+		
 		List<String> cmd = new ArrayList<String>();
 		cmd.add("java");
 		cmd.add("-cp");
@@ -234,23 +246,12 @@ public final class Testing {
 
 
 				String addToCpForMutant = "";
-				String addToCpAtEnd = "";
 
 				if(ms != null && forMutant != null){
 					addToCpForMutant = ms.getBytecodeMutationResolved() + File.separator + forMutant;
 				}
 
-				// Add JUnit for currently running CP
-				for(String cpadd : System.getProperty("java.class.path").split(":")){
-					if(cpadd.contains("smf") || cpadd.contains("junit")){
-						if(!cpadd.startsWith(File.separator)){
-							cpadd = System.getProperty("user.dir") + File.separator + cpadd;
-						}
-						addToCpAtEnd += ((addToCpAtEnd==null || addToCpAtEnd.length()==0)?"":File.pathSeparator)+cpadd;
-					}
-				}
-
-				String[] cmd = buildExecutionPath(ps, TestExecutor.class, addToCpForMutant, addToCpAtEnd, aTest, hangingTests.toArray(new String[0]));
+				String[] cmd = buildExecutionPath(ps, TestExecutor.class, addToCpForMutant, aTest, hangingTests.toArray(new String[0]));
 
 				String s = "";
 				for(String c : cmd)

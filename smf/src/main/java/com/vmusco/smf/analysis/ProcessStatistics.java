@@ -308,7 +308,12 @@ public class ProcessStatistics implements Serializable{
 	 * @throws ClassNotFoundException 
 	 */
 	public static ProcessStatistics loadState(String persistFile) throws PersistenceException{
-		ExecutionPersistence<ProcessStatistics> persist = new ProcessXMLPersistence(new File(persistFile));
+		File f = new File(persistFile);
+		
+		if(f.isDirectory())
+			f = new File(f, ProcessStatistics.DEFAULT_CONFIGFILE);
+		
+		ExecutionPersistence<ProcessStatistics> persist = new ProcessXMLPersistence(f);
 
 		ProcessStatistics loadState = persist.loadState();
 		return loadState;

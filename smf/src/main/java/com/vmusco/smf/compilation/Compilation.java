@@ -42,7 +42,16 @@ import com.vmusco.smf.utils.LogToFile;
  */
 public abstract class Compilation {
 
-	public static boolean compileProjectUsingSpoon(ProcessStatistics ps) throws IOException{
+	/**
+	 * Build a project using spoon
+	 * @param sources
+	 * @param classpath
+	 * @param generationFolder
+	 * @param buildlogfile
+	 * @return the time required to build the project
+	 * @throws IOException
+	 */
+	public static long compileProjectUsingSpoon(String[] sources, String[] classpath, String generationFolder, String buildlogfile) throws IOException, ModelBuildingException{
 		long t1 = System.currentTimeMillis();
 
 		Environment environment = new StandardEnvironment();
@@ -51,17 +60,17 @@ public abstract class Compilation {
 		SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
 
 		// Add all sources here
-		for(String aSrcFile : ps.getSrcToCompile(true)){
+		for(String aSrcFile : sources){
 			//compiler.addInputSource(new File(ps.getProjectIn(true) + File.separator + aSrcFile));
 			compiler.addInputSource(new File(aSrcFile));
 		}
 
-		for(String cp : ps.getClasspath())
+		for(String cp : classpath)
 			System.out.println(cp);
 
-		compiler.setSourceClasspath(ps.getClasspath());
+		compiler.setSourceClasspath(classpath);
 
-		File fdest = new File(ps.srcGenerationFolder());
+		File fdest = new File(generationFolder);
 		if(fdest.exists())
 			FileUtils.deleteDirectory(fdest);
 
@@ -70,7 +79,7 @@ public abstract class Compilation {
 		System.out.println("Compiling the project using spoon in "+fdest.getAbsolutePath()+".");
 
 		// This part is used to log WARNINGS or stderr !!!
-		File f = new File(ps.buildPath("spoonCompilation.log"));
+		File f = new File(buildlogfile);
 		if(f.exists())
 			f.delete();
 		f.createNewFile();
@@ -80,16 +89,21 @@ public abstract class Compilation {
 
 		compiler.setDestinationDirectory(fdest);
 
-		try{
-			compiler.compile();
-			return true;
-		}catch(ModelBuildingException ex){
+		compiler.compile();
+		ltf.restablish();
+		long t2 = System.currentTimeMillis();
+		return t2-t1;
+	}
+	
+	public static boolean compileProjectUsingSpoon(ProcessStatistics ps) throws IOException{
+		long ret = compileProjectUsingSpoon(ps.getSrcToCompile(true), ps.getClasspath(), ps.srcGenerationFolder(), ps.buildPath("spoonCompilation.log"));
+		
+		if(ret < 0){
 			System.err.println("Error on compilation phase !");
 			return false;
-		}finally{
-			ltf.restablish();
-			long t2 = System.currentTimeMillis();
-			ps.setBuildProjectTime(t2-t1);
+		}else{
+			ps.setBuildProjectTime(ret);
+			return true;
 		}
 	}
 
@@ -187,21 +201,6 @@ public abstract class Compilation {
 			long t2 = System.currentTimeMillis();
 			ps.setBuildTestsTime(t2-t1);
 		}
-	}
-
-	/***
-	 * This method is responsible of building a Java project
-	 * @param project_path
-	 * @param classpath
-	 * @param outputPath
-	 */
-	public static void compileProjectUsingSpoon(String project_path, String[] classpath, String outputPath) {
-		Factory factory = new FactoryImpl(new DefaultCoreFactory(), new StandardEnvironment());
-		SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
-		compiler.addInputSource(new File(project_path));
-		compiler.setSourceClasspath(classpath);
-		compiler.setDestinationDirectory(new File(outputPath));
-		compiler.compile();
 	}
 
 	/**

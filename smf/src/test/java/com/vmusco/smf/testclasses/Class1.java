@@ -1,4 +1,4 @@
-package com.vmusco.smf.mutation.testclasses;
+package com.vmusco.smf.testclasses;
 
 public class Class1 {
 	public static void main(String[] args) {

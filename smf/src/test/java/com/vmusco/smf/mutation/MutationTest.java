@@ -18,11 +18,13 @@ import spoon.support.reflect.code.CtLiteralImpl;
 import spoon.support.reflect.code.CtVariableReadImpl;
 import spoon.support.reflect.code.CtVariableWriteImpl;
 
+import com.vmusco.smf.TestingTools;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.exceptions.HashClashException;
 import com.vmusco.smf.exceptions.NotValidMutationException;
 import com.vmusco.smf.mutation.operators.KingOffutt91.AbsoluteValueInsertionMutator;
-import com.vmusco.smf.mutation.testclasses.Class1;
+import com.vmusco.smf.testclasses.Class1;
+import com.vmusco.smf.utils.SpoonHelpers;
 
 /**
  * Tests for mutation code
@@ -34,7 +36,7 @@ public class MutationTest {
 	 */
 	@Test
 	public void testElementsToMutateABS(){
-		Factory factory = Mutation.obtainFactory();
+		Factory factory = SpoonHelpers.obtainFactory();
 		CtElement[] mutations = Mutation.getMutations(TestingTools.getTestClassForCurrentProject(Class1.class), TestingTools.getCurrentCp(), AbsoluteValueInsertionMutator.class.getCanonicalName(), factory);
 
 		Map<String, Class<?>> matches = new HashMap<String, Class<?>>();
@@ -100,7 +102,7 @@ public class MutationTest {
 		matches.put("l", "l >= 0 ? l * -1 : l");
 		matches2.put("l", "l >= 0 ? l : l * -1");
 		
-		Factory factory = Mutation.obtainFactory();
+		Factory factory = SpoonHelpers.obtainFactory();
 		MutationOperator<?> mo = new AbsoluteValueInsertionMutator();
 
 		CtElement[] mutations = Mutation.getMutations(TestingTools.getTestClassForCurrentProject(Class1.class), TestingTools.getCurrentCp(), mo.getClass().getCanonicalName(), factory);
@@ -182,11 +184,11 @@ public class MutationTest {
 	 */
 	@Test
 	public void testMutantProberHashClash() throws NoSuchAlgorithmException, IOException, NotValidMutationException{
-		Factory factory = Mutation.obtainFactory();
+		Factory factory = SpoonHelpers.obtainFactory();
 		Object[] r = getMutationTestingObject(factory);
 		
 		Set<String> hash = new HashSet<String>();
-		hash.add("ab595c23fc91e4d344484f2cb6e8af14");
+		hash.add("8b995b97ea440992980517618d5289fe");
 		
 		try {
 			Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp());
@@ -206,7 +208,7 @@ public class MutationTest {
 	 */
 	@Test
 	public void testMutantProberNullElement() throws NoSuchAlgorithmException, IOException, HashClashException, NotValidMutationException{
-		Factory factory = Mutation.obtainFactory();
+		Factory factory = SpoonHelpers.obtainFactory();
 		Object[] r = getMutationTestingObject(factory);
 
 		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp());
@@ -221,7 +223,7 @@ public class MutationTest {
 	 */
 	@Test
 	public void testMutantProberSuccess() throws NoSuchAlgorithmException, IOException, NotValidMutationException, HashClashException{
-		Factory factory = Mutation.obtainFactory();
+		Factory factory = SpoonHelpers.obtainFactory();
 		Object[] r = getMutationTestingObject(factory);
 		
 		Set<String> hash = new HashSet<String>();
@@ -239,23 +241,22 @@ public class MutationTest {
 	 */
 	@Test
 	public void testMutantIfosContent() throws NoSuchAlgorithmException, IOException, NotValidMutationException, HashClashException{
-		Factory factory = Mutation.obtainFactory();
+		Factory factory = SpoonHelpers.obtainFactory();
 		Object[] r = getMutationTestingObject(factory);
 		
 		MutantIfos pm = Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp());
-
-		Assert.assertEquals("ab595c23fc91e4d344484f2cb6e8af14", pm.getHash());
+		Assert.assertEquals("8b995b97ea440992980517618d5289fe", pm.getHash());
 		Assert.assertEquals("i", pm.getMutationFrom());
 		Assert.assertEquals("i >= 0 ? i : i * -1", pm.getMutationTo());
-		Assert.assertEquals("com.vmusco.smf.mutation.testclasses.Class1.main(java.lang.String[])", pm.getMutationIn());
+		Assert.assertEquals("com.vmusco.smf.testclasses.Class1.main(java.lang.String[])", pm.getMutationIn());
 		Assert.assertTrue(pm.isViable());
 		Assert.assertEquals(6, pm.getSourceReference().getColumnStart());
 		Assert.assertEquals(6, pm.getSourceReference().getColumnEnd());
 		Assert.assertEquals(10, pm.getSourceReference().getLineStart());
 		Assert.assertEquals(10, pm.getSourceReference().getLineEnd());
 		Assert.assertEquals(0, pm.getSourceReference().getParentSearch());
-		Assert.assertEquals(186, pm.getSourceReference().getSourceStart());
-		Assert.assertEquals(186, pm.getSourceReference().getSourceEnd());
+		Assert.assertEquals(177, pm.getSourceReference().getSourceStart());
+		Assert.assertEquals(177, pm.getSourceReference().getSourceEnd());
 		Assert.assertEquals(TestingTools.getTestClassForCurrentProject(Class1.class, false)[0]+".java", pm.getSourceReference().getFile());
 	}
 	
