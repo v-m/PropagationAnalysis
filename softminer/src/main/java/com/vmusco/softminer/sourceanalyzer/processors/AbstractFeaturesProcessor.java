@@ -195,6 +195,12 @@ public abstract class AbstractFeaturesProcessor extends AbstractProcessor<CtName
 		newMethodCall(src, aReferenceExecutable);
 	}
 
+	/**
+	 * Return the method in anElement which is extended by the one passed (aMethod) or null if none
+	 * @param aMethod
+	 * @param anElement
+	 * @return
+	 */
 	private static CtMethod<?> isMethodComingFrom(CtMethod aMethod, CtTypeReference anElement){
 		List<CtTypeReference<?>> resolveFrom = anElement.getDeclaration().getFormalTypeParameters();
 		List<CtTypeReference<?>> resolveTo = anElement.getActualTypeArguments();
@@ -258,6 +264,11 @@ public abstract class AbstractFeaturesProcessor extends AbstractProcessor<CtName
 		return declaringType instanceof CtInterface;
 	}
 
+	/**
+	 * Return CtMethods overridden by the "casted" one
+	 * @param casted
+	 * @return
+	 */
 	private static CtMethod<?>[] getAllOverriden(CtMethod casted){
 		List<CtMethod<?>> ret = new ArrayList<CtMethod<?>>();
 

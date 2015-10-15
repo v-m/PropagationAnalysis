@@ -67,7 +67,7 @@ public class MutantIfos{
 	 */
 	private String hash = null;
 	private SourceReference sourceRef = null;
-	private MutantExecutionIfos execution = null;
+	private TestsExecutionIfos execution = null;
 	
 	public void setSourceReference(SourcePosition sp) throws MalformedSourcePositionException {
 		this.sourceRef = new SourceReference(sp);
@@ -121,11 +121,11 @@ public class MutantIfos{
 		return hash;
 	}
 	
-	public void setExecutedTestsResults(MutantExecutionIfos exec) {
+	public void setExecutedTestsResults(TestsExecutionIfos exec) {
 		this.execution = exec;
 	}
 	
-	public MutantExecutionIfos getExecutedTestsResults() throws MutationNotRunException {
+	public TestsExecutionIfos getExecutedTestsResults() throws MutationNotRunException {
 		if(execution == null) throw new MutationNotRunException();
 		return execution;
 	}

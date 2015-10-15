@@ -23,7 +23,7 @@ import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.exceptions.HashClashException;
 import com.vmusco.smf.exceptions.NotValidMutationException;
 import com.vmusco.smf.mutation.operators.KingOffutt91.AbsoluteValueInsertionMutator;
-import com.vmusco.smf.testclasses.Class1;
+import com.vmusco.smf.testclasses.simple.Class1;
 import com.vmusco.smf.utils.SpoonHelpers;
 
 /**
@@ -188,7 +188,7 @@ public class MutationTest {
 		Object[] r = getMutationTestingObject(factory);
 		
 		Set<String> hash = new HashSet<String>();
-		hash.add("8b995b97ea440992980517618d5289fe");
+		hash.add("8c4c7c6d6449d208a7451f9aeb224818");
 		
 		try {
 			Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp());
@@ -245,18 +245,18 @@ public class MutationTest {
 		Object[] r = getMutationTestingObject(factory);
 		
 		MutantIfos pm = Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp());
-		Assert.assertEquals("8b995b97ea440992980517618d5289fe", pm.getHash());
+		Assert.assertEquals("8c4c7c6d6449d208a7451f9aeb224818", pm.getHash());
 		Assert.assertEquals("i", pm.getMutationFrom());
 		Assert.assertEquals("i >= 0 ? i : i * -1", pm.getMutationTo());
-		Assert.assertEquals("com.vmusco.smf.testclasses.Class1.main(java.lang.String[])", pm.getMutationIn());
+		Assert.assertEquals("com.vmusco.smf.testclasses.simple.Class1.main(java.lang.String[])", pm.getMutationIn());
 		Assert.assertTrue(pm.isViable());
 		Assert.assertEquals(6, pm.getSourceReference().getColumnStart());
 		Assert.assertEquals(6, pm.getSourceReference().getColumnEnd());
 		Assert.assertEquals(10, pm.getSourceReference().getLineStart());
 		Assert.assertEquals(10, pm.getSourceReference().getLineEnd());
 		Assert.assertEquals(0, pm.getSourceReference().getParentSearch());
-		Assert.assertEquals(177, pm.getSourceReference().getSourceStart());
-		Assert.assertEquals(177, pm.getSourceReference().getSourceEnd());
+		Assert.assertEquals(184, pm.getSourceReference().getSourceStart());
+		Assert.assertEquals(184, pm.getSourceReference().getSourceEnd());
 		Assert.assertEquals(TestingTools.getTestClassForCurrentProject(Class1.class, false)[0]+".java", pm.getSourceReference().getFile());
 	}
 	

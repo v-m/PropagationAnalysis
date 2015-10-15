@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
+import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
@@ -89,12 +90,11 @@ public abstract class TestingFunctions {
 
 					FileLock lock = fos.getChannel().tryLock();
 					if(lock != null){
-						Testing.runTestCases(ms, mut, tn);
+						ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
+						ifos.setExecutedTestsResults(Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath(mut), ps.getTestClasses(), tn));
 
 						if(tn != null)	tn.mutantPersisting(mut);
 
-						//MutantIfos mi = ms.getMutationStats(mut);
-						
 						try{
 							MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(fos, mut);
 							pers.saveState(ms.getMutationStats(mut));

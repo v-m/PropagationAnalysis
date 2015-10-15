@@ -16,6 +16,8 @@ import org.tmatesoft.svn.core.wc2.SvnUpdate;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.compilation.Compilation;
+import com.vmusco.smf.exceptions.BadStateException;
+import com.vmusco.smf.testing.TestCasesProcessor;
 import com.vmusco.smf.testing.Testing;
 
 /**
@@ -59,7 +61,7 @@ public class CollectionsProjectTest {
 	}
 
 	@Test
-	public void simplePipeExecution() throws IOException {
+	public void simplePipeExecution() throws IOException, BadStateException {
 		File projFolder = new File(temporaryFolder, "project");
 		
 		ProcessStatistics ps = ProcessStatistics.rawCreateProject(ProcessStatistics.SOURCES_COPY, projFolder.getAbsolutePath());
@@ -74,15 +76,13 @@ public class CollectionsProjectTest {
 		Assert.assertEquals(5, ps.getClasspath().length);
 		Assert.assertEquals(5, new File(ps.resolveThis(ps.getCpLocalFolder())).list().length);
 		
-		Assert.assertTrue(Compilation.compileProjectUsingSpoon(ps));
-		Assert.assertTrue(Compilation.compileTestsDissociatedUsingSpoon(ps));
+		Assert.assertTrue(ps.compileProjectWithSpoon());
+		Assert.assertTrue(ps.compileTestWithSpoon());
 		
-		int[] nbeach = Testing.findTestClassesString(ps);
-		Assert.assertEquals(18, nbeach[0]);
-		Assert.assertEquals(162, nbeach[1]);
-		Assert.assertEquals(nbeach[0]+nbeach[1], ps.getTestClasses().length);
-		
-		Testing.runTestCases(ps, null);
+		ps.performFreshTesting(null);
+		Assert.assertEquals(18, TestCasesProcessor.getNbFromAnnotations());
+		Assert.assertEquals(162, TestCasesProcessor.getNbFromTestCases());
+		Assert.assertEquals(TestCasesProcessor.getNbFromTestCases()+TestCasesProcessor.getNbFromAnnotations(), ps.getTestClasses().length);
 		Assert.assertEquals(5262, ps.getTestCases().length);
 	}
 

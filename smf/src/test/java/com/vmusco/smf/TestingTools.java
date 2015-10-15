@@ -42,15 +42,22 @@ public final class TestingTools {
 		return new String[]{f.getAbsolutePath()};
 	}
 	
-	public static String getTestPackageFolders(Class testClass, boolean getFolder) {
+	public static String getTestPackageFolders(Class testClass, int ignores) {
+		String ret = testClass.getCanonicalName();
+		int i = 0;
 		
-		String ret = testClass.getCanonicalName().replaceAll("\\.", File.separator);
-		
-		if(!getFolder)
-			return ret;
-		else{
-			return ret.substring(0, ret.lastIndexOf(File.separator));
+		while(i<ignores){
+			ret = ret.substring(0, ret.lastIndexOf('.'));
+			i++;
 		}
+		
+		ret = ret.replaceAll("\\.", File.separator);
+		
+		return ret;
+	}
+	
+	public static String getTestPackageFolders(Class testClass, boolean getFolder) {
+		return getTestPackageFolders(testClass, getFolder?1:0);
 	}
 
 	/**

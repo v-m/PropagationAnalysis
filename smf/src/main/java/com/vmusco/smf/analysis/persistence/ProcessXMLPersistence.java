@@ -18,6 +18,7 @@ import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.analysis.TestsExecutionIfos;
 import com.vmusco.smf.exceptions.PersistenceException;
 
 /**
@@ -342,11 +343,6 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 
 		Element tmp;
 		List<Element> tmplist;
-
-		if((tmp = global.getChild(HANGTIMEOUT_2)) != null){
-			ps.setTestTimeOut(Integer.parseInt(tmp.getText()));
-			ps.setAutoTestTimeOut(false);
-		}
 		
 		if((tmp = global.getChild(ORIGINAL_PROJECT_IN_2)) != null)
 			ps.setOriginalSrc(tmp.getText());
@@ -414,16 +410,6 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 			ps.setSrcTestsToTreat(al.toArray(new String[0]));
 		}
 
-		/*if((tmp = tests.getChild(TEST_CLASSPATH_2)) != null){
-			tmplist = tmp.getChildren(TEST_CLASSPATH_3);
-
-			ArrayList<String> al = new ArrayList<String>();
-			for(Element e: tmplist){
-				al.add(e.getText());
-			}
-			ps.tests_classpath = al.toArray(new String[0]);
-		}*/
-
 		if((tmp = tests.getChild(TESTS_RESSOURCES_2)) != null){
 			tmplist = tmp.getChildren(TESTS_RESSOURCES_3);
 
@@ -477,9 +463,15 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 
 		/************************************/
 
+		int timeout = -1;
+		if((tmp = global.getChild(HANGTIMEOUT_2)) != null){
+			timeout = Integer.parseInt(tmp.getText());
+		}
+		
 		Element original = root.getChild(TEST_EXEC_1);
 
 		if(original != null){
+			TestsExecutionIfos tei = new TestsExecutionIfos();
 			if(original.getAttribute(TIME_ATTRIBUTE) != null){
 				ps.setRunTestsOriginalTime(Long.valueOf(original.getAttribute(TIME_ATTRIBUTE).getValue()));
 			}
@@ -491,7 +483,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 				for(Element e: tmplist){
 					al.add(e.getText());
 				}
-				ps.setFailingTestCases(al.toArray(new String[0]));
+				tei.setFailingTestCases(al.toArray(new String[0]));
 				
 				tmplist = tmp.getChildren(ONE_TS_4);
 
@@ -499,7 +491,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 				for(Element e: tmplist){
 					al.add(e.getText());
 				}
-				ps.setErrorOnTestSuite(al.toArray(new String[0]));
+				tei.setErrorOnTestSuite(al.toArray(new String[0]));
 			}
 
 			if((tmp = original.getChild(IGNORED_TC_3)) != null){
@@ -509,7 +501,7 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 				for(Element e: tmplist){
 					al.add(e.getText());
 				}
-				ps.setIgnoredTestCases(al.toArray(new String[0]));
+				tei.setIgnoredTestCases(al.toArray(new String[0]));
 			}
 
 			if((tmp = original.getChild(HANGING_TC_3)) != null){
@@ -519,8 +511,14 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 				for(Element e: tmplist){
 					al.add(e.getText());
 				}
-				ps.setHangingTestCases(al.toArray(new String[0]));
+				tei.setHangingTestCases(al.toArray(new String[0]));
 			}
+			
+			if(timeout >= 0){
+				tei.setTestTimeOut(timeout);
+			}
+			
+			ps.setTestExecutionResult(tei);
 		}
 		
 		return ps;

@@ -51,7 +51,7 @@ public abstract class Compilation {
 	 * @return the time required to build the project
 	 * @throws IOException
 	 */
-	public static long compileProjectUsingSpoon(String[] sources, String[] classpath, String generationFolder, String buildlogfile) throws IOException, ModelBuildingException{
+	public static long compileUsingSpoon(String[] sources, String[] classpath, String generationFolder, String buildlogfile) throws IOException, ModelBuildingException{
 		long t1 = System.currentTimeMillis();
 
 		Environment environment = new StandardEnvironment();
@@ -95,27 +95,18 @@ public abstract class Compilation {
 		return t2-t1;
 	}
 	
-	public static boolean compileProjectUsingSpoon(ProcessStatistics ps) throws IOException{
-		long ret = compileProjectUsingSpoon(ps.getSrcToCompile(true), ps.getClasspath(), ps.srcGenerationFolder(), ps.buildPath("spoonCompilation.log"));
-		
-		if(ret < 0){
-			System.err.println("Error on compilation phase !");
-			return false;
-		}else{
-			ps.setBuildProjectTime(ret);
-			return true;
-		}
-	}
-
-	public static boolean compileTestsDissociatedUsingSpoon(ProcessStatistics ps) throws IOException{
+	
+	
+	/*public static long compileTestsDissociatedUsingSpoon(String[] srcToTreat, String testClasspath, String testGenerationFolder, String logfile, ProcessStatistics ps) throws IOException{
 		long t1 = System.currentTimeMillis();
-
-		File fdest = new File(ps.testsGenerationFolder());
+		long t2 = -10000;
+		
+		File fdest = new File(testGenerationFolder);
 		if(fdest.exists())
 			FileUtils.deleteDirectory(fdest);
 
 		fdest.mkdirs();
-		File f = new File(ps.getWorkingDir() + File.separator + "spoonCompilationTests.log");
+		File f = new File(logfile);
 		if(f.exists())
 			f.delete();
 		f.createNewFile();
@@ -125,7 +116,7 @@ public abstract class Compilation {
 		ltf.redirectTo(f);
 
 		// Add all sources here
-		for(String aSrcFile : ps.getSrcTestsToTreat(false)){
+		for(String aSrcFile : srcToTreat){
 			Environment environment = new StandardEnvironment();
 
 			Factory factory = new FactoryImpl(new DefaultCoreFactory(), environment);
@@ -144,19 +135,15 @@ public abstract class Compilation {
 				ex.printStackTrace();
 
 				ltf.restablish();
-				long t2 = System.currentTimeMillis();
-				ps.setBuildTestsTime(t2-t1);
-
-				return false;
+				t2 = System.currentTimeMillis();
+				return -1;
 			}
 		}
 
 		ltf.restablish();
-		long t2 = System.currentTimeMillis();
-		ps.setBuildTestsTime(t2-t1);
 
-		return true;
-	}
+		return t2-t1;
+	}*/
 
 	public static boolean compileTestsUsingSpoon(ProcessStatistics ps) throws IOException{
 		long t1 = System.currentTimeMillis();

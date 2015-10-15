@@ -72,9 +72,6 @@ public class NewProject extends GlobalTestRunning {
 		opt = new Option("h", "help", false, "print this message");
 		options.addOption(opt);
 		
-		opt = new Option("H", "testhang-timeout", true, "set the test timeout to a specific value in seconds (default: 0 - dynamic reseach of the timeout)");
-		options.addOption(opt);
-		
 		CommandLineParser parser = new PosixParser();
 		CommandLine cmd = parser.parse(options, args);
 
@@ -134,12 +131,7 @@ public class NewProject extends GlobalTestRunning {
 			}
 			
 			ps.setProjectName(cmd.getArgs()[1]);
-			
-			if(!ps.changeState(STATE.DEFINED)){
-				System.out.println("Error changing state !");
-				System.exit(1);
-				return;
-			}
+			ProcessStatistics.saveState(ps);
 			
 			skipRunWithPs = cmd.hasOption("just-prepare");
 			
@@ -148,35 +140,24 @@ public class NewProject extends GlobalTestRunning {
 			ps = ProcessStatistics.rawLoad(f.getAbsolutePath());
 			
 			if(cmd.hasOption("reset")){
-				ps.setCurrentState(STATE.DEFINED);
+				ps.setCurrentState(STATE.FRESH);
 			}else if(cmd.hasOption("reset-tests")){
-				ps.setCurrentState(STATE.BUILD_TESTS);
+				ps.setCurrentState(STATE.BUILD);
 			}
 		}
 		
 		if(cmd.hasOption("ressources")){
 			ps.setRessources(cmd.getOptionValue("ressources").split(File.pathSeparator));
-			ps.setCurrentState(STATE.DEFINED);
 		}
 
 		if(cmd.hasOption("sources")){
 			ps.setSrcToCompile(cmd.getOptionValue("sources").split(File.pathSeparator));
-			ps.setCurrentState(STATE.DEFINED);
 		}
 
 		if(cmd.hasOption("tests")){
 			ps.setSrcTestsToTreat(cmd.getOptionValue("tests").split(File.pathSeparator));
-			ps.setCurrentState(STATE.DEFINED);
 		}else if(cmd.hasOption("no-tests")){
 			ps.setSrcTestsToTreat(new String[]{});
-			ps.setCurrentState(STATE.DEFINED);
-		}
-		
-		if(cmd.hasOption("testhang-timeout")){
-			ps.setTestTimeOut(Integer.parseInt(cmd.getOptionValue("testhang-timeout")));
-		}else{
-			// Dynamic research
-			ps.setTestTimeOut(0);
 		}
 		
 		if(!skipRunWithPs){
@@ -198,15 +179,12 @@ public class NewProject extends GlobalTestRunning {
 		System.out.println("Current state is: " + ps.getCurrentState());
 
 		System.out.print("Building project.....");
-		if(ps.currentStateIsBefore(STATE.BUILD)){
+		if(ps.getCurrentState() == STATE.FRESH){
 			System.out.println();
-			if(!Compilation.compileProjectUsingSpoon(ps)){
+			if(ps.compileProjectWithSpoon()){
+				ProcessStatistics.saveState(ps);
+			}else{
 				System.out.println("Building failed. Didn't you forget to run 'mvn clean install' priorly ?");
-				System.exit(1);
-			}
-
-			if(!ps.changeState(STATE.BUILD)){
-				System.out.println("Error changing state !");
 				System.exit(1);
 			}
 
@@ -216,32 +194,24 @@ public class NewProject extends GlobalTestRunning {
 		}
 
 		System.out.print("Building tests.....");
-		if(ps.currentStateIsBefore(STATE.BUILD_TESTS)){
+		if(ps.getCurrentState() == STATE.BUILD){
 			System.out.println();
-			if(!Compilation.compileTestsDissociatedUsingSpoon(ps)){
+			if(ps.compileTestWithSpoon()){
+				ProcessStatistics.saveState(ps);
+			}else{
 				System.out.println("Building failed. Didn't you forget to run 'mvn clean install' priorly ?");
 				System.exit(1);
 			}
 
-			if(!ps.changeState(STATE.BUILD_TESTS)){
-				System.out.println("Error changing state !");
-				System.exit(1);
-			}
 			System.out.println("\n********************\n");
 		}else{
 			System.out.println("SKIP");
 		}
 
 		System.out.print("Running tests.....");
-		if(ps.currentStateIsBefore(STATE.READY)){
+		if(ps.getCurrentState() == STATE.BUILD_TESTS){
 			System.out.println();
-			Testing.findTestClassesString(ps);
-			Testing.runTestCases(ps, np);
-
-			if(!ps.changeState(STATE.READY)){
-				System.out.println("Error changing state !");
-				return;
-			}
+			ps.performFreshTesting(np);
 
 			System.out.println("\n********************\n");
 		}else{

@@ -10,10 +10,17 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
+import spoon.compiler.ModelBuildingException;
+
 import com.vmusco.smf.analysis.persistence.ExecutionPersistence;
 import com.vmusco.smf.analysis.persistence.ProcessXMLPersistence;
+import com.vmusco.smf.compilation.Compilation;
+import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.PersistenceException;
+import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
+import com.vmusco.smf.instrumentation.Instrumentation;
 import com.vmusco.smf.testing.Testing;
+import com.vmusco.smf.testing.TestsExecutionListener;
 import com.vmusco.smf.utils.MavenTools;
 
 /**
@@ -45,37 +52,29 @@ public class ProcessStatistics implements Serializable{
 
 	public enum STATE{
 		/**
-		 * On this state, the project has just been CREATED
+		 * On this state, the project has just been CREATED - user is free to declare configuration
 		 */
-		NEW,
-		/**
-		 * On this state, the project has been created and has STRONGLY BEEN SET (cp, mutation, ...)
-		 * STATE: preparation
-		 */
-		DEFINED,
+		FRESH,
 		/**
 		 * On this state, the project has been created and has strongly been set (cp, mutation, ...) and BUILT
-		 * STATE: preparation
 		 */
 		BUILD,
 		/**
 		 * On this state, the project has been created and has strongly been set (cp, mutation, ...), built and TEST ARE BUILT ALSO
-		 * STATE: preparation
 		 */
 		BUILD_TESTS,
 		/**
 		 * On this state, the test has been run (not mutated ones)
-		 * STATE: preparation
 		 */
 		READY
 	};
 
-	private static STATE[] orderStates = new STATE[]{ STATE.NEW, STATE.DEFINED, STATE.BUILD, STATE.BUILD_TESTS, STATE.READY };
+	//private static STATE[] orderStates = new STATE[]{ STATE.NEW, STATE.DEFINED, STATE.BUILD, STATE.BUILD_TESTS, STATE.READY };
 
 	/***************
 	 ** Variables **
 	 ***************/
-	
+
 	private STATE currentState;
 	/**
 	 * A name for this project
@@ -133,27 +132,14 @@ public class ProcessStatistics implements Serializable{
 	 * null if no discovery process has been run
 	 */
 	private String[] testClasses = null;
+	
+	
 	/**
-	 * Failing test cases on original project
+	 * Test cases execution results on original project
 	 * null if no discovery process has been run
 	 */
-	private String[] failingTestCases = null;
-	/**
-	 * Ignored test cases on original project
-	 * null if no discovery process has been run
-	 */
-	private String[] ignoredTestCases = null;
-	/**
-	 * Test cases which fails because they cannot be initialized.
-	 * This should never occurs in normal execution of tests
-	 * only for mutation cases...
-	 */
-	private String[] errorOnTestSuite;
-	/**
-	 * Hanging test cases on original project (infinite loops)
-	 * null if no discovery process has been run
-	 */
-	private String[] hangingTestCases = null;
+	private TestsExecutionIfos cleanTestExecution = null;
+	
 	/**
 	 * The folder in which all mutation takes place
 	 */
@@ -173,18 +159,13 @@ public class ProcessStatistics implements Serializable{
 	private Long buildProjectTime = null;
 	private Long buildTestsTime = null;
 	private Long runTestsOriginalTime = null;
-	/**
-	 * Number of second after which the test is considered as hanging
-	 * Can be dynamically determined
-	 */
-	private int testTimeOut;
-	private boolean testTimeOut_auto;
+	
 	private String originalSrc = null;
 	private String cpLocalFolder = null;
 
 	/*********************************************
 	 *********************************************/
-	
+
 	private ProcessStatistics() { }
 
 	public static ProcessStatistics rawCreateProject(String datasetRepository, String workingDir){
@@ -204,10 +185,8 @@ public class ProcessStatistics implements Serializable{
 		ps.mutantsOut = DEFAULT_MUTANT_SOURCE;
 		ps.mutantsBytecodeOut = DEFAULT_MUTANT_BYTECODE;
 		ps.mutantsTestResults = DEFAULT_MUTANT_EXECUTION;
-		ps.testTimeOut = Testing.MAX_TEST_TIMEOUT;
-		ps.testTimeOut_auto = true;
 
-		ps.currentState = STATE.NEW;
+		ps.currentState = STATE.FRESH;
 
 		return ps;
 	}
@@ -249,10 +228,8 @@ public class ProcessStatistics implements Serializable{
 			return "BUILD_TESTS";
 		case READY:
 			return "DRY_TESTS";
-		case NEW:
-			return "NEW";
-		case DEFINED:
-			return "READY";
+		case FRESH:
+			return "FRESH";
 		}
 
 		return "UNKNOWN";
@@ -265,26 +242,10 @@ public class ProcessStatistics implements Serializable{
 			return STATE.BUILD_TESTS;
 		else if(aState.equals("DRY_TESTS"))
 			return STATE.READY;
-		else if(aState.equals("NEW"))
-			return STATE.NEW;
-		else if(aState.equals("READY"))
-			return STATE.DEFINED;
+		else if(aState.equals("FRESH"))
+			return STATE.FRESH;
 		else 
 			return null;
-	}
-
-	/**
-	 * Change the state and persist the object only if it follows the state flow
-	 * @param newState
-	 * @return false if the new state is not the expected one.
-	 */
-	public boolean changeState(STATE newState) throws Exception{
-		if(!newState.equals(ProcessStatistics.getNextState(this.currentState)) && !newState.equals(this.currentState))
-			return false;
-
-		this.currentState = newState;
-		ProcessStatistics.saveState(this);
-		return true;
 	}
 
 	public static String generatePersistanceFileName(){
@@ -309,56 +270,14 @@ public class ProcessStatistics implements Serializable{
 	 */
 	public static ProcessStatistics loadState(String persistFile) throws PersistenceException{
 		File f = new File(persistFile);
-		
+
 		if(f.isDirectory())
 			f = new File(f, ProcessStatistics.DEFAULT_CONFIGFILE);
-		
+
 		ExecutionPersistence<ProcessStatistics> persist = new ProcessXMLPersistence(f);
 
 		ProcessStatistics loadState = persist.loadState();
 		return loadState;
-	}
-
-	public boolean currentStateIsBefore(STATE aState){
-		STATE tmpState = aState;
-
-		while(ProcessStatistics.getPreviousState(tmpState) != null){
-			tmpState = ProcessStatistics.getPreviousState(tmpState);
-
-			if(tmpState.equals(this.currentState)){
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public static STATE getPreviousState(STATE aState){
-		int i=0;
-
-		for(i=0; i<orderStates.length; i++){
-			if(aState.equals(orderStates[i]))
-				break;
-		}
-
-		if(!aState.equals(orderStates[i]) || i <= 0)
-			return null;
-
-		return orderStates[i-1];
-	}
-
-	public static STATE getNextState(STATE aState){
-		int i=0;
-
-		for(i=0; i<orderStates.length; i++){
-			if(aState.equals(orderStates[i]))
-				break;
-		}
-
-		if(!aState.equals(orderStates[i]) || i >= orderStates.length-1)
-			return null;
-
-		return orderStates[i+1];
 	}
 
 	public void determineClassPath() throws IOException, InterruptedException {
@@ -446,11 +365,11 @@ public class ProcessStatistics implements Serializable{
 		this.currentState = currentState;
 	}
 
-	
+
 	public String[] getTestCases() {
 		return testCases;
 	}
-	
+
 	public String getProjectName() {
 		return projectName;
 	}
@@ -506,7 +425,7 @@ public class ProcessStatistics implements Serializable{
 	public String resolveThis(String s){
 		return getWorkingDir() + File.separator + s;
 	}
-	
+
 	public String getProjectOut(boolean resolve) {
 		if(resolve){
 			return resolveThis(projectOut);
@@ -585,7 +504,7 @@ public class ProcessStatistics implements Serializable{
 			return testingRessources;
 		}
 	}
-	
+
 	public void setTestingRessources(String[] testingRessources) {
 		this.testingRessources = testingRessources;
 	}
@@ -593,56 +512,57 @@ public class ProcessStatistics implements Serializable{
 	public String[] getTestClasses() {
 		return testClasses;
 	}
-	
+
 	public void setTestClasses(String[] testClasses) {
 		this.testClasses = testClasses;
 	}
-	
+
 	public void setTestCases(String[] testCases) {
 		this.testCases = ProcessStatistics.fixTestSignatures(testCases);
 	}
-	
-	
+
+
 	public String[] getFailingTestCases() {
-		return failingTestCases;
+		if(cleanTestExecution != null)
+			return cleanTestExecution.getRawFailingTestCases();
+		else
+			return null;
 	}
-	
-	public void setFailingTestCases(String[] failingTestCases) {
-		this.failingTestCases = ProcessStatistics.fixTestSignatures(failingTestCases);
-	}
-	
+
 	public String[] getIgnoredTestCases() {
-		return ignoredTestCases;
+		if(cleanTestExecution != null)
+			return cleanTestExecution.getRawIgnoredTestCases();
+		else
+			return null;
+		
 	}
-	
-	public void setIgnoredTestCases(String[] ignoredTestCases) {
-		this.ignoredTestCases = ProcessStatistics.fixTestSignatures(ignoredTestCases);
-	}
-	
+
 	public String[] getHangingTestCases() {
-		return hangingTestCases;
+		if(cleanTestExecution != null)
+			return cleanTestExecution.getRawHangingTestCases();
+		else
+			return null;
 	}
-	
-	public void setHangingTestCases(String[] hangingTestCases) {
-		this.hangingTestCases = ProcessStatistics.fixTestSignatures(hangingTestCases);
-	}
-	
+
 	public static String[] fixTestSignatures(String[] hangingTestCases2) {
 		String[] ret = new String[hangingTestCases2.length];
-		
+
 		for(int i = 0; i < hangingTestCases2.length; i++){
 			ret[i] = ProcessStatistics.fixTestSignature(hangingTestCases2[i]);
 		}
-		
+
 		return ret;
 	}
 
 	public String[] getErrorOnTestSuite() {
-		return errorOnTestSuite;
+		if(cleanTestExecution != null)
+			return cleanTestExecution.getRawErrorOnTestSuite();
+		else
+			return null;
 	}
-	
-	public void setErrorOnTestSuite(String[] errorOnTestSuite) {
-		this.errorOnTestSuite = errorOnTestSuite;
+
+	public void setTestExecutionResult(TestsExecutionIfos cleanTestExecution){
+		this.cleanTestExecution = cleanTestExecution;
 	}
 	
 	/**
@@ -655,7 +575,7 @@ public class ProcessStatistics implements Serializable{
 	public String getMutantsBasedir() {
 		return mutantsBasedir;
 	}
-	
+
 	/**
 	 * Return the path to the base directory containing all projects id
 	 * @return
@@ -664,22 +584,22 @@ public class ProcessStatistics implements Serializable{
 		int pos = mutantsBasedir.indexOf("{id}");
 		return mutantsBasedir.substring(0, pos);
 	}
-	
+
 	public String getMutantsOpsBaseDir(String id){
 		int pos = mutantsBasedir.indexOf("{op}");
 		String tmp = mutantsBasedir.substring(0, pos);
 		return tmp.replace("{id}", id);
 	}
-	
+
 	public void setMutantsBasedir(String mutantsBasedir) {
 		this.mutantsBasedir = mutantsBasedir;
 	}
 
-	
+
 	public String getMutantsOut() {
 		return mutantsOut;
 	}
-	
+
 	public void setMutantsOut(String mutantsOut) {
 		this.mutantsOut = mutantsOut;
 	}
@@ -687,7 +607,7 @@ public class ProcessStatistics implements Serializable{
 	public String getMutantsBytecodeOut() {
 		return mutantsBytecodeOut;
 	}
-	
+
 	public void setMutantsBytecodeOut(String mutantsBytecodeOut) {
 		this.mutantsBytecodeOut = mutantsBytecodeOut;
 	}
@@ -695,11 +615,11 @@ public class ProcessStatistics implements Serializable{
 	public String getMutantsTestResults() {
 		return mutantsTestResults;
 	}
-	
+
 	public void setMutantsTestResults(String mutantsTestResults) {
 		this.mutantsTestResults = mutantsTestResults;
 	}
-	
+
 	public Long getBuildProjectTime() {
 		return buildProjectTime;
 	}
@@ -709,7 +629,7 @@ public class ProcessStatistics implements Serializable{
 	public Long getRunTestsOriginalTime() {
 		return runTestsOriginalTime;
 	}
-	
+
 	public void setBuildProjectTime(Long buildProjectTime) {
 		this.buildProjectTime = buildProjectTime;
 	}
@@ -724,7 +644,7 @@ public class ProcessStatistics implements Serializable{
 	public String[] getUnmutatedFailAndHang(){
 		Set<String> cases = new HashSet<String>();
 
-		for(String ts : errorOnTestSuite){
+		for(String ts : getErrorOnTestSuite()){
 			for(String s : testCases){
 				if(s.startsWith(ts)){
 					cases.add(s);
@@ -732,15 +652,15 @@ public class ProcessStatistics implements Serializable{
 			}
 		}
 
-		for(String s:this.hangingTestCases){
+		for(String s : getHangingTestCases()){
 			cases.add(s);
 		}
 
-		for(String s:this.failingTestCases){
+		for(String s : getFailingTestCases()){
 			cases.add(s);
 		}
 
-		for(String s : this.errorOnTestSuite){
+		for(String s : getErrorOnTestSuite()){
 			for(String ss : this.testCases){
 				if(ss.startsWith(s)){
 					cases.add(ss);
@@ -759,8 +679,11 @@ public class ProcessStatistics implements Serializable{
 				l.add(c);
 			}
 
-			l.add(this.srcGenerationFolder());
-			l.add(this.testsGenerationFolder());
+			if(new File(this.srcGenerationFolder()).exists())
+				l.add(this.srcGenerationFolder());
+			
+			if(new File(this.testsGenerationFolder()).exists())
+				l.add(this.testsGenerationFolder());
 
 			return l.toArray(new String[0]);
 		}else{
@@ -805,39 +728,26 @@ public class ProcessStatistics implements Serializable{
 			}
 		}
 	}
-	
+
 	public String getOriginalSrc() {
 		return originalSrc;
 	}
 	public void setOriginalSrc(String originalSrc) {
 		this.originalSrc = originalSrc;
 	}
-	
+
 	public String getCpLocalFolder() {
 		return cpLocalFolder;
 	}
-	
+
 	public void setCpLocalFolder(String cpLocalFolder) {
 		this.cpLocalFolder = cpLocalFolder;
 	}
-	
-	public int getTestTimeOut() {
-		return testTimeOut;
-	}
-	
-	public void setTestTimeOut(int testTimeOut) {
-		this.testTimeOut = testTimeOut;
-	}
-	
-	
-	public boolean isAutoTestTimeOut(){
-		return testTimeOut_auto;
-	}
-	
-	public void setAutoTestTimeOut(boolean value){
-		testTimeOut_auto = value;
-	}
 
+	public int getTestTimeOut() {
+		if(cleanTestExecution != null) return cleanTestExecution.getTestTimeOut();
+		else return Testing.MAX_TEST_TIMEOUT;
+	}
 
 	public boolean workingDirAlreadyExists() {
 		File f = new File(this.workingDir);
@@ -851,7 +761,7 @@ public class ProcessStatistics implements Serializable{
 		MavenTools.exportDependenciesUsingMaven(this.getProjectIn(true), dst.getAbsolutePath(), this.buildPath("mvn_copy.log"));
 	}
 
-	
+
 
 	public void exportClassPathOnAll() throws IOException {
 		for(File fp : MavenTools.findAllPomsFiles(this.getProjectIn(true))){
@@ -889,5 +799,94 @@ public class ProcessStatistics implements Serializable{
 		String ctest = fixTestSignature(test);
 
 		return cbug.equals(ctest);
+	}
+
+	public void instrumentSources(AbstractInstrumentationProcessor[] aips) throws BadStateException{
+		if(getCurrentState() != STATE.FRESH)
+			throw new BadStateException();
+		
+		File pji = new File(this.getProjectIn(true));
+		File orig = new File(pji.getParentFile(), pji.getName()+".original");
+
+		pji.renameTo(orig);
+
+		for(String srce : getSrcToCompile(false)){
+			Instrumentation.instrumentSource(new String[]{orig.getAbsolutePath() + File.separator + srce}, getClasspath(), new File(pji, srce), aips);
+		}
+ 
+		for(String srce : getSrcTestsToTreat(false)){
+			Instrumentation.instrumentSource(new String[]{orig.getAbsolutePath() + File.separator + srce}, getClasspath(), new File(pji, srce), aips);
+			Instrumentation.instrumentSource(new String[]{orig.getAbsolutePath() + File.separator + srce}, getClasspath(), new File(pji,  srce), aips);
+		}
+	}
+
+	public boolean compileProjectWithSpoon() throws BadStateException, IOException {
+		if(getCurrentState() != STATE.FRESH)
+			throw new BadStateException();
+		
+		long ret = Compilation.compileUsingSpoon(getSrcToCompile(true), getClasspath(), srcGenerationFolder(), buildPath("spoonCompilation.log"));
+
+		if(ret < 0){
+			System.err.println("Error on compilation phase !");
+			return false;
+		}else{
+			setBuildProjectTime(ret);
+			this.currentState = STATE.BUILD;
+			return true;
+		}
+	}
+
+	public boolean compileTestWithSpoon() throws BadStateException, IOException {
+		if(getCurrentState() != STATE.BUILD)
+			throw new BadStateException();
+		
+		long ret = Compilation.compileUsingSpoon(getSrcTestsToTreat(true), getTestingClasspath(), testsGenerationFolder(), buildPath("spoonTestCompilations.log"));
+		
+		if(ret < 0){
+			System.err.println("Error on compilation phase !");
+			return false;
+		}else{
+			setBuildTestsTime(ret);
+			this.currentState = STATE.BUILD_TESTS;
+			return true;
+		}
+	}
+	
+	public boolean compileAllWithSpoon() throws BadStateException, IOException{
+		if(compileProjectWithSpoon())
+			if(compileTestWithSpoon())
+				return true;
+		return false;
+	}
+
+	public void performFreshTesting(TestsExecutionListener tel) throws IOException {
+		setTestClasses(Testing.findTestClassesString(getSrcTestsToTreat(true), getTestingClasspath()));
+		cleanTestExecution = Testing.runTestCases(getProjectIn(true), getRunningClassPath(), getTestClasses(), 0, tel);
+		this.testCases = cleanTestExecution.getAllRunnedTests();
+		
+		this.currentState = STATE.READY;
+	}
+	
+	public String[] getRunningClassPath() throws IOException{
+		List<String> ret = new ArrayList<String>();
+
+		
+
+
+		for(String s : getTestingClasspath()){
+			ret.add(s);
+		}
+		
+		ret.add(testsGenerationFolder());
+		
+		for(String aRess : getTestingRessources(true)){
+			ret.add(aRess);
+		}
+
+		for(String cpe : Testing.getCurrentVMClassPath(new String[]{"smf", "junit"})){
+			ret.add(cpe);
+		}
+
+		return ret.toArray(new String[0]);
 	}
 }

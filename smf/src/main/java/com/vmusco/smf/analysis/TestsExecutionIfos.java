@@ -7,83 +7,96 @@ import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.utils.MutationsSetTools;
 
 /**
- * This class contains all informations related to a mutant run 
+ * This class contains all informations related to a run 
  * @author Vincenzo Musco - http://www.vmusco.com
  *
  */
-public class MutantExecutionIfos {
+public class TestsExecutionIfos {
 	/**
 	 * Failing test cases for the mutant
 	 */
-	private String[] mutantFailingTestCases = null;
+	private String[] failingTestCases = null;
 	/**
 	 * Ignored test cases for the mutant
 	 */
-	private String[] mutantIgnoredTestCases = null;
+	private String[] ignoredTestCases = null;
 	/**
 	 * Hanging (infinite-loop) test cases for the mutant
 	 */
-	private String[] mutantHangingTestCases = null;
+	private String[] hangingTestCases = null;
 	/**
 	 * Full test suite failure (eg. static field on init)
 	 */
-	private String[] mutantErrorOnTestSuite = null;
-	private long runTestOnMutantTime = -1;
+	private String[] errorOnTestSuite = null;
+	private long runTestsTime = -1;
+	private int timeout = -1;
+	private String[] tests_arr;
 	
 	/**
 	 * Take care, DO NOT USE IN COMPARISONS AND STATISTICS.
 	 * This method do not takes into consideration the failing cases and the fact that some methods are similar in clean run.
 	 * @return
 	 */
-	public String[] getRawMutantErrorOnTestSuite() {
-		return mutantErrorOnTestSuite;
+	public String[] getRawErrorOnTestSuite() {
+		return errorOnTestSuite;
 	}
 	/**
 	 * Take care, DO NOT USE IN COMPARISONS AND STATISTICS.
 	 * This method do not takes into consideration the failing cases and the fact that some methods are similar in clean run.
-	 * To get a coherent and representative set, use {@link MutantExecutionIfos#getCoherentMutantFailingTestCases(ProcessStatistics)} or {@link MutantExecutionIfos#getCoherentMutantFailAndHangTestCases(ProcessStatistics)}
+	 * To get a coherent and representative set, use {@link TestsExecutionIfos#getCoherentMutantFailingTestCases(ProcessStatistics)} or {@link TestsExecutionIfos#getCoherentMutantFailAndHangTestCases(ProcessStatistics)}
 	 * @return
 	 */
-	public String[] getRawMutantFailingTestCases() {
-		return mutantFailingTestCases;
+	public String[] getRawFailingTestCases() {
+		return failingTestCases;
 	}
 	/**
 	 * Take care, DO NOT USE IN COMPARISONS AND STATISTICS.
 	 * This method do not takes into consideration the failing cases and the fact that some methods are similar in clean run.
-	 * To get a coherent and representative set, use {@link MutantExecutionIfos#getCoherentMutantHangingTestCases(ProcessStatistics)} or {@link MutantExecutionIfos#getCoherentMutantFailAndHangTestCases(ProcessStatistics)}
+	 * To get a coherent and representative set, use {@link TestsExecutionIfos#getCoherentMutantHangingTestCases(ProcessStatistics)} or {@link TestsExecutionIfos#getCoherentMutantFailAndHangTestCases(ProcessStatistics)}
 	 * @return
 	 */
-	public String[] getRawMutantHangingTestCases() {
-		return mutantHangingTestCases;
+	public String[] getRawHangingTestCases() {
+		return hangingTestCases;
 	}
 	/**
 	 * Take care, DO NOT USE IN COMPARISONS AND STATISTICS.
 	 * This method do not takes into consideration the failing cases and the fact that some methods are similar in clean run.
-	 * To get a coherent and representative set, use {@link MutantExecutionIfos#getCoherentMutantIgnoredTestCases(ProcessStatistics)}
+	 * To get a coherent and representative set, use {@link TestsExecutionIfos#getCoherentMutantIgnoredTestCases(ProcessStatistics)}
 	 * @return
 	 */
-	public String[] getRawMutantIgnoredTestCases() {
-		return mutantIgnoredTestCases;
+	public String[] getRawIgnoredTestCases() {
+		return ignoredTestCases;
 	}
-	public long getRunTestOnMutantTime(){
-		return runTestOnMutantTime;
+	public long getRunTestsTime(){
+		return runTestsTime;
 	}
-	public void setMutantErrorOnTestSuite(String[] mutantErrorOnTestSuite) {
-		this.mutantErrorOnTestSuite = mutantErrorOnTestSuite;
+	public void setErrorOnTestSuite(String[] mutantErrorOnTestSuite) {
+		this.errorOnTestSuite = mutantErrorOnTestSuite;
 	}
-	public void setMutantFailingTestCases(String[] mutantFailingTestCases) {
-		this.mutantFailingTestCases = ProcessStatistics.fixTestSignatures(mutantFailingTestCases);
+	public void setFailingTestCases(String[] mutantFailingTestCases) {
+		this.failingTestCases = ProcessStatistics.fixTestSignatures(mutantFailingTestCases);
 	}
-	public void setMutantHangingTestCases(String[] mutantHangingTestCases) {
-		this.mutantHangingTestCases = ProcessStatistics.fixTestSignatures(mutantHangingTestCases);
+	public void setHangingTestCases(String[] mutantHangingTestCases) {
+		this.hangingTestCases = ProcessStatistics.fixTestSignatures(mutantHangingTestCases);
 	}
-	public void setMutantIgnoredTestCases(String[] mutantIgnoredTestCases) {
-		this.mutantIgnoredTestCases = ProcessStatistics.fixTestSignatures(mutantIgnoredTestCases);
+	public void setIgnoredTestCases(String[] mutantIgnoredTestCases) {
+		this.ignoredTestCases = ProcessStatistics.fixTestSignatures(mutantIgnoredTestCases);
 	}
-	public void setRunTestOnMutantTime(long runTestOnMutantTime) {
-		this.runTestOnMutantTime = runTestOnMutantTime;
+	public void setRunTestsTime(long runTestOnMutantTime) {
+		this.runTestsTime = runTestOnMutantTime;
 	}
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//TODO: the end of this file should be moved for coherency with reusability
 	private static String[] includeTestSuiteGlobalFailingCases(ProcessStatistics ps, String[] testsuites, String[] include){
 		Set<String> cases = new HashSet<String>();
 
@@ -113,7 +126,7 @@ public class MutantExecutionIfos {
 	 * @throws MutationNotRunException
 	 */
 	public String[] getCoherentMutantFailingTestCases(ProcessStatistics ps) throws MutationNotRunException {
-		String[] mutset = includeTestSuiteGlobalFailingCases(ps, getRawMutantErrorOnTestSuite(), getRawMutantFailingTestCases());
+		String[] mutset = includeTestSuiteGlobalFailingCases(ps, getRawErrorOnTestSuite(), getRawFailingTestCases());
 		String[] glbset = includeTestSuiteGlobalFailingCases(ps, ps.getErrorOnTestSuite(), ps.getFailingTestCases());
 
 		return MutationsSetTools.setDifference(mutset, glbset);
@@ -126,7 +139,7 @@ public class MutantExecutionIfos {
 	 * @throws MutationNotRunException
 	 */
 	public String[] getCoherentMutantIgnoredTestCases(ProcessStatistics ps) throws MutationNotRunException {
-		String[] mutset = getRawMutantIgnoredTestCases();
+		String[] mutset = getRawIgnoredTestCases();
 		String[] glbset = ps.getIgnoredTestCases();
 
 		return MutationsSetTools.setDifference(mutset, glbset);
@@ -139,7 +152,7 @@ public class MutantExecutionIfos {
 	 * @throws MutationNotRunException
 	 */
 	public String[] getCoherentMutantHangingTestCases(ProcessStatistics ps) throws MutationNotRunException {
-		String[] mutset = getRawMutantHangingTestCases();
+		String[] mutset = getRawHangingTestCases();
 		String[] glbset = ps.getHangingTestCases();
 
 		return MutationsSetTools.setDifference(mutset, glbset);
@@ -155,18 +168,33 @@ public class MutantExecutionIfos {
 	public String[] getCoherentMutantFailAndHangTestCases(ProcessStatistics ps) throws MutationNotRunException {
 		Set<String> cases = new HashSet<String>();
 
-		for(String s : includeTestSuiteGlobalFailingCases(ps, getRawMutantErrorOnTestSuite(), null)){
+		for(String s : includeTestSuiteGlobalFailingCases(ps, getRawErrorOnTestSuite(), null)){
 			cases.add(s);
 		}
 		
-		for(String s:getRawMutantHangingTestCases()){
+		for(String s:getRawHangingTestCases()){
 			cases.add(s);
 		}
 
-		for(String s:getRawMutantFailingTestCases()){
+		for(String s:getRawFailingTestCases()){
 			cases.add(s);
 		}
 
 		return MutationsSetTools.setDifference(cases.toArray(new String[0]), ps.getUnmutatedFailAndHang());
+	}
+	public void setTestTimeOut(int timeout) {
+		this.timeout = timeout;
+	}
+	
+	public int getTestTimeOut(){
+		return timeout;
+	}
+	
+	public void setAllRunnedTests(String[] tests_arr) {
+		this.tests_arr = tests_arr;
+	}
+	
+	public String[] getAllRunnedTests() {
+		return this.tests_arr;
 	}
 }

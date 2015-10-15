@@ -15,7 +15,7 @@ import org.jdom2.output.Format;
 import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
 
-import com.vmusco.smf.analysis.MutantExecutionIfos;
+import com.vmusco.smf.analysis.TestsExecutionIfos;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
@@ -63,7 +63,7 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 
 	@Override
 	public void saveState(MutantIfos mi) throws PersistenceException {
-		MutantExecutionIfos mei;
+		TestsExecutionIfos mei;
 		try {
 			mei = mi.getExecutedTestsResults();
 		} catch (MutationNotRunException e2) {
@@ -75,20 +75,20 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 		Document document = new Document(mutations);
 
 		mutations.setAttribute(new Attribute(ID, this.mutantId));
-		mutations.setAttribute(new Attribute(ProcessXMLPersistence.TIME_ATTRIBUTE, Long.toString(mei.getRunTestOnMutantTime())));
+		mutations.setAttribute(new Attribute(ProcessXMLPersistence.TIME_ATTRIBUTE, Long.toString(mei.getRunTestsTime())));
 
 		Element e = new Element(ProcessXMLPersistence.FAILING_TC_3);
 		mutations.addContent(e);
-		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TS_4, mei.getRawMutantErrorOnTestSuite());
-		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getRawMutantFailingTestCases());
+		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TS_4, mei.getRawErrorOnTestSuite());
+		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getRawFailingTestCases());
 
 		e = new Element(ProcessXMLPersistence.IGNORED_TC_3);
 		mutations.addContent(e);
-		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getRawMutantIgnoredTestCases());
+		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getRawIgnoredTestCases());
 
 		e = new Element(ProcessXMLPersistence.HANGING_TC_3);
 		mutations.addContent(e);
-		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getRawMutantHangingTestCases());
+		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getRawHangingTestCases());
 		
 		Format format = Format.getPrettyFormat();
 		format.setLineSeparator(LineSeparator.UNIX);
@@ -117,10 +117,10 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 			return;
 		}
 
-		MutantExecutionIfos mei = new MutantExecutionIfos();
+		TestsExecutionIfos mei = new TestsExecutionIfos();
 		
 		Element root = document.getRootElement();
-		mei.setRunTestOnMutantTime(Long.valueOf(root.getAttributeValue(ProcessXMLPersistence.TIME_ATTRIBUTE)));
+		mei.setRunTestsTime(Long.valueOf(root.getAttributeValue(ProcessXMLPersistence.TIME_ATTRIBUTE)));
 		
 		Element tmp;
 
@@ -131,14 +131,14 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 			for(Element e: tmplist){
 				al.add(e.getText());
 			}
-			mei.setMutantFailingTestCases(al.toArray(new String[0]));
+			mei.setFailingTestCases(al.toArray(new String[0]));
 			
 			tmplist = tmp.getChildren(ProcessXMLPersistence.ONE_TS_4);
 			al = new ArrayList<String>();
 			for(Element e: tmplist){
 				al.add(e.getText());
 			}
-			mei.setMutantErrorOnTestSuite(al.toArray(new String[0]));
+			mei.setErrorOnTestSuite(al.toArray(new String[0]));
 		}
 
 		if((tmp = root.getChild(ProcessXMLPersistence.IGNORED_TC_3)) != null){
@@ -148,7 +148,7 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 			for(Element e: tmplist){
 				al.add(e.getText());
 			}
-			mei.setMutantIgnoredTestCases(al.toArray(new String[0]));
+			mei.setIgnoredTestCases(al.toArray(new String[0]));
 		}
 
 		if((tmp = root.getChild(ProcessXMLPersistence.HANGING_TC_3)) != null){
@@ -158,7 +158,7 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 			for(Element e: tmplist){
 				al.add(e.getText());
 			}
-			mei.setMutantHangingTestCases(al.toArray(new String[0]));
+			mei.setHangingTestCases(al.toArray(new String[0]));
 		}
 		
 		updateMe.setExecutedTestsResults(mei);

@@ -1,4 +1,4 @@
-package com.vmusco.smf.testclasses;
+package com.vmusco.smf.testclasses.simple;
 
 public class Class1 {
 	public static void main(String[] args) {
@@ -13,4 +13,5 @@ public class Class1 {
 			l *= 2;
 		}
 	}
+
 }

@@ -1,10 +1,12 @@
 package com.vmusco.smf.analysis;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
@@ -19,6 +21,7 @@ import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.utils.InterruptionManager;
 import com.vmusco.smf.utils.MutationsSetTools;
 import com.vmusco.smf.utils.SourceReference;
@@ -394,8 +397,8 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	public boolean isMutantAlive(String mutid) throws MutationNotRunException, PersistenceException {
 		MutantIfos mutationStats = loadMutationStats(mutid);
 
-		return MutationsSetTools.areSetsSimilars(ps.getFailingTestCases(), mutationStats.getExecutedTestsResults().getRawMutantFailingTestCases()) &&
-				MutationsSetTools.areSetsSimilars(ps.getHangingTestCases(), mutationStats.getExecutedTestsResults().getRawMutantHangingTestCases());
+		return MutationsSetTools.areSetsSimilars(ps.getFailingTestCases(), mutationStats.getExecutedTestsResults().getRawFailingTestCases()) &&
+				MutationsSetTools.areSetsSimilars(ps.getHangingTestCases(), mutationStats.getExecutedTestsResults().getRawHangingTestCases());
 	}
 
 	public boolean isMutantKilled(String mutid) throws MutationNotRunException, PersistenceException {
@@ -443,5 +446,19 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		}
 		
 		return sr;
+	}
+	
+	public String[] getRunningClassPath(String forMutant) throws IOException{
+		String[] rcp = getRelatedProcessStatisticsObject().getRunningClassPath();
+		String[] ret = new String[rcp.length + 1];
+		
+		ret[0] = getBytecodeMutationResolved() + File.separator + forMutant;
+		
+		int i = 1;
+		for(String it : rcp){
+			ret[i++] = it;
+		}
+		
+		return ret;
 	}
 }
