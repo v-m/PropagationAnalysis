@@ -11,7 +11,7 @@ import com.vmusco.smf.exceptions.MutationNotRunException;
 public class ConsoleDisplayAnalyzer extends MutantTestAnalyzer {
 	@Override
 	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) throws MutationNotRunException{
-		String[] ais = mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps); 
+		String[] ais = ps.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults()); 
 		String[] cis = impactedTests;
 		
 		CIAEstimationSets sets = new CIAEstimationSets(cis, ais);

@@ -54,7 +54,7 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		lastUnbounded = impactedNodes == null && impactedTests == null;
 		lastIsolated  = impactedNodes == null && impactedTests != null && impactedTests.length == 0;
 		
-		String[] ais = mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps);
+		String[] ais = ps.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults());
 
 		if(lastUnbounded){
 			soud.addUnbounded(mi.getId());

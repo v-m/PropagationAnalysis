@@ -30,6 +30,9 @@ public class TestsExecutionIfos {
 	private String[] errorOnTestSuite = null;
 	private long runTestsTime = -1;
 	private int timeout = -1;
+	/**
+	 * This content is NOT directly persisted !
+	 */
 	private String[] tests_arr;
 	
 	/**
@@ -86,102 +89,22 @@ public class TestsExecutionIfos {
 		this.runTestsTime = runTestOnMutantTime;
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	//TODO: the end of this file should be moved for coherency with reusability
-	private static String[] includeTestSuiteGlobalFailingCases(ProcessStatistics ps, String[] testsuites, String[] include){
-		Set<String> cases = new HashSet<String>();
-
-		if(include != null){
-			for(String s : include){
-				cases.add(s);
-			}
-		}
-
-		for(String ts : testsuites){
-			for(String s : ps.getTestCases()){
-				if(s.startsWith(ts)){
-					cases.add(s);
-				}
-			}
-		}
-
-		return cases.toArray(new String[0]);
-	}
-
 	/**
-	 * This method return the failing function after...
-	 *  - removing functions already failing on execution on the unmutated version of the software;
-	 *  - adding all functions included in test suite global failing methods.
-	 * @param ps The {@link ProcessStatistics} object which describes the execution
-	 * @return 
-	 * @throws MutationNotRunException
+	 * This content is NOT directly persisted !
 	 */
-	public String[] getCoherentMutantFailingTestCases(ProcessStatistics ps) throws MutationNotRunException {
-		String[] mutset = includeTestSuiteGlobalFailingCases(ps, getRawErrorOnTestSuite(), getRawFailingTestCases());
-		String[] glbset = includeTestSuiteGlobalFailingCases(ps, ps.getErrorOnTestSuite(), ps.getFailingTestCases());
-
-		return MutationsSetTools.setDifference(mutset, glbset);
+	public void setAllRunnedTests(String[] tests_arr) {
+		this.tests_arr = tests_arr;
 	}
-
+	
 	/**
-	 * This method return the ignored function after removing functions already ignored on execution on the unmutated version of the software;
-	 * @param ps The {@link ProcessStatistics} object which describes the execution
-	 * @return 
-	 * @throws MutationNotRunException
+	 * This content is NOT directly persisted !
 	 */
-	public String[] getCoherentMutantIgnoredTestCases(ProcessStatistics ps) throws MutationNotRunException {
-		String[] mutset = getRawIgnoredTestCases();
-		String[] glbset = ps.getIgnoredTestCases();
-
-		return MutationsSetTools.setDifference(mutset, glbset);
+	public String[] getAllRunnedTests() {
+		return this.tests_arr;
 	}
+	
 
-	/**
-	 * This method return the hanging function after removing functions already hanging on execution on the unmutated version of the software;
-	 * @param ps The {@link ProcessStatistics} object which describes the execution
-	 * @return 
-	 * @throws MutationNotRunException
-	 */
-	public String[] getCoherentMutantHangingTestCases(ProcessStatistics ps) throws MutationNotRunException {
-		String[] mutset = getRawHangingTestCases();
-		String[] glbset = ps.getHangingTestCases();
-
-		return MutationsSetTools.setDifference(mutset, glbset);
-	}
-
-	/**
-	 * Includes tests hanging when the whole test case fail, the failing and the hanging cases in one shot.
-	 * The result do not includes the elements already failing or hanging in the execution of the un mutated version of the code. 
-	 * @param ps The {@link ProcessStatistics} object which describes the execution
-	 * @return
-	 * @throws MutationNotRunException
-	 */
-	public String[] getCoherentMutantFailAndHangTestCases(ProcessStatistics ps) throws MutationNotRunException {
-		Set<String> cases = new HashSet<String>();
-
-		for(String s : includeTestSuiteGlobalFailingCases(ps, getRawErrorOnTestSuite(), null)){
-			cases.add(s);
-		}
-		
-		for(String s:getRawHangingTestCases()){
-			cases.add(s);
-		}
-
-		for(String s:getRawFailingTestCases()){
-			cases.add(s);
-		}
-
-		return MutationsSetTools.setDifference(cases.toArray(new String[0]), ps.getUnmutatedFailAndHang());
-	}
+	
 	public void setTestTimeOut(int timeout) {
 		this.timeout = timeout;
 	}
@@ -190,11 +113,4 @@ public class TestsExecutionIfos {
 		return timeout;
 	}
 	
-	public void setAllRunnedTests(String[] tests_arr) {
-		this.tests_arr = tests_arr;
-	}
-	
-	public String[] getAllRunnedTests() {
-		return this.tests_arr;
-	}
 }

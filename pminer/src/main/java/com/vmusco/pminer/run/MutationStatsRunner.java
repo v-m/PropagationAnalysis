@@ -214,7 +214,7 @@ public class MutationStatsRunner{
 				}
 			}
 			// relevant IS list of tests impacted by the introduced bug (determined using mutation)
-			String[] relevantArray = ifos.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps);
+			String[] relevantArray = ps.getCoherentMutantFailAndHangTestCases(ifos.getExecutedTestsResults());
 
 			if(relevantArray == null)
 				continue;

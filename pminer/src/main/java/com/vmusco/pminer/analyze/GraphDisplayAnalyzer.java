@@ -37,7 +37,7 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 	}
 
 	protected void makeUp(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) throws MutationNotRunException {
-		String[] mutationDetermined = mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps);
+		String[] mutationDetermined = ps.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults());
 		String[] graphDetermined = impactedTests;
 		
 		String mutationInsertionPosition = mi.getMutationIn();

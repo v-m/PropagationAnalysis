@@ -16,12 +16,14 @@ import com.vmusco.smf.analysis.persistence.ExecutionPersistence;
 import com.vmusco.smf.analysis.persistence.ProcessXMLPersistence;
 import com.vmusco.smf.compilation.Compilation;
 import com.vmusco.smf.exceptions.BadStateException;
+import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
 import com.vmusco.smf.instrumentation.Instrumentation;
 import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.testing.TestsExecutionListener;
 import com.vmusco.smf.utils.MavenTools;
+import com.vmusco.smf.utils.MutationsSetTools;
 
 /**
  * This class contains all informations required for a mutation project
@@ -564,6 +566,99 @@ public class ProcessStatistics implements Serializable{
 	public void setTestExecutionResult(TestsExecutionIfos cleanTestExecution){
 		this.cleanTestExecution = cleanTestExecution;
 	}
+	
+	
+	
+	
+	
+
+	//TODO: the end of this file should be moved for coherency with reusability
+	private String[] includeTestSuiteGlobalFailingCases(String[] testsuites, String[] include){
+		Set<String> cases = new HashSet<String>();
+
+		if(include != null){
+			for(String s : include){
+				cases.add(s);
+			}
+		}
+
+		for(String ts : testsuites){
+			for(String s : getTestCases()){
+				if(s.startsWith(ts)){
+					cases.add(s);
+				}
+			}
+		}
+
+		return cases.toArray(new String[0]);
+	}
+
+	/**
+	 * This method return the failing function after...
+	 *  - removing functions already failing on execution on the unmutated version of the software;
+	 *  - adding all functions included in test suite global failing methods.
+	 * @param ps The {@link ProcessStatistics} object which describes the execution
+	 * @return 
+	 * @throws MutationNotRunException
+	 */
+	public String[] getCoherentMutantFailingTestCases(TestsExecutionIfos tei) throws MutationNotRunException {
+		String[] mutset = includeTestSuiteGlobalFailingCases(tei.getRawErrorOnTestSuite(), tei.getRawFailingTestCases());
+		String[] glbset = includeTestSuiteGlobalFailingCases(getErrorOnTestSuite(), getFailingTestCases());
+
+		return MutationsSetTools.setDifference(mutset, glbset);
+	}
+
+	/**
+	 * This method return the ignored function after removing functions already ignored on execution on the unmutated version of the software;
+	 * @param ps The {@link ProcessStatistics} object which describes the execution
+	 * @return 
+	 * @throws MutationNotRunException
+	 */
+	public String[] getCoherentMutantIgnoredTestCases(TestsExecutionIfos tei) throws MutationNotRunException {
+		String[] mutset = tei.getRawIgnoredTestCases();
+		String[] glbset = getIgnoredTestCases();
+
+		return MutationsSetTools.setDifference(mutset, glbset);
+	}
+
+	/**
+	 * This method return the hanging function after removing functions already hanging on execution on the unmutated version of the software;
+	 * @param ps The {@link ProcessStatistics} object which describes the execution
+	 * @return 
+	 * @throws MutationNotRunException
+	 */
+	public String[] getCoherentMutantHangingTestCases(TestsExecutionIfos tei) throws MutationNotRunException {
+		String[] mutset = tei.getRawHangingTestCases();
+		String[] glbset = getHangingTestCases();
+
+		return MutationsSetTools.setDifference(mutset, glbset);
+	}
+
+	/**
+	 * Includes tests hanging when the whole test case fail, the failing and the hanging cases in one shot.
+	 * The result do not includes the elements already failing or hanging in the execution of the un mutated version of the code. 
+	 * @param ps The {@link ProcessStatistics} object which describes the execution
+	 * @return
+	 * @throws MutationNotRunException
+	 */
+	public String[] getCoherentMutantFailAndHangTestCases(TestsExecutionIfos tei) throws MutationNotRunException {
+		Set<String> cases = new HashSet<String>();
+
+		for(String s : includeTestSuiteGlobalFailingCases(tei.getRawErrorOnTestSuite(), null)){
+			cases.add(s);
+		}
+		
+		for(String s:tei.getRawHangingTestCases()){
+			cases.add(s);
+		}
+
+		for(String s:tei.getRawFailingTestCases()){
+			cases.add(s);
+		}
+
+		return MutationsSetTools.setDifference(cases.toArray(new String[0]), getUnmutatedFailAndHang());
+	}
+	
 	
 	/**
 	 * Return the base directory for mutants. 

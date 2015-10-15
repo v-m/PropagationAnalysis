@@ -116,7 +116,7 @@ public class UseGraphMutantStats {
 		graphsizeonlytests = data_basin_testnodes.size();
 		
 		data_relevant = new HashSet<String>();
-		for(String t : mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps)){
+		for(String t : ps.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults())){
 			data_relevant.add(t);
 		}
 
@@ -127,7 +127,7 @@ public class UseGraphMutantStats {
 
 		// inter IS list of tests impacted by the introduced bug (determined by BOTH)
 		data_inter = new HashSet<String>();
-		for(String tt : MutationsSetTools.setIntersection(impactedTests, mi.getExecutedTestsResults().getCoherentMutantFailAndHangTestCases(ps))){
+		for(String tt : MutationsSetTools.setIntersection(impactedTests, ps.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults()))){
 			data_inter.add(tt);
 		}
 
