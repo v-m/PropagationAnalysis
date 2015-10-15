@@ -20,6 +20,7 @@ import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
 import com.vmusco.smf.instrumentation.Instrumentation;
+import com.vmusco.smf.testing.TestCasesProcessor;
 import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.testing.TestsExecutionListener;
 import com.vmusco.smf.utils.MavenTools;
@@ -61,10 +62,6 @@ public class ProcessStatistics implements Serializable{
 		 * On this state, the project has been created and has strongly been set (cp, mutation, ...) and BUILT
 		 */
 		BUILD,
-		/**
-		 * On this state, the project has been created and has strongly been set (cp, mutation, ...), built and TEST ARE BUILT ALSO
-		 */
-		BUILD_TESTS,
 		/**
 		 * On this state, the test has been run (not mutated ones)
 		 */
@@ -226,8 +223,6 @@ public class ProcessStatistics implements Serializable{
 		switch(aState){
 		case BUILD:
 			return "BUILD";
-		case BUILD_TESTS:
-			return "BUILD_TESTS";
 		case READY:
 			return "DRY_TESTS";
 		case FRESH:
@@ -240,8 +235,6 @@ public class ProcessStatistics implements Serializable{
 	public static STATE fromStringToState(String aState){
 		if(aState.equals("BUILD"))
 			return STATE.BUILD;
-		else if(aState.equals("BUILD_TESTS"))
-			return STATE.BUILD_TESTS;
 		else if(aState.equals("DRY_TESTS"))
 			return STATE.READY;
 		else if(aState.equals("FRESH"))
@@ -780,11 +773,14 @@ public class ProcessStatistics implements Serializable{
 			if(new File(this.testsGenerationFolder()).exists())
 				l.add(this.testsGenerationFolder());
 
+			//l.add(Testing.getCurrentVMClassPath(new String[]{"smf"})[0]);
+			
 			return l.toArray(new String[0]);
 		}else{
 			return new String[]{
 					this.srcGenerationFolder(),
 					this.testsGenerationFolder(),
+					//Testing.getCurrentVMClassPath(new String[]{"smf"})[0]
 			};
 		}
 	}
@@ -896,7 +892,7 @@ public class ProcessStatistics implements Serializable{
 		return cbug.equals(ctest);
 	}
 
-	public void instrumentSources(AbstractInstrumentationProcessor[] aips) throws BadStateException{
+	public void instrumentAndBuildProjectAndTests(AbstractInstrumentationProcessor[] aips) throws BadStateException, IOException{
 		if(getCurrentState() != STATE.FRESH)
 			throw new BadStateException();
 		
@@ -908,17 +904,17 @@ public class ProcessStatistics implements Serializable{
 		for(String srce : getSrcToCompile(false)){
 			Instrumentation.instrumentSource(new String[]{orig.getAbsolutePath() + File.separator + srce}, getClasspath(), new File(pji, srce), aips);
 		}
+		
+		compileProjectWithSpoon();
  
 		for(String srce : getSrcTestsToTreat(false)){
-			Instrumentation.instrumentSource(new String[]{orig.getAbsolutePath() + File.separator + srce}, getClasspath(), new File(pji, srce), aips);
-			Instrumentation.instrumentSource(new String[]{orig.getAbsolutePath() + File.separator + srce}, getClasspath(), new File(pji,  srce), aips);
+			Instrumentation.instrumentSource(new String[]{orig.getAbsolutePath() + File.separator + srce}, getTestingClasspath(), new File(pji, srce), aips);
 		}
+		
+		compileTestWithSpoon();
 	}
 
-	public boolean compileProjectWithSpoon() throws BadStateException, IOException {
-		if(getCurrentState() != STATE.FRESH)
-			throw new BadStateException();
-		
+	private boolean compileProjectWithSpoon() throws BadStateException, IOException {
 		long ret = Compilation.compileUsingSpoon(getSrcToCompile(true), getClasspath(), srcGenerationFolder(), buildPath("spoonCompilation.log"));
 
 		if(ret < 0){
@@ -926,15 +922,11 @@ public class ProcessStatistics implements Serializable{
 			return false;
 		}else{
 			setBuildProjectTime(ret);
-			this.currentState = STATE.BUILD;
 			return true;
 		}
 	}
 
-	public boolean compileTestWithSpoon() throws BadStateException, IOException {
-		if(getCurrentState() != STATE.BUILD)
-			throw new BadStateException();
-		
+	private boolean compileTestWithSpoon() throws BadStateException, IOException {
 		long ret = Compilation.compileUsingSpoon(getSrcTestsToTreat(true), getTestingClasspath(), testsGenerationFolder(), buildPath("spoonTestCompilations.log"));
 		
 		if(ret < 0){
@@ -942,31 +934,36 @@ public class ProcessStatistics implements Serializable{
 			return false;
 		}else{
 			setBuildTestsTime(ret);
-			this.currentState = STATE.BUILD_TESTS;
 			return true;
 		}
 	}
 	
-	public boolean compileAllWithSpoon() throws BadStateException, IOException{
-		if(compileProjectWithSpoon())
-			if(compileTestWithSpoon())
+	public boolean compileWithSpoon() throws BadStateException, IOException{
+		if(getCurrentState() != STATE.FRESH)
+			throw new BadStateException();
+		
+		if(compileProjectWithSpoon()){
+			if(compileTestWithSpoon()){
+				this.currentState = STATE.BUILD;
 				return true;
+			}
+		}
+		
 		return false;
 	}
 
 	public void performFreshTesting(TestsExecutionListener tel) throws IOException {
-		setTestClasses(Testing.findTestClassesString(getSrcTestsToTreat(true), getTestingClasspath()));
+		Testing.executeTestDetection(getSrcTestsToTreat(true), getTestingClasspath());
+		setTestClasses(TestCasesProcessor.getTestClassesString());
+		setTestCases(TestCasesProcessor.getTestCasesString());
+		
 		cleanTestExecution = Testing.runTestCases(getProjectIn(true), getRunningClassPath(), getTestClasses(), 0, tel);
-		this.testCases = cleanTestExecution.getAllRunnedTests();
 		
 		this.currentState = STATE.READY;
 	}
 	
 	public String[] getRunningClassPath() throws IOException{
 		List<String> ret = new ArrayList<String>();
-
-		
-
 
 		for(String s : getTestingClasspath()){
 			ret.add(s);
@@ -982,6 +979,12 @@ public class ProcessStatistics implements Serializable{
 			ret.add(cpe);
 		}
 
+		this.currentState = STATE.READY;
+		
 		return ret.toArray(new String[0]);
+	}
+	
+	public boolean isInstrumented() {
+		return new File(getProjectIn(true)+File.separator+".original").exists();
 	}
 }

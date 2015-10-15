@@ -14,8 +14,8 @@ import org.junit.runner.notification.RunListener;
 
 /**
  * This entry point is used to do test cases executions.
- * Used in {@link Testing#runTestCases(com.vmusco.smf.analysis.ProcessStatistics, com.vmusco.smf.analysis.MutationStatistics, String, TestsExecutionListener)}
- * @see Testing#runTestCases(com.vmusco.smf.analysis.ProcessStatistics, com.vmusco.smf.analysis.MutationStatistics, String, TestsExecutionListener)
+ * Used in {@link Testing#runTestCases(String, String[], String[], int, TestsExecutionListener)}
+ * @see Testing#Testing#runTestCases(String, String[], String[], int, TestsExecutionListener)
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public class TestExecutor {

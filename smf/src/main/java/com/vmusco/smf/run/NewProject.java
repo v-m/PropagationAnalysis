@@ -181,22 +181,7 @@ public class NewProject extends GlobalTestRunning {
 		System.out.print("Building project.....");
 		if(ps.getCurrentState() == STATE.FRESH){
 			System.out.println();
-			if(ps.compileProjectWithSpoon()){
-				ProcessStatistics.saveState(ps);
-			}else{
-				System.out.println("Building failed. Didn't you forget to run 'mvn clean install' priorly ?");
-				System.exit(1);
-			}
-
-			System.out.println("\n********************\n");
-		}else{
-			System.out.println("SKIP");
-		}
-
-		System.out.print("Building tests.....");
-		if(ps.getCurrentState() == STATE.BUILD){
-			System.out.println();
-			if(ps.compileTestWithSpoon()){
+			if(ps.compileWithSpoon()){
 				ProcessStatistics.saveState(ps);
 			}else{
 				System.out.println("Building failed. Didn't you forget to run 'mvn clean install' priorly ?");
@@ -209,7 +194,7 @@ public class NewProject extends GlobalTestRunning {
 		}
 
 		System.out.print("Running tests.....");
-		if(ps.getCurrentState() == STATE.BUILD_TESTS){
+		if(ps.getCurrentState() == STATE.BUILD){
 			System.out.println();
 			ps.performFreshTesting(np);
 

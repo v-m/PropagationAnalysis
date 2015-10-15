@@ -8,6 +8,8 @@ import junit.framework.TestCase;
 
 import org.junit.Test;
 
+import com.vmusco.smf.utils.SpoonHelpers;
+
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtMethod;
@@ -17,41 +19,20 @@ import spoon.reflect.declaration.ModifierKind;
 public class TestCasesProcessor extends AbstractProcessor<CtClass<?>> {
 	private static ArrayList<CtClass<?>> annot_classes;
 	private static ArrayList<CtClass<?>> tc_classes;
-	//private static ArrayList<CtClass> rw_classes;
-
-	//private static ArrayList<String> output;
 
 	public TestCasesProcessor() {
 		TestCasesProcessor.annot_classes = new ArrayList<CtClass<?>>();
 		TestCasesProcessor.tc_classes = new ArrayList<CtClass<?>>();
-		//TestCasesFinderProcessor.rw_classes = new ArrayList<CtClass>();
-
-		//TestCasesProcessor.output = new ArrayList<String>();
 	}
 
 	@Override
 	public void process(CtClass<?> element) {
 		if(element.getModifiers().contains(ModifierKind.ABSTRACT))
 			return;
-
-		// TEST_CLASSES
-		Iterator<CtMethod<?>> iterator = element.getMethods().iterator();
-
-		while(iterator.hasNext()){
-			Object o = iterator.next();
-
-			if(o instanceof CtMethod){
-				CtMethod<?> method = (CtMethod<?>) o;
-
-				if(method.getAnnotation(Test.class) != null){
-					// Ok there is tests :)
-					annot_classes.add(element);
-					return;
-				}
-			}
-		}
-
-		// JUNIT38 -- lookup reccurssively
+		
+		// JUnit 3.8 -- lookup recursively
+		int junit_version = 0;
+		
 		CtClass<?> explore = element;
 		while(explore.getSuperclass() != null 
 				&& !explore.getSuperclass().getQualifiedName().equals(TestCase.class.getCanonicalName())
@@ -64,20 +45,31 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass<?>> {
 				explore.getSuperclass().getQualifiedName().equals(TestCase.class.getCanonicalName())){
 			// Ok this is a testing class :)
 			tc_classes.add(element);
-			return;
+			junit_version = 3;
 		}
+		
+		if(junit_version == 0){
+			Iterator<CtMethod<?>> iterator = element.getMethods().iterator();
 
-		// RUN_WITH_CLASSES
-		/*if(element.getAnnotation(RunWith.class) != null){
-			rw_classes.add(element);
-			return;
-		}*/
+			while(iterator.hasNext()){
+				Object o = iterator.next();
+
+				if(o instanceof CtMethod){
+					CtMethod<?> method = (CtMethod<?>) o;
+
+					if(method.getAnnotation(Test.class) != null){
+						annot_classes.add(element);
+						junit_version = 4;
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	public static String[] getTestClassesString(){
 		int i=0;
 		String[] ret = new String[TestCasesProcessor.annot_classes.size() +
-		                          //TestCasesFinderProcessor.rw_classes.size() +
 		                          TestCasesProcessor.tc_classes.size()];
 
 		for(CtClass<?> aClass : TestCasesProcessor.annot_classes){
@@ -87,10 +79,6 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass<?>> {
 		for(CtClass<?> aClass : TestCasesProcessor.tc_classes){
 			ret[i++] = aClass.getQualifiedName();
 		}
-
-		/*for(CtClass aClass : TestCasesFinderProcessor.rw_classes){
-			ret[i++] = aClass.getQualifiedName();
-		}*/
 
 		return ret;
 	}
@@ -98,7 +86,6 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass<?>> {
 	public static CtClass<?>[] getTestClasses(){
 		int i=0;
 		CtClass<?>[] ret = new CtClass[TestCasesProcessor.annot_classes.size() +
-		                          //TestCasesFinderProcessor.rw_classes.size() +
 		                          TestCasesProcessor.tc_classes.size()];
 
 		for(CtClass<?> aClass : TestCasesProcessor.annot_classes){
@@ -108,10 +95,6 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass<?>> {
 		for(CtClass<?> aClass : TestCasesProcessor.tc_classes){
 			ret[i++] = aClass;
 		}
-
-		/*for(CtClass aClass : TestCasesFinderProcessor.rw_classes){
-			ret[i++] = aClass.getQualifiedName();
-		}*/
 
 		return ret;
 	}
@@ -130,7 +113,7 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass<?>> {
 					CtMethod<?> method = (CtMethod<?>) o;
 
 					if(method.getAnnotation(Test.class) != null){
-						ret.add("<A>"+getFullMethodSignature(method));
+						ret.add(SpoonHelpers.resolveName(method));
 					}
 				}
 			}
@@ -147,13 +130,11 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass<?>> {
 					CtMethod<?> method = (CtMethod<?>) o;
 
 					if(method.getSimpleName().startsWith("test")){
-						ret.add("<I>"+getFullMethodSignature(method));
+						ret.add(SpoonHelpers.resolveName(method));
 					}
 				}
 			}
 		}
-
-		/*for(CtClass aClass : TestCasesFinderProcessor.rw_classes){ }*/
 
 		return ret.toArray(new String[0]);
 	}
@@ -195,8 +176,6 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass<?>> {
 			}
 		}
 
-		/*for(CtClass aClass : TestCasesFinderProcessor.rw_classes){ }*/
-
 		return ret.toArray(new CtMethod[0]);
 	}
 
@@ -206,12 +185,5 @@ public class TestCasesProcessor extends AbstractProcessor<CtClass<?>> {
 
 	public static int getNbFromTestCases(){
 		return tc_classes.size();
-	}
-	
-	private static String getFullMethodSignature(CtMethod<?> method){
-		int pos = method.getSignature().indexOf("(");
-		String st = method.getSignature().substring(0, pos);
-		pos = st.lastIndexOf(' ');
-		return method.getDeclaringType().getQualifiedName()+"."+method.getSignature().substring(pos+1);
 	}
 }

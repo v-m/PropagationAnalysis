@@ -28,9 +28,7 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.factory.Factory;
-import spoon.reflect.factory.FactoryImpl;
 import spoon.reflect.visitor.DefaultJavaPrettyPrinter;
-import spoon.support.DefaultCoreFactory;
 import spoon.support.JavaOutputProcessor;
 import spoon.support.StandardEnvironment;
 import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
@@ -511,21 +509,7 @@ public final class Mutation {
 			return null;
 		}
 
-		return resolveName((CtTypeMember)searchSignature);
-	}
-
-	public static String resolveName(CtTypeMember castedElement){
-
-		int pos = castedElement.getSignature().indexOf("(");
-		String st = castedElement.getSignature().substring(0, pos);
-		pos = st.lastIndexOf(' ');
-
-		if(castedElement instanceof CtConstructor)
-			return castedElement.getSignature();
-		else if(castedElement instanceof CtMethod)
-			return castedElement.getDeclaringType().getQualifiedName()+"."+castedElement.getSignature().substring(pos+1);
-		else
-			return null;
+		return SpoonHelpers.resolveName((CtTypeMember)searchSignature);
 	}
 
 	public static void persistMutantClass(CtClass<?> aClass, String outputPath, Factory f){

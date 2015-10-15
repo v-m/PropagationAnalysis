@@ -26,7 +26,7 @@ import spoon.reflect.visitor.Query;
 import spoon.reflect.visitor.filter.AbstractFilter;
 import spoon.reflect.visitor.filter.AbstractReferenceFilter;
 
-import com.vmusco.smf.mutation.Mutation;
+import com.vmusco.smf.utils.SpoonHelpers;
 import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 
 /**
@@ -56,7 +56,7 @@ public abstract class AbstractFeaturesProcessor extends AbstractProcessor<CtName
 	 * @return
 	 */
 	public static String getNodeForItemKey(CtExecutable anExecutable){
-		return Mutation.resolveName((CtTypeMember)anExecutable);
+		return SpoonHelpers.resolveName((CtTypeMember)anExecutable);
 	}
 
 

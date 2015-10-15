@@ -44,7 +44,12 @@ public final class Testing {
 	private Testing() {
 	}
 
-	private static void executeTestDetection(String[] srcFolder, String[] classpath){
+	/**
+	 * Run the test detections on source files and return results on TestCasesProcessor
+	 * @param srcFolder
+	 * @param classpath
+	 */
+	public static void executeTestDetection(String[] srcFolder, String[] classpath){
 		Factory factory = new FactoryImpl(new DefaultCoreFactory(), new StandardEnvironment());
 		SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
 
@@ -63,10 +68,6 @@ public final class Testing {
 		List<String> arg0 = new ArrayList<String>();
 		arg0.add(TestCasesProcessor.class.getName());
 		compiler.process(arg0);
-
-		/*System.out.println(TestCasesProcessor.getNbFromAnnotations()+" test classes based on Annotation (Junit 4)");
-		System.out.println(TestCasesProcessor.getNbFromTestCases()+" test classes based on inheritance (Junit 3)");
-		System.out.println();*/
 	}
 	
 	/**
@@ -182,6 +183,7 @@ public final class Testing {
 				for(String c : cmd)
 					s += c+" ";
 				s = s.trim();
+				System.out.println(s);
 
 				if(tel != null)		tel.testSuiteExecutionStart(cpt, testClasses.length, s);
 
@@ -337,7 +339,6 @@ public final class Testing {
 		
 		return tei;
 	}
-	
 	
 	private static String[] buildExecutionPath(Class<?> classToRun, String testClassToRun, String[] classpath, String... testcasesToIgnores){
 		List<String> cmd = new ArrayList<String>();

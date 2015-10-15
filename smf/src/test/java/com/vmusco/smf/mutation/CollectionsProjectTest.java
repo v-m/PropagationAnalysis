@@ -76,9 +76,8 @@ public class CollectionsProjectTest {
 		Assert.assertEquals(5, ps.getClasspath().length);
 		Assert.assertEquals(5, new File(ps.resolveThis(ps.getCpLocalFolder())).list().length);
 		
-		Assert.assertTrue(ps.compileProjectWithSpoon());
-		Assert.assertTrue(ps.compileTestWithSpoon());
-		
+		Assert.assertTrue(ps.compileWithSpoon());
+
 		ps.performFreshTesting(null);
 		Assert.assertEquals(18, TestCasesProcessor.getNbFromAnnotations());
 		Assert.assertEquals(162, TestCasesProcessor.getNbFromTestCases());

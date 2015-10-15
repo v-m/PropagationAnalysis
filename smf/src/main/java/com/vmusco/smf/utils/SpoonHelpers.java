@@ -1,16 +1,13 @@
 package com.vmusco.smf.utils;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import com.vmusco.smf.mutation.MutationGateway;
-
 import spoon.compiler.SpoonCompiler;
-import spoon.processing.Processor;
 import spoon.reflect.declaration.CtClass;
-import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtConstructor;
+import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.FactoryImpl;
 import spoon.reflect.visitor.DefaultJavaPrettyPrinter;
@@ -57,7 +54,7 @@ public final class SpoonHelpers {
 	 * @param object
 	 * @return
 	 */
-	public static CtClass getClassElement(String[] sourcefolder, String cp, final String classFullName){
+	public static CtClass<?> getClassElement(String[] sourcefolder, String cp, final String classFullName){
 		Factory factory = SpoonHelpers.obtainFactory();
 		SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
 
@@ -74,7 +71,7 @@ public final class SpoonHelpers {
 
 		List<CtClass<?>> elements = Query.getElements(factory, new Filter<CtClass<?>>() {
 			@Override
-			public boolean matches(CtClass arg0) {
+			public boolean matches(CtClass<?> arg0) {
 				return arg0.getQualifiedName().equals(classFullName);
 			}
 		});
@@ -82,6 +79,20 @@ public final class SpoonHelpers {
 		if(elements.size() == 1)
 			return elements.get(0);
 		else 
+			return null;
+	}
+	
+	public static String resolveName(CtTypeMember castedElement){
+
+		int pos = castedElement.getSignature().indexOf("(");
+		String st = castedElement.getSignature().substring(0, pos);
+		pos = st.lastIndexOf(' ');
+
+		if(castedElement instanceof CtConstructor)
+			return castedElement.getSignature();
+		else if(castedElement instanceof CtMethod)
+			return castedElement.getDeclaringType().getQualifiedName()+"."+castedElement.getSignature().substring(pos+1);
+		else
 			return null;
 	}
 }

@@ -11,17 +11,14 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import spoon.reflect.declaration.CtClass;
-import spoon.reflect.declaration.CtElement;
 
 import com.vmusco.smf.TestingTools;
 import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.smf.analysis.ProcessStatistics.STATE;
 import com.vmusco.smf.compilation.Compilation;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
 import com.vmusco.smf.instrumentation.EntryMethodInstrumentationProcessor;
-import com.vmusco.smf.instrumentation.Instrumentation;
 import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.utils.SpoonHelpers;
 
@@ -107,11 +104,8 @@ public class BuildingTest {
 		ProcessStatistics.saveState(ps);
 
 		// Build project
-		ps.compileProjectWithSpoon();
-		ProcessStatistics.saveState(ps);
-
-		System.out.print("Building tests.....");
-		ps.compileTestWithSpoon();
+		System.out.print("Building.....");
+		ps.compileWithSpoon();
 		ProcessStatistics.saveState(ps);
 
 		System.out.println("Running tests...");
@@ -140,11 +134,14 @@ public class BuildingTest {
 		ps.setOriginalClasspath(Testing.getCurrentVMClassPath());
 		ps.createLocalCopies(ProcessStatistics.SOURCES_COPY, ProcessStatistics.CLASSPATH_PACK);
 		ProcessStatistics.saveState(ps);
-		
-		ps.instrumentSources(new AbstractInstrumentationProcessor[]{ new EntryMethodInstrumentationProcessor() });
-		
-		File f = prepareProjectWithTests();
-		File ff = new File(f, "instru");
+
+		ps.instrumentAndBuildProjectAndTests(
+				new AbstractInstrumentationProcessor[]{ 
+						new EntryMethodInstrumentationProcessor(),
+				}
+				);
+
+		ps.performFreshTesting(null);
 	}
 
 	@Test
@@ -169,11 +166,8 @@ public class BuildingTest {
 		ProcessStatistics.saveState(ps);
 
 		// Build project
-		ps.compileProjectWithSpoon();
-		ProcessStatistics.saveState(ps);
-
-		System.out.print("Building tests.....");
-		ps.compileTestWithSpoon();
+		System.out.print("Building.....");
+		ps.compileWithSpoon();
 		ProcessStatistics.saveState(ps);
 
 		System.out.println("Running tests...");
@@ -193,26 +187,27 @@ public class BuildingTest {
 		return src;
 	}
 
-	private File prepareProjectWithTests() throws IOException{
-		File f = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
+	public static File prepareProjectWithTests() throws IOException{
+		File f = File.createTempFile("BuildingTests", Long.toString(System.currentTimeMillis()));
 		f.delete();
 		f.mkdirs();
 
+		File ff = new File (System.getProperty("user.dir"));
+		ff = new File(ff.getParent(), "testproject");
+		
 		System.out.println(f);
 
 		// SOURCES
 		File srcf = new File(f, "src");
-		srcf = new File(srcf, TestingTools.getTestPackageFolders(com.vmusco.smf.testclasses.srcandtst.src.AClass.class, true));
 		srcf.mkdirs();
 
-		FileUtils.copyDirectory(new File(TestingTools.getTestClassForCurrentProject(com.vmusco.smf.testclasses.srcandtst.src.AClass.class, true)[0]), srcf);
+		FileUtils.copyDirectory(new File(ff, "src/main/java/"), srcf);
 
 		// TESTS
 		File tstf = new File(f, "tst");
-		tstf = new File(tstf, TestingTools.getTestPackageFolders(com.vmusco.smf.testclasses.srcandtst.tst.Test1.class, true));
 		tstf.mkdirs();
 
-		FileUtils.copyDirectory(new File(TestingTools.getTestClassForCurrentProject(com.vmusco.smf.testclasses.srcandtst.tst.Test1.class, true)[0]), tstf);
+		FileUtils.copyDirectory(new File(ff, "src/test/java/"), tstf);
 		tstf.mkdirs();
 
 		return f;
