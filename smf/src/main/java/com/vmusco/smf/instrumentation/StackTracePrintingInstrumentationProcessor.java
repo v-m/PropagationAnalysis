@@ -21,7 +21,7 @@ public class StackTracePrintingInstrumentationProcessor extends AbstractInstrume
 		CtExecutable<?> exec = (CtExecutable<?>) arg0;
 
 		CtCodeSnippetStatement snippet = getFactory().Core().createCodeSnippetStatement();
-
+		
 		if(exec.getBody() != null){ 
 			snippet.setValue("com.vmusco.smf.testing.TestingHelper.printStackTrace()");
 			exec.getBody().insertBegin(snippet);

@@ -354,17 +354,17 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	}
 
 	public void loadOrCreateMutants(boolean reset, MutationCreationListener mcl, int safepersist) throws Exception {
-		loadOrCreateMutants(reset, mcl, -1, safepersist);
+		loadOrCreateMutants(reset, mcl, -1, safepersist, false);
 	}
 
-	public void loadOrCreateMutants(boolean reset, MutationCreationListener mcl, int nb, int safepersist) throws PersistenceException, URISyntaxException {
+	public void loadOrCreateMutants(boolean reset, MutationCreationListener mcl, int nb, int safepersist, boolean stackTraceInstrumentation) throws PersistenceException, URISyntaxException {
 		File f = new File(getConfigFileResolved());
 
 		if(!reset && f.exists()){
 			loadMutants();
 		}
 
-		Mutation.createMutants(ps, this, mcl, reset, nb, safepersist);
+		Mutation.createMutants(ps, this, mcl, reset, nb, safepersist, stackTraceInstrumentation);
 
 		saveMutants();
 

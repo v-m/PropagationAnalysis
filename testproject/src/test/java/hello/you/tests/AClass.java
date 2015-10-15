@@ -1,4 +1,4 @@
-package com.vmusco.smf.testclasses.srcandtst.src;
+package hello.you.tests;
 
 public abstract class AClass {
 	public boolean returnTrue() {

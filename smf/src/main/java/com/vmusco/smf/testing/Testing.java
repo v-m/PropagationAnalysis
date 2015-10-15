@@ -152,6 +152,8 @@ public final class Testing {
 		Set<String> ignored = new HashSet<>();
 		Set<String> infloops = new HashSet<>();
 		Set<String> errorts = new HashSet<>();
+		Set<String[]> stacktraces = new HashSet<>();
+		
 		boolean run_exception_skipped = false;
 
 		long t1 = System.currentTimeMillis();
@@ -164,10 +166,12 @@ public final class Testing {
 			timeout = MIN_TEST_TIMEOUT;
 		}else{
 			tweaking_timeout = false;
+			timeout = MAX_TEST_TIMEOUT;
 		}
 		
 		if(tel != null)		tel.currentTimeout(timeout);
 
+		List<String> stacktrace = new ArrayList<>();
 		for(String aTest : testClasses){
 			cpt++;
 			boolean testcase_finished = false;
@@ -253,13 +257,28 @@ public final class Testing {
 							}else{
 								if(tel != null)		tel.testCaseNotPermitted(cpt, line);
 							}
+							
+							// Stacktrace managing
+							if(stacktrace.size() > 0){
+								// Persist Stacktrace
+								stacktraces.add(stacktrace.toArray(new String[0]));
+								stacktrace = new ArrayList<>();
+							}
 						}else if(line.startsWith(TestExecutor.UNDETERMINED_MARKER)){
 							// Here all success and failing tests
 							line = line.substring(TestExecutor.UNDETERMINED_MARKER.length());
-							//System.out.println("\tDROPPED (undt): "+line);
 							if(tel != null)		tel.testCaseUndeterminedTest(cpt, line);
+						}else if(line.startsWith(TestingHelper.STACKTRACESTART)){
+							stacktrace = new ArrayList<String>();
+						}else if(line.startsWith(TestingHelper.STACKTRACEEND)){
+							stacktraces.add(stacktrace.toArray(new String[0]));
+							stacktrace = null;
+						}else if(line.startsWith(TestingHelper.STACKTRACELINE)){
+							// This is a stacktrace information
+							if(stacktrace != null){
+								stacktrace.add(line.substring(TestingHelper.STACKTRACELINE.length()));
+							}
 						}else{
-							//System.out.println("((((( "+line+" )))))");
 							if(tel != null)		tel.testCaseOtherCase(cpt, line);
 						}
 
@@ -287,6 +306,7 @@ public final class Testing {
 							proc.destroy();
 						}catch(Exception ex){
 							if(tel != null)		tel.testCaseException(cpt, line, cmd);
+							ex.printStackTrace();
 							run_exception_skipped = true;
 							testcase_finished = true;
 						}
@@ -308,7 +328,6 @@ public final class Testing {
 		if(run_exception_skipped)
 			return null;
 
-
 		long t2 = System.currentTimeMillis();
 
 		String[] failing_arr = failing.toArray(new String[0]);
@@ -324,6 +343,7 @@ public final class Testing {
 		tei.setErrorOnTestSuite(errts_arr);
 		tei.setAllRunnedTests(tests_arr);
 		tei.setRunTestsTime(t2 - t1);
+		tei.setStacktraces(stacktraces.toArray(new String[0][0]));
 
 		if(tweaking_timeout){
 			tei.setTestTimeOut(timeout);

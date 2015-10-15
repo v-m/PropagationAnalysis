@@ -1,5 +1,7 @@
 package com.vmusco.smf.mutation;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -20,10 +22,17 @@ import spoon.support.reflect.code.CtVariableWriteImpl;
 
 import com.vmusco.smf.TestingTools;
 import com.vmusco.smf.analysis.MutantIfos;
+import com.vmusco.smf.analysis.MutationStatistics;
+import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.analysis.TestsExecutionIfos;
+import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
+import com.vmusco.smf.buildtest.BuildingTest;
 import com.vmusco.smf.exceptions.HashClashException;
 import com.vmusco.smf.exceptions.NotValidMutationException;
 import com.vmusco.smf.mutation.operators.KingOffutt91.AbsoluteValueInsertionMutator;
+import com.vmusco.smf.mutation.operators.KingOffutt91.ArithmeticMutatorOperator;
 import com.vmusco.smf.testclasses.simple.Class1;
+import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.utils.SpoonHelpers;
 
 /**
@@ -191,7 +200,7 @@ public class MutationTest {
 		hash.add("8c4c7c6d6449d208a7451f9aeb224818");
 		
 		try {
-			Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp());
+			Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), false);
 		} catch (HashClashException e) {
 			return;
 		}
@@ -211,7 +220,7 @@ public class MutationTest {
 		Factory factory = SpoonHelpers.obtainFactory();
 		Object[] r = getMutationTestingObject(factory);
 
-		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp());
+		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), false);
 	}
 
 	/**
@@ -229,7 +238,7 @@ public class MutationTest {
 		Set<String> hash = new HashSet<String>();
 		hash.add("ab595c23fc91e4d344484f2cb6e8af13");
 		
-		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp());
+		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), false);
 	}
 	
 	/**
@@ -244,7 +253,7 @@ public class MutationTest {
 		Factory factory = SpoonHelpers.obtainFactory();
 		Object[] r = getMutationTestingObject(factory);
 		
-		MutantIfos pm = Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp());
+		MutantIfos pm = Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), false);
 		Assert.assertEquals("8c4c7c6d6449d208a7451f9aeb224818", pm.getHash());
 		Assert.assertEquals("i", pm.getMutationFrom());
 		Assert.assertEquals("i >= 0 ? i : i * -1", pm.getMutationTo());
@@ -260,5 +269,87 @@ public class MutationTest {
 		Assert.assertEquals(TestingTools.getTestClassForCurrentProject(Class1.class, false)[0]+".java", pm.getSourceReference().getFile());
 	}
 	
+	@Test
+	public void testMutationWithPMStatisticsObject() throws Exception{
+		File src = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
+		src.delete();
+		System.out.println(src.getAbsolutePath());
+
+		File proj = BuildingTest.prepareProjectWithTests();
+
+		ProcessStatistics ps = ProcessStatistics.rawCreateProject(ProcessStatistics.SOURCES_COPY, src.getAbsolutePath());
+		ps.createWorkingDir();
+		ps.setProjectIn(proj.getAbsolutePath());
+
+		// Setting ps configuration
+		ps.setSrcToCompile(new String[]{"src"});
+		ps.setSrcTestsToTreat(new String[]{"tst"});
+		ps.setProjectName("my test");
+
+		// Setting classpath
+		ps.setOriginalClasspath(Testing.getCurrentVMClassPath());
+		ProcessStatistics.saveState(ps);
+
+		// Build project
+		System.out.print("Building.....");
+		ps.compileWithSpoon();
+		ProcessStatistics.saveState(ps);
+
+		System.out.println("Running tests...");
+		ps.performFreshTesting(null);
+		ProcessStatistics.saveState(ps);
+		
+		MutationStatistics<ArithmeticMutatorOperator> ms = new MutationStatistics<ArithmeticMutatorOperator>(ps, ArithmeticMutatorOperator.class);
+		ms.loadOrCreateMutants(true);
+		
+		//TODO: test mutation result
+	}
 	
+	@Test
+	public void testMutationWithPMStatisticsObjectAndInstrumentation() throws Exception{
+		File src = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
+		src.delete();
+		System.out.println(src.getAbsolutePath());
+
+		File proj = BuildingTest.prepareProjectWithTests();
+
+		ProcessStatistics ps = ProcessStatistics.rawCreateProject(ProcessStatistics.SOURCES_COPY, src.getAbsolutePath());
+		ps.createWorkingDir();
+		ps.setProjectIn(proj.getAbsolutePath());
+
+		// Setting ps configuration
+		ps.setSrcToCompile(new String[]{"src"});
+		ps.setSrcTestsToTreat(new String[]{"tst"});
+		ps.setProjectName("my test");
+
+		// Setting classpath
+		ps.setOriginalClasspath(Testing.getCurrentVMClassPath());
+		ProcessStatistics.saveState(ps);
+
+		// Build project
+		System.out.print("Building.....");
+		ps.compileWithSpoon();
+		ProcessStatistics.saveState(ps);
+
+		System.out.println("Running tests...");
+		ps.performFreshTesting(null);
+		ProcessStatistics.saveState(ps);
+		
+		MutationStatistics<ArithmeticMutatorOperator> ms = new MutationStatistics<ArithmeticMutatorOperator>(ps, ArithmeticMutatorOperator.class);
+		ms.loadOrCreateMutants(true, null, -1, 0, true);
+		
+		TestsExecutionIfos runTestCases = Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath("mutant_0"), ps.getTestClasses(), null);
+		ms.getMutationStats("mutant_0").setExecutedTestsResults(runTestCases);
+		
+		File ff = new File(ms.getMutantFileResolved("mutation_0"));
+		ff.getParentFile().mkdirs();
+		MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(new FileOutputStream(ff), "mutant_0");
+		pers.saveState(ms.getMutationStats("mutant_0"));
+		
+		System.out.println(runTestCases.getStacktraces().length);
+		
+		pers = new MutantInfoXMLPersisitence(ff);
+		MutantIfos loadState = pers.loadState();
+		System.out.println(loadState);
+	}
 }

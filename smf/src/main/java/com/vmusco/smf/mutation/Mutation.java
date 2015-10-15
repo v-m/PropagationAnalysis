@@ -25,6 +25,7 @@ import spoon.compiler.SpoonCompiler;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.factory.Factory;
@@ -42,6 +43,7 @@ import com.vmusco.smf.compilation.Compilation;
 import com.vmusco.smf.exceptions.HashClashException;
 import com.vmusco.smf.exceptions.NotValidMutationException;
 import com.vmusco.smf.exceptions.PersistenceException;
+import com.vmusco.smf.instrumentation.StackTracePrintingInstrumentationProcessor;
 import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.smf.utils.InterruptionManager;
 import com.vmusco.smf.utils.NewReportedStandardEnvironment;
@@ -75,12 +77,12 @@ public final class Mutation {
 	}
 
 	public static void createMutants(ProcessStatistics ps, MutationStatistics<?> ms, MutationCreationListener mcl, boolean reset) throws PersistenceException {
-		createMutants(ps, ms, mcl, reset, 0);
+		createMutants(ps, ms, mcl, reset, 0, false);
 	}
 
 
-	public static void createMutants(ProcessStatistics ps, MutationStatistics<?> ms, MutationCreationListener mcl, boolean reset, int safepersist) throws PersistenceException {
-		createMutants(ps, ms, mcl, reset, -1, safepersist);
+	public static void createMutants(ProcessStatistics ps, MutationStatistics<?> ms, MutationCreationListener mcl, boolean reset, int safepersist, boolean stackTraceInstrumentation) throws PersistenceException {
+		createMutants(ps, ms, mcl, reset, -1, safepersist, stackTraceInstrumentation);
 	}
 
 	/**
@@ -159,16 +161,18 @@ public final class Mutation {
 	 * @param factory
 	 * @param hashes hash of generations (check if already generated -- null to disable the check)
 	 * @param testingClassPath
+	 * @param stackTraceInstrumentation true if the trace should be printed by the method (code injection)
 	 * @return null if element cannot be mutated or if aborted, else, the temporary directory containing a folder "src" with the mutated sources and a "bytecode" file or folder if built has succeeded or not. 
 	 * @throws IOException
 	 * @throws NoSuchAlgorithmException
 	 * @throws HashClashException
 	 * @throws NotValidMutationException
 	 */
-	public static MutantIfos probeMutant(CtElement e, CtElement m, TargetObtainer to, Factory factory, Set<String> hashes, String[] testingClassPath) throws IOException, NoSuchAlgorithmException, HashClashException, NotValidMutationException{
+	public static MutantIfos probeMutant(CtElement e, CtElement m, TargetObtainer to, Factory factory, Set<String> hashes, String[] testingClassPath, boolean stackTraceInstrumentation) throws IOException, NoSuchAlgorithmException, HashClashException, NotValidMutationException{
 		CtClass<?> theClass = findAssociatedClass(e);
 		CtElementImpl toReplace = (CtElementImpl) to.determineTarget(e);
 		CtElementImpl replaceWith = (CtElementImpl) m;
+		CtExecutable<?> exec = toReplace.getParent(CtExecutable.class);
 
 		MutantIfos ifos = new MutantIfos();
 		ifos.setMutationIn(Mutation.getMethodFullSignatureForParent(toReplace));
@@ -181,9 +185,15 @@ public final class Mutation {
 		ifos.setMutationFrom(toReplace.toString());
 		ifos.setMutationTo(replaceWith.toString());
 
+		if(stackTraceInstrumentation && exec != null){
+			StackTracePrintingInstrumentationProcessor stackTracePrintingInstrumentationProcessor = new StackTracePrintingInstrumentationProcessor();
+			stackTracePrintingInstrumentationProcessor.setFactory(factory);
+			stackTracePrintingInstrumentationProcessor.process(exec);
+		}
+		
 		replaceWith.setParent(toReplace.getParent());
 		toReplace.replace(replaceWith);
-
+		
 		File tmpf = File.createTempFile("mutation_probe", null);
 		ifos.setGenerationDirectory(tmpf);
 
@@ -200,6 +210,9 @@ public final class Mutation {
 		if(hashes != null && hashes.contains(ifos.getHash())){
 			// Revert before interrupting
 			replaceWith.replace(toReplace);
+			if(stackTraceInstrumentation && exec != null){
+				exec.getBody().removeStatement(exec.getBody().getStatement(0));
+			}
 			throw new HashClashException();
 		}
 
@@ -251,10 +264,13 @@ public final class Mutation {
 		}
 
 		replaceWith.replace(toReplace);
+		if(stackTraceInstrumentation && exec != null){
+			exec.getBody().removeStatement(exec.getBody().getStatement(0));
+		}
 		return ifos; 
 	}
 
-	public static void createMutants(ProcessStatistics ps, MutationStatistics<?> ms, final MutationCreationListener mcl, boolean reset, int nb, int safepersist) throws PersistenceException{
+	public static void createMutants(ProcessStatistics ps, MutationStatistics<?> ms, final MutationCreationListener mcl, boolean reset, int nb, int safepersist, boolean stackTraceInstrumentation) throws PersistenceException{
 		try{
 			Factory factory = SpoonHelpers.obtainFactory();
 
@@ -372,21 +388,22 @@ public final class Mutation {
 							(TargetObtainer) o[2],
 							factory,
 							mutHashs,
-							ps.getTestingClasspath());
+							ps.getTestingClasspath(),
+							stackTraceInstrumentation);
 
 					if(tmpmi != null){
 						String mutationid = MUTANT_FILE_PREFIX+mutantcounter++;
-						String outp = ms.getSourceMutationResolved() + File.separator + mutationid;
+						String outp = ms.resolveName(ps.getMutantsOut());
 
-						FileUtils.moveDirectory(new File(tmpmi.getGenerationDirectory(), "src"), new File(outp, "src"));
+						FileUtils.moveDirectory(new File(tmpmi.getGenerationDirectory(), "src"), new File(outp, mutationid));
 
-						String boutp = ms.getBytecodeMutationResolved() + File.separator + mutationid;
+						String boutp = ms.resolveName(ps.getMutantsBytecodeOut());
 						if(tmpmi.isViable()){
-							FileUtils.moveDirectory(new File(tmpmi.getGenerationDirectory(), "bytecode"), new File(outp, "bytecode"));
+							FileUtils.moveDirectory(new File(tmpmi.getGenerationDirectory(), "bytecode"), new File(boutp, mutationid));
 							validmutants++;
 							if(mcl != null) mcl.viableMutant((CtElement)o[0], (CtElementImpl)o[1]);
 						}else{
-							FileUtils.moveFile(new File(tmpmi.getGenerationDirectory(), "bytecode"), new File(boutp+".debug.txt"));
+							FileUtils.moveFile(new File(tmpmi.getGenerationDirectory(), "bytecode"), new File(boutp, mutationid+".debug.txt"));
 							if(tmpmi.getMutationIn() == null){
 								tmpmi.setMutationIn("?");
 							}
