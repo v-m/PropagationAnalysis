@@ -14,8 +14,8 @@ import org.apache.commons.cli.PosixParser;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics.STATE;
-import com.vmusco.smf.compilation.Compilation;
-import com.vmusco.smf.testing.Testing;
+import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
+import com.vmusco.smf.instrumentation.EntryMethodInstrumentationProcessor;
 import com.vmusco.smf.utils.ConsoleTools;
 
 /**
@@ -47,6 +47,8 @@ public class NewProject extends GlobalTestRunning {
 		opt = new Option("F", "force", false, "Overwritte the working directory if it already exists !");
 		options.addOption(opt);
 		opt = new Option("j", "just-prepare", false, "Just prepare the project directory. Do not execute any build/tests/...");
+		options.addOption(opt);
+		opt = new Option("i", "instrument", false, "if set, instrument the source code to be able to produce dynamic call graphs (default: false).");
 		options.addOption(opt);
 		
 		// OPTIONS FOR PHASE 2
@@ -161,7 +163,7 @@ public class NewProject extends GlobalTestRunning {
 		}
 		
 		if(!skipRunWithPs){
-			runWithPs(ps);
+			runWithPs(ps, cmd.hasOption("instrument"));
 		}else{
 			ProcessStatistics.saveState(ps);
 		}
@@ -169,7 +171,7 @@ public class NewProject extends GlobalTestRunning {
 		System.out.println("Done.");
 	}
 
-	private static void runWithPs(ProcessStatistics ps) throws Exception{
+	private static void runWithPs(ProcessStatistics ps, boolean instrument) throws Exception{
 		NewProject np = new NewProject(ps.buildPath("tests_execution.log"));
 		np.execname = "original";
 
@@ -181,7 +183,17 @@ public class NewProject extends GlobalTestRunning {
 		System.out.print("Building project.....");
 		if(ps.getCurrentState() == STATE.FRESH){
 			System.out.println();
-			if(ps.compileWithSpoon()){
+			boolean ret = false;
+			
+			if(instrument){
+				ret = ps.instrumentAndBuildProjectAndTests(new AbstractInstrumentationProcessor[]{
+					new EntryMethodInstrumentationProcessor()
+				});
+			}else{
+				ret = ps.compileWithSpoon();
+			}
+			
+			if(ret){
 				ProcessStatistics.saveState(ps);
 			}else{
 				System.out.println("Building failed. Didn't you forget to run 'mvn clean install' priorly ?");

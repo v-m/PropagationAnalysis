@@ -1,9 +1,11 @@
 package com.vmusco.smf.instrumentation;
 
+import spoon.reflect.code.CtCFlowBreak;
 import spoon.reflect.code.CtCodeSnippetStatement;
 import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtReturn;
+import spoon.reflect.code.CtThrow;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
@@ -21,39 +23,51 @@ import com.vmusco.smf.utils.SpoonHelpers;
 public class EntryMethodInstrumentationProcessor extends AbstractInstrumentationProcessor{
 	public static final String STARTKEY = ((char)2)+"=EMINSTR=>";
 	public static final String ENDKEY = ((char)2)+"=LMINSTR=>";
+	private static final String THROWKEY = ((char)2)+"=LMTINSTR=>";
+	private static final String RETURNKEY = ((char)2)+"=LMRINSTR=>";
 
 	@Override
 	public void process(CtElement arg0) {
 		if(arg0 instanceof CtExecutable<?>){
 			CtExecutable<?> exec = (CtExecutable<?>) arg0;
-			System.out.println(exec.getSignature());
+
 			if(exec.getBody() != null){
+				// At each method entry, we add a START
 				CtCodeSnippetStatement snippet = getFactory().Core().createCodeSnippetStatement();
 				snippet.setValue("java.lang.System.out.println(\""+STARTKEY+SpoonHelpers.resolveName((CtTypeMember) exec)+"\")");
 				exec.getBody().insertBegin(snippet);
+				snippet.setParent(exec);
 
-				if(exec instanceof CtConstructor<?> || (exec instanceof CtMethod<?> && ((CtMethod)exec).getType().getSimpleName().equals("void"))){
+				if(exec.getType().toString().equals("void")){
+					// For void method, we add a END at the end of the method
 					snippet = getFactory().Core().createCodeSnippetStatement();
 					snippet.setValue("java.lang.System.out.println(\""+ENDKEY+SpoonHelpers.resolveName((CtTypeMember) exec)+"\")");
 					exec.getBody().insertEnd(snippet);
+					snippet.setParent(exec);
 				}
 			}
-		}else if(arg0 instanceof CtReturn<?>){
-			CtReturn<?> exec = (CtReturn<?>) arg0;
+		}else if(arg0 instanceof CtReturn<?> || arg0 instanceof CtThrow){
+			CtCFlowBreak exec = (CtCFlowBreak) arg0;
 
 			CtCodeSnippetStatement snippet = getFactory().Core().createCodeSnippetStatement();
-			CtMethod<?> mt = exec.getParent(CtMethod.class);
-			snippet.setValue("java.lang.System.out.println(\""+ENDKEY+SpoonHelpers.resolveName(mt)+"\")");
+			CtTypeMember mt = exec.getParent(CtMethod.class);
+			if(mt == null)
+				mt = exec.getParent(CtConstructor.class);
 
-			CtIf rIf = getFactory().Core().createIf();
-			CtLiteral<Boolean> ctl = getFactory().Core().createLiteral();
-			ctl.setValue(true);
-			rIf.setCondition(ctl);
+			snippet.setValue("java.lang.System.out.println(\""+((arg0 instanceof CtThrow)?THROWKEY:RETURNKEY)+SpoonHelpers.resolveName(mt)+"\")");
+			snippet.setParent(exec.getParent());
 
-			rIf.setThenStatement(getFactory().Core().clone((CtReturn<?>)arg0));
+			exec.insertBefore(snippet);
+			if(mt instanceof CtConstructor || ((CtMethod<?>)mt).getType().toString().equals("void")){
+				CtIf rIf = getFactory().Core().createIf();
+				CtLiteral<Boolean> ctl = getFactory().Core().createLiteral();
+				ctl.setValue(true);
+				rIf.setCondition(ctl);
 
-			((CtReturn<?>) arg0).replace(snippet);
-			snippet.insertAfter((CtReturn<?>) arg0);
+				rIf.setThenStatement(getFactory().Core().clone(exec));
+				rIf.setParent(exec.getParent());
+				exec.replace(rIf);
+			}
 		}
 	}
 

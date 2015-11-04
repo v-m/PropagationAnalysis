@@ -87,7 +87,7 @@ public abstract class Compilation {
 		LogToFile ltf = new LogToFile();
 		ltf.redirectTo(f);
 
-		compiler.setDestinationDirectory(fdest);
+		compiler.setBinaryOutputDirectory(fdest);
 
 		compiler.compile();
 		ltf.restablish();
@@ -174,7 +174,7 @@ public abstract class Compilation {
 		LogToFile ltf = new LogToFile();
 		ltf.redirectTo(f);
 
-		compiler.setDestinationDirectory(fdest);
+		compiler.setBinaryOutputDirectory(fdest);
 
 		try{
 			compiler.compile();

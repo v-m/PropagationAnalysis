@@ -892,7 +892,7 @@ public class ProcessStatistics implements Serializable{
 		return cbug.equals(ctest);
 	}
 
-	public void instrumentAndBuildProjectAndTests(AbstractInstrumentationProcessor[] aips) throws BadStateException, IOException{
+	public boolean instrumentAndBuildProjectAndTests(AbstractInstrumentationProcessor[] aips) throws BadStateException, IOException{
 		if(getCurrentState() != STATE.FRESH)
 			throw new BadStateException();
 		
@@ -905,13 +905,19 @@ public class ProcessStatistics implements Serializable{
 			Instrumentation.instrumentSource(new String[]{orig.getAbsolutePath() + File.separator + srce}, getClasspath(), new File(pji, srce), aips);
 		}
 		
-		compileProjectWithSpoon();
+		if(!compileProjectWithSpoon()){
+			return false;
+		}
  
 		for(String srce : getSrcTestsToTreat(false)){
 			Instrumentation.instrumentSource(new String[]{orig.getAbsolutePath() + File.separator + srce}, getTestingClasspath(), new File(pji, srce), aips);
 		}
 		
-		compileTestWithSpoon();
+		if(!compileTestWithSpoon()){
+			return false;
+		}
+		
+		return true;
 	}
 
 	private boolean compileProjectWithSpoon() throws BadStateException, IOException {
