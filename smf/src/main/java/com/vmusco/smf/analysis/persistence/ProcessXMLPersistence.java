@@ -81,6 +81,9 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 	protected static String ONE_TC_4 = "case";
 	protected static String ONE_TS_4 = "suite";
 	
+	private static final String STACKTRACES_3 = "stacktraces";
+	private static final String STACKTRACE_4 = "stacktrace";
+	private static final String ONE_ST_5 = "trace";
 
 	// TEST EXEC END
 
@@ -158,12 +161,6 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 			tmp.setText(ps.getOriginalSrc());
 			run.addContent(tmp);
 		}
-
-		/*if(ps.workingDir != null){
-			tmp = new Element(WORKING_DIR_2);
-			tmp.setText(ps.workingDir);
-			run.addContent(tmp);
-		}*/
 
 		tmp = new Element(CLASSPATH_2);
 		run.addContent(tmp);
@@ -288,6 +285,16 @@ public class ProcessXMLPersistence extends ExecutionPersistence<ProcessStatistic
 				Element e = new Element(HANGING_TC_3);
 				testexec.addContent(e);
 				populateXml(e, ONE_TC_4, ps.getHangingTestCases());
+			}
+			
+			if(ps.getStackTraces() != null){
+				Element e = new Element(STACKTRACES_3);
+				testexec.addContent(e);
+				
+				for(String[] st : ps.getStackTraces()){
+					Element ee = new Element(STACKTRACE_4);
+					populateXml(ee, ONE_ST_5, st);
+				}
 			}
 		}
 

@@ -3,8 +3,6 @@ package com.vmusco.pminer.analyze;
 import java.util.Map;
 
 import com.vmusco.smf.analysis.MutantIfos;
-import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.NodeShape;
@@ -36,13 +34,13 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 		g.bestDisplay();
 	}
 
-	protected void makeUp(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) throws MutationNotRunException {
-		String[] mutationDetermined = ps.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults());
-		String[] graphDetermined = impactedTests;
+	protected void makeUp(MutantIfos mi, String[] ais, String[] cis) {
+		//String[] mutationDetermined = ps.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults());
+		//String[] graphDetermined = cis;
 		
 		String mutationInsertionPosition = mi.getMutationIn();
 
-		CIAEstimationSets sets = new CIAEstimationSets(graphDetermined, mutationDetermined);
+		CIAEstimationSets sets = new CIAEstimationSets(cis, ais);
 		
 		// STYLE THE BUG NODE
     	g.colorNode(mutationInsertionPosition, BUGGY_NODE_COLOR);
@@ -65,11 +63,6 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 			g.colorNode(aTest, NODES_ONLY_WITH_EXEC_COLOR);
 			g.shapeNode(aTest, NODES_ONLY_WITH_EXEC_SHAPE);
 		}
-	}
-	
-	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) throws MutationNotRunException{
-		makeUp(ps, mi, impactedNodes, impactedTests);
 	}
 	
 	/**
@@ -95,5 +88,20 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 			else
 				g.colorEdge(k.getFrom(), k.getTo(), "green");
 		}
+	}
+
+	@Override
+	public void fireIntersectionFound(MutantIfos mi, String[] ais, String[] cis) {
+		makeUp(mi, ais, cis);
+	}
+
+	@Override
+	public void fireUnboundedFound(MutantIfos mi) {
+		
+	}
+
+	@Override
+	public void fireIsolatedFound(MutantIfos mi) {
+		
 	}
 }

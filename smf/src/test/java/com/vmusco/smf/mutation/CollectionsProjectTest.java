@@ -15,10 +15,8 @@ import org.tmatesoft.svn.core.wc2.SvnTarget;
 import org.tmatesoft.svn.core.wc2.SvnUpdate;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.smf.compilation.Compilation;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.testing.TestCasesProcessor;
-import com.vmusco.smf.testing.Testing;
 
 /**
  * Tests for projects managing code with Apache Commons Collections - revision 1610049 

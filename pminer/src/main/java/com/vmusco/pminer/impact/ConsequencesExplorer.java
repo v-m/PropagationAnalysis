@@ -1,53 +1,34 @@
 package com.vmusco.pminer.impact;
 
-import com.vmusco.pminer.exceptions.AlreadyGeneratedException;
 import com.vmusco.pminer.exceptions.SpecialEntryPointException;
-import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.EdgeMarkers;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.GraphNodeVisitor;
 import com.vmusco.softminer.graphs.NodeMarkers;
 
 /**
- * This class manage subgraphs representing the propagation from a node.
- * Cache removed due to over memory consumption
+ * This class manage subgraphs representing the concequences from one or several node(s).
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public abstract class PropagationExplorer{
+public abstract class ConsequencesExplorer{
 	final protected Graph base;
-	//HashMap<String, Graph> cache = new HashMap<String, Graph>();
 	protected Graph last_propa;
-	protected String last_entryid;
 	
-	public abstract void visitTo(String id) throws SpecialEntryPointException;
-	//public abstract String[] getImpactedNodes(String id) throws NoEntryPointException;
-	//public abstract String[] getImpactedTestNodes(String id, String[] tests) throws NoEntryPointException;
-	public abstract String[] getLastImpactedNodes();
-	public abstract String[] getLastImpactedTestNodes(String[] tests);
+	public abstract void visit(String[] id) throws SpecialEntryPointException;
+	public abstract String[] getLastConsequenceNodes();
+	public abstract String[] getLastConsequenceNodesIn(String[] nodes);
 
-	public PropagationExplorer(Graph base) {
+	public ConsequencesExplorer(Graph base) {
 		this.base = base;
 	}
 	
-	/*public Graph getPropagationGraph(String id){
-		return cache.get(id);
-	}
-
-	public boolean hasSubGraph(String id){
-		return cache.containsKey(id);
-	}*/
-	
-	public Graph getLastPropagationGraph(){
+	public Graph getLastConcequenceGraph(){
 		return last_propa;
 	}
 	
-	protected GraphNodeVisitor populateNew(String id) throws AlreadyGeneratedException{
-		//if(hasSubGraph(id))
-		//	throw new AlreadyGeneratedException();
-		last_entryid = id;
+	protected GraphNodeVisitor populateNew() {
 		final Graph newgraph = base.createNewLikeThis();
 		last_propa = newgraph;
-		//cache.put(id, newgraph);
 		
 		return new GraphNodeVisitor() {
 
@@ -80,21 +61,6 @@ public abstract class PropagationExplorer{
 	}
 	
 	
-	/**
-	 * Directly set on the visiting phase...
-	 * @param accordingTo
-	 */
-	@Deprecated
-	public static void propagateMarkersAndTypes(Graph newGraph, Graph accordingTo){
-		for(String node : newGraph.getNodesNames()){
-			propagateMarkersAndTypesForNode(node, newGraph, accordingTo);
-		}
-
-		for(EdgeIdentity nnfe : newGraph.getEdges()){
-			propagateMarkersAndTypesForEdge(nnfe.getFrom(), nnfe.getTo(), newGraph, accordingTo);
-		}
-	}
-
 	public static void propagateMarkersAndTypesForNode(String node, Graph newGraph, Graph accordingTo){
 		for(NodeMarkers aMarker : accordingTo.getNodeMarkers(node)){
 			newGraph.markNode(node, aMarker);
@@ -111,23 +77,13 @@ public abstract class PropagationExplorer{
 		newGraph.setEdgeType(from, to, accordingTo.getEdgeType(from, to));
 	}
 
-
-	/*public int getNbTestNodes(String id, String[] tests) throws NoEntryPointException{
-		return getImpactedTestNodes(id, tests).length;
-	}
-
-
-	public int getNbNodes(String id) throws NoEntryPointException {
-		return getImpactedNodes(id).length;
-	}*/
-	
 	public int getLastNbTestNodes(String id, String[] tests) throws SpecialEntryPointException{
-		return getLastImpactedTestNodes(tests).length;
+		return getLastConsequenceNodesIn(tests).length;
 	}
 
 
 	public int getLastNbNodes(String id) throws SpecialEntryPointException {
-		return getLastImpactedNodes().length;
+		return getLastConsequenceNodes().length;
 	}
 	
 	public Graph getBaseGraph() {

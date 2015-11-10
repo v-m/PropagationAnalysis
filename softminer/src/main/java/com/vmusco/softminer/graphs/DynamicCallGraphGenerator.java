@@ -15,13 +15,11 @@ public class DynamicCallGraphGenerator implements TestsExecutionListener {
 	}
 
 	@Override
-	public void testCaseException(int nbtest, String readLine,
-			String[] executedCommand) {
+	public void testCaseException(int nbtest, String readLine, String[] executedCommand) {
 	}
 
 	@Override
-	public void testCaseExecutionFinished(int cpt, String[] all, String[] fail,
-			String[] ignored, String[] hang) {
+	public void testCaseExecutionFinished(int cpt, String[] all, String[] fail, String[] ignored, String[] hang) {
 	}
 
 	@Override
@@ -58,6 +56,12 @@ public class DynamicCallGraphGenerator implements TestsExecutionListener {
 			}else if(line.startsWith(EntryMethodInstrumentationProcessor.ENDKEY)){
 				whereAmI.pop();
 				//System.out.println("< Leaving: "+l);
+			}else if(line.startsWith(EntryMethodInstrumentationProcessor.THROWKEY)){
+				whereAmI.pop();
+				//System.out.println("< Leaving (exception throwing): "+l);
+			}else if(line.startsWith(EntryMethodInstrumentationProcessor.RETURNKEY)){
+				whereAmI.pop();
+				//System.out.println("< Leaving (return): "+l);
 			}
 		}
 		

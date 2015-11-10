@@ -52,7 +52,7 @@ public class TestsExecutionIfos {
 	/**
 	 * Take care, DO NOT USE IN COMPARISONS AND STATISTICS.
 	 * This method do not takes into consideration the failing cases and the fact that some methods are similar in clean run.
-	 * To get a coherent and representative set, use {@link TestsExecutionIfos#getCoherentMutantFailingTestCases(ProcessStatistics)} or {@link TestsExecutionIfos#getCoherentMutantFailAndHangTestCases(ProcessStatistics)}
+	 * To get a coherent and representative set, use {@link ProcessStatistics#getCoherentMutantFailingTestCases(TestsExecutionIfos)}.
 	 * @return
 	 */
 	public String[] getRawFailingTestCases() {
@@ -61,7 +61,7 @@ public class TestsExecutionIfos {
 	/**
 	 * Take care, DO NOT USE IN COMPARISONS AND STATISTICS.
 	 * This method do not takes into consideration the failing cases and the fact that some methods are similar in clean run.
-	 * To get a coherent and representative set, use {@link TestsExecutionIfos#getCoherentMutantHangingTestCases(ProcessStatistics)} or {@link TestsExecutionIfos#getCoherentMutantFailAndHangTestCases(ProcessStatistics)}
+	 * To get a coherent and representative set, use {@link ProcessStatistics#getCoherentMutantHangingTestCases(TestsExecutionIfos)}.
 	 * @return
 	 */
 	public String[] getRawHangingTestCases() {
@@ -70,7 +70,7 @@ public class TestsExecutionIfos {
 	/**
 	 * Take care, DO NOT USE IN COMPARISONS AND STATISTICS.
 	 * This method do not takes into consideration the failing cases and the fact that some methods are similar in clean run.
-	 * To get a coherent and representative set, use {@link TestsExecutionIfos#getCoherentMutantIgnoredTestCases(ProcessStatistics)}
+	 * To get a coherent and representative set, use {@link ProcessStatistics#getCoherentMutantIgnoredTestCases(TestsExecutionIfos)}.
 	 * @return
 	 */
 	public String[] getRawIgnoredTestCases() {

@@ -1,11 +1,9 @@
 package com.vmusco.pminer.analyze;
 
 import com.vmusco.smf.analysis.MutantIfos;
-import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.smf.exceptions.MutationNotRunException;
 
 /**
- * 
+ * Abstract class defining events for analyzing mutants
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public abstract class MutantTestAnalyzer {
@@ -22,7 +20,9 @@ public abstract class MutantTestAnalyzer {
 	 */
 	public void fireExecutionEnded(){}
 
-	public abstract void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) throws MutationNotRunException;
+	public abstract void fireIntersectionFound(MutantIfos mi, String[] ais, String[] cis);
+	public abstract void fireUnboundedFound(MutantIfos mi);
+	public abstract void fireIsolatedFound(MutantIfos mi);
 	
 	/***
 	 * This method can be invoked to order the runner to interrupt its execution and discard remaining set

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vmusco.smf.analysis.MutantIfos;
-import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.softminer.utils.Tools;
 
 /**
@@ -19,8 +17,6 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	private MutantTestProcessingListener<MutationStatisticsCollecter> mtpl = null;
 
 	// Last values retainer
-	private String lastMutantId = null;
-	private ProcessStatistics lastProcessStatistics = null;
 	private MutantIfos lastMutantIfos = null;
 	private String[] lastGraphDetermined = null;
 	private List<Double> times = new ArrayList<Double>();
@@ -41,26 +37,20 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		times.add(propatime * 1d);
 	}
 	
+	/**
+	 * To declare an unbounded case, use {@link MutationStatisticsCollecter#fireUnboundedFound(MutantIfos)}
+	 * To declare an isolated case, use {@link MutationStatisticsCollecter#fireIsolatedFound(MutantIfos)}
+	 * 
+	 * 
+	 * To declare an unbounded case, pass impactedNodes = null and impactedTests = null
+	 * To declare an isolated case, pass impactedNodes = null and impactedTests = []
+	 */
 	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) throws MutationNotRunException {
-		// To declare an unbounded case, pass impactedNodes = null and impactedTests = null
-		// To declare an isolated case, pass impactedNodes = null and impactedTests = []
-		String[] cis = impactedTests;
-		
-		lastMutantId = mi.getId();
-		lastProcessStatistics = ps;
+	public void fireIntersectionFound(MutantIfos mi, String[] ais, String[] cis) {
 		lastMutantIfos = mi;
 		lastGraphDetermined = cis;
-		lastUnbounded = impactedNodes == null && impactedTests == null;
-		lastIsolated  = impactedNodes == null && impactedTests != null && impactedTests.length == 0;
-		
-		String[] ais = ps.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults());
-
-		if(lastUnbounded){
-			soud.addUnbounded(mi.getId());
-		}else if(lastIsolated){
-			soud.addIsolated(mi.getId());
-		}
+		lastUnbounded = false;
+		lastIsolated  = false;
 		
 		soud.cumulate(mi.getId(), ais, cis);
 		prf.cumulate(ais, cis);
@@ -68,6 +58,24 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		if(mtpl != null)
 			mtpl.aMutantHasBeenProceeded(this);
 	}
+	
+	@Override
+	public void fireIsolatedFound(MutantIfos mi) {
+		lastMutantIfos = mi;
+		soud.addIsolated(mi.getId());
+		lastUnbounded = false;
+		lastIsolated = true;
+	}
+	
+	@Override
+	public void fireUnboundedFound(MutantIfos mi) {
+		lastMutantIfos = mi;
+		soud.addUnbounded(mi.getId());
+		lastUnbounded = true;
+		lastIsolated = false;
+	}
+	
+	
 
 	@Override
 	public void fireExecutionEnded() {
@@ -88,7 +96,7 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	}
 
 	public String getLastMutantId() {
-		return lastMutantId;
+		return lastMutantIfos.getId();
 	}
 
 	public MutantIfos getLastMutantIfos() {
@@ -101,10 +109,6 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	
 	public boolean isLastIsolated() {
 		return lastIsolated;
-	}
-	
-	public ProcessStatistics getLastProcessStatistics() {
-		return lastProcessStatistics;
 	}
 
 	public double getMedianTimes(){

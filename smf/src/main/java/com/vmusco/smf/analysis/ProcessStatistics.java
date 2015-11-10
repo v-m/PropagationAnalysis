@@ -538,6 +538,13 @@ public class ProcessStatistics implements Serializable{
 		else
 			return null;
 	}
+	
+	public String[][] getStackTraces() {
+		if(cleanTestExecution != null)
+			return cleanTestExecution.getStacktraces();
+		else
+			return null;
+	}
 
 	public static String[] fixTestSignatures(String[] hangingTestCases2) {
 		String[] ret = new String[hangingTestCases2.length];
@@ -899,7 +906,8 @@ public class ProcessStatistics implements Serializable{
 		File pji = new File(this.getProjectIn(true));
 		File orig = new File(pji.getParentFile(), pji.getName()+".original");
 
-		pji.renameTo(orig);
+		//pji.renameTo(orig);
+		FileUtils.copyDirectory(pji, orig);
 
 		for(String srce : getSrcToCompile(false)){
 			Instrumentation.instrumentSource(new String[]{orig.getAbsolutePath() + File.separator + srce}, getClasspath(), new File(pji, srce), aips);
@@ -917,6 +925,7 @@ public class ProcessStatistics implements Serializable{
 			return false;
 		}
 		
+		this.currentState = STATE.BUILD;
 		return true;
 	}
 

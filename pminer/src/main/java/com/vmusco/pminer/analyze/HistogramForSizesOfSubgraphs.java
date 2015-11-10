@@ -15,13 +15,12 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import com.vmusco.smf.analysis.MutantIfos;
-import com.vmusco.smf.analysis.ProcessStatistics;
 
 /**
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class HistogramForSizesOfSubgraphs extends MutantTestAnalyzer {
+public class HistogramForSizesOfSubgraphs extends HistogramAnalyzer {
 	private HashMap<Double, Double> histogramData = new HashMap<Double, Double>();
 	private String project;
 	private String folder;
@@ -34,24 +33,7 @@ public class HistogramForSizesOfSubgraphs extends MutantTestAnalyzer {
 		this.binSize = binSize;
 	}
 
-	@Override
-	public void fireIntersectionFound(ProcessStatistics ps, MutantIfos mi, String[] impactedNodes, String[] impactedTests) {
-		
-		int propagationSize = impactedNodes.length;
-		double putInBin = Math.ceil(propagationSize/this.binSize);
-		
-		if(putInBin < 0)
-			return;
-		
-		if(!histogramData.containsKey(putInBin)){
-			histogramData.put(putInBin, 0d);
-		}
-
-		histogramData.put(putInBin, histogramData.get(putInBin) + 1);
-		if(putInBin > max)
-			max = putInBin;
-	}
-
+	
 	@SuppressWarnings("serial")
 	@Override
 	public void fireExecutionEnded() {
@@ -93,5 +75,20 @@ public class HistogramForSizesOfSubgraphs extends MutantTestAnalyzer {
 		}
 	}
 
+	@Override
+	public void fireIntersectionFound(MutantIfos mi, int nblast) {
+		double putInBin = Math.ceil(nblast/this.binSize);
+		
+		if(putInBin < 0)
+			return;
+		
+		if(!histogramData.containsKey(putInBin)){
+			histogramData.put(putInBin, 0d);
+		}
+
+		histogramData.put(putInBin, histogramData.get(putInBin) + 1);
+		if(putInBin > max)
+			max = putInBin;
+	}
 
 }

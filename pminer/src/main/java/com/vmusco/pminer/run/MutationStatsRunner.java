@@ -16,7 +16,7 @@ import com.vmusco.pminer.analyze.MutationStatisticsCollecter;
 import com.vmusco.pminer.exceptions.SpecialEntryPointException;
 import com.vmusco.pminer.exceptions.SpecialEntryPointException.TYPE;
 import com.vmusco.pminer.impact.JavapdgPropagationExplorer;
-import com.vmusco.pminer.impact.PropagationExplorer;
+import com.vmusco.pminer.impact.ConsequencesExplorer;
 import com.vmusco.pminer.impact.SoftMinerPropagationExplorer;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
@@ -119,7 +119,7 @@ public class MutationStatsRunner{
 			}
 		};
 
-		PropagationExplorer pgp;
+		ConsequencesExplorer pgp;
 		String pth = cmd.getArgs()[0];
 		
 		if(cmd.hasOption("javapdg")){
@@ -175,7 +175,7 @@ public class MutationStatsRunner{
 		}
 	}
 
-	public static String[] processMutants(MutationStatistics<?> ms, PropagationExplorer pgp, 
+	public static String[] processMutants(MutationStatistics<?> ms, ConsequencesExplorer pgp, 
 			Character sep, boolean excludeNulls, MutantTestProcessingListener<MutationStatisticsCollecter> listener, 
 			boolean excludeUnbounded, int nb, boolean includeAlives) throws MutationNotRunException, PersistenceException{
 		/**
@@ -188,7 +188,7 @@ public class MutationStatsRunner{
 		return processMutants(ms, pgp, sep, excludeNulls, listener, excludeUnbounded, nb, includeAlives, allMutations);
 	}
 	
-	public static String[] processMutants(MutationStatistics<?> ms, PropagationExplorer pgp, 
+	public static String[] processMutants(MutationStatistics<?> ms, ConsequencesExplorer pgp, 
 			Character sep, boolean excludeNulls, MutantTestProcessingListener<MutationStatisticsCollecter> listener, 
 			boolean excludeUnbounded, int nb, boolean includeAlives, String[] allMutations) throws MutationNotRunException, PersistenceException{
 		String[] ret = new String[2];
@@ -222,8 +222,10 @@ public class MutationStatsRunner{
 			String id = ifos.getMutationIn();
 
 			try{
-				pgp.visitTo(id);
-				sd.fireIntersectionFound(ps, ifos, pgp.getLastImpactedNodes(), pgp.getLastImpactedTestNodes(ps.getTestCases()));
+				pgp.visit(new String[]{id});
+				String[] ais = ps.getCoherentMutantFailAndHangTestCases(ifos.getExecutedTestsResults());
+				String[] cis = pgp.getLastConsequenceNodesIn(ps.getTestCases());
+				sd.fireIntersectionFound(ifos, ais, cis);
 				cpt++;
 			}catch(SpecialEntryPointException e){
 				// No entry point here !
@@ -233,9 +235,9 @@ public class MutationStatsRunner{
 					continue;
 				}else{
 					if(e.getType().equals(TYPE.NOT_FOUND)){
-						sd.fireIntersectionFound(ps, ifos, null, null);
+						sd.fireUnboundedFound(ifos);
 					}else{
-						sd.fireIntersectionFound(ps, ifos, null, new String[0]);
+						sd.fireIsolatedFound(ifos);
 					}
 					cpt++;
 				}

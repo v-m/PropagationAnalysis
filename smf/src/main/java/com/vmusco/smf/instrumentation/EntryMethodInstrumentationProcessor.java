@@ -23,8 +23,8 @@ import com.vmusco.smf.utils.SpoonHelpers;
 public class EntryMethodInstrumentationProcessor extends AbstractInstrumentationProcessor{
 	public static final String STARTKEY = ((char)2)+"=EMINSTR=>";
 	public static final String ENDKEY = ((char)2)+"=LMINSTR=>";
-	private static final String THROWKEY = ((char)2)+"=LMTINSTR=>";
-	private static final String RETURNKEY = ((char)2)+"=LMRINSTR=>";
+	public static final String THROWKEY = ((char)2)+"=LMTINSTR=>";
+	public static final String RETURNKEY = ((char)2)+"=LMRINSTR=>";
 
 	@Override
 	public void process(CtElement arg0) {

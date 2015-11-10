@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vmusco.pminer.exceptions.AlreadyGeneratedException;
 import com.vmusco.pminer.exceptions.SpecialEntryPointException;
 import com.vmusco.pminer.exceptions.SpecialEntryPointException.TYPE;
 import com.vmusco.softminer.graphs.Graph;
@@ -21,7 +20,7 @@ import com.vmusco.softminer.graphs.Graph.GraphApi;
  * Using a JavaPDG database
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class JavapdgPropagationExplorer extends PropagationExplorer {
+public class JavapdgPropagationExplorer extends ConsequencesExplorer {
 	private Map<Long, JavaPDGTriplet> dbentries;
 	private Map<Long, String> testsMapped = null;
 	private	Map<String, Long> bugs;
@@ -42,8 +41,16 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 		this("jar:("+archivepath+")"+dbname);
 	}
 
+	public void visit(String id) throws SpecialEntryPointException {
+		visit(new String[]{ id });
+	}
+	
+	/**
+	 * Takes into consideration only the fist node for propagation estimation
+	 */
 	@Override
-	public void visitTo(String id) throws SpecialEntryPointException {
+	public void visit(String[] ids) throws SpecialEntryPointException {
+		String id = ids[0];
 		Long node;
 
 		if(!bugs.containsKey(id)){
@@ -58,11 +65,7 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 			throw new SpecialEntryPointException(TYPE.NOT_FOUND);
 		}
 
-		try{
-			base.visitTo(populateNew(id), Long.toString(node));
-		} catch (AlreadyGeneratedException e) {
-			// Already generated, nothing to do...
-		}
+		base.visitTo(populateNew(), Long.toString(node));
 	}
 
 	/**
@@ -70,19 +73,19 @@ public class JavapdgPropagationExplorer extends PropagationExplorer {
 	 * TODO: Propose an alternative writing type?
 	 */
 	@Override
-	public String[] getLastImpactedNodes() {
-		return getLastPropagationGraph().getNodesNames();
+	public String[] getLastConsequenceNodes() {
+		return getLastConcequenceGraph().getNodesNames();
 	}
 
 	@Override
-	public String[] getLastImpactedTestNodes(String[] tests) {
+	public String[] getLastConsequenceNodesIn(String[] tests) {
 		if(this.testsMapped == null){
 			getMappingsForTests(tests);
 		}
 		
 		ArrayList<String> ret = new ArrayList<String>();
 
-		for(String node : getLastPropagationGraph().getNodesNames()){
+		for(String node : getLastConcequenceGraph().getNodesNames()){
 			if(testsMapped.containsKey(Long.parseLong(node))){
 				ret.add(testsMapped.get(Long.parseLong(node)));
 			}

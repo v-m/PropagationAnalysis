@@ -17,7 +17,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
 import com.vmusco.pminer.impact.JavapdgPropagationExplorer;
-import com.vmusco.pminer.impact.PropagationExplorer;
+import com.vmusco.pminer.impact.ConsequencesExplorer;
 import com.vmusco.pminer.impact.SoftMinerPropagationExplorer;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
@@ -103,7 +103,7 @@ public class AllMutationsStatsRunner{
 			File f = new File(aFile);
 			File fp = new File(f, smfrun);
 
-			Map<String, PropagationExplorer> explorers = null;
+			Map<String, ConsequencesExplorer> explorers = null;
 
 			if(fp.exists()){
 				// This is a project
@@ -135,11 +135,11 @@ public class AllMutationsStatsRunner{
 		}
 	}
 
-	public static Map<String, PropagationExplorer> getExplorers(File f, String[] graphs) throws IOException{
+	public static Map<String, ConsequencesExplorer> getExplorers(File f, String[] graphs) throws IOException{
 		/*************
 		 * Load graphs
 		 */
-		Map<String, PropagationExplorer> explorers = new HashMap<>();
+		Map<String, ConsequencesExplorer> explorers = new HashMap<>();
 
 		for(int i = 0; i<graphs.length; i++){
 			File gf = new File(f.getParentFile(), graphs[i]);
@@ -154,11 +154,11 @@ public class AllMutationsStatsRunner{
 	}
 
 
-	public static Map<String, PropagationExplorer> getExplorers(File projPath, String javapdgroot) throws FileNotFoundException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public static Map<String, ConsequencesExplorer> getExplorers(File projPath, String javapdgroot) throws FileNotFoundException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		/*************
 		 * Load graphs
 		 */
-		Map<String, PropagationExplorer> explorers = new HashMap<>();
+		Map<String, ConsequencesExplorer> explorers = new HashMap<>();
 
 		File gf = new File(javapdgroot);
 		boolean isarchive = true;
@@ -189,7 +189,7 @@ public class AllMutationsStatsRunner{
 		}
 	}
 
-	private static void processProject(String name, File f, Map<String, PropagationExplorer> explorers, int nbmut, boolean includeAlives, boolean excludeNulls, Character sep, String mutationrun, String projectrun, boolean average, boolean excludeUnbounded, boolean avg, boolean med) throws IOException, PersistenceException, MutationNotRunException {
+	private static void processProject(String name, File f, Map<String, ConsequencesExplorer> explorers, int nbmut, boolean includeAlives, boolean excludeNulls, Character sep, String mutationrun, String projectrun, boolean average, boolean excludeUnbounded, boolean avg, boolean med) throws IOException, PersistenceException, MutationNotRunException {
 
 		/****************
 		 * Load mutations
@@ -210,7 +210,7 @@ public class AllMutationsStatsRunner{
 		 * Logic iteration
 		 */
 		for(String graphTitle: explorers.keySet()){
-			PropagationExplorer pgp = explorers.get(graphTitle);
+			ConsequencesExplorer pgp = explorers.get(graphTitle);
 
 			for(MutationStatistics<?> ms : mss){
 				//String[] allMutations = MutationStatsRunner.selectMutations(ms, nbmut, onlyKilled);
