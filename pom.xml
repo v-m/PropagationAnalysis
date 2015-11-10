@@ -23,6 +23,7 @@
         <module>smf</module>
         <module>softminer</module>
         <module>pminer</module>
+	<module>softwearn</module>
     </modules>
     
     <properties>

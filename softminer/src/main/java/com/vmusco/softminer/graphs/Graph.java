@@ -1,7 +1,9 @@
 package com.vmusco.softminer.graphs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import com.vmusco.smf.utils.SourceReference;
 
@@ -13,20 +15,175 @@ import com.vmusco.smf.utils.SourceReference;
 public abstract class Graph {
 	protected Object graph;
 	private long buildTime = -1;
-	
+
 	/**
 	 * Generates a new graph which contain only nodes/edges with specific types and markers
 	 * @param node
 	 * @return
 	 */
 	public abstract Graph keepOnly(NodeTypes[] nt, NodeMarkers[] nm, EdgeTypes[] et, EdgeMarkers[] em);
-	
+
 	public abstract Graph createNewLikeThis();
 	public abstract void addNode(String name, boolean displayLabel);
 	public abstract void addDirectedEdge(String from, String to, boolean displayLabel);
 	public abstract void removeDirectedEdge(String from, String to);
 	public abstract void removeNode(String id);
 	public abstract void bestDisplay();
+
+	/**
+	 * Returns all path from <from> to <to>
+	 * @param from
+	 * @param to
+	 * @return a list of strings which each describes a path or null if from or to are not in the graph
+	 */
+	public List<String[]> getPaths(String from, String to) {
+		if(!hasNode(from) || !hasNode(to))
+			return null;
+
+		return getPathsRecur(from, to, new String[0]);
+	}
+
+	private List<String[]> getPathsRecur(String arrived, String to, String[] visited){
+		List<String[]> paths = new ArrayList<String[]>();
+
+		for(String next : getNodesConnectedFrom(arrived)){
+			if(next.equals(to)){
+				// Arrived :)
+				String[] cpy = Arrays.copyOf(visited, visited.length+2);
+				cpy[cpy.length-2] = arrived;
+				cpy[cpy.length-1] = next;
+
+				paths.add(cpy);
+			}else{
+				boolean exec = true;
+				for(int i=0; i<visited.length; i++){
+					if(visited[i].equals(next))
+						exec = false;
+				}
+
+				if(exec){
+					String[] cpy = Arrays.copyOf(visited, visited.length+1);
+					cpy[cpy.length-1] = arrived;
+
+					List<String[]> solved = getPathsRecur(next, to, cpy);
+					if(solved.size() > 0){
+						paths.addAll(solved);
+					}
+				}
+			}
+		}
+
+		return paths;
+	}
+
+	/**
+	 * This methods do the same job that {@link Graph#visitFrom(GraphNodeVisitor, String)} but consider ALL possibles paths.
+	 * This has a performance cose, thus if you just need to explore once the graph, prefer using {@link Graph#visitFrom(GraphNodeVisitor, String)} 
+	 * @param visitor
+	 * @param node
+	 */
+	public void visitAllPathsFrom(GraphNodeVisitor visitor, String node){
+		visitAllPathRec(node, new String[0], visitor, true);
+	}
+
+	/**
+	 * This methods do the same job that {@link Graph#visitTo(GraphNodeVisitor, String)} but consider ALL possibles paths.
+	 * This has a performance cose, thus if you just need to explore once the graph, prefer using {@link Graph#visitTo(GraphNodeVisitor, String)} 
+	 * @param visitor
+	 * @param node
+	 */
+	public void visitAllPathsTo(GraphNodeVisitor visitor, String node){
+		visitAllPathRec(node, new String[0], visitor, false);
+	}
+
+	/**
+	 * Visit all nodes and paths possibles in the graph as long as {@link GraphNodeVisitor#interruptVisit()} is false.
+	 * Ensure to update the value after each {@link GraphNodeVisitor#visitEdge(String, String)} call in order to get 
+	 * the correct state for the last exploration.
+	 * Recursive method.
+	 * @param arrived the current tested node
+	 * @param visited the already visited nodes
+	 * @param aVisitor the visitor to notify of visiting edge/node
+	 * @param from
+	 */
+	private void visitAllPathRec(String arrived, String[] visited, GraphNodeVisitor aVisitor, boolean from){
+		String[] nodes;
+
+		aVisitor.visitNode(arrived);
+
+		if(from)
+			nodes = getNodesConnectedFrom(arrived);
+		else
+			nodes = getNodesConnectedTo(arrived);
+
+		if(nodes == null)
+			return;
+
+		for(String next : nodes){
+			for(String candidate : nodes){
+				if(from)
+					aVisitor.visitEdge(arrived, candidate);
+				else
+					aVisitor.visitEdge(candidate, arrived);
+
+				if(!aVisitor.interruptVisit()){
+					boolean exec = true;
+					for(int i=0; i<visited.length; i++){
+						if(visited[i].equals(next))
+							exec = false;
+					}
+
+					if(exec){
+						String[] cpy = Arrays.copyOf(visited, visited.length+1);
+						cpy[cpy.length-1] = arrived;
+
+						visitAllPathRec(next, cpy, aVisitor, from);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Determine whether there is at least one path from a node to another
+	 * @param from starting node
+	 * @param to finish node
+	 * @return true if there is at least a path, false otherwise
+	 */
+	public boolean isThereAtLeastOnePath(final String from, final String to){
+		if(!hasNode(from) || !hasNode(to))
+			return false;
+
+		GraphNodeVisitor graphNodeVisitor = new DefaultGraphNodeVisitor() {
+			boolean found = false;
+
+			@Override
+			public void visitNode(String node) {
+				if(node.equals(to))
+					found = true;
+			}
+
+			@Override
+			public boolean interruptVisit() {
+				return found;
+			}
+
+		};
+		visitFrom(graphNodeVisitor, from);
+
+		return graphNodeVisitor.interruptVisit();
+	}
+	public static EdgeIdentity[] getAllEdgesInPath(String[] path){
+		EdgeIdentity[] re = new EdgeIdentity[path.length-1];
+
+		for(int i=1; i<path.length; i++){
+			re[i-1] = new EdgeIdentity(path[i-1], path[i]);
+		}
+
+		return re;
+
+	}
+
 	public abstract boolean hasNode(String name);
 	public abstract boolean hasDirectedEdge(String from, String to);
 	public abstract void addDirectedEdgeAndNodeIfNeeded(String from, String to, boolean nodesLabel, boolean edgesLabel);
@@ -43,7 +200,7 @@ public abstract class Graph {
 	public int getDegreeFor(String node){
 		return getOutDegreeFor(node) + getInDegreeFor(node);
 	}
-	
+
 	public long getBuildTime() {
 		return buildTime;
 	}
@@ -65,7 +222,7 @@ public abstract class Graph {
 	public abstract NodeTypes getNodeType(String node);
 	public abstract NodeMarkers[] getNodeMarkers(String node);
 	public abstract EdgeMarkers[] getEdgeMarkers(String from, String to);
-		
+
 	public abstract GraphApi getGraphFamily();
 	public abstract String[] computeShortestPath(String from, String to);
 
@@ -78,24 +235,24 @@ public abstract class Graph {
 
 	public int nbNodesMarkedAs(NodeMarkers aMarker){
 		int cpt = 0;
-		
+
 		for(String node : getNodesNames()){
 			cpt += isNodeMarked(node, aMarker)?1:0;
 		}
-		
+
 		return cpt;
 	}
-	
+
 	public int nbNodesOfType(NodeTypes aType){
 		int cpt = 0;
-		
+
 		for(String node : getNodesNames()){
 			cpt += getNodeType(node).equals(aType)?1:0;
 		}
-		
+
 		return cpt;
 	}
-	
+
 	public static Graph getNewGraph(GraphApi anApi){
 		Graph g = null;
 
@@ -157,7 +314,7 @@ public abstract class Graph {
 	public void visitTo(GraphNodeVisitor aVisitor, String node){
 		visit(aVisitor, node, false);
 	}
-	
+
 	private void visit(GraphNodeVisitor aVisitor, String node, boolean from){
 		ArrayList<String> nodesToExplore = new ArrayList<String>();
 		HashSet<String> visitedNodes = new HashSet<String>();
@@ -187,7 +344,7 @@ public abstract class Graph {
 					aVisitor.visitEdge(cur, candidate);
 				else
 					aVisitor.visitEdge(candidate, cur);
-				
+
 				if(!visitedNodes.contains(candidate)){
 					visitedNodes.add(candidate);
 					nodesToExplore.add(candidate);
@@ -223,16 +380,16 @@ public abstract class Graph {
 
 			for(String candidate : nodes){
 				aVisitor.visitEdge(cur, candidate);
-				
+
 				if(!visitedNodes.contains(candidate)){
 					visitedNodes.add(candidate);
 					nodesToExplore.add(candidate);
 				}
 			}
 		}
-		
+
 		long end_time = System.nanoTime();
-		
+
 		return end_time - start_time;
 	}
 

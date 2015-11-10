@@ -57,6 +57,11 @@ public abstract class ConsequencesExplorer{
 			public String[] nextNodesToVisitFrom(String node) {
 				return base.getNodesConnectedTo(node);
 			}
+
+			@Override
+			public boolean interruptVisit() {
+				return false;
+			}
 		};
 	}
 	
