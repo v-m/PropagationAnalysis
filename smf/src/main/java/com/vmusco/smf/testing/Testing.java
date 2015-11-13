@@ -26,6 +26,7 @@ import spoon.support.StandardEnvironment;
 import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
 
 import com.vmusco.smf.analysis.TestsExecutionIfos;
+import com.vmusco.smf.compilation.Compilation;
 
 /**
  * Tests execution logic
@@ -57,9 +58,12 @@ public final class Testing {
 			compiler.addInputSource(new File(src));
 		}
 
+
+		String[] cp = Compilation.getLibraryAccess(classpath);
+		
 		//Updating classpath
-		if(classpath != null)
-			compiler.setSourceClasspath(classpath);
+		//if(classpath != null)
+		compiler.setSourceClasspath(cp);
 
 		// Build (in memory)
 		compiler.build();
@@ -152,7 +156,7 @@ public final class Testing {
 		Set<String> ignored = new HashSet<>();
 		Set<String> infloops = new HashSet<>();
 		Set<String> errorts = new HashSet<>();
-		Set<String[]> stacktraces = new HashSet<>();
+		//Set<String[]> stacktraces = new HashSet<>();
 		
 		boolean run_exception_skipped = false;
 
@@ -181,8 +185,9 @@ public final class Testing {
 				ExecutorService executor = Executors.newFixedThreadPool(2);
 				String currentTestCase = null;
 
-				String[] cmd = buildExecutionPath(TestExecutor.class, aTest, classpath, hangingTests.toArray(new String[0]));
-
+				String[] cmd = buildExecutionPathWithInstrumentationOptions(TestExecutor.class, aTest, classpath, hangingTests.toArray(new String[0]));
+				//String[] cmd = buildExecutionPath(TestExecutor.class, aTest, classpath, hangingTests.toArray(new String[0]));
+				
 				String s = "";
 				for(String c : cmd)
 					s += c+" ";
@@ -216,7 +221,7 @@ public final class Testing {
 
 				try{
 					while (!run_exception_skipped && (line = future.get(timeout, TimeUnit.SECONDS)) != null){
-
+						//System.out.println(line);
 						if(thisisfirstline && (line.startsWith("Exception") || line.startsWith("Error")) ){
 							testcase_finished = true;
 							if(line.contains("ExceptionInInitializerError")){
@@ -259,25 +264,25 @@ public final class Testing {
 							}
 							
 							// Stacktrace managing
-							if(stacktrace.size() > 0){
+							/*if(stacktrace.size() > 0){
 								// Persist Stacktrace
 								stacktraces.add(stacktrace.toArray(new String[0]));
 								stacktrace = new ArrayList<>();
-							}
+							}*/
 						}else if(line.startsWith(TestExecutor.UNDETERMINED_MARKER)){
 							// Here all success and failing tests
 							line = line.substring(TestExecutor.UNDETERMINED_MARKER.length());
 							if(tel != null)		tel.testCaseUndeterminedTest(cpt, line);
-						}else if(line.startsWith(TestingHelper.STACKTRACESTART)){
+						/*}else if(line.startsWith(TestingInstrumentedCodeHelper.STACKTRACESTART)){
 							stacktrace = new ArrayList<String>();
-						}else if(line.startsWith(TestingHelper.STACKTRACEEND)){
+						}else if(line.startsWith(TestingInstrumentedCodeHelper.STACKTRACEEND)){
 							stacktraces.add(stacktrace.toArray(new String[0]));
 							stacktrace = null;
-						}else if(line.startsWith(TestingHelper.STACKTRACELINE)){
+						}else if(line.startsWith(TestingInstrumentedCodeHelper.STACKTRACELINE)){
 							// This is a stacktrace information
 							if(stacktrace != null){
-								stacktrace.add(line.substring(TestingHelper.STACKTRACELINE.length()));
-							}
+								stacktrace.add(line.substring(TestingInstrumentedCodeHelper.STACKTRACELINE.length()));
+							}*/
 						}else{
 							if(tel != null)		tel.testCaseOtherCase(cpt, line);
 						}
@@ -343,7 +348,7 @@ public final class Testing {
 		tei.setErrorOnTestSuite(errts_arr);
 		tei.setAllRunnedTests(tests_arr);
 		tei.setRunTestsTime(t2 - t1);
-		tei.setStacktraces(stacktraces.toArray(new String[0][0]));
+		//tei.setStacktraces(stacktraces.toArray(new String[0][0]));
 
 		if(tweaking_timeout){
 			tei.setTestTimeOut(timeout);
@@ -381,6 +386,20 @@ public final class Testing {
 		}
 
 		return cmd.toArray(new String[0]);
+	}
+	
+	private static String[] buildExecutionPathWithInstrumentationOptions(Class<?> classToRun, String testClassToRun, String[] classpath, String... testcasesToIgnores){
+		List<String> ret = new ArrayList<>();
+		
+		for(String a : testcasesToIgnores){
+			ret.add(a);
+		}
+		
+		ret.add(TestExecutor.INSTRU_OPT+"enter="+(TestingInstrumentedCodeHelper.isEnteringPrinting()?"yes":"no"));
+		ret.add(TestExecutor.INSTRU_OPT+"exit="+(TestingInstrumentedCodeHelper.isLeavingPrinting()?"yes":"no"));
+		ret.add(TestExecutor.INSTRU_OPT+"stacktraces="+(TestingInstrumentedCodeHelper.isStacktracePrinting()?"yes":"no"));
+		
+		return buildExecutionPath(classToRun, testClassToRun, classpath, ret.toArray(new String[0]));
 	}
 
 	private static boolean addIfPermited(String line, String[] testclasses, Set<String> list) {

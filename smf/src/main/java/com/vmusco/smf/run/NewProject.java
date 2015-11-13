@@ -2,7 +2,9 @@ package com.vmusco.smf.run;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
@@ -16,6 +18,8 @@ import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics.STATE;
 import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
 import com.vmusco.smf.instrumentation.EntryMethodInstrumentationProcessor;
+import com.vmusco.smf.instrumentation.StackTracePrintingInstrumentationProcessor;
+import com.vmusco.smf.testing.TestingInstrumentedCodeHelper;
 import com.vmusco.smf.utils.ConsoleTools;
 
 /**
@@ -48,7 +52,7 @@ public class NewProject extends GlobalTestRunning {
 		options.addOption(opt);
 		opt = new Option("j", "just-prepare", false, "Just prepare the project directory. Do not execute any build/tests/...");
 		options.addOption(opt);
-		opt = new Option("i", "instrument", false, "if set, instrument the source code to be able to produce dynamic call graphs (default: false).");
+		opt = new Option("n", "no-instrument", false, "do not instrument the source code (dynamic informations recolting -- default: false).");
 		options.addOption(opt);
 		
 		// OPTIONS FOR PHASE 2
@@ -162,8 +166,15 @@ public class NewProject extends GlobalTestRunning {
 			ps.setSrcTestsToTreat(new String[]{});
 		}
 		
+		List<AbstractInstrumentationProcessor> aip = new ArrayList<>(); 
+		
+		if(!cmd.hasOption("no-instrument")){
+			aip.add(new EntryMethodInstrumentationProcessor());
+			aip.add(new StackTracePrintingInstrumentationProcessor());
+		}
+		
 		if(!skipRunWithPs){
-			runWithPs(ps, cmd.hasOption("instrument"));
+			runWithPs(ps, aip.toArray(new AbstractInstrumentationProcessor[0]));
 		}else{
 			ProcessStatistics.saveState(ps);
 		}
@@ -171,7 +182,7 @@ public class NewProject extends GlobalTestRunning {
 		System.out.println("Done.");
 	}
 
-	private static void runWithPs(ProcessStatistics ps, boolean instrument) throws Exception{
+	private static void runWithPs(ProcessStatistics ps, AbstractInstrumentationProcessor[] aips) throws Exception{
 		NewProject np = new NewProject(ps.buildPath("tests_execution.log"));
 		np.execname = "original";
 
@@ -185,13 +196,13 @@ public class NewProject extends GlobalTestRunning {
 			System.out.println();
 			boolean ret = false;
 			
-			if(instrument){
-				ret = ps.instrumentAndBuildProjectAndTests(new AbstractInstrumentationProcessor[]{
-					new EntryMethodInstrumentationProcessor()
-				});
+			if(aips.length > 0){
+				ret = ps.instrumentAndBuildProjectAndTests(aips);
 			}else{
 				ret = ps.compileWithSpoon();
 			}
+			
+			System.out.println(ret);
 			
 			if(ret){
 				ProcessStatistics.saveState(ps);
@@ -206,6 +217,7 @@ public class NewProject extends GlobalTestRunning {
 		}
 
 		System.out.print("Running tests.....");
+		
 		if(ps.getCurrentState() == STATE.BUILD){
 			System.out.println();
 			ps.performFreshTesting(np);

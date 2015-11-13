@@ -15,6 +15,7 @@ import org.apache.commons.cli.PosixParser;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics.STATE;
+import com.vmusco.smf.testing.TestingInstrumentedCodeHelper;
 import com.vmusco.smf.testing.TestsExecutionListener;
 import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.smf.utils.MavenTools;
@@ -100,6 +101,9 @@ public class DynamicGraphGenerator {
 		
 		// Building graph part
 		DynamicCallGraphGenerator tel = new DynamicCallGraphGenerator();
+		TestingInstrumentedCodeHelper.setEnteringPrinting(true);
+		TestingInstrumentedCodeHelper.setLeavingPrinting(true);
+		
 		ps.performFreshTesting(tel);
 		Graph aGraph = tel.getGraph();
 		

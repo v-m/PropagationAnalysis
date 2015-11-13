@@ -41,7 +41,7 @@ import com.vmusco.smf.utils.LogToFile;
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public abstract class Compilation {
-
+	
 	/**
 	 * Build a project using spoon
 	 * @param sources
@@ -65,10 +65,9 @@ public abstract class Compilation {
 			compiler.addInputSource(new File(aSrcFile));
 		}
 
-		for(String cp : classpath)
-			System.out.println(cp);
-
-		compiler.setSourceClasspath(classpath);
+		String[] fcp = getLibraryAccess(classpath);
+		
+		compiler.setSourceClasspath(fcp);
 
 		File fdest = new File(generationFolder);
 		if(fdest.exists())
@@ -77,6 +76,7 @@ public abstract class Compilation {
 		fdest.mkdirs();
 
 		System.out.println("Compiling the project using spoon in "+fdest.getAbsolutePath()+".");
+		System.out.println("Log at "+buildlogfile);
 
 		// This part is used to log WARNINGS or stderr !!!
 		File f = new File(buildlogfile);
@@ -94,56 +94,6 @@ public abstract class Compilation {
 		long t2 = System.currentTimeMillis();
 		return t2-t1;
 	}
-	
-	
-	
-	/*public static long compileTestsDissociatedUsingSpoon(String[] srcToTreat, String testClasspath, String testGenerationFolder, String logfile, ProcessStatistics ps) throws IOException{
-		long t1 = System.currentTimeMillis();
-		long t2 = -10000;
-		
-		File fdest = new File(testGenerationFolder);
-		if(fdest.exists())
-			FileUtils.deleteDirectory(fdest);
-
-		fdest.mkdirs();
-		File f = new File(logfile);
-		if(f.exists())
-			f.delete();
-		f.createNewFile();
-
-		// This part is used to log WARNINGS or stderr !!!
-		LogToFile ltf = new LogToFile();
-		ltf.redirectTo(f);
-
-		// Add all sources here
-		for(String aSrcFile : srcToTreat){
-			Environment environment = new StandardEnvironment();
-
-			Factory factory = new FactoryImpl(new DefaultCoreFactory(), environment);
-			SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
-
-			compiler.addInputSource(new File(ps.getProjectIn(true) + File.separator + aSrcFile));
-			compiler.setSourceClasspath(ps.getTestingClasspath());
-
-			System.out.println("Compiling test (aSrcFile) using spoon in "+fdest.getAbsolutePath()+".");
-			compiler.setDestinationDirectory(fdest);
-
-			try{
-				compiler.compile();
-			}catch(ModelBuildingException ex){
-				System.err.println("Error on compilation phase:");
-				ex.printStackTrace();
-
-				ltf.restablish();
-				t2 = System.currentTimeMillis();
-				return -1;
-			}
-		}
-
-		ltf.restablish();
-
-		return t2-t1;
-	}*/
 
 	public static boolean compileTestsUsingSpoon(ProcessStatistics ps) throws IOException{
 		long t1 = System.currentTimeMillis();
@@ -258,7 +208,19 @@ public abstract class Compilation {
 		return compilesUsingJavax(aClass, source, classpath, diagnostics);
 	}
 
-	private static Set<String> getLibraryAccess() {
+	public static String[] getLibraryAccess(String[] cp) {
+		Set<String> ret = getLibraryAccess();
+		
+		if(cp != null){
+			for(String c : cp){
+				ret.add(c);
+			}
+		}
+		
+		return ret.toArray(new String[0]);
+	}
+	
+	public static Set<String> getLibraryAccess() {
 		String bootpath = System.getProperty("sun.boot.class.path");
 		Set<String> lst = new HashSet<String>();
 		for (String s : bootpath.split(File.pathSeparator)) {

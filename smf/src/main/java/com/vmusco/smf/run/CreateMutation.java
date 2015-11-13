@@ -62,9 +62,8 @@ public class CreateMutation implements MutationCreationListener{
 		options.addOption(opt);
 		opt = new Option("R", "reset", false, "drop all previously generated mutants if so (default: false)");
 		options.addOption(opt);
-		opt = new Option("s", "stacktrace", false, "instrument the mutants in order to get the stacktrace of the call (default: false)");
+		opt = new Option("t", "stacktrace", false, "instrument the mutants in order to get the stacktrace of the call (default: false)");
 		options.addOption(opt);
-		
 
 		CommandLineParser parser = new PosixParser();
 		CommandLine cmd = parser.parse(options, args);

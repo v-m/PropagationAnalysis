@@ -306,6 +306,7 @@ public class MutationTest {
 	}
 	
 	@Test
+	//TODO Review this -- instrumentation should be reviewed
 	public void testMutationWithPMStatisticsObjectAndInstrumentation() throws Exception{
 		File src = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
 		src.delete();
@@ -346,7 +347,7 @@ public class MutationTest {
 		MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(new FileOutputStream(ff), "mutant_0");
 		pers.saveState(ms.getMutationStats("mutant_0"));
 		
-		System.out.println(runTestCases.getStacktraces().length);
+		//System.out.println(runTestCases.getStacktraces().length);
 		
 		pers = new MutantInfoXMLPersisitence(ff);
 		MutantIfos loadState = pers.loadState();

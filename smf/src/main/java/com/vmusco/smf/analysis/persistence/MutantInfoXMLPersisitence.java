@@ -30,9 +30,9 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 	private static final String ROOT = "mutation-execution";
 	private static final String ID = "id";
 
-	private static final String STS = "stacktraces";
+	/*private static final String STS = "stacktraces";
 	private static final String ST = "stacktrace";
-	private static final String T = "trace";
+	private static final String T = "trace";*/
 
 
 	private String mutantId;
@@ -95,7 +95,7 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 		mutations.addContent(e);
 		ProcessXMLPersistence.populateXml(e, ProcessXMLPersistence.ONE_TC_4, mei.getRawHangingTestCases());
 
-		if(mei.getStacktraces() != null){
+		/*if(mei.getStacktraces() != null){
 			e = new Element(STS);
 
 			for(String[] st : mei.getStacktraces()){
@@ -111,7 +111,7 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 			}
 
 			mutations.addContent(e);
-		}
+		}*/
 
 		Format format = Format.getPrettyFormat();
 		format.setLineSeparator(LineSeparator.UNIX);
@@ -184,7 +184,7 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 			mei.setHangingTestCases(al.toArray(new String[0]));
 		}
 		
-		if((tmp = root.getChild(STS)) != null){
+		/*if((tmp = root.getChild(STS)) != null){
 			List<String[]> st = new ArrayList<String[]>();
 			
 			List<Element> tmplist = tmp.getChildren(ST);
@@ -200,7 +200,7 @@ public class MutantInfoXMLPersisitence extends ExecutionPersistence<MutantIfos>{
 			}
 			
 			mei.setStacktraces(st.toArray(new String[0][0]));
-		}
+		}*/
 
 		updateMe.setExecutedTestsResults(mei);
 	}

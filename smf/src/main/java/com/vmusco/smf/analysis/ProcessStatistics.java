@@ -539,12 +539,12 @@ public class ProcessStatistics implements Serializable{
 			return null;
 	}
 	
-	public String[][] getStackTraces() {
+	/*public String[][] getStackTraces() {
 		if(cleanTestExecution != null)
 			return cleanTestExecution.getStacktraces();
 		else
 			return null;
-	}
+	}*/
 
 	public static String[] fixTestSignatures(String[] hangingTestCases2) {
 		String[] ret = new String[hangingTestCases2.length];
@@ -903,6 +903,8 @@ public class ProcessStatistics implements Serializable{
 		if(getCurrentState() != STATE.FRESH)
 			throw new BadStateException();
 		
+		System.out.println("Instrumenting project...");
+		
 		File pji = new File(this.getProjectIn(true));
 		File orig = new File(pji.getParentFile(), pji.getName()+".original");
 
@@ -916,11 +918,9 @@ public class ProcessStatistics implements Serializable{
 		if(!compileProjectWithSpoon()){
 			return false;
 		}
- 
 		for(String srce : getSrcTestsToTreat(false)){
 			Instrumentation.instrumentSource(new String[]{orig.getAbsolutePath() + File.separator + srce}, getTestingClasspath(), new File(pji, srce), aips);
 		}
-		
 		if(!compileTestWithSpoon()){
 			return false;
 		}
@@ -930,7 +930,8 @@ public class ProcessStatistics implements Serializable{
 	}
 
 	private boolean compileProjectWithSpoon() throws BadStateException, IOException {
-		long ret = Compilation.compileUsingSpoon(getSrcToCompile(true), getClasspath(), srcGenerationFolder(), buildPath("spoonCompilation.log"));
+		String pt = buildPath("spoonCompilation.log");
+		long ret = Compilation.compileUsingSpoon(getSrcToCompile(true), getClasspath(), srcGenerationFolder(), pt);
 
 		if(ret < 0){
 			System.err.println("Error on compilation phase !");

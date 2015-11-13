@@ -32,7 +32,7 @@ public class TestsExecutionIfos {
 	/**
 	 * Stacktrace informations if available
 	 */
-	private String[][] stacktraces = null;
+	//private String[][] stacktraces = null;
 	
 	private long runTestsTime = -1;
 	private int timeout = -1;
@@ -119,11 +119,11 @@ public class TestsExecutionIfos {
 		return timeout;
 	}
 	
-	public void setStacktraces(String[][] array) {
+	/*public void setStacktraces(String[][] array) {
 		this.stacktraces = array;
 	}
 	
 	public String[][] getStacktraces(){
 		return this.stacktraces;
-	}
+	}*/
 }

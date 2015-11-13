@@ -1,11 +1,10 @@
 package com.vmusco.smf.instrumentation;
 
-import com.vmusco.smf.testing.Testing;
-import com.vmusco.smf.testing.TestingHelper;
-
 import spoon.reflect.code.CtCodeSnippetStatement;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
+
+import com.vmusco.smf.testing.TestingInstrumentedCodeHelper;
 
 /**
  * This Processor is used to inject stack trace printing in a given software
@@ -30,7 +29,7 @@ public class StackTracePrintingInstrumentationProcessor extends AbstractInstrume
 
 	@Override
 	public boolean isThisLineInstrumented(String line) {
-		return line.startsWith(TestingHelper.STACKTRACELINE);
+		return line.startsWith(TestingInstrumentedCodeHelper.STACKTRACELINE);
 	}
 
 	@Override
@@ -38,7 +37,7 @@ public class StackTracePrintingInstrumentationProcessor extends AbstractInstrume
 		if(!isThisLineInstrumented(line))
 			return null;
 		else
-			return line.substring(TestingHelper.STACKTRACELINE.length());
+			return line.substring(TestingInstrumentedCodeHelper.STACKTRACELINE.length());
 	}
 
 }

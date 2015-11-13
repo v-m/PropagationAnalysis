@@ -25,13 +25,28 @@ public class TestExecutor {
 	public static final String IGNORE_MARKER = "(vmdignores)";
 	public static final String STATS_MARKER = "(vmdstats)";
 	public static final String UNDETERMINED_MARKER = "(vmd???)";
+	public static final String INSTRU_OPT = "-_instrument-option:";
 
+	
+	
+	//private static PrintStream file, defile; 
+	
+	
+	
 	/**
 	 * Receives ONE test case a time. Other parameters are intended for test skipping (on case of hanging !)
 	 * @param args
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
+		/*File ff = File.createTempFile("aaa", "bbb");
+		ff.createNewFile();
+		
+		file = new PrintStream(ff);
+		defile = System.out;
+
+		printDefault(ff.getAbsolutePath());*/
+		
 		String[] s = args;
 
 		Class<?> c = Class.forName(s[0]);
@@ -39,8 +54,23 @@ public class TestExecutor {
 
 		int i = 1;
 		while(i<s.length){
-			skip.add(s[i]);
-			System.out.println("SKIP:"+s[i]);
+			if(s[i].startsWith(INSTRU_OPT)){
+				String io_analyze = s[i].substring(INSTRU_OPT.length());
+				String[] io_tok = io_analyze.split("=");
+				
+				boolean isYes = io_tok[1].equals("yes");
+				
+				if(io_tok[0].equals("enter")){
+					TestingInstrumentedCodeHelper.setEnteringPrinting(isYes);
+				}else if(io_tok[0].equals("exit")){
+					TestingInstrumentedCodeHelper.setLeavingPrinting(isYes);
+				}else{
+					printDefault("Unknown instrumentation option: "+io_tok[0]);
+				}
+			}else{
+				skip.add(s[i]);
+				printDefault("SKIP:"+s[i]);
+			}
 			i++;
 		}
 
@@ -56,7 +86,7 @@ public class TestExecutor {
 				
 				int pos = name.lastIndexOf('(');
 				if(pos <= 0){
-					System.out.println(UNDETERMINED_MARKER+name);
+					printDefault(UNDETERMINED_MARKER+name);
 					return false;
 				}
 				
@@ -90,32 +120,40 @@ public class TestExecutor {
 
 			@Override
 			public void testStarted(Description description) throws Exception {
-				System.out.println(TEST_MARKER + testname(description.getDisplayName()));
+				String line = TEST_MARKER + testname(description.getDisplayName());
+				printDefault(line);
+				System.out.println(line);
 			}
 
 			public void testFinished(Description description) throws Exception{
-				//System.out.println("> Finished: "+testname(description.getDisplayName()));
+				//printDefault("> Finished: "+testname(description.getDisplayName()));
 			}
 
 			@Override
 			public void testFailure(Failure failure) throws Exception {
-				System.out.println(FAIL_MARKER+testname(failure.getTestHeader()));
+				printDefault(FAIL_MARKER+testname(failure.getTestHeader()));
 				for(String l : failure.getTrace().split("\n")){
-					System.out.println(FAILDETAILS_MARKER+l);
+					printDefault(FAILDETAILS_MARKER+l);
 				}
 			}
 
 			@Override
 			public void testIgnored(Description description) throws Exception {
-				System.out.println(IGNORE_MARKER+testname(description.getDisplayName()));
+				printDefault(IGNORE_MARKER+testname(description.getDisplayName()));
 			}
 		});
 
 		Result result = juc.run(r2);
 
 		//Iterator<Failure> iterator = result.getFailures().iterator();
-		System.out.println(STATS_MARKER+result.getRunCount()+"#"+result.getFailureCount()+"#"+result.getIgnoreCount());
+		printDefault(STATS_MARKER+result.getRunCount()+"#"+result.getFailureCount()+"#"+result.getIgnoreCount());
 
 		System.exit(0);
+	}
+	
+	private static void printDefault(String s){
+		//System.setOut(defile);
+		System.out.println(s);
+		//System.setOut(file);
 	}
 }
