@@ -46,7 +46,7 @@ public class MutationVisualizationRunner{
 		}
 
 		// Load mutations and executions informations from the project
-		MutationStatistics<?> ms = MutationStatistics.loadState(cmd.getArgs()[1]);
+		MutationStatistics ms = MutationStatistics.loadState(cmd.getArgs()[1]);
 		MutantIfos mi = ms.loadMutationStats(cmd.getArgs()[2]);
 
 		// Load a graph

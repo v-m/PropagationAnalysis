@@ -2,7 +2,7 @@ package com.vmusco.smf.mutation.operators.misc;
 
 import java.util.ArrayList;
 
-import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -14,7 +14,7 @@ import spoon.reflect.factory.Factory;
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class ArithmeticMutatorOperator extends MutationOperator<CtBinaryOperator<?>>{
+public class ArithmeticMutatorOperator extends SmfMutationOperator<CtBinaryOperator<?>>{
 
 	private BinaryOperatorKind[] operators = new BinaryOperatorKind[]{
 			BinaryOperatorKind.DIV, 

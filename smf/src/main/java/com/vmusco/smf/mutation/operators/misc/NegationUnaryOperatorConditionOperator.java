@@ -3,7 +3,7 @@ package com.vmusco.smf.mutation.operators.misc;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtUnaryOperator;
@@ -16,7 +16,7 @@ import spoon.reflect.factory.Factory;
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class NegationUnaryOperatorConditionOperator extends MutationOperator<CtTypedElement<?>>{
+public class NegationUnaryOperatorConditionOperator extends SmfMutationOperator<CtTypedElement<?>>{
 
 	@Override
 	public void process(CtTypedElement<?> element) {

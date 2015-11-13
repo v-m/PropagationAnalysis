@@ -13,6 +13,10 @@ public class PersistenceException extends Exception {
 		this.underException = under;
 	}
 	
+	public PersistenceException(String msg) {
+		super(msg);
+	}
+
 	public Exception getUnderException() {
 		return underException;
 	}

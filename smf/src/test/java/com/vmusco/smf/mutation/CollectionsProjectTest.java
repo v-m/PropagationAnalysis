@@ -62,7 +62,7 @@ public class CollectionsProjectTest {
 	public void simplePipeExecution() throws IOException, BadStateException {
 		File projFolder = new File(temporaryFolder, "project");
 		
-		ProcessStatistics ps = ProcessStatistics.rawCreateProject(ProcessStatistics.SOURCES_COPY, projFolder.getAbsolutePath());
+		ProcessStatistics ps = new ProcessStatistics(ProcessStatistics.SOURCES_COPY, projFolder.getAbsolutePath()); 
 		ps.createWorkingDir();
 		Assert.assertTrue(new File(ps.getWorkingDir()).exists());
 		ps.setProjectIn(repoFolder.getAbsolutePath());

@@ -3,7 +3,7 @@ package com.vmusco.smf.mutation.operators;
 import java.util.ArrayList;
 
 import com.vmusco.smf.mutation.ManualProcessingStep;
-import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -15,7 +15,7 @@ import spoon.reflect.factory.Factory;
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public abstract class AbstractBinaryOperator extends MutationOperator<CtBinaryOperator<?>> {
+public abstract class AbstractBinaryOperator extends SmfMutationOperator<CtBinaryOperator<?>> {
 	
 	public abstract BinaryOperatorKind[] operatorsToUse();
 	public abstract ManualProcessingStep[] manualProcessThose();

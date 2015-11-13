@@ -3,7 +3,7 @@ package com.vmusco.smf.mutation.operators.misc;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFieldAccess;
@@ -21,7 +21,7 @@ import spoon.reflect.reference.CtTypeReference;
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class ReturnValueOperator extends MutationOperator<CtReturn<?>> {
+public class ReturnValueOperator extends SmfMutationOperator<CtReturn<?>> {
 
 	@Override
 	public void process(CtReturn<?> element) {

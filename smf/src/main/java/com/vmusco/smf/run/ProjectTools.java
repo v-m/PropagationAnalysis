@@ -19,6 +19,7 @@ import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.mutation.Mutation;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 import com.vmusco.smf.mutation.TargetObtainer;
 import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.smf.utils.SpoonHelpers;
@@ -107,7 +108,7 @@ public class ProjectTools {
 				pth = pth.replace("{id}", fftmp.getName());
 				pth = pth.replace("{op}", fffftmp.getName());
 
-				MutationStatistics<?> ms = MutationStatistics.loadState(pth);
+				MutationStatistics ms = MutationStatistics.loadState(pth);
 
 				//int treated = ms.loadResultsForExecutedTestOnMutants(0).length;
 				int maxmutat = 0;
@@ -118,7 +119,7 @@ public class ProjectTools {
 					CtElement[] mutations = Mutation.getMutations(ps, ms, factory);
 
 					for(CtElement e : mutations){
-						HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = Mutation.obtainsMutationCandidates(ms.getMutationObject(), e, factory);
+						HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = Mutation.obtainsMutationCandidates((SmfMutationOperator<?>) ms.getMutationOperator(), e, factory);
 						if(mutatedEntriesWithTargets != null)
 							maxmutat += mutatedEntriesWithTargets.size();
 					}

@@ -20,7 +20,7 @@ public class MutationGraphKFold {
 	private Set<TestListener> listeners = new HashSet<TestListener>();
 	
 	private int k;
-	private MutationStatistics<?> ms;
+	private MutationStatistics ms;
 	private LearningGraph g;
 	private ImpactLearner learner;
 	List<MutantIfos[]> partitionDataset;
@@ -29,7 +29,7 @@ public class MutationGraphKFold {
 	 * Build an object for 10-fold testing with mutants and graph (@link {@link MutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, ImpactLearner, boolean) 
 
 	 * @throws PersistenceException 	 */
-	public static MutationGraphKFold instantiateTenFold(MutationStatistics<?> ms, LearningGraph g, int nbmutants, ImpactLearner learner, boolean ignoreOverlaping) throws PersistenceException{
+	public static MutationGraphKFold instantiateTenFold(MutationStatistics ms, LearningGraph g, int nbmutants, ImpactLearner learner, boolean ignoreOverlaping) throws PersistenceException{
 		return instantiateKFold(ms, g, 10, nbmutants, learner, ignoreOverlaping);
 	}
 
@@ -38,7 +38,7 @@ public class MutationGraphKFold {
 	 * taking all mutants in the mutation object and taking into consideration overlaping mutants 
 
 	 * @throws PersistenceException 	 */
-	public static MutationGraphKFold instantiateKFold(MutationStatistics<?> ms, LearningGraph g, int k, ImpactLearner learner) throws PersistenceException {
+	public static MutationGraphKFold instantiateKFold(MutationStatistics ms, LearningGraph g, int k, ImpactLearner learner) throws PersistenceException {
 		return instantiateKFold(ms, g, k, learner, false);
 	}
 	
@@ -47,7 +47,7 @@ public class MutationGraphKFold {
 	 * taking all mutants in the mutation object
 
 	 * @throws PersistenceException 	 */
-	public static MutationGraphKFold instantiateKFold(MutationStatistics<?> ms, LearningGraph g, int k, ImpactLearner learner, boolean ignoreOverlaping) throws PersistenceException {
+	public static MutationGraphKFold instantiateKFold(MutationStatistics ms, LearningGraph g, int k, ImpactLearner learner, boolean ignoreOverlaping) throws PersistenceException {
 		return instantiateKFold(ms, g, k, 0, learner, ignoreOverlaping);
 	}
 	
@@ -56,7 +56,7 @@ public class MutationGraphKFold {
 	 * taking into consideration overlaping mutants
 
 	 * @throws PersistenceException 	 */
-	public static MutationGraphKFold instantiateKFold(MutationStatistics<?> ms, LearningGraph g, int k, int nbmutants, ImpactLearner learner) throws PersistenceException {
+	public static MutationGraphKFold instantiateKFold(MutationStatistics ms, LearningGraph g, int k, int nbmutants, ImpactLearner learner) throws PersistenceException {
 		return instantiateKFold(ms, g, k, nbmutants, learner, false);
 	}
 	
@@ -71,7 +71,7 @@ public class MutationGraphKFold {
 	 * @throws PersistenceException 
 	 * @throws Exception
 	 */
-	public static MutationGraphKFold instantiateKFold(MutationStatistics<?> ms, LearningGraph g, int k, int nbmutants, ImpactLearner learner, boolean ignoreOverlaping) throws PersistenceException{
+	public static MutationGraphKFold instantiateKFold(MutationStatistics ms, LearningGraph g, int k, int nbmutants, ImpactLearner learner, boolean ignoreOverlaping) throws PersistenceException{
 		MutationGraphKFold r = new MutationGraphKFold();
 		
 		r.g = g;

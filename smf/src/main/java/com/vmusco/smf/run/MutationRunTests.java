@@ -65,7 +65,7 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 			formatter.printHelp(thisclass.getCanonicalName()+" [options] <mutationFile>", header, options, footer);
 			System.exit(-2);
 		}else{
-			MutationStatistics<?> ms = null;
+			MutationStatistics ms = null;
 
 			try{
 				ms = openConfig(cmd.getArgs()[0]);
@@ -119,7 +119,7 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 		}
 	}
 
-	public static MutationStatistics<?> openConfig(String path) throws Exception{
+	public static MutationStatistics openConfig(String path) throws Exception{
 		File f = new File(path);
 		String fb = path;
 
@@ -127,7 +127,7 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 			fb = path + File.separator + MutationStatistics.DEFAULT_CONFIGFILE; 
 		}
 
-		MutationStatistics<?> loadState = MutationStatistics.loadState(fb);
+		MutationStatistics loadState = MutationStatistics.loadState(fb);
 		
 		if(loadState == null)
 			throw new Exception("Unable to load data, an error has occured");

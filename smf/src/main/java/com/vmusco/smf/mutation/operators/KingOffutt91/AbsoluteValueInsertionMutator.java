@@ -17,14 +17,14 @@ import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtTypeReference;
 
 import com.vmusco.smf.mutation.MutationGateway;
-import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 import com.vmusco.smf.mutation.TargetObtainer;
 
 /**
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class AbsoluteValueInsertionMutator extends MutationOperator<CtElement>{
+public class AbsoluteValueInsertionMutator extends SmfMutationOperator<CtElement>{
 
 	@Override
 	public void process(CtElement element) {
@@ -68,11 +68,11 @@ public class AbsoluteValueInsertionMutator extends MutationOperator<CtElement>{
 			
 			CtElement newElement = (CtElement) factory.Core().clone(srcinv.getArguments().get(0));
 			newElement.setParent(srcinv.getParent());
-			ret.put(newElement, MutationOperator.createParentTarget(1));
+			ret.put(newElement, SmfMutationOperator.createParentTarget(1));
 			
 			CtConditional<?> inv = createConditionalAbs(factory, (CtExpression<?>) srcinv.getArguments().get(0), true);
 			inv.setParent(srcinv.getParent());
-			ret.put(inv, MutationOperator.createParentTarget(1));
+			ret.put(inv, SmfMutationOperator.createParentTarget(1));
 		}else{
 			//CtTypedElement<?> anElem = (CtTypedElement<?>) element;
 			CtElement clonedElement = factory.Core().clone(element);
@@ -82,14 +82,14 @@ public class AbsoluteValueInsertionMutator extends MutationOperator<CtElement>{
 				CtBinaryOperator<Object> createBinaryOperator = factory.Code().createBinaryOperator(lit, (CtLiteral<?>)clonedElement, BinaryOperatorKind.MUL);
 				clonedElement.setParent(createBinaryOperator);
 				lit.setParent(createBinaryOperator);
-				ret.put(createBinaryOperator, MutationOperator.createSelfTarget());
+				ret.put(createBinaryOperator, SmfMutationOperator.createSelfTarget());
 			}else{
 				CtConditional<?> inv = createConditionalAbs(factory, clonedElement, false);
 				clonedElement.setParent(inv);
-				ret.put(inv, MutationOperator.createSelfTarget());
+				ret.put(inv, SmfMutationOperator.createSelfTarget());
 				
 				inv = createConditionalAbs(factory, element, true);
-				ret.put(inv, MutationOperator.createSelfTarget());
+				ret.put(inv, SmfMutationOperator.createSelfTarget());
 			}
 		}
 

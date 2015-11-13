@@ -11,6 +11,7 @@ import com.vmusco.smf.testing.TestingInstrumentedCodeHelper;
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public class StackTracePrintingInstrumentationProcessor extends AbstractInstrumentationProcessor{
+	private static final Class instrumentationClass = TestingInstrumentedCodeHelper.class;
 
 	@Override
 	public void process(CtElement arg0) {
@@ -22,7 +23,7 @@ public class StackTracePrintingInstrumentationProcessor extends AbstractInstrume
 		CtCodeSnippetStatement snippet = getFactory().Core().createCodeSnippetStatement();
 		
 		if(exec.getBody() != null){ 
-			snippet.setValue("com.vmusco.smf.testing.TestingHelper.printStackTrace()");
+			snippet.setValue(instrumentationClass.getCanonicalName()+".printStackTrace()");
 			exec.getBody().insertBegin(snippet);
 		}
 	}

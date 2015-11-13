@@ -10,10 +10,8 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
-import spoon.compiler.ModelBuildingException;
-
-import com.vmusco.smf.analysis.persistence.ExecutionPersistence;
-import com.vmusco.smf.analysis.persistence.ProcessXMLPersistence;
+import com.vmusco.smf.analysis.persistence.ProjectXmlPersistenceManager;
+import com.vmusco.smf.analysis.persistence.XMLPersistence;
 import com.vmusco.smf.compilation.Compilation;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.MutationNotRunException;
@@ -165,29 +163,27 @@ public class ProcessStatistics implements Serializable{
 	/*********************************************
 	 *********************************************/
 
-	private ProcessStatistics() { }
+	public ProcessStatistics(String workingDir) { 
+		this.workingDir = workingDir;
+		projectIn = null;
 
-	public static ProcessStatistics rawCreateProject(String datasetRepository, String workingDir){
-		ProcessStatistics ps;
+		srcToCompile = new String[]{DEFAULT_SOURCE_FOLDER};
+		srcTestsToTreat = new String[]{DEFAULT_TEST_FOLDER};
+		testingRessources = new String[]{};
 
-		ps = new ProcessStatistics();
-		ps.projectIn = datasetRepository;
-		ps.workingDir = workingDir;
+		projectOut = DEFAULT_PROJECT_BYTECODE;
+		testsOut = DEFAULT_TESTS_BYTECODE;
+		mutantsBasedir = DEFAULT_MUTANT_BASEDIR;
+		mutantsOut = DEFAULT_MUTANT_SOURCE;
+		mutantsBytecodeOut = DEFAULT_MUTANT_BYTECODE;
+		mutantsTestResults = DEFAULT_MUTANT_EXECUTION;
 
-		ps.srcToCompile = new String[]{DEFAULT_SOURCE_FOLDER};
-		ps.srcTestsToTreat = new String[]{DEFAULT_TEST_FOLDER};
-		ps.testingRessources = new String[]{};
-
-		ps.projectOut = DEFAULT_PROJECT_BYTECODE;
-		ps.testsOut = DEFAULT_TESTS_BYTECODE;
-		ps.mutantsBasedir = DEFAULT_MUTANT_BASEDIR;
-		ps.mutantsOut = DEFAULT_MUTANT_SOURCE;
-		ps.mutantsBytecodeOut = DEFAULT_MUTANT_BYTECODE;
-		ps.mutantsTestResults = DEFAULT_MUTANT_EXECUTION;
-
-		ps.currentState = STATE.FRESH;
-
-		return ps;
+		currentState = STATE.FRESH;
+	}
+	
+	public ProcessStatistics(String datasetRepository, String workingDir) {
+		this(workingDir);
+		this.projectIn = datasetRepository;
 	}
 
 	public static ProcessStatistics rawLoad(String persistenceFile) throws IOException{
@@ -247,16 +243,22 @@ public class ProcessStatistics implements Serializable{
 		return "null";
 	}
 
+	public String getConfigFilePath(){
+		return buildPath(DEFAULT_CONFIGFILE);
+	}
+	
 	/**
 	 * This method saves the instance of a ProcessStatistics object
 	 * @throws IOException 
 	 */
 	public static void saveState(ProcessStatistics ps) throws PersistenceException {
-		File f = new File(ps.buildPath(DEFAULT_CONFIGFILE));
-		ExecutionPersistence<ProcessStatistics> persist = new ProcessXMLPersistence(f);
-		persist.saveState(ps);
+		ProjectXmlPersistenceManager mgr = new ProjectXmlPersistenceManager(ps);
+		XMLPersistence.save(mgr);
+		//File f = new File(ps.buildPath(DEFAULT_CONFIGFILE));
+		//ExecutionPersistence<ProcessStatistics> persist = new ProcessXMLPersistence(f);
+		//persist.saveState(ps);
 	}
-
+	
 	/**
 	 * This method loads the last saved instance of the object
 	 * @throws PersistenceException 
@@ -266,13 +268,14 @@ public class ProcessStatistics implements Serializable{
 	public static ProcessStatistics loadState(String persistFile) throws PersistenceException{
 		File f = new File(persistFile);
 
-		if(f.isDirectory())
-			f = new File(f, ProcessStatistics.DEFAULT_CONFIGFILE);
-
-		ExecutionPersistence<ProcessStatistics> persist = new ProcessXMLPersistence(f);
-
-		ProcessStatistics loadState = persist.loadState();
-		return loadState;
+		if(!f.isDirectory())
+			f = f.getParentFile();
+		
+		ProcessStatistics ps = new ProcessStatistics(f.getAbsolutePath());
+		ProjectXmlPersistenceManager mgr = new ProjectXmlPersistenceManager(ps);
+		XMLPersistence.load(mgr);
+		
+		return ps;
 	}
 
 	public void determineClassPath() throws IOException, InterruptedException {
@@ -565,6 +568,10 @@ public class ProcessStatistics implements Serializable{
 
 	public void setTestExecutionResult(TestsExecutionIfos cleanTestExecution){
 		this.cleanTestExecution = cleanTestExecution;
+	}
+	
+	public TestsExecutionIfos getTestExecutionResult(){
+		return this.cleanTestExecution;
 	}
 	
 	
@@ -901,7 +908,7 @@ public class ProcessStatistics implements Serializable{
 
 	public boolean instrumentAndBuildProjectAndTests(AbstractInstrumentationProcessor[] aips) throws BadStateException, IOException{
 		if(getCurrentState() != STATE.FRESH)
-			throw new BadStateException();
+			throw new BadStateException("Expecting state to be FRESH");
 		
 		System.out.println("Instrumenting project...");
 		
@@ -956,7 +963,7 @@ public class ProcessStatistics implements Serializable{
 	
 	public boolean compileWithSpoon() throws BadStateException, IOException{
 		if(getCurrentState() != STATE.FRESH)
-			throw new BadStateException();
+			throw new BadStateException("Expecting state to be FRESH");
 		
 		if(compileProjectWithSpoon()){
 			if(compileTestWithSpoon()){

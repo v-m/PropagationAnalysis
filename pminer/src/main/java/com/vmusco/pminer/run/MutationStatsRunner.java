@@ -78,7 +78,7 @@ public class MutationStatsRunner{
 		}
 
 		// Load mutations and executions informations from the project
-		MutationStatistics<?> ms = MutationStatistics.loadState(cmd.getArgs()[1]); 
+		MutationStatistics ms = MutationStatistics.loadState(cmd.getArgs()[1]); 
 
 		// Load the graph
 
@@ -175,7 +175,7 @@ public class MutationStatsRunner{
 		}
 	}
 
-	public static String[] processMutants(MutationStatistics<?> ms, ConsequencesExplorer pgp, 
+	public static String[] processMutants(MutationStatistics ms, ConsequencesExplorer pgp, 
 			Character sep, boolean excludeNulls, MutantTestProcessingListener<MutationStatisticsCollecter> listener, 
 			boolean excludeUnbounded, int nb, boolean includeAlives) throws MutationNotRunException, PersistenceException{
 		/**
@@ -188,7 +188,7 @@ public class MutationStatsRunner{
 		return processMutants(ms, pgp, sep, excludeNulls, listener, excludeUnbounded, nb, includeAlives, allMutations);
 	}
 	
-	public static String[] processMutants(MutationStatistics<?> ms, ConsequencesExplorer pgp, 
+	public static String[] processMutants(MutationStatistics ms, ConsequencesExplorer pgp, 
 			Character sep, boolean excludeNulls, MutantTestProcessingListener<MutationStatisticsCollecter> listener, 
 			boolean excludeUnbounded, int nb, boolean includeAlives, String[] allMutations) throws MutationNotRunException, PersistenceException{
 		String[] ret = new String[2];
@@ -265,7 +265,7 @@ public class MutationStatsRunner{
 
 		if(sep == null){
 			ret[0] = String.format("%5s %5d %5d %5d %5d %5d %5d %7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
-					ms.getMutationId(),
+					ms.getMutationOperator().operatorId(),
 					cpt,
 					nbalives,
 					sd.getSoud().getNbUnbounded(),
@@ -287,7 +287,7 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbDifferentProportion());
 
 			ret[1] = String.format("%5s %5d %5d %5d %5d %5d %5d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
-					ms.getMutationId(),
+					ms.getMutationOperator().operatorId(),
 					cpt,
 					nbalives,
 					sd.getSoud().getNbUnbounded(),
@@ -309,7 +309,7 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbDifferentProportion());
 		}else{
 			ret[0] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
-					ms.getMutationId(),sep,
+					ms.getMutationOperator().operatorId(),sep,
 					cpt,sep,
 					nbalives,sep,
 					sd.getSoud().getNbUnbounded(),sep,
@@ -331,7 +331,7 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbDifferentProportion());
 
 			ret[1] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
-					ms.getMutationId(),sep,
+					ms.getMutationOperator().operatorId(),sep,
 					cpt,sep,
 					nbalives,sep,
 					sd.getSoud().getNbUnbounded(),sep,

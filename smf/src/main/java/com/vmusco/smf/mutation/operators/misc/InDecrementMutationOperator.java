@@ -3,7 +3,7 @@ package com.vmusco.smf.mutation.operators.misc;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 
 import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.UnaryOperatorKind;
@@ -14,7 +14,7 @@ import spoon.reflect.factory.Factory;
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class InDecrementMutationOperator extends MutationOperator<CtUnaryOperator<?>>{
+public class InDecrementMutationOperator extends SmfMutationOperator<CtUnaryOperator<?>>{
 	private boolean prepost;
 	private boolean incdec;
 

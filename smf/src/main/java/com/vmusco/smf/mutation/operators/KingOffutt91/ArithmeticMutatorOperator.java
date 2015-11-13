@@ -8,13 +8,13 @@ import spoon.reflect.code.CtExpression;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 
-import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 
 /**
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class ArithmeticMutatorOperator extends MutationOperator<CtBinaryOperator<?>>{
+public class ArithmeticMutatorOperator extends SmfMutationOperator<CtBinaryOperator<?>>{
 
 	private BinaryOperatorKind[] operators = new BinaryOperatorKind[]{
 			BinaryOperatorKind.DIV, 

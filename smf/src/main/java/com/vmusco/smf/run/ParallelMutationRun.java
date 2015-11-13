@@ -33,16 +33,16 @@ public class ParallelMutationRun implements TestingNotification{
 
 	int cur = -1;
 	
-	Map<String, Map<String, MutationStatistics<?>>> files = new HashMap<String, Map<String, MutationStatistics<?>>>();
+	Map<String, Map<String, MutationStatistics>> files = new HashMap<String, Map<String, MutationStatistics>>();
 	Map<String, Map<String, List<String>>> remains = new HashMap<String, Map<String, List<String>>>();
 	Map<String, Map<String, Integer>> viables = new HashMap<String, Map<String, Integer>>();
 
 	private int slicesize;
 
 	public void process(File f) throws Exception{
-		MutationStatistics<?> ms = MutationStatistics.loadState(f.getAbsolutePath());
+		MutationStatistics ms = MutationStatistics.loadState(f.getAbsolutePath());
 		
-		String op = ms.getMutationId();
+		String op = ms.getMutationOperator().operatorId();
 		File ff = new File(ms.getRelatedProcessStatisticsObject().getWorkingDir());
 		int cpt = 0;
 
@@ -58,7 +58,7 @@ public class ParallelMutationRun implements TestingNotification{
 		String pro = ff.getName();
 		
 		if(!files.containsKey(pro)){
-			Map<String, MutationStatistics<?>> r = new HashMap<String, MutationStatistics<?>>();
+			Map<String, MutationStatistics> r = new HashMap<String, MutationStatistics>();
 			Map<String, List<String>> r2 = new HashMap<String, List<String>>();
 			Map<String, Integer> r3 = new HashMap<String, Integer>();
 			files.put(pro, r);
@@ -165,7 +165,7 @@ public class ParallelMutationRun implements TestingNotification{
 		
 		printStats(cop, cpr);
 		
-		MutationStatistics<?> ms = files.get(cpr).get(cop);
+		MutationStatistics ms = files.get(cpr).get(cop);
 
 		if(al.size()<=0)
 			return;

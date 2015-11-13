@@ -29,7 +29,7 @@ public class DynamicCallGraphGeneration {
 
 		File proj = prepareProjectWithTests();
 
-		ProcessStatistics ps = ProcessStatistics.rawCreateProject(ProcessStatistics.SOURCES_COPY, src.getAbsolutePath());
+		ProcessStatistics ps = new ProcessStatistics(ProcessStatistics.SOURCES_COPY, src.getAbsolutePath());
 		ps.createWorkingDir();
 		ps.setProjectIn(proj.getAbsolutePath());
 

@@ -77,7 +77,7 @@ public class MutationGraphKFord {
 		Graph g = Graph.getNewGraph(GraphApi.GRAPH_STREAM);
 		GraphPersistence gp = new GraphML(g);
 		gp.load(new FileInputStream(cmd.getArgs()[0]));
-		final MutationStatistics<?> ms = MutationStatistics.loadState(cmd.getArgs()[1]);
+		final MutationStatistics ms = MutationStatistics.loadState(cmd.getArgs()[1]);
 		String[] testCases = ms.getRelatedProcessStatisticsObject().getTestCases();
 
 		int k = 10;

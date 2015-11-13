@@ -12,13 +12,13 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 
 import com.vmusco.smf.mutation.MutationGateway;
-import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 
 /**
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class UnaryOperatorInsertionMutator extends MutationOperator<CtBinaryOperator<?>>{
+public class UnaryOperatorInsertionMutator extends SmfMutationOperator<CtBinaryOperator<?>>{
 
 	@Override
 	public void process(CtBinaryOperator<?> element) {

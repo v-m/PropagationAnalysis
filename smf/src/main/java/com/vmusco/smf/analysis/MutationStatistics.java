@@ -1,27 +1,27 @@
 package com.vmusco.smf.analysis;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
-import spoon.support.reflect.declaration.CtElementImpl;
 
-import com.vmusco.smf.analysis.persistence.ExecutionPersistence;
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
-import com.vmusco.smf.analysis.persistence.MutationXMLPersisitence;
+import com.vmusco.smf.analysis.persistence.MutationXmlPersistenceManager;
+import com.vmusco.smf.analysis.persistence.XMLPersistence;
+import com.vmusco.smf.exceptions.BadObjectTypeException;
 import com.vmusco.smf.exceptions.MalformedSourcePositionException;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutationOperator;
-import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.utils.InterruptionManager;
 import com.vmusco.smf.utils.MutationsSetTools;
 import com.vmusco.smf.utils.SourceReference;
@@ -31,27 +31,25 @@ import com.vmusco.smf.utils.SourceReference;
  * @param <T>
  * @see MutationXMLPersisitence
  * @author Vincenzo Musco - http://www.vmusco.com
- * @see MutationOperator
+ * @see SmfMutationOperator
  */
-public class MutationStatistics<T extends MutationOperator<?>> implements Serializable {
+public class MutationStatistics implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static final String DEFAULT_ID_NAME = "main";
 	public static final String DEFAULT_CONFIGFILE = "mutations.xml";
 
 	private ProcessStatistics ps = null;
-	private String mutationOpId = null;
-	private T mopobj = null;
 	private String mutationName = null;		// name to specify mutations (if null, not considered)
 	/**
 	 * This is the list of class which should be mutated
 	 * If this value is null, then all classes on the source are considered !
 	 */
 	private String[] classToMutate = new String[]{};
-	private String mutator;			// The mutator to use for mutation
-	//private String configFile;
 	private HashMap<String, MutantIfos> mutations = new HashMap<String, MutantIfos>();
 	private Long mutantsGenerationTime = null;
+
+	private MutationOperator mutop = null;
 
 	/**
 	 * This method loads the last saved instance of the object
@@ -62,7 +60,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	 * @param loadTestExecutionsResults true if the test executions results should be loaded (when existing)
 	 * @throws PersistenceException 
 	 */
-	public static MutationStatistics<?> loadState(String persistFile) throws PersistenceException {
+	public static MutationStatistics loadState(String persistFile) throws PersistenceException {
 		return loadState(persistFile, false);
 	}
 
@@ -73,14 +71,18 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 	 * @param loadTestExecutionsResults true if the test executions results should be loaded (when existing)
 	 * @throws PersistenceException 
 	 */
-	public static MutationStatistics<?> loadState(String persistFile, boolean loadTestExecutionsResults) throws PersistenceException {
+	public static MutationStatistics loadState(String persistFile, boolean loadTestExecutionsResults) throws PersistenceException {
 		File finalf = new File(persistFile);
 		if(finalf.isDirectory()){
 			finalf = new File(finalf, MutationStatistics.DEFAULT_CONFIGFILE);
 		}
 
-		ExecutionPersistence<MutationStatistics<?>> persist = new MutationXMLPersisitence(finalf);
-		return persist.loadState();
+		MutationXmlPersistenceManager mgr = new MutationXmlPersistenceManager(new File(persistFile));
+		XMLPersistence.load(mgr);
+		
+		return mgr.getLinkedObject();
+		/*FileExecutionPersistence<MutationStatistics> persist = new MutationXMLPersisitence(finalf);
+		return persist.loadState();*/
 	}
 
 	/**
@@ -181,38 +183,19 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		return re.toArray(new String[0]);
 	}
 
-	public MutationStatistics(ProcessStatistics ps, Class<T> mutator, String name) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+	public MutationStatistics(ProcessStatistics ps, MutationOperator mutator, String name) {
 		this.ps = ps;
-		//this.configFile = DEFAULT_CONFIGFILE;
-		this.mutator = mutator.getCanonicalName();
 		this.mutationName = name;
-		resolveWithMutator();
+		this.mutop = mutator;
+		
 	}
 
-	@SuppressWarnings("unchecked")
-	public void resolveWithMutator() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-		this.mopobj = (T) Class.forName(this.mutator).newInstance();
-		this.mutationOpId = this.mopobj.operatorId();
-	}
-
-	public MutationStatistics(ProcessStatistics ps, Class<T> mutator) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+	public MutationStatistics(ProcessStatistics ps, MutationOperator mutator) {
 		this(ps, mutator, DEFAULT_ID_NAME);
 	}
 
 	public ProcessStatistics getRelatedProcessStatisticsObject() {
 		return ps;
-	}
-
-	public String getMutationId(){
-		return mutationOpId;
-	}
-
-	public String getMutationClassName(){
-		return mopobj.getClass().getName();
-	}
-
-	public T getMutationObject(){
-		return mopobj;
 	}
 
 	public String getMutationName() {
@@ -241,15 +224,8 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		this.classToMutate = classToMutate;
 	}
 
-	public String getMutator() {
-		return mutator;
-	}
-	public void setMutator(String mutator) {
-		this.mutator = mutator;
-	}
-
 	public String resolveName(String resolving){
-		return ps.getWorkingDir() + File.separator + ps.getMutantsBasedir().replace("{id}", this.mutationName).replace("{op}", this.mutationOpId) + File.separator + resolving;
+		return ps.getWorkingDir() + File.separator + ps.getMutantsBasedir().replace("{id}", this.mutationName).replace("{op}", this.mutop.operatorId()) + File.separator + resolving;
 	}
 
 	public String getSourceMutationResolved(){
@@ -306,12 +282,27 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 			if(!isMutantExecutionPersisted(mutationId))
 				throw new MutationNotRunException();
 
-			MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(getMutantExecutionFile(mutationId));
-			pers.loadState(mutations.get(mutationId));
+			
+			MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(getMutationStats(mutationId), getMutantExecutionFile(mutationId));
+			XMLPersistence.load(pers);
 		}
 		return mutations.get(mutationId);
 	}
 
+	public void saveMutationStats(String mutationId) throws FileNotFoundException, PersistenceException{
+		File ff = new File(getMutantFileResolved(mutationId));
+		ff.getParentFile().mkdirs();
+		MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(getMutationStats(mutationId), ff);
+		pers.setFileLock(new FileOutputStream(ff));
+		XMLPersistence.save(pers);
+	}
+	
+	public void saveAllMutationStats() throws FileNotFoundException, PersistenceException{
+		for(String mutationId : listMutants()){
+			saveMutationStats(mutationId);
+		}
+	}
+	
 	/**
 	 * Return the statistics for a mutation execution.
 	 * If the MutationStatistics object has been loaded, the results for this execution are not loaded
@@ -357,7 +348,7 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		loadOrCreateMutants(reset, mcl, -1, safepersist, false);
 	}
 
-	public void loadOrCreateMutants(boolean reset, MutationCreationListener mcl, int nb, int safepersist, boolean stackTraceInstrumentation) throws PersistenceException, URISyntaxException {
+	public void loadOrCreateMutants(boolean reset, MutationCreationListener mcl, int nb, int safepersist, boolean stackTraceInstrumentation) throws PersistenceException, URISyntaxException, BadObjectTypeException {
 		File f = new File(getConfigFileResolved());
 
 		if(!reset && f.exists()){
@@ -375,15 +366,13 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 
 
 	public void saveMutants() throws PersistenceException {
-		File f = new File(getConfigFileResolved());
-		MutationXMLPersisitence per = new MutationXMLPersisitence(f);
-		per.saveState(this);
+		MutationXmlPersistenceManager mgr = new MutationXmlPersistenceManager(this);
+		XMLPersistence.save(mgr);
 	}
 
 	public void loadMutants() throws PersistenceException {
-		File f = new File(getConfigFileResolved());
-		MutationXMLPersisitence per = new MutationXMLPersisitence(f);
-		per.loadState(this);
+		MutationXmlPersistenceManager mgr = new MutationXmlPersistenceManager(this);
+		XMLPersistence.load(mgr);
 	}
 
 	public void createExecutionFolderIfNeeded(){
@@ -460,5 +449,9 @@ public class MutationStatistics<T extends MutationOperator<?>> implements Serial
 		}
 		
 		return ret;
+	}
+	
+	public MutationOperator getMutationOperator() {
+		return this.mutop;
 	}
 }

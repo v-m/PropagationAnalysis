@@ -12,6 +12,7 @@ import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
+import com.vmusco.smf.analysis.persistence.XMLPersistence;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
 
@@ -21,7 +22,7 @@ import com.vmusco.smf.exceptions.PersistenceException;
  */
 public abstract class TestingFunctions {
 
-	public static List<String> getViableCollection(MutationStatistics<?> ms){
+	public static List<String> getViableCollection(MutationStatistics ms){
 		ArrayList<String> al = new ArrayList<String>();
 		for(String mut : ms.listMutants()){
 			MutantIfos ifos = ms.getMutationStats(mut);
@@ -36,7 +37,7 @@ public abstract class TestingFunctions {
 		return al;
 	}
 	
-	public static List<String> getUnfinishedCollection(MutationStatistics<?> ms, boolean shuffle){
+	public static List<String> getUnfinishedCollection(MutationStatistics ms, boolean shuffle){
 		ArrayList<String> al = new ArrayList<String>();
 		for(String mut : getViableCollection(ms)){
 			//MutantIfos ifos = ms.getMutationStats(mut);
@@ -68,7 +69,7 @@ public abstract class TestingFunctions {
 		return al;
 	}
 	
-	public static int processMutants(MutationStatistics<?> ms, List<String> mutantIds, int nbdone, int nbmax, TestingNotification tn, boolean onlyKilled) throws PersistenceException{
+	public static int processMutants(MutationStatistics ms, List<String> mutantIds, int nbdone, int nbmax, TestingNotification tn, boolean onlyKilled) throws PersistenceException{
 		int nbproc = nbdone;
 
 		while(mutantIds.size() > 0){
@@ -96,8 +97,9 @@ public abstract class TestingFunctions {
 						if(tn != null)	tn.mutantPersisting(mut);
 
 						try{
-							MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(fos, mut);
-							pers.saveState(ms.getMutationStats(mut));
+							MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(ifos, ff);
+							pers.setFileLock(fos);
+							XMLPersistence.save(pers);
 						}catch(PersistenceException e){
 							if(e.getUnderException() instanceof MutationNotRunException){
 								// Should not occurs here !!!
@@ -133,7 +135,7 @@ public abstract class TestingFunctions {
 		return nbproc;
 	}
 	
-	public static int processMutants(MutationStatistics<?> ms, List<String> mutantIds, int nbmax, TestingNotification tn) throws PersistenceException{
+	public static int processMutants(MutationStatistics ms, List<String> mutantIds, int nbmax, TestingNotification tn) throws PersistenceException{
 		return processMutants(ms, mutantIds, 0, nbmax, tn, false);
 	}
 }

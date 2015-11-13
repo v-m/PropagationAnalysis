@@ -52,7 +52,7 @@ public class NewProject extends GlobalTestRunning {
 		options.addOption(opt);
 		opt = new Option("j", "just-prepare", false, "Just prepare the project directory. Do not execute any build/tests/...");
 		options.addOption(opt);
-		opt = new Option("n", "no-instrument", false, "do not instrument the source code (dynamic informations recolting -- default: false).");
+		opt = new Option("i", "instrument", false, "instrument the source code (dynamic informations recolting -- default: false).");
 		options.addOption(opt);
 		
 		// OPTIONS FOR PHASE 2
@@ -99,7 +99,7 @@ public class NewProject extends GlobalTestRunning {
 		if(cmd.getArgs().length == 3){
 			File f2 = new File(cmd.getArgs()[2]);
 			
-			ps = ProcessStatistics.rawCreateProject(ProcessStatistics.SOURCES_COPY, f.getAbsolutePath());
+			ps = new ProcessStatistics(ProcessStatistics.SOURCES_COPY, f.getAbsolutePath());
 			
 			if(ps.workingDirAlreadyExists()){
 				if(!cmd.hasOption("force")){
@@ -168,7 +168,7 @@ public class NewProject extends GlobalTestRunning {
 		
 		List<AbstractInstrumentationProcessor> aip = new ArrayList<>(); 
 		
-		if(!cmd.hasOption("no-instrument")){
+		if(cmd.hasOption("instrument")){
 			aip.add(new EntryMethodInstrumentationProcessor());
 			aip.add(new StackTracePrintingInstrumentationProcessor());
 		}
@@ -221,6 +221,7 @@ public class NewProject extends GlobalTestRunning {
 		if(ps.getCurrentState() == STATE.BUILD){
 			System.out.println();
 			ps.performFreshTesting(np);
+			ProcessStatistics.saveState(ps);
 
 			System.out.println("\n********************\n");
 		}else{

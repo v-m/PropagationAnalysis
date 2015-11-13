@@ -8,4 +8,8 @@ package com.vmusco.smf.exceptions;
  */
 public class BadStateException extends Exception {
 
+	public BadStateException(String string) {
+		super(string);
+	}
+
 }

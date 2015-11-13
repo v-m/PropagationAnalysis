@@ -40,6 +40,7 @@ import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.compilation.ClassFileUtil;
 import com.vmusco.smf.compilation.Compilation;
+import com.vmusco.smf.exceptions.BadObjectTypeException;
 import com.vmusco.smf.exceptions.HashClashException;
 import com.vmusco.smf.exceptions.NotValidMutationException;
 import com.vmusco.smf.exceptions.PersistenceException;
@@ -58,12 +59,12 @@ public final class Mutation {
 
 	private Mutation() {}
 
-	public static MutationStatistics<?> createMutationElement(ProcessStatistics ps, Class<MutationOperator<?>> mutatorClass) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
-		return createMutationElement(ps, mutatorClass, null, null);
+	public static MutationStatistics createMutationElement(ProcessStatistics ps, SmfMutationOperator<?> mutator) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
+		return createMutationElement(ps, mutator, null, null);
 	}
 
-	public static MutationStatistics<?> createMutationElement(ProcessStatistics ps, Class<MutationOperator<?>> mutatorClass, String mutationid, String[] classToMutate) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
-		MutationStatistics<?> ms = new MutationStatistics<MutationOperator<?>>(ps, mutatorClass);
+	public static MutationStatistics createMutationElement(ProcessStatistics ps, SmfMutationOperator<?> mutator, String mutationid, String[] classToMutate) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
+		MutationStatistics ms = new MutationStatistics(ps, mutator);
 
 		if(classToMutate != null){
 			ms.setClassToMutate(classToMutate);
@@ -76,12 +77,12 @@ public final class Mutation {
 		return ms;
 	}
 
-	public static void createMutants(ProcessStatistics ps, MutationStatistics<?> ms, MutationCreationListener mcl, boolean reset) throws PersistenceException {
+	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset) throws PersistenceException, BadObjectTypeException {
 		createMutants(ps, ms, mcl, reset, 0, false);
 	}
 
 
-	public static void createMutants(ProcessStatistics ps, MutationStatistics<?> ms, MutationCreationListener mcl, boolean reset, int safepersist, boolean stackTraceInstrumentation) throws PersistenceException {
+	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset, int safepersist, boolean stackTraceInstrumentation) throws PersistenceException, BadObjectTypeException {
 		createMutants(ps, ms, mcl, reset, -1, safepersist, stackTraceInstrumentation);
 	}
 
@@ -91,8 +92,9 @@ public final class Mutation {
 	 * @param ms
 	 * @param factory
 	 * @return
+	 * @throws BadObjectTypeException if the mutation operator declared in ms is NOT intended for direct mutation using SMF framework (ie. imported mutation operator)
 	 */
-	public static CtElement[] getMutations(ProcessStatistics ps, MutationStatistics<?> ms, Factory factory){
+	public static CtElement[] getMutations(ProcessStatistics ps, MutationStatistics ms, Factory factory) throws BadObjectTypeException{
 		String[] mutateFrom = ms.getClassToMutate(true);
 		if(mutateFrom == null || mutateFrom.length <= 0){
 			mutateFrom = ps.getSrcToCompile(true);
@@ -113,10 +115,15 @@ public final class Mutation {
 
 		cp[i] = ps.getProjectOut(true);
 
-		return getMutations(mutateFrom,
-				cp,
-				ms.getMutationClassName(),
-				factory);
+		if(ms.getMutationOperator() instanceof SmfMutationOperator){
+			return getMutations(mutateFrom,
+					cp,
+					(SmfMutationOperator<?>) ms.getMutationOperator(),
+					factory);
+		}else{
+			throw new BadObjectTypeException("The mutation operator is NOT intended for doing concrete mutation with SMF mutation framework !");
+		}
+		
 
 	}
 
@@ -128,7 +135,7 @@ public final class Mutation {
 	 * @param factory the spoon factory to use for mutation
 	 * @return a list of CtElement to mutate
 	 */
-	public static CtElement[] getMutations(String[] mutateFrom, String[] cp, String mutationClassName, Factory factory){
+	public static CtElement[] getMutations(String[] mutateFrom, String[] cp, SmfMutationOperator<?> mutop, Factory factory){
 		SpoonCompiler compiler = new JDTBasedSpoonCompiler(factory);
 
 		for(String srcitem : mutateFrom){
@@ -144,7 +151,7 @@ public final class Mutation {
 		// Obtain list of element to mutate
 		List<String> arg0 = new ArrayList<String>();
 
-		arg0.add(mutationClassName);
+		arg0.add(mutop.getClass().getCanonicalName());
 		compiler.process(arg0);
 
 		return MutationGateway.getMutationCandidates();
@@ -270,7 +277,19 @@ public final class Mutation {
 		return ifos; 
 	}
 
-	public static void createMutants(ProcessStatistics ps, MutationStatistics<?> ms, final MutationCreationListener mcl, boolean reset, int nb, int safepersist, boolean stackTraceInstrumentation) throws PersistenceException{
+	/**
+	 * 
+	 * @param ps
+	 * @param ms
+	 * @param mcl
+	 * @param reset
+	 * @param nb
+	 * @param safepersist
+	 * @param stackTraceInstrumentation
+	 * @throws PersistenceException
+	 * @throws BadObjectTypeException if the mutation operator declared in ms is NOT intended for direct mutation using SMF framework (ie. imported mutation operator)
+	 */
+	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, final MutationCreationListener mcl, boolean reset, int nb, int safepersist, boolean stackTraceInstrumentation) throws PersistenceException, BadObjectTypeException{
 		try{
 			Factory factory = SpoonHelpers.obtainFactory();
 
@@ -334,7 +353,7 @@ public final class Mutation {
 			List<Object[]> mutations = new ArrayList<Object[]>();
 
 			for(CtElement e : getMutations(ps, ms, factory)){
-				HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = obtainsMutationCandidates(ms.getMutationObject(), e, factory);
+				HashMap<CtElement, TargetObtainer> mutatedEntriesWithTargets = obtainsMutationCandidates((SmfMutationOperator<?>) ms.getMutationOperator(), e, factory);
 
 				if(mutatedEntriesWithTargets == null)
 					continue;
@@ -454,7 +473,7 @@ public final class Mutation {
 	 * @return a list of mutation candidates for an element according a mutation operator
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static HashMap<CtElement, TargetObtainer> obtainsMutationCandidates(MutationOperator mo, CtElement e, Factory factory) {
+	public static HashMap<CtElement, TargetObtainer> obtainsMutationCandidates(SmfMutationOperator mo, CtElement e, Factory factory) {
 		CtClass<?> theClass = findAssociatedClass(e);
 
 		if(theClass == null){

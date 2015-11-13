@@ -1,8 +1,10 @@
 package com.vmusco.smf.analysis;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.utils.MutationsSetTools;
 
@@ -29,6 +31,12 @@ public class TestsExecutionIfos {
 	 */
 	private String[] errorOnTestSuite = null;
 
+	/**
+	 * Called nodes when running a test. Generally are application nodes.
+	 * This field may be null if no instrumented analysis has been run !
+	 */
+	private HashMap<String, String[]> calledNodes = null;
+	
 	/**
 	 * Stacktrace informations if available
 	 */
@@ -93,6 +101,27 @@ public class TestsExecutionIfos {
 	}
 	public void setRunTestsTime(long runTestOnMutantTime) {
 		this.runTestsTime = runTestOnMutantTime;
+	}
+	
+	public void addCalledNodeInformation(String concernedTest, String[] concernedCalledNodes){
+		if(calledNodes == null)
+			calledNodes = new HashMap<>();
+		
+		calledNodes.put(concernedTest, concernedCalledNodes);
+	}
+	
+	public String[] getTestsWithCalledInformations() throws BadStateException{
+		if(calledNodes == null)
+			throw new BadStateException("No dynamic execution of injected software has been found !");
+		
+		return calledNodes.keySet().toArray(new String[calledNodes.keySet().size()]);
+	}
+	
+	public String[] getCalledNodes(String forTest) throws BadStateException{
+		if(calledNodes == null)
+			throw new BadStateException("No dynamic execution of injected software has been found !");
+		
+		return calledNodes.get(forTest);
 	}
 	
 	/**

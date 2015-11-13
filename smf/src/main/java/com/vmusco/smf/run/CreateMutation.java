@@ -17,8 +17,8 @@ import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.smf.mutation.MutationCreationListener;
-import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.mutation.MutatorsFactory;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.smf.utils.InterruptionDemander;
 
@@ -70,10 +70,10 @@ public class CreateMutation implements MutationCreationListener{
 
 
 		if(cmd.hasOption("operators")){
-			Class<MutationOperator<?>>[] allClasses = MutatorsFactory.allAvailMutator();
+			Class<SmfMutationOperator<?>>[] allClasses = MutatorsFactory.allAvailMutator();
 
-			for(Class<MutationOperator<?>> c : allClasses){
-				MutationOperator<?> m = c.newInstance();
+			for(Class<SmfMutationOperator<?>> c : allClasses){
+				SmfMutationOperator<?> m = c.newInstance();
 				System.out.println("-> "+m.operatorId()+" ("+c.getCanonicalName()+"): "+m.shortDescription());
 			}
 
@@ -88,7 +88,7 @@ public class CreateMutation implements MutationCreationListener{
 
 
 		ProcessStatistics ps = null;
-		Class<MutationOperator<?>> moc = null;
+		SmfMutationOperator<?> moc = null;
 
 		ps = ProcessStatistics.rawLoad(cmd.getArgs()[0]);
 		if(cmd.getArgs()[1].contains("\\.")){
@@ -106,7 +106,7 @@ public class CreateMutation implements MutationCreationListener{
 		}
 		
 		CreateMutation cm = new CreateMutation();
-		cm.mop = ((MutationOperator<?>)moc.newInstance()).operatorId();
+		cm.mop = moc.operatorId();
 
 		if(ps==null){
 			ConsoleTools.write("ERROR: ", ConsoleTools.FG_RED);
@@ -116,7 +116,7 @@ public class CreateMutation implements MutationCreationListener{
 			System.exit(1);
 		}
 
-		final MutationStatistics<?> ms = Mutation.createMutationElement(ps, moc);
+		final MutationStatistics ms = Mutation.createMutationElement(ps, moc);
 
 		if(cmd.hasOption("mutate"))
 			ms.setClassToMutate(cmd.getOptionValue("mutate").split(File.pathSeparator));
@@ -154,7 +154,7 @@ public class CreateMutation implements MutationCreationListener{
 		
 		ms.loadOrCreateMutants(cmd.hasOption("reset"), cm, nbmut, safepersist, cmd.hasOption("stacktrace"));
 		
-		Runtime.getRuntime().removeShutdownHook(id);
+		//Runtime.getRuntime().removeShutdownHook(id);
 	}
 
 	private int nbchecks = 0;

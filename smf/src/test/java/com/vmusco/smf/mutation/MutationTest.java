@@ -26,6 +26,7 @@ import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.TestsExecutionIfos;
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
+import com.vmusco.smf.analysis.persistence.XMLPersistence;
 import com.vmusco.smf.buildtest.BuildingTest;
 import com.vmusco.smf.exceptions.HashClashException;
 import com.vmusco.smf.exceptions.NotValidMutationException;
@@ -46,7 +47,7 @@ public class MutationTest {
 	@Test
 	public void testElementsToMutateABS(){
 		Factory factory = SpoonHelpers.obtainFactory();
-		CtElement[] mutations = Mutation.getMutations(TestingTools.getTestClassForCurrentProject(Class1.class), TestingTools.getCurrentCp(), AbsoluteValueInsertionMutator.class.getCanonicalName(), factory);
+		CtElement[] mutations = Mutation.getMutations(TestingTools.getTestClassForCurrentProject(Class1.class), TestingTools.getCurrentCp(), new AbsoluteValueInsertionMutator(), factory);
 
 		Map<String, Class<?>> matches = new HashMap<String, Class<?>>();
 		Map<String, String> types = new HashMap<String, String>();
@@ -112,9 +113,9 @@ public class MutationTest {
 		matches2.put("l", "l >= 0 ? l : l * -1");
 		
 		Factory factory = SpoonHelpers.obtainFactory();
-		MutationOperator<?> mo = new AbsoluteValueInsertionMutator();
+		SmfMutationOperator<?> mo = new AbsoluteValueInsertionMutator();
 
-		CtElement[] mutations = Mutation.getMutations(TestingTools.getTestClassForCurrentProject(Class1.class), TestingTools.getCurrentCp(), mo.getClass().getCanonicalName(), factory);
+		CtElement[] mutations = Mutation.getMutations(TestingTools.getTestClassForCurrentProject(Class1.class), TestingTools.getCurrentCp(), mo, factory);
 
 		for(CtElement mutation : mutations){
 			HashMap<CtElement, TargetObtainer> candid = Mutation.obtainsMutationCandidates(mo, mutation, factory);
@@ -142,9 +143,9 @@ public class MutationTest {
 	}
 
 	private static Object[] getMutationTestingObject(Factory factory){
-		MutationOperator<?> mo = new AbsoluteValueInsertionMutator();
+		SmfMutationOperator<?> mo = new AbsoluteValueInsertionMutator();
 		
-		CtElement[] mutations = Mutation.getMutations(TestingTools.getTestClassForCurrentProject(Class1.class), TestingTools.getCurrentCp(), mo.getClass().getCanonicalName(), factory);
+		CtElement[] mutations = Mutation.getMutations(TestingTools.getTestClassForCurrentProject(Class1.class), TestingTools.getCurrentCp(), mo, factory);
 		CtElement target = null;
 		
 		for(CtElement e : mutations){
@@ -277,7 +278,7 @@ public class MutationTest {
 
 		File proj = BuildingTest.prepareProjectWithTests();
 
-		ProcessStatistics ps = ProcessStatistics.rawCreateProject(ProcessStatistics.SOURCES_COPY, src.getAbsolutePath());
+		ProcessStatistics ps = new ProcessStatistics(ProcessStatistics.SOURCES_COPY, src.getAbsolutePath());
 		ps.createWorkingDir();
 		ps.setProjectIn(proj.getAbsolutePath());
 
@@ -299,7 +300,7 @@ public class MutationTest {
 		ps.performFreshTesting(null);
 		ProcessStatistics.saveState(ps);
 		
-		MutationStatistics<ArithmeticMutatorOperator> ms = new MutationStatistics<ArithmeticMutatorOperator>(ps, ArithmeticMutatorOperator.class);
+		MutationStatistics ms = new MutationStatistics(ps, new ArithmeticMutatorOperator());
 		ms.loadOrCreateMutants(true);
 		
 		//TODO: test mutation result
@@ -314,7 +315,7 @@ public class MutationTest {
 
 		File proj = BuildingTest.prepareProjectWithTests();
 
-		ProcessStatistics ps = ProcessStatistics.rawCreateProject(ProcessStatistics.SOURCES_COPY, src.getAbsolutePath());
+		ProcessStatistics ps = new ProcessStatistics(ProcessStatistics.SOURCES_COPY, src.getAbsolutePath());
 		ps.createWorkingDir();
 		ps.setProjectIn(proj.getAbsolutePath());
 
@@ -336,7 +337,7 @@ public class MutationTest {
 		ps.performFreshTesting(null);
 		ProcessStatistics.saveState(ps);
 		
-		MutationStatistics<ArithmeticMutatorOperator> ms = new MutationStatistics<ArithmeticMutatorOperator>(ps, ArithmeticMutatorOperator.class);
+		MutationStatistics ms = new MutationStatistics(ps, new ArithmeticMutatorOperator());
 		ms.loadOrCreateMutants(true, null, -1, 0, true);
 		
 		TestsExecutionIfos runTestCases = Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath("mutant_0"), ps.getTestClasses(), null);
@@ -344,13 +345,14 @@ public class MutationTest {
 		
 		File ff = new File(ms.getMutantFileResolved("mutation_0"));
 		ff.getParentFile().mkdirs();
-		MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(new FileOutputStream(ff), "mutant_0");
-		pers.saveState(ms.getMutationStats("mutant_0"));
+		MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(ms.getMutationStats("mutant_0"), ff);
+		pers.setFileLock(new FileOutputStream(ff));
+		XMLPersistence.save(pers);
 		
 		//System.out.println(runTestCases.getStacktraces().length);
 		
-		pers = new MutantInfoXMLPersisitence(ff);
-		MutantIfos loadState = pers.loadState();
-		System.out.println(loadState);
+		pers = new MutantInfoXMLPersisitence(new MutantIfos(), ff);
+		XMLPersistence.load(pers);
+		System.out.println(pers.getLinkedObject());
 	}
 }

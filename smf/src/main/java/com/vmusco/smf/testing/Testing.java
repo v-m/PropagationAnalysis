@@ -175,7 +175,7 @@ public final class Testing {
 		
 		if(tel != null)		tel.currentTimeout(timeout);
 
-		List<String> stacktrace = new ArrayList<>();
+		//List<String> stacktrace = new ArrayList<>();
 		for(String aTest : testClasses){
 			cpt++;
 			boolean testcase_finished = false;

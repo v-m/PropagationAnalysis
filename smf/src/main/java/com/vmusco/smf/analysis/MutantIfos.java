@@ -137,7 +137,7 @@ public class MutantIfos{
 		return this.execution != null;
 	}
 	
-	public void loadExecution(MutationStatistics<?> ms) throws MutationNotRunException, PersistenceException{
+	public void loadExecution(MutationStatistics ms) throws MutationNotRunException, PersistenceException{
 		ms.loadMutationStats(id);
 	}
 

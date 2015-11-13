@@ -196,7 +196,7 @@ public class AllMutationsStatsRunner{
 		 */
 		ProcessStatistics ps = ProcessStatistics.loadState(f.getAbsolutePath());
 		File ops = new File(ps.resolveThis(ps.getMutantsOpsBaseDir(projectrun)));
-		List<MutationStatistics<?>> mss = new ArrayList<MutationStatistics<?>>();
+		List<MutationStatistics> mss = new ArrayList<MutationStatistics>();
 
 		for(File op : ops.listFiles()){
 			File resolved = new File(op, mutationrun);
@@ -212,7 +212,7 @@ public class AllMutationsStatsRunner{
 		for(String graphTitle: explorers.keySet()){
 			ConsequencesExplorer pgp = explorers.get(graphTitle);
 
-			for(MutationStatistics<?> ms : mss){
+			for(MutationStatistics ms : mss){
 				//String[] allMutations = MutationStatsRunner.selectMutations(ms, nbmut, onlyKilled);
 				//String[] ret = MutationStatsRunner.processMutants(ms, allMutations, aGraph, sep, removeNulls, null);
 				String[] ret = MutationStatsRunner.processMutants(ms, pgp, sep, excludeNulls, null, excludeUnbounded, nbmut, includeAlives);

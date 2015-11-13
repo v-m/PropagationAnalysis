@@ -7,13 +7,13 @@ import spoon.reflect.code.CtLiteral;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 
-import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 
 /**
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class NegateConstantsOperator extends MutationOperator<CtLiteral<?>>{
+public class NegateConstantsOperator extends SmfMutationOperator<CtLiteral<?>>{
 
 	@Override
 	public void process(CtLiteral<?> element) {

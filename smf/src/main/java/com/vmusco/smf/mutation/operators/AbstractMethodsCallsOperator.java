@@ -3,7 +3,7 @@ package com.vmusco.smf.mutation.operators;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.declaration.CtElement;
@@ -14,7 +14,7 @@ import spoon.reflect.reference.CtTypeReference;
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public abstract class AbstractMethodsCallsOperator extends MutationOperator<CtInvocation<?>>{
+public abstract class AbstractMethodsCallsOperator extends SmfMutationOperator<CtInvocation<?>>{
 	
 	@Override
 	public CtElement[] getMutatedEntries(CtInvocation<?> t, Factory factory) {

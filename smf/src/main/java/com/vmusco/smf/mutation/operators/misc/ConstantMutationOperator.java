@@ -3,7 +3,7 @@ package com.vmusco.smf.mutation.operators.misc;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.declaration.CtElement;
@@ -13,7 +13,7 @@ import spoon.reflect.factory.Factory;
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class ConstantMutationOperator extends MutationOperator<CtLiteral<?>>{
+public class ConstantMutationOperator extends SmfMutationOperator<CtLiteral<?>>{
 
 	@Override
 	public void process(CtLiteral<?> element) {

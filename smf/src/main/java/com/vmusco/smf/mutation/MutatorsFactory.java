@@ -7,7 +7,7 @@ import com.vmusco.smf.mutation.operators.KingOffutt91.RelationalBinaryOperator;
 import com.vmusco.smf.mutation.operators.KingOffutt91.UnaryOperatorInsertionMutator;
 
 /**
- * This class allows to get mutation operators based on code op defined using {@link MutationOperator#operatorId()} and 
+ * This class allows to get mutation operators based on code op defined using {@link SmfMutationOperator#operatorId()} and 
  * by full canonical name. For this class to work, the {@link MutatorsFactory#mutationClasses} must be updated for each new
  * opeartor
  * @author Vincenzo Musco - http://www.vmusco.com
@@ -16,7 +16,7 @@ public abstract class MutatorsFactory {
 	private MutatorsFactory(){}
 
 	@SuppressWarnings("unchecked")
-	private static Class<MutationOperator<?>>[] mutationClasses = new Class[]{
+	private static Class<SmfMutationOperator<?>>[] mutationClasses = new Class[]{
 		AbsoluteValueInsertionMutator.class,
 		ArithmeticMutatorOperator.class,
 		RelationalBinaryOperator.class,
@@ -24,26 +24,32 @@ public abstract class MutatorsFactory {
 		UnaryOperatorInsertionMutator.class
 	};
 
-	public static Class<MutationOperator<?>>[] allAvailMutator(){
+	public static Class<SmfMutationOperator<?>>[] allAvailMutator(){
 		return MutatorsFactory.mutationClasses;
 	}
 
-	public static Class<MutationOperator<?>> getOperatorClassFromId(String codeop) throws InstantiationException, IllegalAccessException{
-		for(Class<MutationOperator<?>> op : allAvailMutator()){
-			MutationOperator<?> mo = op.newInstance();
-			
-			if(mo.operatorId().equals(codeop)){
-				return op;
+	public static SmfMutationOperator<?> getOperatorClassFromId(String codeop) {
+		for(Class<SmfMutationOperator<?>> op : allAvailMutator()){
+			SmfMutationOperator<?> mo;
+			try {
+				mo = op.newInstance();
+				
+				if(mo.operatorId().equals(codeop)){
+					return mo;
+				}
+			} catch (InstantiationException | IllegalAccessException e) {
+				// Should not occurs !
+				e.printStackTrace();
 			}
 		}
 		
 		return null;
 	}
 	
-	public static Class<MutationOperator<?>> getOperatorClassFromFullName(String opname) throws InstantiationException, IllegalAccessException{
-		for(Class<MutationOperator<?>> op : allAvailMutator()){
+	public static SmfMutationOperator<?> getOperatorClassFromFullName(String opname) throws InstantiationException, IllegalAccessException{
+		for(Class<SmfMutationOperator<?>> op : allAvailMutator()){
 			if(op.getCanonicalName().equals(opname)){
-				return op;
+				return op.newInstance();
 			}
 		}
 		
