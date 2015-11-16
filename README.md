@@ -84,7 +84,7 @@ $ ./smf-runmutants /tmp/myproject/mutations/main/ABS/
 This tool can simply use projects created with smf to generate graphs from it. To do so, just invoke:
 
 ```
-$ ./softminer-creategraph /tmp/myproject/
+$ ./sm-smfgengraph /tmp/myproject/
 ```
 
 To generate other type of graphs and more options, just add the ``--help`` parameter to the program.

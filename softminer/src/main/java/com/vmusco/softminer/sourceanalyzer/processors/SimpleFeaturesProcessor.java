@@ -32,7 +32,6 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		try {
 			ProcessorCommunicator.addEdgeIfAllowed(src_txt, dst_txt, NodeTypes.METHOD, NodeTypes.FIELD, EdgeTypes.READ_OPERATION, src.getPosition());
 		} catch (MalformedSourcePositionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -43,9 +42,8 @@ public class SimpleFeaturesProcessor extends AbstractFeaturesProcessor {
 		String dst_txt = anAccess.getSignature().split(" ")[1];
 		
 		try {
-			ProcessorCommunicator.addEdgeIfAllowed(dst_txt, src_txt, NodeTypes.METHOD, NodeTypes.FIELD, EdgeTypes.WRITE_OPERATION, src.getPosition());
+			ProcessorCommunicator.addEdgeIfAllowed(dst_txt, src_txt, NodeTypes.FIELD, NodeTypes.METHOD, EdgeTypes.WRITE_OPERATION, src.getPosition());
 		} catch (MalformedSourcePositionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

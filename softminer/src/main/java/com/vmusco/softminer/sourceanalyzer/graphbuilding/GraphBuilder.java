@@ -21,7 +21,7 @@ public class GraphBuilder {
 	@SuppressWarnings("unused")
 	final private String projectName;
 	final private String[] inputSources;
-	final private String[] cp;
+	private String[] cp ;
 	private long lastBuildingDuration = -1;
 
 	private SpoonCompiler compiler;
@@ -160,7 +160,11 @@ public class GraphBuilder {
 		return gb;
 	}
 	
-	
+	/**
+	 * New generator without classpath generation
+	 * @param projectName
+	 * @param inputSources
+	 */
 	protected GraphBuilder(String projectName, String[] inputSources) {
 		this.projectName = projectName;
 		this.cp = null;
@@ -190,6 +194,8 @@ public class GraphBuilder {
 		
 		if(cp != null)
 			this.compiler.setSourceClasspath(cp);
+		else
+			this.compiler.getFactory().getEnvironment().setNoClasspath(true);
 
 		long start = System.currentTimeMillis();
 		this.compiler.build();
@@ -214,5 +220,14 @@ public class GraphBuilder {
 		// Override this method to apply special treatment to the created graph (after generation)
 	}
 
+	public void setClassPath(String[] cp){
+		this.cp = cp;
+	}
 
+	/**
+	 * Ask Spoon not to take into consideration the classpath resolution
+	 */
+	public void setNoClassPath(){
+		this.cp = null;
+	}
 }
