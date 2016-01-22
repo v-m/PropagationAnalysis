@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import spoon.compiler.SpoonCompiler;
+import spoon.processing.Processor;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.factory.Factory;
@@ -38,9 +39,9 @@ public final class Testing {
 	/**
 	 * The time after which the test fails (in seconds)
 	 */
-	public static final int MIN_TEST_TIMEOUT = 10;
-	public static final int MAX_TEST_TIMEOUT = 60;
-	public static final int INC_TEST_TIMEOUT = 10;
+	public static int MIN_TEST_TIMEOUT = 10;
+	public static int MAX_TEST_TIMEOUT = 60;
+	public static int INC_TEST_TIMEOUT = 10;
 
 	private Testing() {
 	}
@@ -69,8 +70,8 @@ public final class Testing {
 		compiler.build();
 
 		// Obtain list of element to mutate
-		List<String> arg0 = new ArrayList<String>();
-		arg0.add(TestCasesProcessor.class.getName());
+		List<Processor<?>> arg0 = new ArrayList<>();
+		arg0.add(new TestCasesProcessor());
 		compiler.process(arg0);
 	}
 	

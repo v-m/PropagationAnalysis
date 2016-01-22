@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.jdom2.Attribute;
@@ -77,9 +78,14 @@ public class ProjectXmlPersistenceManager extends XMLPersistenceManager<ProcessS
 		Element config = root.getChild(CONFIG_ELEMENT_1);
 		Element global = config.getChild(GLOBAL_ELEMENT_1);
 		
-		String datasetRepository = global.getChild(PROJECT_IN_2).getText();
 		
-		ps.setProjectIn(datasetRepository);
+		String datasetRepository = null;
+		
+		if(global.getChild(PROJECT_IN_2) != null){
+			datasetRepository = global.getChild(PROJECT_IN_2).getText();
+			ps.setProjectIn(datasetRepository);
+		}
+		
 		ps.setSkipMvnClassDetermination(config.getAttribute(SKIP_MVN_CLASS_2).getValue().equals("true")?true:false);
 
 		Element tmp;
@@ -216,7 +222,8 @@ public class ProjectXmlPersistenceManager extends XMLPersistenceManager<ProcessS
 				ps.setRunTestsOriginalTime(Long.valueOf(original.getAttribute(TIME_ATTRIBUTE).getValue()));
 			}
 
-			TestsExecutionIfos tei = TestInformationPersistence.readFrom(original);
+			TestsExecutionIfos tei = TestInformationPersistence.readFrom(original, true);
+			tei.setCalledNodeInformation(TestInformationPersistence.readCalledNodes(original));
 			
 			if(timeout >= 0){
 				tei.setTestTimeOut(timeout);
@@ -391,12 +398,20 @@ public class ProjectXmlPersistenceManager extends XMLPersistenceManager<ProcessS
 	}
 
 	protected static void populateXml(Element parent, String elementsName, String[] data){
+		populateXml(parent, elementsName, data, null);
+	}
+	
+	protected static void populateXml(Element parent, String elementsName, String[] data, HashMap<String, Integer> compressor){
 		if(data == null)
 			return;
 
 		for(String s: data){
 			Element e = new Element(elementsName);
-			e.setText(s);
+			if(compressor == null)
+				e.setText(s);
+			else
+				e.setText(Integer.toString(TestInformationPersistence.keyForCompression(s, compressor)));
+			
 			parent.addContent(e);
 		}
 	}

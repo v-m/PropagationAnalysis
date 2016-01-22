@@ -3,8 +3,8 @@ package com.vmusco.pminer.analyze;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vmusco.smf.utils.MutationsSetTools;
-import com.vmusco.softminer.utils.Tools;
+import com.vmusco.pminer.utils.Tools;
+import com.vmusco.smf.utils.SetTools;
 
 /**
  * Class used to compute 
@@ -44,9 +44,9 @@ public class SOUDStatistics {
 		int cis_size = cis.length;
 		int ais_size = ais.length;
 
-		int fpis_size = MutationsSetTools.setDifference(cis, ais).length;
-		int dis_size = MutationsSetTools.setDifference(ais, cis).length;
-		int inter_size = MutationsSetTools.setIntersection(ais, cis).length;
+		int fpis_size = SetTools.setDifference(cis, ais).length;
+		int dis_size = SetTools.setDifference(ais, cis).length;
+		int inter_size = SetTools.setIntersection(ais, cis).length;
 
 		this.cis.add(cis_size * 1.0d);
 		this.ais.add(ais_size * 1.0d);

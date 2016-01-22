@@ -23,11 +23,15 @@ public class SourceGraphGenerator implements GraphGeneratorLogic{
 			sources.add(s);
 		}
 		
-		for(String s : cmd.getArgs()[1].split(File.pathSeparator)){
-			sources.add(s);
+		if(cmd.getArgs().length == 2){
+			output_file = cmd.getArgs()[1];
+		}else{
+			for(String s : cmd.getArgs()[1].split(File.pathSeparator)){
+				sources.add(s);
+			}
+			
+			output_file = cmd.getArgs()[2];
 		}
-		
-		output_file = cmd.getArgs()[2]; 
 				
 		return true;
 	}
@@ -58,17 +62,17 @@ public class SourceGraphGenerator implements GraphGeneratorLogic{
 
 	@Override
 	public boolean verifyCommandParameters(CommandLine cmd) {
-		return cmd.getArgList().size() == 3;
+		return cmd.getArgList().size() >= 2 && cmd.getArgList().size() <= 3;
 	}
 
 	@Override
 	public String getSignatureHelp() {
-		return "<src> <tst> <out>";
+		return "<src> [<tst>] <out>";
 	}
 
 	@Override
 	public String getHeaderHelp() {
-		return "Generate a call graph for sources <src> and tests <tst> (both eventually separated by "+File.pathSeparator+") and produce the result in <out> file";
+		return "Generate a call graph for sources <src> and eventually tests <tst> (both eventually separated by "+File.pathSeparator+") and produce the result in <out> file";
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -159,6 +160,19 @@ public class GraphML implements GraphPersistence{
 				data.setText("true");
 				aNode.addContent(data);
 			}
+			
+			String ftstring = "";
+			for(String ft : aGraph.getNodeFormalTypes(n)){
+				ftstring+=((ftstring.length()==0)?"":",")+ft;
+			}
+			
+			if(ftstring.length()>0){
+				data = new Element("data", xmlns);
+				attr = new Attribute("key", "formaltype");
+				data.setAttribute(attr);
+				data.setText(ftstring);
+				aNode.addContent(data);
+			}
 		}
 
 		int i = 1;
@@ -235,8 +249,16 @@ public class GraphML implements GraphPersistence{
 		// <key id="type" for="edge" attr.name="sourcecode" attr.type="string" />
 		tmp = new Element("key", xmlns);
 		tmp.setAttribute(new Attribute("id", "type"));
-		tmp.setAttribute(new Attribute("for", "all"));
+		tmp.setAttribute(new Attribute("for", "edge"));
 		tmp.setAttribute(new Attribute("attr.name", "sourcecode"));
+		tmp.setAttribute(new Attribute("attr.type", "string"));
+		root.addContent(tmp);
+		
+		// <key id="type" for="node" attr.name="formaltype" attr.type="string" />
+		tmp = new Element("key", xmlns);
+		tmp.setAttribute(new Attribute("id", "type"));
+		tmp.setAttribute(new Attribute("for", "node"));
+		tmp.setAttribute(new Attribute("attr.name", "formaltype"));
 		tmp.setAttribute(new Attribute("attr.type", "string"));
 		root.addContent(tmp);
 		
@@ -245,7 +267,7 @@ public class GraphML implements GraphPersistence{
 		//</key>
 		for(NodeMarkers m : NodeMarkers.values()){
 			tmp = new Element("key", xmlns);
-			tmp.setAttribute(new Attribute("id", m.name()));
+			tmp.setAttribute(new Attribute("id", "type"));
 			tmp.setAttribute(new Attribute("for", "node"));
 			tmp.setAttribute(new Attribute("attr.name", m.name()));
 			tmp.setAttribute(new Attribute("attr.type", "boolean"));
@@ -324,6 +346,17 @@ public class GraphML implements GraphPersistence{
 					
 					for(SourceReference sr : sc){
 						g.bindNodeToSourcePosition(nodename, sr);
+					}
+				}else if(tmp.equals("formaltype")){
+					List<String> ft = new ArrayList<>();
+					
+					StringTokenizer st = new StringTokenizer(ee.getValue(), ",");
+					while(st.hasMoreElements()){
+						ft.add(st.nextToken());
+					}
+					
+					if(ft.size()>0){
+						g.setNodeFormalTypes(nodename, ft);
 					}
 				}
 			}

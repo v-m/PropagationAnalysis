@@ -116,8 +116,8 @@ public class NewSteimannProject {
 			}
 			
 			if(mutelement == null){
-				System.err.println("No changed points --- Error !");
-				System.exit(1);
+				System.out.println("No mutation point for "+mut.getName()+", skipping file");
+				continue;
 			}
 			
 			mi.setMutationIn(BytecodeTools.signatureConverter(mutelement.name));

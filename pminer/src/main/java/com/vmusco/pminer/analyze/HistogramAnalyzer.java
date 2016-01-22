@@ -17,12 +17,12 @@ public abstract class HistogramAnalyzer extends MutantTestAnalyzer {
 	
 
 	@Override
-	public void fireUnboundedFound(MutantIfos mi) {
+	public void unboundedFound(MutantIfos mi) {
 		
 	}
 
 	@Override
-	public void fireIsolatedFound(MutantIfos mi) {
+	public void isolatedFound(MutantIfos mi) {
 		
 	}
 	
@@ -33,7 +33,7 @@ public abstract class HistogramAnalyzer extends MutantTestAnalyzer {
 	 * ais and cis are not used !
 	 */
 	@Override
-	public void fireIntersectionFound(MutantIfos mi, String[] ais, String[] cis) {
+	public void intersectionFound(MutantIfos mi, String[] ais, String[] cis) {
 		fireIntersectionFound(mi, propsize);
 	}
 }

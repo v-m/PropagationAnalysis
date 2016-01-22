@@ -1,5 +1,6 @@
 package com.vmusco.smf.mutation;
 
+import com.vmusco.smf.mutation.operators.ExternalMutationOperator;
 import com.vmusco.smf.mutation.operators.KingOffutt91.AbsoluteValueInsertionMutator;
 import com.vmusco.smf.mutation.operators.KingOffutt91.ArithmeticMutatorOperator;
 import com.vmusco.smf.mutation.operators.KingOffutt91.LogicalConnectorReplacementOperator;
@@ -28,7 +29,10 @@ public abstract class MutatorsFactory {
 		return MutatorsFactory.mutationClasses;
 	}
 
-	public static SmfMutationOperator<?> getOperatorClassFromId(String codeop) {
+	public static MutationOperator getOperatorClassFromId(String codeop) {
+		if(codeop == null)
+			return null;
+		
 		for(Class<SmfMutationOperator<?>> op : allAvailMutator()){
 			SmfMutationOperator<?> mo;
 			try {
@@ -43,7 +47,7 @@ public abstract class MutatorsFactory {
 			}
 		}
 		
-		return null;
+		return new ExternalMutationOperator(codeop);
 	}
 	
 	public static SmfMutationOperator<?> getOperatorClassFromFullName(String opname) throws InstantiationException, IllegalAccessException{

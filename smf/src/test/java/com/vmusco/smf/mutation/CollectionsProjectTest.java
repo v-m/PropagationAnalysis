@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNURL;
@@ -58,6 +59,7 @@ public class CollectionsProjectTest {
 		
 	}
 
+	@Ignore
 	@Test
 	public void simplePipeExecution() throws IOException, BadStateException {
 		File projFolder = new File(temporaryFolder, "project");

@@ -20,6 +20,7 @@ import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.PersistenceException;
+import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.mutation.MutatorsFactory;
 import com.vmusco.smf.mutation.SmfMutationOperator;
 import com.vmusco.smf.utils.SourceReference;
@@ -71,12 +72,15 @@ public class MutationXmlPersistenceManager extends XMLPersistenceManager<Mutatio
 			document = sxb.build(f);
 			Element root = document.getRootElement();
 			String targetPs = root.getAttributeValue(MUTATIONS_PARENT_2);
-			String mutid = root.getAttribute(MUTATION_OPERATOR_3).getValue();
+			String mutid = null;
+			if(root.getAttribute(MUTATION_OPERATOR_3) != null)
+				mutid = root.getAttribute(MUTATION_OPERATOR_3).getValue();
+			
 			String name = root.getAttributeValue(MUTATION_NAME);
 
 			ProcessStatistics ps = ProcessStatistics.loadState((new File(f.getParentFile(), targetPs)).getAbsolutePath());
 			
-			SmfMutationOperator<?> mutator = MutatorsFactory.getOperatorClassFromId(mutid);
+			MutationOperator mutator = MutatorsFactory.getOperatorClassFromId(mutid);
 			ms = new MutationStatistics(ps, mutator, name);
 		} catch (JDOMException | IOException e) {
 			throw new PersistenceException(e);

@@ -3,6 +3,9 @@ package com.vmusco.smf.analysis.persistence;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.jdom2.Comment;
 import org.jdom2.Document;
@@ -17,6 +20,11 @@ import com.vmusco.smf.exceptions.PersistenceException;
 
 public class XMLPersistence {
 	
+	private static final String VALUE = "value";
+	private static final String ID = "id";
+	private static final String ENTRY = "entry";
+	private static final String COMPRESSION_ENTRIES = "compression-entries";
+
 	public static void load(XMLPersistenceManager pm) throws PersistenceException{
 		SAXBuilder sxb = new SAXBuilder();
 		Document document;
@@ -50,4 +58,33 @@ public class XMLPersistence {
 		}
 	}
 	
+	public static Element generateCompressionEntry(Map<String, Integer> compressor){
+		Element e = new Element(COMPRESSION_ENTRIES);
+		
+		for(Entry<String, Integer> anEntry : compressor.entrySet()){
+			Element e2 = new Element(ENTRY);
+			e2.setAttribute(ID, Integer.toString(anEntry.getValue()));
+			e2.setAttribute(VALUE, anEntry.getKey());
+			e.addContent(e2);
+		}
+		
+		return e;
+	}
+	
+	public static boolean isDocumentUsingCompression(Element root){
+		return root.getChild(COMPRESSION_ENTRIES) != null;
+	}
+	
+	public static Map<Integer, String> readDecompressionEntries(Element root){
+		Element compressionEntries = root.getChild(COMPRESSION_ENTRIES);
+		Map<Integer, String> decompressor = new HashMap<Integer, String>();
+		
+		for(Element e : compressionEntries.getChildren(ENTRY)){
+			Integer id = Integer.parseInt(e.getAttributeValue(ID));
+			String key = e.getAttributeValue(VALUE);
+			decompressor.put(id, key);
+		}
+		
+		return decompressor;
+	}
 }

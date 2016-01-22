@@ -20,8 +20,13 @@ import javax.tools.DiagnosticCollector;
 import javax.tools.JavaFileObject;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import spoon.compiler.SpoonCompiler;
+import spoon.processing.Processor;
+import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
@@ -45,7 +50,6 @@ import com.vmusco.smf.exceptions.HashClashException;
 import com.vmusco.smf.exceptions.NotValidMutationException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.instrumentation.StackTracePrintingInstrumentationProcessor;
-import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.smf.utils.InterruptionManager;
 import com.vmusco.smf.utils.NewReportedStandardEnvironment;
 import com.vmusco.smf.utils.SpoonHelpers;
@@ -55,6 +59,7 @@ import com.vmusco.smf.utils.SpoonHelpers;
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public final class Mutation {
+	private static final Logger logger = LogManager.getFormatterLogger(Mutation.class.getSimpleName());
 	private static final String MUTANT_FILE_PREFIX = "mutant_";
 
 	private Mutation() {}
@@ -149,9 +154,9 @@ public final class Mutation {
 		compiler.build();
 
 		// Obtain list of element to mutate
-		List<String> arg0 = new ArrayList<String>();
-
-		arg0.add(mutop.getClass().getCanonicalName());
+		List<Processor<?>> arg0 = new ArrayList<>();
+		arg0.add(mutop);
+		
 		compiler.process(arg0);
 
 		return MutationGateway.getMutationCandidates();
@@ -199,7 +204,9 @@ public final class Mutation {
 		}
 		
 		replaceWith.setParent(toReplace.getParent());
-		toReplace.replace(replaceWith);
+		if(!replace(toReplace, replaceWith)){
+			return null;
+		}
 		
 		File tmpf = File.createTempFile("mutation_probe", null);
 		ifos.setGenerationDirectory(tmpf);
@@ -216,7 +223,9 @@ public final class Mutation {
 
 		if(hashes != null && hashes.contains(ifos.getHash())){
 			// Revert before interrupting
-			replaceWith.replace(toReplace);
+			if(!replace(replaceWith, toReplace)){
+				return null;
+			}
 			if(stackTraceInstrumentation && exec != null){
 				exec.getBody().removeStatement(exec.getBody().getStatement(0));
 			}
@@ -270,11 +279,26 @@ public final class Mutation {
 			fos.close();
 		}
 
-		replaceWith.replace(toReplace);
+		if(!replace(replaceWith, toReplace)){
+			return null;
+		}
 		if(stackTraceInstrumentation && exec != null){
 			exec.getBody().removeStatement(exec.getBody().getStatement(0));
 		}
 		return ifos; 
+	}
+
+	private static boolean replace(CtElement toReplace, CtElement replaceWith) {
+		if(toReplace instanceof CtExpression && replaceWith instanceof CtExpression){
+			((CtExpression)toReplace).replace((CtExpression)replaceWith);
+		}else if(toReplace instanceof CtStatement && replaceWith instanceof CtStatement){
+			((CtStatement)toReplace).replace((CtStatement)replaceWith);
+		}else{
+			logger.warn("Incompatible types for mutation: %s and %s", toReplace.getClass().getSimpleName(), replaceWith.getClass().getSimpleName());
+			return false;
+		}
+		
+		return true;
 	}
 
 	/**
@@ -284,7 +308,7 @@ public final class Mutation {
 	 * @param mcl
 	 * @param reset
 	 * @param nb
-	 * @param safepersist
+	 * @param safepersistFold
 	 * @param stackTraceInstrumentation
 	 * @throws PersistenceException
 	 * @throws BadObjectTypeException if the mutation operator declared in ms is NOT intended for direct mutation using SMF framework (ie. imported mutation operator)
@@ -477,11 +501,7 @@ public final class Mutation {
 		CtClass<?> theClass = findAssociatedClass(e);
 
 		if(theClass == null){
-			//TODO: put in logger?!
-			ConsoleTools.write("WARNING:\n", ConsoleTools.BG_YELLOW);
-			ConsoleTools.write("Unable to find a parent class for the element "+e.getSignature()+".");
-			ConsoleTools.write("This item is skipped cleanly and silently but be aware of this :)");
-			ConsoleTools.endLine(2);
+			logger.warn("Unable to find a parent class for the element %s. The item is skipped", e.getSignature());
 			return null;
 		}
 

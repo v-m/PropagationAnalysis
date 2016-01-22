@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
@@ -21,6 +22,7 @@ import com.vmusco.softminer.graphs.DynamicCallGraphGenerator;
  */
 public class DynamicCallGraphGeneration {
 	
+	@Ignore
 	@Test
 	public void testGeneration() throws IOException, PersistenceException, BadStateException{
 		File src = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
@@ -51,7 +53,7 @@ public class DynamicCallGraphGeneration {
 
 		DynamicCallGraphGenerator dcgg = new DynamicCallGraphGenerator();
 		ps.performFreshTesting(dcgg);
-		dcgg.getGraph().bestDisplay();
+		//dcgg.getGraph().bestDisplay();
 	}
 	
 	public static File prepareProjectWithTests() throws IOException{

@@ -22,7 +22,7 @@ import com.vmusco.smf.testing.TestCasesProcessor;
 import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.testing.TestsExecutionListener;
 import com.vmusco.smf.utils.MavenTools;
-import com.vmusco.smf.utils.MutationsSetTools;
+import com.vmusco.smf.utils.SetTools;
 
 /**
  * This class contains all informations required for a mutation project
@@ -579,8 +579,7 @@ public class ProcessStatistics implements Serializable{
 	
 	
 
-	//TODO: the end of this file should be moved for coherency with reusability
-	private String[] includeTestSuiteGlobalFailingCases(String[] testsuites, String[] include){
+	public String[] includeTestSuiteGlobalFailingCases(String[] testsuites, String[] include){
 		Set<String> cases = new HashSet<String>();
 
 		if(include != null){
@@ -612,7 +611,7 @@ public class ProcessStatistics implements Serializable{
 		String[] mutset = includeTestSuiteGlobalFailingCases(tei.getRawErrorOnTestSuite(), tei.getRawFailingTestCases());
 		String[] glbset = includeTestSuiteGlobalFailingCases(getErrorOnTestSuite(), getFailingTestCases());
 
-		return MutationsSetTools.setDifference(mutset, glbset);
+		return SetTools.setDifference(mutset, glbset);
 	}
 
 	/**
@@ -625,7 +624,7 @@ public class ProcessStatistics implements Serializable{
 		String[] mutset = tei.getRawIgnoredTestCases();
 		String[] glbset = getIgnoredTestCases();
 
-		return MutationsSetTools.setDifference(mutset, glbset);
+		return SetTools.setDifference(mutset, glbset);
 	}
 
 	/**
@@ -638,7 +637,7 @@ public class ProcessStatistics implements Serializable{
 		String[] mutset = tei.getRawHangingTestCases();
 		String[] glbset = getHangingTestCases();
 
-		return MutationsSetTools.setDifference(mutset, glbset);
+		return SetTools.setDifference(mutset, glbset);
 	}
 
 	/**
@@ -663,7 +662,7 @@ public class ProcessStatistics implements Serializable{
 			cases.add(s);
 		}
 
-		return MutationsSetTools.setDifference(cases.toArray(new String[0]), getUnmutatedFailAndHang());
+		return SetTools.setDifference(cases.toArray(new String[cases.size()]), getUnmutatedFailAndHang());
 	}
 	
 	

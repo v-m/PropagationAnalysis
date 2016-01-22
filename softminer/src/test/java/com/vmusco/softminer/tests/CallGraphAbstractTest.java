@@ -3,11 +3,20 @@ package com.vmusco.softminer.tests;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
+
 /**
 *
 * @author Vincenzo Musco - http://www.vmusco.com
 */
 public abstract class CallGraphAbstractTest {
+	protected DepGraphTestHelper.BeforeGenerateHandler tweaksDisabler = new DepGraphTestHelper.BeforeGenerateHandler() {
+		@Override
+		public void action() {
+			ProcessorCommunicator.dropUselessCalls = false;
+		}
+	};
+	
 	private GraphBuilderObtainer gbo = null;
 	
 	public CallGraphAbstractTest(GraphBuilderObtainer gbo) {
@@ -67,10 +76,21 @@ public abstract class CallGraphAbstractTest {
 	 */
 	@Test
 	public abstract void testAbstractAndInheritanceClasses() throws Exception;
-	
+
 	@Test
 	public abstract void testInterfaceAndInheritance() throws Exception;
 	
+	@Test
+	public abstract void testSimpleInheritance() throws Exception;
+	
+	/**
+	 * This test allows to explore a simple graph. The aim is to see if edges are correctly set
+	 * in case of method calls inside the same class AND outside.
+	 * Status: Finished
+	 * @throws Exception
+	 */
+	@Test
+	public abstract void testSimpleMethodCalls() throws Exception;
 	
 	@Ignore
 	@Test
@@ -93,19 +113,6 @@ public abstract class CallGraphAbstractTest {
 	@Test
 	public void testConstructors() throws Exception{
 		//com.vmusco.softminer.tests.cases.testConstructors.Foo.class
-	}
-
-
-	/**
-	 * This test allows to explore a simple graph. The aim is to see if edges are correctly set
-	 * in case of method calls inside the same class AND outside.
-	 * Status: Finished
-	 * @throws Exception
-	 */
-	@Ignore
-	@Test
-	public void testSimpleMethodCalls() throws Exception{
-		//com.vmusco.softminer.tests.cases.testSimpleMethodCalls.Foo.class
 	}
 
 	/***

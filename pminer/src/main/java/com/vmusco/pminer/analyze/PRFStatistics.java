@@ -3,8 +3,8 @@ package com.vmusco.pminer.analyze;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vmusco.smf.utils.MutationsSetTools;
-import com.vmusco.softminer.utils.Tools;
+import com.vmusco.pminer.utils.Tools;
+import com.vmusco.smf.utils.SetTools;
 
 /**
  * Class used to compute precision, recall and fscores
@@ -44,7 +44,7 @@ public class PRFStatistics {
 	}
 
 	public static double precision(String[] ais, String[] cis){
-		int nbinter = MutationsSetTools.setIntersection(ais, cis).length;
+		int nbinter = SetTools.setIntersection(ais, cis).length;
 
 		if(cis.length == 0){
 			return (ais.length>0)?1:0;
@@ -54,7 +54,7 @@ public class PRFStatistics {
 	}
 
 	public static double recall(String[] ais, String[] cis){
-		int nbinter = MutationsSetTools.setIntersection(ais, cis).length;
+		int nbinter = SetTools.setIntersection(ais, cis).length;
 
 		if(ais.length == 0){
 			return (cis.length>0)?1:0;

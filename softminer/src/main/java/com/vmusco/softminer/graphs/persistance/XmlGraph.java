@@ -85,7 +85,7 @@ public class XmlGraph implements GraphPersistence{
 
 			if(edgeType != null){
 				switch(edgeType){
-				case ABSTRACT_METHOD_IMPLEMENTATION:
+				case METHOD_OVERRIDE:
 					edgename = "abstract-method-implementation";
 					break;
 				case INTERFACE_IMPLEMENTATION:

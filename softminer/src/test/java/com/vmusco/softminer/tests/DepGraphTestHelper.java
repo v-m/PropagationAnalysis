@@ -28,10 +28,16 @@ public class DepGraphTestHelper {
 	}
 	
 	public DepGraphTestHelper(GraphBuilderObtainer gbo, Class<?> packageInto) throws Exception {
+		this(gbo, null, packageInto);
+	}
+	
+	public DepGraphTestHelper(GraphBuilderObtainer gbo, BeforeGenerateHandler handler, Class<?> packageInto) throws Exception {
 		currTestedPakg = packageInto.getPackage().getName();
 		String[] sources = getFullPath(currTestedPakg); 
 		graphBuilder = gbo.getGraphBuilder(sources);
 		postSetTestPkgAndGenerateBuilder();
+		if(handler != null)
+			handler.action();
 		builtGraph = graphBuilder.generateDependencyGraph(buildingLogicToUse); 
 	}
 	
@@ -202,5 +208,9 @@ public class DepGraphTestHelper {
 		
 		
 		return out;
+	}
+	
+	public interface BeforeGenerateHandler{
+		void action();
 	}
 }

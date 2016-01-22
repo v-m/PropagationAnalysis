@@ -8,26 +8,27 @@ import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 import com.vmusco.softminer.sourceanalyzer.processors.SimpleFeaturesProcessor;
 
 import spoon.compiler.SpoonCompiler;
+import spoon.processing.Processor;
 
 /**
 *
 * @author Vincenzo Musco - http://www.vmusco.com
 */
 public class SpoonGraphBuilder extends GraphBuildLogic {
-	private Class<?> aProcessor;
+	private Processor<?> aProcessor;
 	
 	public static SpoonGraphBuilder getFeatureGranularityGraphBuilder(){
-		return new SpoonGraphBuilder(SimpleFeaturesProcessor.class);
+		return new SpoonGraphBuilder(new SimpleFeaturesProcessor());
 	}
 	
-	public SpoonGraphBuilder(Class<?> aProcessor) {
+	public SpoonGraphBuilder(Processor<?> aProcessor) {
 		this.aProcessor = aProcessor;
 	}
 	
 	@Override
 	public Graph build(SpoonCompiler compiler) {
-		List<String> arg0 = new ArrayList<String>();
-		arg0.add(aProcessor.getName());
+		List<Processor<?>> arg0 = new ArrayList<>();
+		arg0.add(aProcessor);
 		compiler.process(arg0);
 		return ProcessorCommunicator.outputgraph;
 	}

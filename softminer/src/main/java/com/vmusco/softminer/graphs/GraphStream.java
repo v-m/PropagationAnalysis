@@ -22,6 +22,7 @@ import org.graphstream.ui.view.Viewer;
 import org.graphstream.ui.view.ViewerPipe;
 
 import com.vmusco.smf.utils.SourceReference;
+import com.vmusco.softminer.exceptions.IncompatibleTypesException;
 
 /**
  *
@@ -41,6 +42,10 @@ public class GraphStream extends Graph {
 	}
 
 	@Override
+	public void addNode(String name){
+		addNode(name, false);
+	}
+	
 	public void addNode(String name, boolean displayLabel){
 		if(!this.hasNode(name)){
 			this.getGraph().addNode(name);
@@ -51,6 +56,10 @@ public class GraphStream extends Graph {
 	}
 
 	@Override
+	public void addDirectedEdge(String from, String to){
+		this.addDirectedEdge(from, to, false);
+	}
+	
 	public void addDirectedEdge(String from, String to, boolean displayLabel){
 		if(!this.hasDirectedEdge(from, to)){
 			String name = buildEdgeName(from, to, true);
@@ -58,7 +67,6 @@ public class GraphStream extends Graph {
 
 			if(displayLabel)
 				setEdgeLabel(name, name);
-
 		}
 	}
 
@@ -142,6 +150,10 @@ public class GraphStream extends Graph {
 	}
 
 	@Override
+	public void addDirectedEdgeAndNodeIfNeeded(String from, String to){
+		addDirectedEdgeAndNodeIfNeeded(from, to, false, false);
+	}
+	
 	public void addDirectedEdgeAndNodeIfNeeded(String from, String to, boolean nodesLabel, boolean edgesLabel) {
 		this.addNode(from, nodesLabel);
 		this.addNode(to, nodesLabel);
@@ -159,23 +171,6 @@ public class GraphStream extends Graph {
 
 		for(String n : getNodesNames()){
 			if(getNodeType(n) == t)
-				nb++;
-		}
-
-		return nb;
-	}
-
-	@Override
-	public int getNbEdges() {
-		return this.getGraph().getEdgeCount();
-	}
-
-	@Override
-	public int getNbEdges(EdgeTypes t) {
-		int nb = 0;
-
-		for(EdgeIdentity n : getEdges()){
-			if(getEdgeType(n.getFrom(), n.getTo()) == t)
 				nb++;
 		}
 
@@ -378,18 +373,6 @@ public class GraphStream extends Graph {
 		}
 
 		return nodes.toArray(new String[nodes.size()]);
-	}
-
-	@Override
-	public int getOutDegreeFor(String node) {
-		Node node2 = this.getGraph().getNode(node);
-		return (node2==null)?-1:node2.getOutDegree();
-	}
-
-	@Override
-	public int getInDegreeFor(String node) {
-		Node node2 = this.getGraph().getNode(node);
-		return (node2==null)?-1:node2.getInDegree();
 	}
 
 	@Override
@@ -713,4 +696,98 @@ public class GraphStream extends Graph {
 	public void removeNode(String id) {
 		getGraph().removeNode(id);
 	}
+
+	@Override
+	public void setNodeFormalTypes(String node, List<String> types) {
+		Node node2 = this.getGraph().getNode(node);
+		node2.setAttribute("formaltypes", types);
+	}
+
+	@Override
+	public List<String> getNodeFormalTypes(String node) {
+		Node node2 = this.getGraph().getNode(node);
+		
+		List<String> re  = node2.getAttribute("formaltypes");
+		if(re == null)
+			return new ArrayList<String>();
+		
+		return re;
+	}
+
+	@Override
+	public void renameNode(String oldname, String newname) {
+		List<String> enteredge = new ArrayList<>();
+		List<String> exitedge = new ArrayList<>();
+		
+		for(Edge e : getGraph().getNode(oldname).getEachEnteringEdge()){
+			enteredge.add(e.getSourceNode().getId());
+		}
+		
+		for(Edge e : getGraph().getNode(oldname).getEachLeavingEdge()){
+			exitedge.add(e.getTargetNode().getId());
+		}
+		
+		removeNode(oldname);
+		addNode(newname);
+		
+		for(String s : enteredge){
+			addDirectedEdgeAndNodeIfNeeded(s, newname);
+		}
+		
+		for(String s : exitedge){
+			addDirectedEdgeAndNodeIfNeeded(newname, s);
+		}
+	}
+
+	@Override
+	public void conformizeWith(Graph g) throws IncompatibleTypesException {
+		if(g instanceof GraphStream){
+			GraphStream gs = (GraphStream)g;
+			
+			for(Node n : getGraph().getNodeSet()){
+				conformizeNodeWith(g, n.getId());
+			}
+			
+			for(EdgeIdentity ei : getEdges()){
+				conformizeEdgeWith(g, ei.getFrom(), ei.getTo());
+			}
+		}else{
+			throw new IncompatibleTypesException();
+		}
+	}
+
+	@Override
+	public void conformizeNodeWith(Graph g, String node) throws IncompatibleTypesException {
+		if(g instanceof GraphStream){
+			GraphStream gs = (GraphStream)g;
+			
+			Node n = getGraph().getNode(node);
+			Node mirror = gs.getGraph().getNode(node);
+			
+			for(String attrib : mirror.getAttributeKeySet()){
+				n.setAttribute(attrib, mirror.getAttribute(attrib));
+			}
+		}else{
+			throw new IncompatibleTypesException();
+		}
+	}
+
+	@Override
+	public void conformizeEdgeWith(Graph g, String from, String to) throws IncompatibleTypesException {
+		if(g instanceof GraphStream){
+			GraphStream gs = (GraphStream)g;
+			
+			String edgename = GraphStream.buildDirectedEdgeName(from, to);
+			Edge e = getGraph().getEdge(edgename);
+			Edge mirror = gs.getGraph().getEdge(edgename);
+			
+			for(String attrib : mirror.getAttributeKeySet()){
+				e.setAttribute(attrib, mirror.getAttribute(attrib));
+			}
+		}else{
+			throw new IncompatibleTypesException();
+		}
+		
+	}
+
 }

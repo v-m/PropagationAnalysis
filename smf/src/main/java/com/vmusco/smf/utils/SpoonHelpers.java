@@ -3,11 +3,16 @@ package com.vmusco.smf.utils;
 import java.io.File;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import spoon.compiler.SpoonCompiler;
+import spoon.reflect.declaration.CtAnonymousExecutable;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtTypeMember;
+import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.FactoryImpl;
 import spoon.reflect.visitor.DefaultJavaPrettyPrinter;
@@ -22,7 +27,8 @@ import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public final class SpoonHelpers {
-
+	private static final Logger logger = LogManager.getFormatterLogger(SpoonHelpers.class.getSimpleName());
+	
 	private SpoonHelpers() {
 	}
 
@@ -90,9 +96,37 @@ public final class SpoonHelpers {
 
 		if(castedElement instanceof CtConstructor)
 			return castedElement.getSignature();
-		else if(castedElement instanceof CtMethod)
+		else if(castedElement instanceof CtMethod){
 			return castedElement.getDeclaringType().getQualifiedName()+"."+castedElement.getSignature().substring(pos+1);
-		else
+		}else if(castedElement instanceof CtAnonymousExecutable){
+			String qualifiedName = castedElement.getParent(CtClass.class).getQualifiedName();
+			
+			if(castedElement.getModifiers().contains(ModifierKind.STATIC))
+				qualifiedName+=".{static}";
+			else
+				qualifiedName+=".{}";
+			
+			logger.info("The analyzed program contains Anonymous Executable blocks");
+			//TODO: Remove for propagation or think about propagation of Anonymous Executable blocs (statics or not)
+			return qualifiedName;
+		}else{
+			logger.warn("Missing type for resolution name: %s", castedElement.getClass().getSimpleName());
+			return null;
+		}
+	}
+	
+	public static String notFullyQualifiedName(CtTypeMember castedElement){
+
+		int pos = castedElement.getSignature().indexOf("(");
+		String st = castedElement.getSignature().substring(0, pos);
+
+		if(castedElement instanceof CtConstructor){
+			pos = st.lastIndexOf('.');
+			return castedElement.getSignature().substring(pos+1);
+		}else if(castedElement instanceof CtMethod){
+			pos = st.lastIndexOf(' ');
+			return castedElement.getSignature().substring(pos+1);
+		}else
 			return null;
 	}
 }

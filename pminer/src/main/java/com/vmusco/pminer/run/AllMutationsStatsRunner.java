@@ -16,9 +16,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
-import com.vmusco.pminer.impact.JavapdgPropagationExplorer;
+import com.vmusco.pminer.impact.GraphPropagationExplorerForTests;
+import com.vmusco.pminer.impact.JavapdgPropagationExplorerForTests;
 import com.vmusco.pminer.impact.ConsequencesExplorer;
-import com.vmusco.pminer.impact.SoftMinerPropagationExplorer;
+import com.vmusco.pminer.impact.GraphPropagationExplorer;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
@@ -102,40 +103,42 @@ public class AllMutationsStatsRunner{
 		for(String aFile : files){
 			File f = new File(aFile);
 			File fp = new File(f, smfrun);
-
+			ProcessStatistics ps = ProcessStatistics.loadState(fp.getAbsolutePath());
+			String[] tests = ps.getTestCases();
+			
 			Map<String, ConsequencesExplorer> explorers = null;
 
 			if(fp.exists()){
 				// This is a project
 				if(cmd.hasOption("javapdg")){
-					explorers = getExplorers(fp, graphs[0]);
+					explorers = getExplorers(fp, graphs[0], tests);
 				}else{
-					explorers = getExplorers(fp, graphs);
+					explorers = getExplorers(fp, graphs, tests);
 				}
 
-				processProject(f.getName(), fp, explorers, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives"), cmd.hasOption("exclude-nulls"), sep, mutationrun, projectrun, cmd.hasOption("average"), cmd.hasOption("exclude-unbounded"), avg, med);
+				processProject(f.getName(), ps, explorers, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives"), cmd.hasOption("exclude-nulls"), sep, mutationrun, projectrun, cmd.hasOption("average"), cmd.hasOption("exclude-unbounded"), avg, med);
 			}else{
 				for(File ff : f.listFiles()){
 					fp = new File(ff, smfrun);
 					if(ff.isDirectory() && fp.exists()){
 						// This is a project
 						if(cmd.hasOption("javapdg")){
-							explorers = getExplorers(fp, graphs[0]);
+							explorers = getExplorers(fp, graphs[0], tests);
 						}else{
-							explorers = getExplorers(fp, graphs);
+							explorers = getExplorers(fp, graphs, tests);
 						}
 
 						String name = f.getName()+"-"+ff.getName();
 						if(cmd.hasOption("short-names"))
 							name = ff.getName();
-						processProject(name, fp, explorers, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives"), cmd.hasOption("exclude-nulls"), sep, mutationrun, projectrun, cmd.hasOption("average"), cmd.hasOption("exclude-unbounded"), avg, med);
+						processProject(name, ps, explorers, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives"), cmd.hasOption("exclude-nulls"), sep, mutationrun, projectrun, cmd.hasOption("average"), cmd.hasOption("exclude-unbounded"), avg, med);
 					}
 				}
 			}
 		}
 	}
 
-	public static Map<String, ConsequencesExplorer> getExplorers(File f, String[] graphs) throws IOException{
+	public static Map<String, ConsequencesExplorer> getExplorers(File f, String[] graphs, String[] tests) throws IOException{
 		/*************
 		 * Load graphs
 		 */
@@ -146,7 +149,7 @@ public class AllMutationsStatsRunner{
 			if(!gf.exists()){
 				throw new FileNotFoundException("Unable to locate the graph file "+gf.getAbsolutePath());
 			}else{
-				explorers.put(gf.getName(), new SoftMinerPropagationExplorer(MutationStatsRunner.loadGraph(gf.getAbsolutePath())));
+				explorers.put(gf.getName(), new GraphPropagationExplorerForTests(MutationStatsRunner.loadGraph(gf.getAbsolutePath()), tests));
 			}
 		}
 
@@ -154,7 +157,7 @@ public class AllMutationsStatsRunner{
 	}
 
 
-	public static Map<String, ConsequencesExplorer> getExplorers(File projPath, String javapdgroot) throws FileNotFoundException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public static Map<String, ConsequencesExplorer> getExplorers(File projPath, String javapdgroot, String[] tests) throws FileNotFoundException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		/*************
 		 * Load graphs
 		 */
@@ -172,10 +175,13 @@ public class AllMutationsStatsRunner{
 		if(!gf.exists()){
 			throw new FileNotFoundException("Unable to locate the javapdg database "+gf.getAbsolutePath());
 		}else{
+			JavapdgPropagationExplorerForTests expl;
 			if(isarchive)
-				explorers.put("pdg_"+gf.getName(), new JavapdgPropagationExplorer(gf.getAbsolutePath(), projname));
+				expl = new JavapdgPropagationExplorerForTests(gf.getAbsolutePath(), projname, tests);
 			else
-				explorers.put("pdg_"+gf.getName(), new JavapdgPropagationExplorer(gf.getAbsolutePath()));
+				expl = new JavapdgPropagationExplorerForTests(gf.getAbsolutePath(), tests);
+			
+			explorers.put("pdg_"+gf.getName(), expl);
 		}
 
 		return explorers;
@@ -189,12 +195,11 @@ public class AllMutationsStatsRunner{
 		}
 	}
 
-	private static void processProject(String name, File f, Map<String, ConsequencesExplorer> explorers, int nbmut, boolean includeAlives, boolean excludeNulls, Character sep, String mutationrun, String projectrun, boolean average, boolean excludeUnbounded, boolean avg, boolean med) throws IOException, PersistenceException, MutationNotRunException {
+	private static void processProject(String name, ProcessStatistics ps, Map<String, ConsequencesExplorer> explorers, int nbmut, boolean includeAlives, boolean excludeNulls, Character sep, String mutationrun, String projectrun, boolean average, boolean excludeUnbounded, boolean avg, boolean med) throws IOException, PersistenceException, MutationNotRunException {
 
 		/****************
 		 * Load mutations
 		 */
-		ProcessStatistics ps = ProcessStatistics.loadState(f.getAbsolutePath());
 		File ops = new File(ps.resolveThis(ps.getMutantsOpsBaseDir(projectrun)));
 		List<MutationStatistics> mss = new ArrayList<MutationStatistics>();
 

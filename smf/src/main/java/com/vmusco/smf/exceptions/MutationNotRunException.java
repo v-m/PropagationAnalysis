@@ -7,4 +7,7 @@ package com.vmusco.smf.exceptions;
 public class MutationNotRunException extends Exception {
 	private static final long serialVersionUID = 1L;
 
+	public MutationNotRunException(String id) {
+		super(String.format("Mutation %s is not run !", id));
+	}
 }

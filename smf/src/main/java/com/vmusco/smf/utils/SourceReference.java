@@ -34,7 +34,7 @@ public class SourceReference {
 				sp.getEndLine() < 0 ||
 				sp.getSourceStart() < 0 ||
 				sp.getSourceEnd() < 0)
-			throw new MalformedSourcePositionException(); 
+			throw new MalformedSourcePositionException(sp); 
 				
 		setFile(sp.getFile().getAbsolutePath());
 		setColumnRange(sp.getColumn(), sp.getEndColumn());

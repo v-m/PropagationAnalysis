@@ -10,7 +10,6 @@ public class EdgeIdentity  {
 	private String to;
 	
 	public EdgeIdentity(String from, String to) {
-		super();
 		this.from = from;
 		this.to = to;
 	}

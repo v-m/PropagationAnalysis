@@ -28,7 +28,7 @@ public class HistogramRawData extends HistogramAnalyzer {
 	}
 
 	@Override
-	public void fireExecutionEnded() {
+	public void executionEnded() {
 		try {
 			this.fos.close();
 		} catch (IOException e) {

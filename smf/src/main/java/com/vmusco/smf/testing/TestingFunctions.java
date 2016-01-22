@@ -92,7 +92,7 @@ public abstract class TestingFunctions {
 					FileLock lock = fos.getChannel().tryLock();
 					if(lock != null){
 						ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
-						ifos.setExecutedTestsResults(Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath(mut), ps.getTestClasses(), tn));
+						ifos.setExecutedTestsResults(Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath(mut), ms.getTestClasses(), tn));
 
 						if(tn != null)	tn.mutantPersisting(mut);
 

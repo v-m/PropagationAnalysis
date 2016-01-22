@@ -31,9 +31,9 @@ public class GraphDisplayAnalyzerAndExporter extends GraphDisplayAnalyzer{
 	}
 
 	@Override
-	public void fireIntersectionFound(MutantIfos mi, String[] ais, String[] cis) {
+	public void intersectionFound(MutantIfos mi, String[] ais, String[] cis) {
 		super.makeUp(mi,ais, cis);
 		super.g.persistAsImage(this.persistTo);
-		super.fireIntersectionFound(mi, ais, cis);
+		super.intersectionFound(mi, ais, cis);
 	}
 }

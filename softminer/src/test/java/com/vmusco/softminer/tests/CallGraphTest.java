@@ -66,7 +66,7 @@ public class CallGraphTest extends CallGraphAbstractTest {
 	
 	@Override
 	public void testPaperCase() throws Exception {
-		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testPaperCase.C.class);
+		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), tweaksDisabler, com.vmusco.softminer.tests.cases.testPaperCase.C.class);
 		
 		String a = dgth.formatAtom("A()");
 		String b = dgth.formatAtom("B()");
@@ -118,4 +118,70 @@ public class CallGraphTest extends CallGraphAbstractTest {
 		dgth.getGraph().removeNode(b);
 		//dgth.getGraph().bestDisplay();
 	}
+
+	@Override
+	public void testSimpleInheritance() throws Exception {
+		// Same as FCG
+		CallGraphFTest t = new CallGraphFTest();
+		t.setGraphBuilderObtainer(localHelper());
+		t.testSimpleInheritance();
+	}
+	
+	@Override
+	public void testSimpleMethodCalls() throws Exception {
+		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), tweaksDisabler, com.vmusco.softminer.tests.cases.testSimpleMethodCalls.Foo.class);
+		
+		String foo2_bar = dgth.formatAtom("Foo2.bar()");
+		String foo2_bar2 = dgth.formatAtom("Foo2.bar2(java.lang.String)");
+		
+		String foo_bar1 = dgth.formatAtom("Foo.bar1()");
+		String foo_bar2 = dgth.formatAtom("Foo.bar2(java.lang.String)");
+		String foo_bar3 = dgth.formatAtom("Foo.bar3(int)");
+		String foo_bar4 = dgth.formatAtom("Foo.bar4(double)");
+		String foo_bar5 = dgth.formatAtom("Foo.bar5(float)");
+
+		//dgth.getGraph().bestDisplay();
+		
+		dgth.fullAssertGraph(7, 7);
+
+		dgth.fullAssertNode(
+				foo2_bar, 
+				new String[]{foo_bar5}, 
+				new String[]{});
+
+		dgth.fullAssertNode(
+				foo2_bar2, 
+				new String[]{foo_bar5}, 
+				new String[]{});
+		
+
+		dgth.fullAssertNode(
+				foo_bar1, 
+				new String[]{foo_bar5}, 
+				new String[]{foo_bar2});
+		
+
+		dgth.fullAssertNode(
+				foo_bar2, 
+				new String[]{foo_bar1}, 
+				new String[]{foo_bar3, foo_bar4});
+
+		dgth.fullAssertNode(
+				foo_bar3, 
+				new String[]{foo_bar2}, 
+				new String[]{foo_bar4});
+
+
+		dgth.fullAssertNode(
+				foo_bar4, 
+				new String[]{foo_bar2, foo_bar3}, 
+				new String[]{});
+
+
+		dgth.fullAssertNode(
+				foo_bar5, 
+				new String[]{}, 
+				new String[]{foo_bar1, foo2_bar, foo2_bar2});
+	}
+	
 }

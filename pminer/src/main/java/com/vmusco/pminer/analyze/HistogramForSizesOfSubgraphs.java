@@ -36,7 +36,7 @@ public class HistogramForSizesOfSubgraphs extends HistogramAnalyzer {
 	
 	@SuppressWarnings("serial")
 	@Override
-	public void fireExecutionEnded() {
+	public void executionEnded() {
 		XYSeries series = new XYSeries(project);
 
 		for(double k : histogramData.keySet()){

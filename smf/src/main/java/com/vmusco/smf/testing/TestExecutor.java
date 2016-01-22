@@ -92,7 +92,7 @@ public class TestExecutor {
 				
 				name = name.substring(0, pos);
 
-				if(skip.contains(name))
+				if(skip.contains(name+"()"))
 					return false;
 				
 				return true;
@@ -109,7 +109,6 @@ public class TestExecutor {
 		Request r2 = new FilterRequest(r1, f);
 
 		juc.addListener(new RunListener(){
-
 			private String testname(String description){
 				int pos = description.lastIndexOf('(');
 				String right = description.substring(0, pos);

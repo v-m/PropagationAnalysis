@@ -133,7 +133,7 @@ public class ProjectTools {
 
 				for(String mid : ms.listMutants()){
 					try{
-						ms.loadMutationStats(mid);
+						ms.loadMutationStats(mid, false);
 						treated += 1;
 
 						if(ms.isMutantAlive(mid)){

@@ -8,8 +8,9 @@ public class DefaultGraphNodeVisitor implements GraphNodeVisitor {
 
 	@Override
 	public void visitEdge(String from, String to) {
+		
 	}
-
+	
 	@Override
 	public String[] nextNodesToVisitFrom(String node) {
 		return null;
@@ -19,5 +20,4 @@ public class DefaultGraphNodeVisitor implements GraphNodeVisitor {
 	public boolean interruptVisit() {
 		return false;
 	}
-
 }

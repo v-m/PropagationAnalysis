@@ -1,6 +1,6 @@
 package com.vmusco.pminer.analyze;
 
-import com.vmusco.smf.utils.MutationsSetTools;
+import com.vmusco.smf.utils.SetTools;
 
 /**
  * This class implements the set described by Bohner.
@@ -13,9 +13,9 @@ public class CIAEstimationSets {
 	String[] commons;
 	
 	public CIAEstimationSets(String[] cis, String[] ais) {
-		commons = MutationsSetTools.setIntersection(cis, ais);
-		fpis = MutationsSetTools.setDifference(cis, ais);
-		dis = MutationsSetTools.setDifference(ais, cis);
+		commons = SetTools.setIntersection(cis, ais);
+		fpis = SetTools.setDifference(cis, ais);
+		dis = SetTools.setDifference(ais, cis);
 	}
 	
 	/**

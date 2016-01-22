@@ -59,15 +59,15 @@ public class GraphGenerator {
 		options.addOption(new Option("h", "help", false, "print this message"));
 		options.addOption(new Option("d", "overwrite", false, "Delete the file if it already exists."));
 		options.addOption(new Option("F", "out-format", true, "set the output format. Set help or h as a type to get the list of types"));
-		options.addOption(new Option("c", "cp", true, "add entries in classpath. Can be separated by "+File.pathSeparator));
+		options.addOption(new Option("C", "cp", true, "add entries in classpath. Can be separated by "+File.pathSeparator));
 		options.addOption(new Option("r", "remove-isolated", false, "remove isolated nodes from the final graph"));
 		options.addOption(new Option("x", "noclasspath", false, "do not resolve the class path for building the graph"));
 		
 		
-		options.addOption(new Option("t", "type", true, "select a specific type of call graph (override -r, -f and -c). Set help or h as a type to get the list of types."));
+		options.addOption(new Option("t", "type", true, "select a specific type of call graph (override -f and -c). Set help or h as a type to get the list of types."));
 		options.addOption(new Option("c", "cha", false, "resolve interfaces and classes"));
 		options.addOption(new Option("f", "fields", false, "resolve fields accesses"));
-		options.addOption(new Option("r", "no-overridden-calls", false, "resolve calls to overriden methods"));
+		options.addOption(new Option("o", "no-overridden-calls", false, "resolve calls to overriden methods"));
 
 		g.updateComandLineOptions(options);
 		

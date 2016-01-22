@@ -11,6 +11,8 @@ import java.util.StringTokenizer;
 /**
  * This importer class is directly taken from the author website (http://www.feu.de/ps/prjs/EzUnit/eval/ISSTA13/programs/javareader.java)
  * and adapted to translate informations to smf data structures. 
+ * http://haslab.uminho.pt/sites/default/files/ruimaranhao/files/issta13.pdf
+ * http://www.feu.de/ps/prjs/EzUnit/eval/ISSTA13/
  */
 public class SteimannDatasetMatrixReader {
 	// classes

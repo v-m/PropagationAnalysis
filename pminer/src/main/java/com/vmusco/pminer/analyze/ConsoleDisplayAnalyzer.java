@@ -8,7 +8,7 @@ import com.vmusco.smf.analysis.MutantIfos;
  */
 public class ConsoleDisplayAnalyzer extends MutantTestAnalyzer {
 	@Override
-	public void fireIntersectionFound(MutantIfos mi, String[] ais, String[] cis) {
+	public void intersectionFound(MutantIfos mi, String[] ais, String[] cis) {
 		CIAEstimationSets sets = new CIAEstimationSets(cis, ais);
 
 		for(String aTest : sets.getFoundImpactedSet()){
@@ -25,12 +25,12 @@ public class ConsoleDisplayAnalyzer extends MutantTestAnalyzer {
 	}
 
 	@Override
-	public void fireUnboundedFound(MutantIfos mi) {
+	public void unboundedFound(MutantIfos mi) {
 		
 	}
 
 	@Override
-	public void fireIsolatedFound(MutantIfos mi) {
+	public void isolatedFound(MutantIfos mi) {
 		
 	}
 

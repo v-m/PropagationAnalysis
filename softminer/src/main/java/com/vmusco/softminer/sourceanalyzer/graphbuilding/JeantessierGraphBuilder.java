@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import spoon.compiler.SpoonCompiler;
+import spoon.processing.Processor;
 
 import com.jeantessier.classreader.ClassfileLoader;
 import com.jeantessier.classreader.LoadListenerVisitorAdapter;
@@ -31,12 +32,13 @@ public class JeantessierGraphBuilder extends GraphBuildLogic {
 
 	@Override
 	public Graph build(SpoonCompiler compiler) {
-		List<String> arg0 = new ArrayList<String>();
+		List<Processor<?>> arg0 = new ArrayList<>();
 		File f = new File("/tmp/spoon");
 		f.mkdir();
 		
 		try {
-			compiler.setDestinationDirectory(f);
+			//compiler.setDestinationDirectory(f);
+			compiler.setBinaryOutputDirectory(f);
 			compiler.process(arg0);
 			compiler.compileInputSources();
 			generateGraph(f);

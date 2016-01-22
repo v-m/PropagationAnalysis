@@ -55,4 +55,17 @@ public final class GraphTools {
 		
 		return ret;
 	}
+	
+	public static void fastInsertion(Graph g, String line){
+		for(String instr : line.split(";")){
+			String prev = null;
+			
+			for(String link : instr.split("->")){
+				if(prev != null){
+					g.addDirectedEdgeAndNodeIfNeeded(prev, link);
+				}
+				prev = link;
+			}
+		}
+	}
 }

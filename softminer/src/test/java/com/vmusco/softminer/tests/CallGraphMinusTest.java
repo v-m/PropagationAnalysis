@@ -1,5 +1,6 @@
 package com.vmusco.softminer.tests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -17,21 +18,25 @@ public class CallGraphMinusTest extends CallGraphAbstractTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testVariableUsage() throws Exception{
 
 	}
 
 	@Test
+	@Ignore
 	public void testInterfaceAndLinking() throws Exception{
 
 	}
 
 	@Test
+	@Ignore
 	public void testAbstractAndInheritanceClasses() throws Exception {
 
 	}
 
 	@Test
+	@Ignore
 	public void testInterfaceAndInheritance() throws Exception {
 
 	}
@@ -45,7 +50,7 @@ public class CallGraphMinusTest extends CallGraphAbstractTest {
 
 	@Override
 	public void testSimpleInheritanceConnectedToImplementation() throws Exception {
-		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testSimpleInheritanceConnectedToImplementation.Impl.class);
+		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), tweaksDisabler, com.vmusco.softminer.tests.cases.testSimpleInheritanceConnectedToImplementation.Impl.class);
 		
 		String abs = dgth.formatAtom("Abs()");
 		String impl = dgth.formatAtom("Impl()");
@@ -72,7 +77,7 @@ public class CallGraphMinusTest extends CallGraphAbstractTest {
 	
 	@Override
 	public void testPaperCase() throws Exception {
-		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), com.vmusco.softminer.tests.cases.testPaperCase.B.class);
+		DepGraphTestHelper dgth = new DepGraphTestHelper(getGraphBuilderObtainer(), tweaksDisabler, com.vmusco.softminer.tests.cases.testPaperCase.B.class);
 		
 		String a = dgth.formatAtom("A()");
 		String b = dgth.formatAtom("B()");
@@ -102,5 +107,19 @@ public class CallGraphMinusTest extends CallGraphAbstractTest {
 				c_biz2, 
 				new String[]{}, 
 				new String[]{b, a_foo});
+	}
+
+	@Override
+	@Ignore
+	public void testSimpleInheritance() throws Exception {
+		
+	}
+	
+	@Override
+	public void testSimpleMethodCalls() throws Exception {
+		// Same as CG
+		CallGraphTest t = new CallGraphTest();
+		t.setGraphBuilderObtainer(localHelper());
+		t.testSimpleMethodCalls();
 	}
 }

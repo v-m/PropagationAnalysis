@@ -166,11 +166,7 @@ public class GraphBuilder {
 	 * @param inputSources
 	 */
 	protected GraphBuilder(String projectName, String[] inputSources) {
-		this.projectName = projectName;
-		this.cp = null;
-		this.inputSources = inputSources;
-		
-		ProcessorCommunicator.reset();
+		this(projectName, inputSources, null);
 	}
 	
 	protected GraphBuilder(String projectName, String[] inputSources, String[] cp) {

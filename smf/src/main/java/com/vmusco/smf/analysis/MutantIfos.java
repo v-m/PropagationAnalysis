@@ -9,6 +9,7 @@ import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
 import com.vmusco.smf.exceptions.MalformedSourcePositionException;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
+import com.vmusco.smf.utils.SetTools;
 import com.vmusco.smf.utils.SourceReference;
 
 /**
@@ -42,6 +43,38 @@ public class MutantIfos{
 	 */
 	private File generationDirectory;
 	
+	/*
+	 * Informations under identifies the mutant
+	 */
+	
+	/**
+	 * The hash of the source generated.
+	 * Obtained via {@link Mutation#getHashForMutationSource(java.io.File)}
+	 */
+	private String hash = null;
+	private SourceReference sourceRef = null;
+	private TestsExecutionIfos execution = null;
+
+	
+	public MutantIfos() {
+	}
+	
+	/**
+	 * Copy constructor -- no deep copying !
+	 * @param mi
+	 */
+	public MutantIfos(MutantIfos mi) {
+		id = mi.id;
+		execution = new TestsExecutionIfos(mi.execution);
+		mutationFrom = mi.mutationFrom;
+		mutationIn = mi.mutationIn;
+		mutationTo = mi.mutationTo;
+		sourceRef = mi.sourceRef;
+		hash = mi.hash;
+		generationDirectory = mi.generationDirectory;
+		viable = mi.viable;
+	}
+	
 	/**
 	 * This file describes where generated files are located. This information is NOT persisted in the XML file,
 	 * thus it should not be accurate (only used for generation phase).
@@ -57,17 +90,6 @@ public class MutantIfos{
 	public void setGenerationDirectory(File generationDirectory) {
 		this.generationDirectory = generationDirectory;
 	}
-	
-	/*
-	 * Informations under identifies the mutant
-	 */
-	/**
-	 * The hash of the source generated.
-	 * Obtained via {@link Mutation#getHashForMutationSource(java.io.File)}
-	 */
-	private String hash = null;
-	private SourceReference sourceRef = null;
-	private TestsExecutionIfos execution = null;
 	
 	public void setSourceReference(SourcePosition sp) throws MalformedSourcePositionException {
 		this.sourceRef = new SourceReference(sp);
@@ -126,7 +148,7 @@ public class MutantIfos{
 	}
 	
 	public TestsExecutionIfos getExecutedTestsResults() throws MutationNotRunException {
-		if(execution == null) throw new MutationNotRunException();
+		if(execution == null) throw new MutationNotRunException(id);
 		return execution;
 	}
 	
@@ -137,8 +159,8 @@ public class MutantIfos{
 		return this.execution != null;
 	}
 	
-	public void loadExecution(MutationStatistics ms) throws MutationNotRunException, PersistenceException{
-		ms.loadMutationStats(id);
+	public void loadExecution(MutationStatistics ms, boolean deepLoading) throws MutationNotRunException, PersistenceException{
+		ms.loadMutationStats(id, deepLoading);
 	}
 
 	public void setId(String mutationId) {
@@ -147,5 +169,12 @@ public class MutantIfos{
 	
 	public String getId() {
 		return id;
+	}
+
+	public void unloadExecution(boolean deepOnly) {
+		if(deepOnly)
+			execution.setCalledNodeInformation(null);
+		else
+			execution = null;
 	}
 }

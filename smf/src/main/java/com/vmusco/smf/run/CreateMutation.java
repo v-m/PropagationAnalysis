@@ -94,7 +94,7 @@ public class CreateMutation implements MutationCreationListener{
 		if(cmd.getArgs()[1].contains("\\.")){
 			moc = MutatorsFactory.getOperatorClassFromFullName(cmd.getArgs()[1]);
 		}else{
-			moc = MutatorsFactory.getOperatorClassFromId(cmd.getArgs()[1]);
+			moc = (SmfMutationOperator<?>)MutatorsFactory.getOperatorClassFromId(cmd.getArgs()[1]);
 		}
 
 		if(moc == null){

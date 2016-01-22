@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 import org.jdom2.Attribute;
 import org.jdom2.Element;
@@ -30,12 +31,18 @@ public class MutantInfoXMLPersisitence extends XMLPersistenceManager<MutantIfos>
 	
 	private File f;
 	private FileOutputStream fos;
+	private boolean deepLoading;
 	
 	//private String mutantId;
 
 	public MutantInfoXMLPersisitence(MutantIfos obj, File persist_file) {
+		this(obj, persist_file, false);
+	}
+	
+	public MutantInfoXMLPersisitence(MutantIfos obj, File persist_file, boolean deepLoading) {
 		super(obj);
 		this.f = persist_file;
+		this.deepLoading = deepLoading;
 	}
 
 	public void setFileLock(FileOutputStream locked_fos){
@@ -57,7 +64,7 @@ public class MutantInfoXMLPersisitence extends XMLPersistenceManager<MutantIfos>
 
 	@Override
 	public void load(Element root) {
-		getLinkedObject().setExecutedTestsResults(TestInformationPersistence.readFrom(root));
+		getLinkedObject().setExecutedTestsResults(TestInformationPersistence.readFrom(root, deepLoading));
 	}
 
 	@Override
@@ -73,7 +80,13 @@ public class MutantInfoXMLPersisitence extends XMLPersistenceManager<MutantIfos>
 		
 		Element mutations = new Element(ROOT);
 		mutations.setAttribute(new Attribute(ID, mi.getId()));
-		TestInformationPersistence.insertInto(mutations, mei);
+		
+		HashMap<String, Integer> compressor = new HashMap<>();
+		
+		TestInformationPersistence.insertInto(mutations, mei, compressor);
+
+		Element compressionDict = XMLPersistence.generateCompressionEntry(compressor);
+		mutations.addContent(0, compressionDict);
 		
 		return mutations;
 	}

@@ -1,7 +1,10 @@
 package com.vmusco.smf.analysis.persistence;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.jdom2.Attribute;
 import org.jdom2.Element;
@@ -34,21 +37,36 @@ public final class TestInformationPersistence {
 		// No instance can be created... Tool class only
 	}
 	
+	public static int keyForCompression(String id, HashMap<String, Integer> compressor){
+		Integer ret = compressor.get(id);
+		
+		if(ret == null){
+			ret = compressor.size();
+			compressor.put(id, ret);
+		}
+		
+		return ret;
+	}
+	
 	public static void insertInto(Element root, TestsExecutionIfos tei){
+		insertInto(root, tei, null);
+	}
+	
+	public static void insertInto(Element root, TestsExecutionIfos tei, HashMap<String, Integer> compressor){
 		root.setAttribute(new Attribute(ProjectXmlPersistenceManager.TIME_ATTRIBUTE, Long.toString(tei.getRunTestsTime())));
 
 		Element e = new Element(FAILING_TC_3);
 		root.addContent(e);
-		ProjectXmlPersistenceManager.populateXml(e, ONE_TS_4, tei.getRawErrorOnTestSuite());
-		ProjectXmlPersistenceManager.populateXml(e, ONE_TC_4, tei.getRawFailingTestCases());
+		ProjectXmlPersistenceManager.populateXml(e, ONE_TS_4, tei.getRawErrorOnTestSuite(), compressor);
+		ProjectXmlPersistenceManager.populateXml(e, ONE_TC_4, tei.getRawFailingTestCases(), compressor);
 
 		e = new Element(IGNORED_TC_3);
 		root.addContent(e);
-		ProjectXmlPersistenceManager.populateXml(e, ONE_TC_4, tei.getRawIgnoredTestCases());
+		ProjectXmlPersistenceManager.populateXml(e, ONE_TC_4, tei.getRawIgnoredTestCases(), compressor);
 
 		e = new Element(HANGING_TC_3);
 		root.addContent(e);
-		ProjectXmlPersistenceManager.populateXml(e, ONE_TC_4, tei.getRawHangingTestCases());
+		ProjectXmlPersistenceManager.populateXml(e, ONE_TC_4, tei.getRawHangingTestCases(), compressor);
 		
 		
 		try {
@@ -57,8 +75,12 @@ public final class TestInformationPersistence {
 			for(String t : tei.getTestsWithCalledInformations()){
 				String[] calledNodes = tei.getCalledNodes(t);
 				e = new Element(A_TEST);
-				e.setAttribute(A_TEST_NAME, t);
-				ProjectXmlPersistenceManager.populateXml(e, A_CALLED_NODE, calledNodes);
+				if(compressor == null)
+					e.setAttribute(A_TEST_NAME, t);
+				else
+					e.setAttribute(A_TEST_NAME, Integer.toString(keyForCompression(t, compressor)));
+				
+				ProjectXmlPersistenceManager.populateXml(e, A_CALLED_NODE, calledNodes, compressor);
 				
 				calls.addContent(e);
 			}
@@ -87,11 +109,24 @@ public final class TestInformationPersistence {
 		}*/
 	}
 	
-	public static TestsExecutionIfos readFrom(Element root){
+	/**
+	 * Read content and fill a new TestsExecutionIfos according to the XML file.
+	 * @param root
+	 * @param deepLoading load heavy intensive informations (eg. called nodes, stacktraces, etc.) or not
+	 * @return
+	 */
+	public static TestsExecutionIfos readFrom(Element root, boolean deepLoading){
 		TestsExecutionIfos tei = new TestsExecutionIfos();
 
 		tei.setRunTestsTime(Long.valueOf(root.getAttributeValue(ProjectXmlPersistenceManager.TIME_ATTRIBUTE)));
 
+		Map<Integer, String> decompressor = null;
+		// Check if compression is used...
+		if(XMLPersistence.isDocumentUsingCompression(root)){
+			//System.out.println("Compression is used for file...");
+			decompressor = XMLPersistence.readDecompressionEntries(root);
+		}
+		
 		Element tmp;
 
 		if((tmp = root.getChild(FAILING_TC_3)) != null){
@@ -99,14 +134,22 @@ public final class TestInformationPersistence {
 
 			List<String> al = new ArrayList<String>();
 			for(Element e: tmplist){
-				al.add(e.getText());
+				if(decompressor != null){
+					al.add(decompressor.get(Integer.parseInt(e.getText())));
+				}else{
+					al.add(e.getText());
+				}
 			}
 			tei.setFailingTestCases(al.toArray(new String[0]));
 
 			tmplist = tmp.getChildren(ONE_TS_4);
 			al = new ArrayList<String>();
 			for(Element e: tmplist){
-				al.add(e.getText());
+				if(decompressor != null){
+					al.add(decompressor.get(Integer.parseInt(e.getText())));
+				}else{
+					al.add(e.getText());
+				}
 			}
 			tei.setErrorOnTestSuite(al.toArray(new String[0]));
 		}
@@ -116,7 +159,11 @@ public final class TestInformationPersistence {
 
 			List<String> al = new ArrayList<String>();
 			for(Element e: tmplist){
-				al.add(e.getText());
+				if(decompressor != null){
+					al.add(decompressor.get(Integer.parseInt(e.getText())));
+				}else{
+					al.add(e.getText());
+				}
 			}
 			tei.setIgnoredTestCases(al.toArray(new String[0]));
 		}
@@ -126,25 +173,23 @@ public final class TestInformationPersistence {
 
 			List<String> al = new ArrayList<String>();
 			for(Element e: tmplist){
-				al.add(e.getText());
+				if(decompressor != null){
+					al.add(decompressor.get(Integer.parseInt(e.getText())));
+				}else{
+					al.add(e.getText());
+				}
 			}
 			tei.setHangingTestCases(al.toArray(new String[0]));
 		}
 		
-		if((tmp = root.getChild(CALLS)) != null){
-			List<Element> tmplist = tmp.getChildren(A_TEST);
-			
-			for(Element child: tmplist){
-				String name = child.getAttributeValue(A_TEST_NAME);
-				List<String> al = new ArrayList<String>();
-				
-				for(Element e : child.getChildren(A_CALLED_NODE)){
-					al.add(e.getText());
-				}
-				
-				tei.addCalledNodeInformation(name, al.toArray(new String[al.size()]));
-			}
-		}
+		if(deepLoading)
+			deepRead(root, tei);
+		
+		return tei;
+	}
+	
+	public static void deepRead(Element root, TestsExecutionIfos tei){
+		tei.setCalledNodeInformation(readCalledNodes(root));
 		
 		/*if((tmp = root.getChild(STS)) != null){
 			List<String[]> st = new ArrayList<String[]>();
@@ -163,9 +208,40 @@ public final class TestInformationPersistence {
 			
 			tei.setStacktraces(st.toArray(new String[0][0]));
 		}*/
+	}
+	
+	public static Map<String, String[]> readCalledNodes(Element root){
+		Element tmp;
+		Map<String, String[]> ret = new HashMap<String, String[]>(); 
 		
+		Map<Integer, String> decompressor = null;
+		// Check if compression is used...
+		if(XMLPersistence.isDocumentUsingCompression(root)){
+			//System.out.println("Compression is used for file...");
+			decompressor = XMLPersistence.readDecompressionEntries(root);
+		}
 		
+		if((tmp = root.getChild(CALLS)) != null){
+			List<Element> tmplist = tmp.getChildren(A_TEST);
+			
+			for(Element child: tmplist){
+				String name = child.getAttributeValue(A_TEST_NAME);
+				if(decompressor != null)
+					name = decompressor.get(Integer.parseInt(name));
+				List<String> al = new ArrayList<String>();
+				
+				for(Element e : child.getChildren(A_CALLED_NODE)){
+					if(decompressor != null){
+						al.add(decompressor.get(Integer.parseInt(e.getText())));
+					}else{
+						al.add(e.getText());
+					}
+				}
+				
+				ret.put(name, al.toArray(new String[al.size()]));
+			}
+		}
 		
-		return tei;
+		return ret;
 	}
 }

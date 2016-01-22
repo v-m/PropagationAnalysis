@@ -9,6 +9,7 @@ import com.vmusco.smf.utils.SourceReference;
 import com.vmusco.softminer.graphs.EdgeMarkers;
 import com.vmusco.softminer.graphs.EdgeTypes;
 import com.vmusco.softminer.graphs.Graph;
+import com.vmusco.softminer.graphs.GraphStream;
 import com.vmusco.softminer.graphs.NodeMarkers;
 import com.vmusco.softminer.graphs.NodeTypes;
 import com.vmusco.softminer.sourceanalyzer.processors.GraphItemRenamer;
@@ -50,6 +51,10 @@ public abstract class ProcessorCommunicator {
 	public static boolean resolveInterfacesAndClasses = false;
 	public static boolean includesFields = false;
 	public static boolean removeOverridenMethods = false;
+	/**
+	 * Removes calls edges which return void and/or the return result is not used (is in a block)
+	 */
+	public static boolean dropUselessCalls = true;
 	
 	// Include all nodes (even isolated ones)
 	public static boolean includeAllNodes = true;
@@ -64,6 +69,7 @@ public abstract class ProcessorCommunicator {
 		granularityGraph = DependenciesType.FEATURES;
 		nodesRenamer = null;
 		resolveInterfacesAndClasses = false;
+		dropUselessCalls = true;
 	}
 	
 	public enum PatternBehavior{
@@ -96,7 +102,7 @@ public abstract class ProcessorCommunicator {
 		return patternpass;
 	}
 	
-	public static boolean addNode(String src, NodeTypes src_type, SourcePosition originator) throws MalformedSourcePositionException{
+	public static String addNode(String src, NodeTypes src_type, SourcePosition originator) throws MalformedSourcePositionException{
 		if(outputgraph != null){
 			String finalsrc = src;
 			
@@ -115,14 +121,31 @@ public abstract class ProcessorCommunicator {
 				sp.setFile(formatSourceCodeFilePath(originator.getFile().getAbsolutePath()));
 				outputgraph.bindNodeToSourcePosition(finalsrc, sp);
 			}
-			return true;
+			return finalsrc;
 		}
 		
-		return false;
+		return null;
+	}
+	
+	public static String addNode(String src, NodeTypes src_type){
+		try {
+			return addNode(src, src_type, null);
+		} catch (MalformedSourcePositionException e) {
+			// Shoud never occurs as originator = null
+			return null;
+		}
+	}
+	
+	public static String addNodeAndIgoreOriginatorErrors(String src, NodeTypes src_type, SourcePosition originator){
+		try{
+			return addNode(src, src_type, originator);
+		}catch(MalformedSourcePositionException e){
+			return addNode(src, src_type);
+		}
 	}
 	
 	public static boolean addEdgeIfAllowed(String src, String dst, NodeTypes src_type, NodeTypes dst_type, EdgeTypes edgeType, SourcePosition originator) throws MalformedSourcePositionException{
-		if(allowedByPattern(src, dst)){
+		if(!src.equals(dst) && allowedByPattern(src, dst)){
 			if(outputgraph != null){
 				String finalsrc = src;
 				String finaldst = dst;
@@ -132,7 +155,7 @@ public abstract class ProcessorCommunicator {
 					finaldst = nodesRenamer.renamed(dst);
 				}
 				
-				outputgraph.addDirectedEdgeAndNodeIfNeeded(finalsrc, finaldst, true, false);
+				((GraphStream)outputgraph).addDirectedEdgeAndNodeIfNeeded(finalsrc, finaldst, true, false);
 				outputgraph.setNodeType(finalsrc, src_type);
 				outputgraph.setNodeType(finaldst, dst_type);
 				outputgraph.setEdgeType(finalsrc, finaldst, edgeType);
@@ -147,6 +170,23 @@ public abstract class ProcessorCommunicator {
 		}
 		
 		return false;
+	}
+	
+	public static boolean addEdgeIfAllowed(String src, String dst, NodeTypes src_type, NodeTypes dst_type, EdgeTypes edgeType){
+		try {
+			return addEdgeIfAllowed(src, dst, src_type, dst_type, edgeType, null);
+		} catch (MalformedSourcePositionException e) {
+			// Never occuring as we pass null as originator !
+			return false;
+		}
+	}
+	
+	public static boolean addEdgeIfAllowedAndIgnoreOriginatorExceptions(String src, String dst, NodeTypes src_type, NodeTypes dst_type, EdgeTypes edgeType, SourcePosition originator){
+		try {
+			return addEdgeIfAllowed(src, dst, src_type, dst_type, edgeType, originator);
+		} catch (MalformedSourcePositionException e) {
+			return addEdgeIfAllowed(src, dst, src_type, dst_type, edgeType);
+		}
 	}
 	
 	public static boolean markEdge(String src, String dst, EdgeMarkers aMarker){

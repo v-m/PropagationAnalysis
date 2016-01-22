@@ -7,7 +7,12 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
@@ -23,7 +28,7 @@ import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.utils.InterruptionManager;
-import com.vmusco.smf.utils.MutationsSetTools;
+import com.vmusco.smf.utils.SetTools;
 import com.vmusco.smf.utils.SourceReference;
 
 /**
@@ -34,6 +39,8 @@ import com.vmusco.smf.utils.SourceReference;
  * @see SmfMutationOperator
  */
 public class MutationStatistics implements Serializable {
+	private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager.getFormatterLogger(MutationStatistics.class.getSimpleName());
+	
 	private static final long serialVersionUID = 1L;
 
 	public static final String DEFAULT_ID_NAME = "main";
@@ -53,25 +60,13 @@ public class MutationStatistics implements Serializable {
 
 	/**
 	 * This method loads the last saved instance of the object
-	 * The content of the test execution is NOT loaded. To load them, use {@link MutationStatistics#loadState(String, boolean)} instead or invoke
-	 * {@link MutationStatistics#listViableAndRunnedMutants(boolean) with true argument.} to load them later.
+	 * The content of the test execution is NOT loaded. To load them, invoke {@link MutationStatistics#listViableAndRunnedMutants(boolean) with true argument.} to load them later.
 	 * Return null if an error has occured
 	 * @param persistFile the file to load
-	 * @param loadTestExecutionsResults true if the test executions results should be loaded (when existing)
 	 * @throws PersistenceException 
 	 */
 	public static MutationStatistics loadState(String persistFile) throws PersistenceException {
-		return loadState(persistFile, false);
-	}
-
-	/**
-	 * This method loads the last saved instance of the object
-	 * Take care: the content of the execution is NOT loaded !
-	 * @param persistFile the file to load
-	 * @param loadTestExecutionsResults true if the test executions results should be loaded (when existing)
-	 * @throws PersistenceException 
-	 */
-	public static MutationStatistics loadState(String persistFile, boolean loadTestExecutionsResults) throws PersistenceException {
+		logger.trace("Loading ms state %s", persistFile);
 		File finalf = new File(persistFile);
 		if(finalf.isDirectory()){
 			finalf = new File(finalf, MutationStatistics.DEFAULT_CONFIGFILE);
@@ -81,8 +76,6 @@ public class MutationStatistics implements Serializable {
 		XMLPersistence.load(mgr);
 		
 		return mgr.getLinkedObject();
-		/*FileExecutionPersistence<MutationStatistics> persist = new MutationXMLPersisitence(finalf);
-		return persist.loadState();*/
 	}
 
 	/**
@@ -110,10 +103,10 @@ public class MutationStatistics implements Serializable {
 	}
 
 	/**
-	 * Similar as {@link MutationStatistics#listViableAndRunnedMutants(boolean, boolean)} without force reload.
+	 * Similar as {@link MutationStatistics#listViableAndRunnedMutants(boolean, boolean)} without force reload and without deep loading
 	 */
 	public String[] listViableAndRunnedMutants(boolean load) throws PersistenceException{
-		return listViableAndRunnedMutants(load, false);
+		return listViableAndRunnedMutants(load, false, false);
 	}
 
 	/**
@@ -123,7 +116,7 @@ public class MutationStatistics implements Serializable {
 	 * @return
 	 * @throws PersistenceException 
 	 */
-	public String[] listViableAndRunnedMutants(boolean load, boolean forceReload) throws PersistenceException{
+	public String[] listViableAndRunnedMutants(boolean load, boolean forceReload, boolean deepLoading) throws PersistenceException{
 		ArrayList<String> re = new ArrayList<String>();
 
 		for(String s : listViableMutants()){
@@ -142,7 +135,7 @@ public class MutationStatistics implements Serializable {
 				}
 				if(mustBeLoaded){
 					try {
-						loadMutationStats(s);
+						loadMutationStats(s, deepLoading);
 						re.add(s);
 					} catch (MutationNotRunException e) { }
 				}
@@ -277,13 +270,14 @@ public class MutationStatistics implements Serializable {
 	 * @throws PersistenceException 
 	 * @throws MutationNotRunException 
 	 */
-	public MutantIfos loadMutationStats(String mutationId) throws PersistenceException, MutationNotRunException {
+	public MutantIfos loadMutationStats(String mutationId, boolean deepLoading) throws PersistenceException, MutationNotRunException {
+		logger.trace("Loading mutation state %s", mutationId);
 		if(!mutations.get(mutationId).isExecutionKnown()){
 			if(!isMutantExecutionPersisted(mutationId))
-				throw new MutationNotRunException();
+				throw new MutationNotRunException(mutationId);
 
 			
-			MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(getMutationStats(mutationId), getMutantExecutionFile(mutationId));
+			MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(getMutationStats(mutationId), getMutantExecutionFile(mutationId), deepLoading);
 			XMLPersistence.load(pers);
 		}
 		return mutations.get(mutationId);
@@ -384,10 +378,10 @@ public class MutationStatistics implements Serializable {
 	}
 
 	public boolean isMutantAlive(String mutid) throws MutationNotRunException, PersistenceException {
-		MutantIfos mutationStats = loadMutationStats(mutid);
+		MutantIfos mutationStats = loadMutationStats(mutid, false);
 
-		return MutationsSetTools.areSetsSimilars(ps.getFailingTestCases(), mutationStats.getExecutedTestsResults().getRawFailingTestCases()) &&
-				MutationsSetTools.areSetsSimilars(ps.getHangingTestCases(), mutationStats.getExecutedTestsResults().getRawHangingTestCases());
+		return SetTools.areSetsSimilars(ps.getFailingTestCases(), mutationStats.getExecutedTestsResults().getRawFailingTestCases()) &&
+				SetTools.areSetsSimilars(ps.getHangingTestCases(), mutationStats.getExecutedTestsResults().getRawHangingTestCases());
 	}
 
 	public boolean isMutantKilled(String mutid) throws MutationNotRunException, PersistenceException {
@@ -454,4 +448,100 @@ public class MutationStatistics implements Serializable {
 	public MutationOperator getMutationOperator() {
 		return this.mutop;
 	}
+	
+	/******
+	 * PS method bridges
+	 */
+	
+	/**
+	 * Invoke {@link ProcessStatistics#getCoherentMutantFailAndHangTestCases(TestsExecutionIfos)}.
+	 */
+	public String[] getCoherentMutantFailAndHangTestCases(TestsExecutionIfos tei) throws MutationNotRunException {
+		return getRelatedProcessStatisticsObject().getCoherentMutantFailAndHangTestCases(tei);
+	}
+
+	/**
+	 * Invoke {@link ProcessStatistics#getTestCases()}.
+	 */
+	public String[] getTestCases() {
+		return getRelatedProcessStatisticsObject().getTestCases();
+	}
+	
+	/**
+	 * Invoke {@link ProcessStatistics#getTestClasses()}.
+	 */
+	public String[] getTestClasses() {
+		return getRelatedProcessStatisticsObject().getTestClasses();
+	}
+
+	/**
+	 * Invoke {@link ProcessStatistics#getTestExecutionResult()}.
+	 */
+	public TestsExecutionIfos getTestExecutionResult(){
+		return getRelatedProcessStatisticsObject().getTestExecutionResult();
+	}
+	
+	/**
+	 * This iterator is aware of memory consumption !
+	 * @return
+	 */
+	public Iterator<MutantIfos> iterator(){
+		final List<String> list;
+		
+		try {
+			list = Arrays.asList(listViableAndRunnedMutants(false));
+		} catch (PersistenceException e) {
+			// Not thrown as parameter is false (no loading)
+			e.printStackTrace();
+			return null;
+		}
+		
+		return new Iterator<MutantIfos>() {
+			int pos = 0;
+			
+			@Override
+			public boolean hasNext() {
+				return pos < list.size();
+			}
+
+			@Override
+			public MutantIfos next() {
+				if(!hasNext())
+					return null;
+				
+				String m = list.get(pos++);
+				
+				MutantIfos mi_notgc = getMutationStats(m);
+				try {
+					mi_notgc.loadExecution(MutationStatistics.this, true);
+				} catch (Exception e) {
+					return null;
+				}
+				MutantIfos mi = new MutantIfos(mi_notgc); 
+				mi_notgc.unloadExecution(false);
+				
+				return mi;
+			}
+		};
+	}
+
+	/**
+	 * This method can be used as a trick to reduce memory consumption by garbage collecting executions once the returned object is lost.
+	 * The returned MutantIfos is a fully loaded object as the internal one is still a light one
+	 * @param m
+	 * @return
+	 * @throws MutationNotRunException
+	 * @throws PersistenceException
+	 */
+	public MutantIfos getExternalDeepLoaded(String m) throws MutationNotRunException, PersistenceException {
+		
+		MutantIfos mi_notgc = getMutationStats(m);
+		mi_notgc.unloadExecution(false);
+		mi_notgc.loadExecution(this, true);
+		MutantIfos mi = new MutantIfos(mi_notgc);
+		mi_notgc.unloadExecution(true);
+		
+		return mi;
+	}
+	
 }

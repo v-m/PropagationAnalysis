@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.vmusco.softminer.graphs.GraphStream;
 import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 
 import spoon.processing.AbstractProcessor;
@@ -62,7 +63,7 @@ public class ClassesProcessor extends AbstractProcessor<CtType<?>>{
 			
 			for(String dst : set.toArray(new String[set.size()])){
 				if(ProcessorCommunicator.outputgraph != null)
-					ProcessorCommunicator.outputgraph.addDirectedEdgeAndNodeIfNeeded(src, dst, true, false);
+					((GraphStream)ProcessorCommunicator.outputgraph).addDirectedEdgeAndNodeIfNeeded(src, dst, true, false);
 				System.out.println(src+" -> "+dst);
 			}
 		}

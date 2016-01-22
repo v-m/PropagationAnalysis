@@ -15,9 +15,10 @@ import com.vmusco.pminer.analyze.MutantTestProcessingListener;
 import com.vmusco.pminer.analyze.MutationStatisticsCollecter;
 import com.vmusco.pminer.exceptions.SpecialEntryPointException;
 import com.vmusco.pminer.exceptions.SpecialEntryPointException.TYPE;
-import com.vmusco.pminer.impact.JavapdgPropagationExplorer;
+import com.vmusco.pminer.impact.GraphPropagationExplorerForTests;
+import com.vmusco.pminer.impact.JavapdgPropagationExplorerForTests;
 import com.vmusco.pminer.impact.ConsequencesExplorer;
-import com.vmusco.pminer.impact.SoftMinerPropagationExplorer;
+import com.vmusco.pminer.impact.GraphPropagationExplorer;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
@@ -122,15 +123,17 @@ public class MutationStatsRunner{
 		ConsequencesExplorer pgp;
 		String pth = cmd.getArgs()[0];
 		
+		String[] tests = ms.getTestCases();
+		
 		if(cmd.hasOption("javapdg")){
 			String[] parts = pth.split(":");
 			
 			if(parts.length > 1)
-				pgp = new JavapdgPropagationExplorer(parts[0], parts[1]);
+				pgp = new JavapdgPropagationExplorerForTests(parts[0], parts[1], tests);
 			else
-				pgp = new JavapdgPropagationExplorer(parts[0]);
+				pgp = new JavapdgPropagationExplorerForTests(parts[0], tests);
 		}else{
-			pgp = new SoftMinerPropagationExplorer(loadGraph(pth));
+			pgp = new GraphPropagationExplorerForTests(loadGraph(pth), tests);
 		}
 		
 		String[] ret = processMutants(ms, pgp, sep, cmd.hasOption("exclude-nulls"), listener, cmd.hasOption("include-unbounded"), cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives")); 
@@ -194,7 +197,6 @@ public class MutationStatsRunner{
 		String[] ret = new String[2];
 		//int nbunbounded = 0;
 
-		ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
 		MutationStatisticsCollecter sd = new MutationStatisticsCollecter(listener);
 		
 		int nbentry = (nb > 0 && allMutations.length>nb)?nb:allMutations.length;
@@ -214,18 +216,16 @@ public class MutationStatsRunner{
 				}
 			}
 			// relevant IS list of tests impacted by the introduced bug (determined using mutation)
-			String[] relevantArray = ps.getCoherentMutantFailAndHangTestCases(ifos.getExecutedTestsResults());
+			String[] relevantArray = ms.getCoherentMutantFailAndHangTestCases(ifos.getExecutedTestsResults());
 
 			if(relevantArray == null)
 				continue;
 
-			String id = ifos.getMutationIn();
-
 			try{
-				pgp.visit(new String[]{id});
-				String[] ais = ps.getCoherentMutantFailAndHangTestCases(ifos.getExecutedTestsResults());
-				String[] cis = pgp.getLastConsequenceNodesIn(ps.getTestCases());
-				sd.fireIntersectionFound(ifos, ais, cis);
+				pgp.visit(ms, ifos);
+				String[] ais = ms.getCoherentMutantFailAndHangTestCases(ifos.getExecutedTestsResults());
+				String[] cis = pgp.getLastConsequenceNodes();
+				sd.intersectionFound(ifos, ais, cis);
 				cpt++;
 			}catch(SpecialEntryPointException e){
 				// No entry point here !
@@ -235,9 +235,9 @@ public class MutationStatsRunner{
 					continue;
 				}else{
 					if(e.getType().equals(TYPE.NOT_FOUND)){
-						sd.fireUnboundedFound(ifos);
+						sd.unboundedFound(ifos);
 					}else{
-						sd.fireIsolatedFound(ifos);
+						sd.isolatedFound(ifos);
 					}
 					cpt++;
 				}
@@ -257,7 +257,7 @@ public class MutationStatsRunner{
 			}
 		}
 
-		sd.fireExecutionEnded();
+		sd.executionEnded();
 
 		if(excludeNulls){
 			sd.getPrecisionRecallFscore().removesNulls();

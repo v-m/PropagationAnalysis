@@ -20,6 +20,7 @@ public class BytecodeTools {
 
 		while(parsing.length() > 0){
 			char nextChar = parsing.charAt(0);
+			
 			parsing = parsing.substring(1);
 
 			if(nextChar == '['){
@@ -40,8 +41,9 @@ public class BytecodeTools {
 				ret += ((ret.length()>0)?",":"")+type;
 			}
 			
-			while(array_cpt-- > 0){
+			while(array_cpt > 0){
 				ret += "[]";
+				array_cpt--;
 			}
 		}
 
