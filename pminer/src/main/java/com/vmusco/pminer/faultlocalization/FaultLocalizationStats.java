@@ -60,15 +60,11 @@ public class FaultLocalizationStats {
 		this.UUTusedByTests = UUTusedByTests;
 		this.totalfailed = fails;
 		this.totalpassed = SetTools.setDifference(testcases, this.totalfailed);
-		
-		//if(fails.length <= 0)
-		//	continue;
-		//System.out.println(fails[0]);
+
 		if(base != null){
 			inter = new GraphFaultLocalizationByIntersection(base);
 			inter.visit(fails);
 		}
-		//union.visit(fails);
 		
 		buffer = new HashMap<>();
 	}

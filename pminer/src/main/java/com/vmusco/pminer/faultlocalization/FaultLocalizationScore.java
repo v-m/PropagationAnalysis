@@ -93,34 +93,6 @@ public abstract class FaultLocalizationScore {
 		return ret;
 	}
 	
-	/*public int wastedEffort(String[] entries, String effectiveMutationPoint) throws BadStateException, TargetNotFoundException {
-		List<Double> l = new ArrayList<>();
-
-		Double scoreOfSearchedUnit = null;
-
-		for(String uut : entries){
-			stats.changeTestingNode(uut);
-			computeScore();
-			double s = getScore();
-
-			if(Double.isNaN(s))
-				s = -1;
-
-
-			if(effectiveMutationPoint.equals(uut)){
-				scoreOfSearchedUnit = s;
-			}
-
-			l.add(s);
-		}
-
-		if(scoreOfSearchedUnit == null){
-			throw new TargetNotFoundException(effectiveMutationPoint);
-		}
-
-		return wastedEffortForList(l, scoreOfSearchedUnit);
-	}*/
-	
 	public int wastedEffort(String[] entries, String effectiveMutationPoint) throws BadStateException, TargetNotFoundException {
 		Map<String, Double> scores = getWastedEffortList(entries);
 		

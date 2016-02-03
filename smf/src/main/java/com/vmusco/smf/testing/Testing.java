@@ -193,7 +193,6 @@ public final class Testing {
 				for(String c : cmd)
 					s += c+" ";
 				s = s.trim();
-				System.out.println(s);
 
 				if(tel != null)		tel.testSuiteExecutionStart(cpt, testClasses.length, s);
 

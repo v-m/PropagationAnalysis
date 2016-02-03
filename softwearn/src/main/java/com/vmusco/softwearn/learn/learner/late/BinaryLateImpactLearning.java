@@ -1,11 +1,13 @@
 package com.vmusco.softwearn.learn.learner.late;
 
+import java.util.List;
+
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.softminer.graphs.EdgeIdentity;
+import com.vmusco.softminer.graphs.GraphVisitorValidator;
 import com.vmusco.softwearn.learn.LearningGraph;
 import com.vmusco.softwearn.learn.LearningKGraph;
-import com.vmusco.softwearn.learn.LearningKGraphStream;
 
 public class BinaryLateImpactLearning extends LateImpactLearner {
 
@@ -26,4 +28,21 @@ public class BinaryLateImpactLearning extends LateImpactLearner {
 	public float defaultInitWeight() {
 		return 0;
 	}
+	
+	@Override
+	public List<String[]> getPaths(final LearningGraph g, String test, String point) {
+		return g.graph().getPaths(test, point, new GraphVisitorValidator() {
+			@Override
+			public boolean isNodeAccepted(String from) {
+				return true;
+			}
+
+			@Override
+			public boolean isEdgeAccepted(String arrived, String next) {
+				return g.getEdgeThreshold(arrived, next) < 1;
+			}
+		});
+	}
+	
+	
 }

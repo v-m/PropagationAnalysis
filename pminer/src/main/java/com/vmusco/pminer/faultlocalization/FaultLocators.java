@@ -13,6 +13,16 @@ public abstract class FaultLocators {
 	private FaultLocators() {
 	}
 
+	/*
+	 * ALL STATS:
+	    double failed = this.stats.getNbExecutingFailed();
+		double nonexec_failed = this.stats.getNbNonExecutingFailed();
+		double passed = this.stats.getNbExecutingPassed();
+		double nonexec_passed = this.stats.getNbNonExecutingPassed();
+		double totalfailed = this.stats.getNbTotalFailed();
+		double totalpassed = this.stats.getNbTotalPassed();
+	 */
+	
 	/*****
 	 * EXECUTION BASED
 	 */
@@ -21,9 +31,7 @@ public abstract class FaultLocators {
 			@Override
 			protected void computeScore() {
 				double failed = this.stats.getNbExecutingFailed();
-				double nonexec_failed = this.stats.getNbNonExecutingFailed();
 				double passed = this.stats.getNbExecutingPassed();
-				double nonexec_passed = this.stats.getNbNonExecutingPassed();
 				double totalfailed = this.stats.getNbTotalFailed();
 				double totalpassed = this.stats.getNbTotalPassed();
 
@@ -40,9 +48,6 @@ public abstract class FaultLocators {
 				double failed = this.stats.getNbExecutingFailed();
 				double nonexec_failed = this.stats.getNbNonExecutingFailed();
 				double passed = this.stats.getNbExecutingPassed();
-				double nonexec_passed = this.stats.getNbNonExecutingPassed();
-				double totalfailed = this.stats.getNbTotalFailed();
-				double totalpassed = this.stats.getNbTotalPassed();
 
 				setScore((failed)/(Math.sqrt((failed+passed)*(failed+nonexec_failed))));
 
@@ -52,17 +57,13 @@ public abstract class FaultLocators {
 		};
 	}
 
-	public static FaultLocalizationScore getO(FaultLocalizationStats stats){
+	public static FaultLocalizationScore getNaish(FaultLocalizationStats stats){
 		return new FaultLocalizationScore(stats){
 
 			@Override
 			protected void computeScore() {
-				double failed = this.stats.getNbExecutingFailed();
 				double nonexec_failed = this.stats.getNbNonExecutingFailed();
-				double passed = this.stats.getNbExecutingPassed();
 				double nonexec_passed = this.stats.getNbNonExecutingPassed();
-				double totalfailed = this.stats.getNbTotalFailed();
-				double totalpassed = this.stats.getNbTotalPassed();
 				
 				if(nonexec_failed > 0)	setScore(-1);
 				else					setScore(nonexec_passed);
@@ -76,9 +77,7 @@ public abstract class FaultLocators {
 			@Override
 			protected void computeScore() {
 				double failed = this.stats.getNbExecutingFailed();
-				double nonexec_failed = this.stats.getNbNonExecutingFailed();
 				double passed = this.stats.getNbExecutingPassed();
-				double nonexec_passed = this.stats.getNbNonExecutingPassed();
 				double totalfailed = this.stats.getNbTotalFailed();
 				double totalpassed = this.stats.getNbTotalPassed();
 				
@@ -107,13 +106,6 @@ public abstract class FaultLocators {
 				boolean contains = Arrays.asList(this.stats.getLastIntersectedNodes()).contains(this.stats.getCurrentTestingNode());
 				
 				setScore(contains?1:0);
-				
-				/*if(!contains)
-					setScore(0);
-				else
-					//setScore(this.stats.getLastIntersectedNodes().length);
-					setScore(1);
-				*/
 			}
 		};
 	}
@@ -164,6 +156,24 @@ public abstract class FaultLocators {
 				}
 
 				setScore( cpt );
+			}
+		};
+	}
+
+	/**
+	 * Zoltar implementation
+	 * @param stats
+	 * @return
+	 */
+	public static FaultLocalizationScore getZoltar(FaultLocalizationStatsWithMutantIfos stats) {
+		return new FaultLocalizationScore(stats) {
+			@Override
+			protected void computeScore() {
+				double failed = this.stats.getNbExecutingFailed();
+				double nonexec_failed = this.stats.getNbNonExecutingFailed();
+				double passed = this.stats.getNbExecutingPassed();
+
+				setScore(failed / (failed + passed + nonexec_failed + ( (10000 * passed  * nonexec_failed) / failed ) ) );
 			}
 		};
 	}

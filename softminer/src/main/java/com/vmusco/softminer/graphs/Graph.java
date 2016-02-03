@@ -7,6 +7,11 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.graphstream.algorithm.Dijkstra;
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Node;
+import org.graphstream.graph.Path;
+import org.graphstream.graph.implementations.SingleGraph;
 
 import com.vmusco.smf.utils.SourceReference;
 import com.vmusco.softminer.exceptions.IncompatibleTypesException;
@@ -33,7 +38,7 @@ public abstract class Graph {
 	public abstract void removeDirectedEdge(String from, String to);
 	public abstract void removeNode(String id);
 	public abstract void bestDisplay();
-
+	
 	/**
 	 * Returns all path from <from> to <to>
 	 * @param from
@@ -41,38 +46,56 @@ public abstract class Graph {
 	 * @return a list of strings which each describes a path or null if from or to are not in the graph
 	 */
 	public List<String[]> getPaths(String from, String to) {
-		if(!hasNode(from) || !hasNode(to))
+		return getPaths(from, to, new GraphVisitorValidator() {
+			@Override
+			public boolean isNodeAccepted(String from) {
+				return true;
+			}
+
+			@Override
+			public boolean isEdgeAccepted(String arrived, String next) {
+				return true;
+			}
+		});
+	}
+	
+	public List<String[]> getPaths(String from, String to, GraphVisitorValidator nv) {
+		if(!hasNode(from) || !hasNode(to) || !nv.isNodeAccepted(from) || !nv.isNodeAccepted(to))
 			return null;
 
 		logger.trace("Starting a reccurssion for graph paths [N=%d;E=%d]", getNbNodes(), getNbEdges());
 
-		return getPathsRecur(from, to, new String[0]);
+		return getPathsRecur(from, to, new String[0], nv);
 	}
 
-	private List<String[]> getPathsRecur(String arrived, String to, String[] visited){
+	private List<String[]> getPathsRecur(String arrived, String to, String[] path, GraphVisitorValidator nv){
 		List<String[]> paths = new ArrayList<String[]>();
 		
 		for(String next : getNodesConnectedFrom(arrived)){
-			if(next.equals(to)){
-				// Arrived :)
-				String[] cpy = Arrays.copyOf(visited, visited.length+2);
-				cpy[cpy.length-2] = arrived;
-				cpy[cpy.length-1] = next;
+			logger.trace("Node %s", next);
+			if(nv.isNodeAccepted(next) && nv.isEdgeAccepted(arrived, next)){
+				if(next.equals(to)){
+					// Arrived :)
+					String[] cpy = Arrays.copyOf(path, path.length+2);
+					cpy[cpy.length-2] = arrived;
+					cpy[cpy.length-1] = next;
 
-				paths.add(cpy);
-			}else{
-				boolean exec = true;
-				for(int i=0; i<visited.length; i++){
-					if(visited[i].equals(next))
-						exec = false;
-				}
+					paths.add(cpy);
+				}else{
 
-				if(exec){
-					String[] cpy = Arrays.copyOf(visited, visited.length+1);
-					cpy[cpy.length-1] = arrived;
+					boolean doesNotExistInPath = true;
 
-					List<String[]> solved = getPathsRecur(next, to, cpy);
-					if(solved.size() > 0){
+					// have we already seen this node
+					for(int i=0; i<path.length; i++){
+						if(path[i].equals(next))
+							doesNotExistInPath = false;
+					}
+
+					if(doesNotExistInPath){
+						String[] cpy = Arrays.copyOf(path, path.length+1);
+						cpy[cpy.length-1] = arrived;
+
+						List<String[]> solved = getPathsRecur(next, to, cpy, nv);
 						paths.addAll(solved);
 					}
 				}
@@ -112,6 +135,9 @@ public abstract class Graph {
 		return graphNodeVisitor.interruptVisit();
 	}
 	public static EdgeIdentity[] getAllEdgesInPath(String[] path){
+		if(path.length == 0)
+			return null;
+		
 		EdgeIdentity[] re = new EdgeIdentity[path.length-1];
 
 		for(int i=1; i<path.length; i++){
@@ -133,44 +159,44 @@ public abstract class Graph {
 	public int getNbEdges() {
 		return getEdges().length;
 	}
-	
+
 	public int getNbEdges(EdgeTypes t){
 		return getEdges(t).length;
 	}
-	
+
 	public abstract String[] getNodesConnectedFrom(String node);
 	public abstract String[] getNodesConnectedTo(String node);
-	
+
 
 	public EdgeIdentity[] getEdgesConnectedFrom(String node){
 		List<EdgeIdentity> ret = new ArrayList<EdgeIdentity>();
-		
+
 		for(String n : getNodesConnectedFrom(node)){
 			ret.add(new EdgeIdentity(node, n));
 		}
-		
+
 		return ret.toArray(new EdgeIdentity[ret.size()]);
 	}
 	public EdgeIdentity[] getEdgesConnectedTo(String node){
 		List<EdgeIdentity> ret = new ArrayList<EdgeIdentity>();
-		
+
 		for(String n : getNodesConnectedTo(node)){
 			ret.add(new EdgeIdentity(n, node));
 		}
-		
+
 		return ret.toArray(new EdgeIdentity[ret.size()]);		
 	}
 	public abstract String[] getNodesNames();
 	public abstract EdgeIdentity[] getEdges();
-	
+
 	public EdgeIdentity[] getEdges(EdgeTypes t){
 		List<EdgeIdentity> ret = new ArrayList<EdgeIdentity>();
-		
+
 		for(EdgeIdentity n : getEdges()){
 			if(getEdgeType(n.getFrom(), n.getTo()) == t)
 				ret.add(n);
 		}
-		
+
 		return ret.toArray(new EdgeIdentity[ret.size()]);
 	}
 
@@ -181,7 +207,7 @@ public abstract class Graph {
 	public int getInDegreeFor(String node) {
 		return getNodesConnectedTo(node).length;
 	}
-	
+
 	public int getDegreeFor(String node){
 		return getOutDegreeFor(node) + getInDegreeFor(node);
 	}
@@ -305,6 +331,10 @@ public abstract class Graph {
 
 		while(!nodesToExplore.isEmpty()){
 			String cur = nodesToExplore.remove(0);
+			if(!aVisitor.isNodeValid(cur)){
+				continue;
+			}
+
 			aVisitor.visitNode(cur);
 
 			String[] nodes;
@@ -327,9 +357,13 @@ public abstract class Graph {
 					nodesToExplore.add(candidate);
 				}
 			}
+
+			if(aVisitor.interruptVisit()){
+				break;
+			}
 		}
 	}
-	
+
 	/*public void visitEdgeFrom(GraphEdgeVisitor aVisitor, String node){
 		visitEdges(aVisitor, node, true);
 	}
@@ -337,7 +371,7 @@ public abstract class Graph {
 	public void visitEdgeTo(GraphEdgeVisitor aVisitor, String node){
 		visitEdges(aVisitor, node, false);
 	}
-	
+
 	private void visitEdges(GraphEdgeVisitor aVisitor, String node, boolean from){
 		ArrayList<EdgeIdentity> edgesToExplore = new ArrayList<EdgeIdentity>();
 		HashSet<EdgeIdentity> visitedEdges = new HashSet<EdgeIdentity>();
@@ -350,7 +384,7 @@ public abstract class Graph {
 			edgesToExplore.addAll(Arrays.asList(getEdgesConnectedFrom(node)));
 		else
 			edgesToExplore.addAll(Arrays.asList(getEdgesConnectedTo(node)));
-		
+
 
 		while(!edgesToExplore.isEmpty()){
 			EdgeIdentity cur = edgesToExplore.remove(0);
@@ -431,5 +465,30 @@ public abstract class Graph {
 
 	public void addDirectedEdgeAndNodeIfNeeded(EdgeIdentity ei) {
 		addDirectedEdgeAndNodeIfNeeded(ei.getFrom(), ei.getTo());
+	}
+
+	/**
+	 * Compute the shortest path from a node to another.
+	 * Note that edges are unweighted. Each edge is considered as 1
+	 * @param from
+	 * @param to
+	 * @return
+	 */
+	public abstract String[] shortestPath(String from, String to);
+
+	public EdgeIdentity[] getNodesConnectedFromAndTo(String n) {
+		List<EdgeIdentity> ret = new ArrayList<EdgeIdentity>();
+		
+		for(String to : getNodesConnectedFrom(n)){
+			EdgeIdentity ei = new EdgeIdentity(n, to);
+			ret.add(ei);
+		}
+		
+		for(String from : getNodesConnectedTo(n)){
+			EdgeIdentity ei = new EdgeIdentity(from, n);
+			ret.add(ei);
+		}
+		
+		return ret.toArray(new EdgeIdentity[ret.size()]);
 	}
 }

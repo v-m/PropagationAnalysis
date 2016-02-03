@@ -13,7 +13,7 @@ public class OFaultLocatorTest extends FaultLocatorAbstractTest{
 
 	@Override
 	public FaultLocalizationScore getFaultLocalizationScore(FaultLocatorTester flt) {
-		return FaultLocators.getO(flt.getStats());
+		return FaultLocators.getNaish(flt.getStats());
 	}
 	
 	@Test

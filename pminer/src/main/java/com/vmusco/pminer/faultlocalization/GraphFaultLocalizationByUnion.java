@@ -23,7 +23,7 @@ public class GraphFaultLocalizationByUnion extends ConsequencesExplorer{
 		
 		for(String id : tests){
 			if(!base.hasNode(id)){
-				//System.err.println("Node not found: "+id);
+				System.err.println("Node not found: "+id);
 				continue;
 			}
 			

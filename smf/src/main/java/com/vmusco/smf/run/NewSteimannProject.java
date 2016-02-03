@@ -41,7 +41,7 @@ public class NewSteimannProject {
 		Options options = new Options();
 
 		Option opt;
-		opt = new Option("F", "force", false, "Overwritte the working directory if it already exists !");
+		opt = new Option("F", "force", false, "Overwrite the working directory if it already exists !");
 		options.addOption(opt);
 		opt = new Option("h", "help", false, "print this message");
 		options.addOption(opt);
@@ -52,7 +52,7 @@ public class NewSteimannProject {
 		if( cmd.getArgs().length < 3 || cmd.hasOption("help")){
 			HelpFormatter formatter = new HelpFormatter();
 
-			String head = "Import a project from Steimann et al. dataset (ISSTA'13 paper) as a a new SMF project entitled <name> in <working-dir>. This project annot be mutated but can be used as entry for pminer tools."
+			String head = "Import a project from Steimann et al. dataset (ISSTA'13 paper) as a a new SMF project entitled <name> in <working-dir>. This project cannot be mutated but can be used as entry for some tools."
 					+"<def-file> is the definition file and <mut-folder> is the folder containing the mutants to take into consideration";
 
 			String foot = "";

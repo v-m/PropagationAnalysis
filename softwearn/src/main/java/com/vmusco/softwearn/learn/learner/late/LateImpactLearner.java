@@ -1,5 +1,7 @@
 package com.vmusco.softwearn.learn.learner.late;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +11,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.Graph;
+import com.vmusco.softminer.graphs.GraphVisitorValidator;
+import com.vmusco.softminer.graphs.algorithms.ShortestPath;
+import com.vmusco.softminer.graphs.algorithms.ShortestPath;
 import com.vmusco.softwearn.learn.LearningGraph;
 import com.vmusco.softwearn.learn.LearningKGraph;
 import com.vmusco.softwearn.learn.learner.Learner;
@@ -22,7 +27,7 @@ public abstract class LateImpactLearner implements Learner {
 
 	private int maxk;
 
-	private Map<String, Map<Integer, Integer>> lateLearner;
+	protected Map<String, Map<Integer, Integer>> lateLearner;
 
 	public LateImpactLearner(int maxk) {
 		this.maxk = maxk;
@@ -62,7 +67,8 @@ public abstract class LateImpactLearner implements Learner {
 
 		if(g instanceof LearningKGraph){
 			LearningKGraph lg = (LearningKGraph)g;
-
+			ShortestPath esp = new ShortestPath(g.graph());
+			
 			for(String key : lateLearner.keySet()){
 				String point = key.split("##>")[0];
 				String test = key.split("##>")[1];
@@ -70,10 +76,18 @@ public abstract class LateImpactLearner implements Learner {
 				logger.trace("Treating %s -> %s", point, test);
 
 				if(g.graph().isThereAtLeastOnePath(test, point)){
-					List<String[]> paths = g.graph().getPaths(test, point);
+					//List<String[]> paths = getPaths(g, test, point);
+					//List<String[]> paths = ShortestPath.kShortestPathsYens(g.graph(), test, point, 10);
+					List<String[]> paths = esp.yen(test, point, 10);
 
 					for(String[] path : paths){
-						for(EdgeIdentity edge : Graph.getAllEdgesInPath(path)){
+						EdgeIdentity[] allEdgesInPath = Graph.getAllEdgesInPath(path);
+						
+						if(allEdgesInPath == null){
+							logger.info("Empty path for %s - %s !", test, point);
+							continue;
+						}
+						for(EdgeIdentity edge : allEdgesInPath){
 							Map<Integer, Integer> ks = lateLearner.get(key);
 
 							for(int onek : ks.keySet()){
@@ -95,6 +109,15 @@ public abstract class LateImpactLearner implements Learner {
 			logger.error("Graph should be a LearningKGraph instance !");
 		}
 	}
+
+	public List<String[]> getPaths(final LearningGraph g, String test, String point) {
+		return g.graph().getPaths(test, point);
+	}
+	
+	
+	
+	
+	
 
 	private static void lateLearnExceptFor(Map<Integer, Integer> str, int k) {
 		for(int i=0; i<str.size(); i++){

@@ -13,7 +13,7 @@ public class SteimannDatasetTools {
 	 * Differences are:
 	 *  - formal types (T) are directly resolved to java.lang.Object types or their basic type (based on extends)
 	 *  - inner class mapped with $ symbol in graphminer are mapped with .
-	 *  - Constructor invocation in graphminer are not see as a method where they are here in Steimann (ie. constructor for A is A() in graphminer where it is A.A() in Steimann)  
+	 *  - Constructor invocation in graphminer are not seen as a method where they are here in Steimann (ie. constructor for A is A() in graphminer where it is A.A() in Steimann)  
 	 * @param base the graph to update
 	 */
 	public static void adaptGraph(Graph base) {

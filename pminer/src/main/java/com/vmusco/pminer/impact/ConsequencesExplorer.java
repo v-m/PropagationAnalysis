@@ -6,6 +6,7 @@ import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.softminer.exceptions.IncompatibleTypesException;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.GraphNodeVisitor;
+import com.vmusco.softminer.graphs.GraphNodeVisitorAdapter;
 
 /**
  * This class manage subgraphs representing the consequences from one or several node(s).
@@ -39,7 +40,7 @@ public abstract class ConsequencesExplorer{
 	protected GraphNodeVisitor populateCurrent() {
 		final Graph newgraph = last_propa;
 		
-		return new GraphNodeVisitor() {
+		return new GraphNodeVisitorAdapter() {
 
 			@Override
 			public void visitNode(String node) {

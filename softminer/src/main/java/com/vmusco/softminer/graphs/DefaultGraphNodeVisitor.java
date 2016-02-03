@@ -20,4 +20,9 @@ public class DefaultGraphNodeVisitor implements GraphNodeVisitor {
 	public boolean interruptVisit() {
 		return false;
 	}
+
+	@Override
+	public boolean isNodeValid(String node) {
+		return true;
+	}
 }

@@ -107,12 +107,14 @@ public class MutationGraphKFold extends MutationGraphExplorer{
 			l.add(this.ms.getMutationStats(m));
 		
 		Collections.shuffle(l);
-		Collections.sort(l, new Comparator<MutantIfos>() {
+		/*
+		 * Can be sorted for testing purposes...
+		 * Collections.sort(l, new Comparator<MutantIfos>() {
 			@Override
 			public int compare(MutantIfos o1, MutantIfos o2) {
 				return o1.getId().compareTo(o2.getId());
 			}
-		});
+		});*/
 		
 		int considerednbmut = nbmut;
 		

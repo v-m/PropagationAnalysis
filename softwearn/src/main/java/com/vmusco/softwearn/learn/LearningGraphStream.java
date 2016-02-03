@@ -13,6 +13,7 @@ import com.vmusco.softminer.exceptions.IncompatibleTypesException;
 import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.GraphNodeVisitor;
+import com.vmusco.softminer.graphs.GraphNodeVisitorAdapter;
 import com.vmusco.softminer.graphs.GraphStream;
 import com.vmusco.softwearn.learn.folding.MutationGraphKFold;
 
@@ -145,7 +146,7 @@ public class LearningGraphStream extends GraphStream implements LearningGraph {
 	}
 	
 	protected void visit(final GraphNodeVisitor aVisitor, final String node, final boolean from, final float threshold){
-		super.visit(new GraphNodeVisitor() {
+		super.visit(new GraphNodeVisitorAdapter() {
 			@Override
 			public void visitNode(String node) {
 				aVisitor.visitNode(node);
