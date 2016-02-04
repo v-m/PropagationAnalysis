@@ -1,0 +1,43 @@
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+function help {
+    echo "Availible commands are:"
+    echo "   pminer        ..."
+    echo "   smf           ..."
+    echo "   softminer     ..."
+    echo "   softwearn     ..."
+    exit
+}
+
+if [ "$#" -eq 0 ]; then
+    echo "Illegal number of parameters"
+    help
+    exit
+fi
+
+case "$1" in
+
+pminer)  
+    echo "Propagation miner"
+    script="bin/pminer"
+    ;;
+smf)  
+    echo "SMF"
+    script="bin/smf"
+    ;;
+softminer)  
+    echo "Softminer"
+    script="bin/softminer"
+    ;;
+softwearn)  
+    echo "Softwearn"
+    script="bin/softwearn"
+    ;;
+*) 
+    echo "Unknown command $1"
+    exit
+    ;;
+esac
+
+shift
+bash $DIR/$script "$@"

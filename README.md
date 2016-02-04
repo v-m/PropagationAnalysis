@@ -2,13 +2,34 @@
 
 ## Overview
 Software graphs, mutation testing and propagation estimer tools.
-This framework is split into three tools.
+This framework is split into four tools.
 Those tools are used for my PhD research purposes.
 
 ## Prerequisites
 
-Please install Java and Maven being able to run those tools.
+To run programs in this framework: install Java and Maven.
 Moreover, install git or svn in order to obtain projects *with tests*.
+Note that this framework is intended to run in Linux operating systems.
+
+### First step
+Checkout ChangePropagation and package with maven:
+
+```
+$ git checkout https://github.com/v-m/ChangePropagation.git
+$ mvn package
+```
+
+(optional) Create eclipse projects:
+
+```
+$ mvn eclipse:eclipse
+```
+
+## General running
+
+As this project is made of several entry points, a unique script is proposed to ease the running. To run any tool, just invoke ``./run`` in the root folder. Pass as a first parameter the the desired tool (pass no argument to list available tools). Then pass as a second parameter the desired function in the tool. For example, read the rest of this file.
+
+## Tools
 
 ### Simple Mutation Framework (smf)
 Tool performing Java Software Mutations. This software produces new versions of a software, based on specific mutations operator.
@@ -38,19 +59,6 @@ All commands can take the ``-h`` or ``--help`` option which will give the list o
 
 ### Create project, mutants and run tests
 
-Checkout ChangePropagation and package with maven:
-
-```
-$ git checkout https://github.com/v-m/ChangePropagation.git
-$ mvn package
-```
-
-(optional) Create eclipse projects:
-
-```
-$ mvn eclipse:eclipse
-```
-
 In a new terminal, checkout a project and switch to the desired version (here we consider the Apache Common Lang rev. 6965455):
 
 ```
@@ -63,20 +71,20 @@ $ git reset --hard 6965455
 Create a new project
 
 ```
-$ ./smf-newproject /tmp/myproject commons-lang /tmp/commons-lang/
+$ ./run smf newproject /tmp/myproject commons-lang /tmp/commons-lang/
 ```
 
 Choose and create a mutation for a specific operator:
 
 ```
-$ ./smf-createmutation -o
-$ ./smf-createmutation /tmp/myproject ABS
+$ ./run smf createmutation -o
+$ ./run smf createmutation /tmp/myproject ABS
 ```
 
 Run tests on mutants:
 
 ```
-$ ./smf-runmutants /tmp/myproject/mutations/main/ABS/
+$ ./run smf runmutants /tmp/myproject/mutations/main/ABS/
 ```
 
 ### Generate graphs
@@ -84,7 +92,7 @@ $ ./smf-runmutants /tmp/myproject/mutations/main/ABS/
 This tool can simply use projects created with smf to generate graphs from it. To do so, just invoke:
 
 ```
-$ ./sm-smfgengraph /tmp/myproject/
+$ ./run softminer smfgengraph /tmp/myproject/
 ```
 
 To generate other type of graphs and more options, just add the ``--help`` parameter to the program.
@@ -92,7 +100,7 @@ To generate other type of graphs and more options, just add the ``--help`` param
 ### Visualize the propagation on a graph
 
 ```
-$ ./pminer-visualize-propagation mut_result/soft1/mutations/main/ABS/ mutant_52 mut_result/soft1/graph_cha.xml
+$ ./run pminer displayvisu mut_result/soft1/mutations/main/ABS/ mutant_52 mut_result/soft1/graph_cha.xml
 ```
 
 Add the ``-c`` option to display the sets on terminal.
@@ -124,7 +132,7 @@ Let consider the following hierarchy:
 To get the performances of mutation using the CHA graph for soft1 software and the ABS mutation operator:
 
 ```
-./pminer-mutop-perf mut_result/soft1/graph_cha.xml mut_result/soft1/mutations/main/ABS/mutations.xml
+./run pminer mutopperf mut_result/soft1/graph_cha.xml mut_result/soft1/mutations/main/ABS/mutations.xml
 ```
 
 Following options are available:
@@ -140,20 +148,20 @@ Following options are available:
 To get the performances of mutation with and without CHA graph for all soft present in mut_result and all mutation operator:
 
 ```
-./pminer-global-perf mut_result graph.xml:graph_cha.xml
+./run pminer globalperf mut_result graph.xml:graph_cha.xml
 ```
 
 If there is only the two softwares listed above the following command is equivalent:
 
 ```
-./pminer-global-perf mut_result/soft1:mut_result/soft2 graph.xml:graph_cha.xml
+./run pminer globalperf mut_result/soft1:mut_result/soft2 graph.xml:graph_cha.xml
 ```
 
-Similar options than for ``pminer-mutop-perf`` can be used. Moreover, the ``-v`` options allows to compute averages instead of medians.
+Similar options than for ``mutopperf`` can be used. Moreover, the ``-v`` options allows to compute averages instead of medians.
 
 ## Use JavaPDG as a graph data source
 
-Both commands (``pminer-global-perf`` and ``pminer-mutop-perf``) accepts as option ``--javapdg`` (or ``-j``). Those enable to pass as an argument the path to a javapdg database. For ``pminer-global-perf``, pass the path to a folder containing subfolders for databases, one for each project (named similarly as the project folders itself). For ``pminer-mutop-perf``, pass the path to the software database.
+Both commands (``mutopperf`` and ``globalperf``) accepts as option ``--javapdg`` (or ``-j``). Those enable to pass as an argument the path to a javapdg database. For ``globalperf``, pass the path to a folder containing subfolders for databases, one for each project (named similarly as the project folders itself). For ``mutopperf``, pass the path to the software database.
 
 ## Dependencies
 

@@ -1,0 +1,38 @@
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+function help {
+    echo "Availible commands are:"
+    echo "   mvngengraph   ..."
+    echo "   smfgengraph   ..."
+    echo "   srcgengraph   ..."
+    exit
+}
+
+if [ "$#" -eq 0 ]; then
+    echo "Illegal number of parameters"
+    help
+    exit
+fi
+
+project="softminer"
+
+case "$1" in
+
+mvngengraph)  
+    package="com.vmusco.softminer.run.MavenGraphGenerator"
+    ;;
+smfgengraph)
+    package="com.vmusco.softminer.run.SmfGraphGenerator"
+    ;;
+srcgengraph)
+    package="com.vmusco.softminer.run.SourceGraphGenerator"
+    ;;
+*) 
+    echo "Unknown command $1"
+    help
+    exit
+    ;;
+esac
+
+shift
+java -cp $DIR/../$project/target/*-jar-with-dependencies.jar $package "$@"

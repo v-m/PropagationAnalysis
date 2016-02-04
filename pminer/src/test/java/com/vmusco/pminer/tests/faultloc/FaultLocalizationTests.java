@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vmusco.pminer.faultlocalizationOLD.FaultLocalizationAnalyzerOnExecution;
+import com.vmusco.pminer.faultlocalization.FaultLocalizationScore;
 
 public class FaultLocalizationTests {
 
@@ -25,7 +25,7 @@ public class FaultLocalizationTests {
 	@Test
 	public void testFirstScoreWithOneOccurence(){
 		List<Double> scores = generateBasicData();
-		Assert.assertEquals(0, FaultLocalizationAnalyzerOnExecution.wastedEffortForList(scores, 5d));
+		Assert.assertEquals(0, FaultLocalizationScore.wastedEffortForList(scores, 5d));
 	}
 	
 	@Test
@@ -35,13 +35,13 @@ public class FaultLocalizationTests {
 		scores.add(5d);
 		scores.add(5d);
 
-		Assert.assertEquals(2, FaultLocalizationAnalyzerOnExecution.wastedEffortForList(scores, 5d));
+		Assert.assertEquals(2, FaultLocalizationScore.wastedEffortForList(scores, 5d));
 	}
 	
 	@Test
 	public void testLastScoreWithOneOccurence(){
 		List<Double> scores = generateBasicData();
-		Assert.assertEquals(4, FaultLocalizationAnalyzerOnExecution.wastedEffortForList(scores, 1d));
+		Assert.assertEquals(4, FaultLocalizationScore.wastedEffortForList(scores, 1d));
 	}
 	
 	@Test
@@ -50,14 +50,14 @@ public class FaultLocalizationTests {
 		scores.add(1d);
 		scores.add(1d);
 		scores.add(1d);
-		Assert.assertEquals(6, FaultLocalizationAnalyzerOnExecution.wastedEffortForList(scores, 1d));
+		Assert.assertEquals(6, FaultLocalizationScore.wastedEffortForList(scores, 1d));
 	}
 	
 
 	@Test
 	public void testMidScoreWithOneOccurence(){
 		List<Double> scores = generateBasicData();
-		Assert.assertEquals(2, FaultLocalizationAnalyzerOnExecution.wastedEffortForList(scores, 3d));
+		Assert.assertEquals(2, FaultLocalizationScore.wastedEffortForList(scores, 3d));
 	}
 	
 	@Test
@@ -66,6 +66,6 @@ public class FaultLocalizationTests {
 		scores.add(3d);
 		scores.add(3d);
 		scores.add(3d);
-		Assert.assertEquals(4, FaultLocalizationAnalyzerOnExecution.wastedEffortForList(scores, 3d));
+		Assert.assertEquals(4, FaultLocalizationScore.wastedEffortForList(scores, 3d));
 	}
 }

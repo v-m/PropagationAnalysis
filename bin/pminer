@@ -1,0 +1,42 @@
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+function help {
+    echo "Availible commands are:"
+    echo "   faultloc         ..."
+    echo "   displayvisu      ..."
+    echo "   globalperf       ..."
+    echo "   mutopperf        ..."
+    exit
+}
+
+if [ "$#" -eq 0 ]; then
+    echo "Illegal number of parameters"
+    help
+    exit
+fi
+
+project="pminer"
+
+case "$1" in
+
+faultloc)  
+    package="com.vmusco.pminer.run.FaultLocalization"
+    ;;
+displayvisu)
+    package="com.vmusco.pminer.run.MutationVisualizationRunner"
+    ;;
+globalperf)
+    package="com.vmusco.pminer.run.AllMutationsStatsRunner"
+    ;;
+mutopperf)
+    package="com.vmusco.pminer.run.MutationStatsRunner"
+    ;;
+*) 
+    echo "Unknown command $1"
+    help
+    exit
+    ;;
+esac
+
+shift
+java -cp $DIR/../$project/target/*-jar-with-dependencies.jar $package "$@"

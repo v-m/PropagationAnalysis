@@ -1,0 +1,30 @@
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+function help {
+    echo "Availible commands are:"
+    echo "   faultloc   ..."
+    exit
+}
+
+if [ "$#" -eq 0 ]; then
+    echo "Illegal number of parameters"
+    help
+    exit
+fi
+
+project="softwearn"
+
+case "$1" in
+
+faultloc)  
+    package="com.vmusco.softwearn.run.LearningFaultLocalization"
+    ;;
+*) 
+    echo "Unknown command $1"
+    help
+    exit
+    ;;
+esac
+
+shift
+java -cp $DIR/../$project/target/*-jar-with-dependencies.jar $package "$@"

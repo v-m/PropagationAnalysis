@@ -1,0 +1,46 @@
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+function help {
+    echo "Availible commands are:"
+    echo "   createmutation   ..."
+    echo "   importsteimann   ..."
+    echo "   newproject       ..."
+    echo "   runmutants       ..."
+    echo "   stats            ..."
+    exit
+}
+
+if [ "$#" -eq 0 ]; then
+    echo "Illegal number of parameters"
+    help
+    exit
+fi
+
+project="smf"
+
+case "$1" in
+
+createmutation)  
+    package="com.vmusco.smf.run.CreateMutation"
+    ;;
+importsteimann)
+    package="com.vmusco.smf.run.NewSteimannProject"
+    ;;
+newproject)
+    package="com.vmusco.smf.run.NewProject"
+    ;;
+runmutants)
+    package="com.vmusco.smf.run.MutationRunTests"
+    ;;
+stats)
+    package="com.vmusco.smf.run.ProjectTools"
+    ;;
+*) 
+    echo "Unknown command $1"
+    help
+    exit
+    ;;
+esac
+
+shift
+java -cp $DIR/../$project/target/*-jar-with-dependencies.jar $package "$@"
