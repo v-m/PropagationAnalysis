@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.vmusco.pminer.faultlocalization.FaultLocalizationScore;
-import com.vmusco.pminer.faultlocalization.FaultLocators;
 import com.vmusco.pminer.tests.faultloc.FaultLocatorTester.ScoreAndWastedEffort;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.MutationNotRunException;

@@ -2,9 +2,6 @@ package com.vmusco.softminer.run;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -16,18 +13,11 @@ import org.apache.commons.cli.PosixParser;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics.STATE;
 import com.vmusco.smf.testing.TestingInstrumentedCodeHelper;
-import com.vmusco.smf.testing.TestsExecutionListener;
 import com.vmusco.smf.utils.ConsoleTools;
-import com.vmusco.smf.utils.MavenTools;
 import com.vmusco.softminer.graphs.DynamicCallGraphGenerator;
 import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softminer.graphs.GraphStream;
 import com.vmusco.softminer.graphs.persistance.GraphML;
 import com.vmusco.softminer.graphs.persistance.GraphPersistence;
-import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
-import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuildLogic;
-import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;
-import com.vmusco.softminer.sourceanalyzer.graphbuilding.SpoonGraphBuilder;
 
 /**
 * Generate call graphs

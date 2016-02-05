@@ -1,0 +1,37 @@
+%10,1
+\documentclass[]{article}
+
+\usepackage{booktabs}
+\usepackage[margin=0.3in,landscape]{geometry}
+
+\pagenumbering{gobble}
+\clearpage
+\thispagestyle{empty}
+
+\begin{document}
+	
+	\begin{table}[htbp]
+%captionhere
+		\centering
+		%\footnotesize
+		\scriptsize
+		
+		\begin{tabular}{@{}lrrrrrrrrrrrrrrrrrrrrr@{}}
+			
+			\toprule
+			& & & \multicolumn{3}{c}{\#Mutants} & & \multicolumn{5}{c}{Bohner sets} & & \multicolumn{3}{c}{Scores} & & \multicolumn{5}{c}{Sets} \\
+						\cmidrule{4-6} 
+						\cmidrule{8-12}
+						\cmidrule{14-16}
+						\cmidrule{18-22}
+			Project & Ope. &\phantom{}& Valid & Alive & Unbound &\phantom{}& CIS & AIS & CAIS & FPIS & DIS &\phantom{}& P & R & F &\phantom{}& S & C & O & U & D \\
+			
+%tablehere
+		
+			\bottomrule	
+		\end{tabular}
+	\end{table}
+	
+	\pagebreak
+	
+\end{document}

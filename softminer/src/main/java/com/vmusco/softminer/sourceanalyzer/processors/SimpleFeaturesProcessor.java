@@ -5,13 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vmusco.smf.exceptions.MalformedSourcePositionException;
-import com.vmusco.smf.utils.SpoonHelpers;
-import com.vmusco.softminer.graphs.EdgeTypes;
-import com.vmusco.softminer.graphs.NodeMarkers;
-import com.vmusco.softminer.graphs.NodeTypes;
-import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
-
 import spoon.reflect.code.CtFieldAccess;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtClass;
@@ -22,11 +15,15 @@ import spoon.reflect.declaration.CtGenericElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtTypeMember;
-import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.support.reflect.reference.CtTypeParameterReferenceImpl;
+
+import com.vmusco.smf.utils.SpoonHelpers;
+import com.vmusco.softminer.graphs.EdgeTypes;
+import com.vmusco.softminer.graphs.NodeMarkers;
+import com.vmusco.softminer.graphs.NodeTypes;
+import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 
 /**
  *

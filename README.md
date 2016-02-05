@@ -1,4 +1,4 @@
-# ChangePropagation
+# PropagationAnalysis
 
 ## Overview
 Software graphs, mutation testing and propagation estimer tools.
@@ -7,16 +7,16 @@ Those tools are used for my PhD research purposes.
 
 ## Prerequisites
 
-To run programs in this framework: install Java and Maven.
+To run programs in this framework: install **Java** and **Maven**.
 Moreover, install git or svn in order to obtain projects *with tests*.
-Note that this framework is intended to run in Linux operating systems.
+Note that this framework is intended to run on Linux operating systems.
 
 ### First step
-Checkout ChangePropagation and package with maven:
+Checkout ChangePropagation and package with maven (skip tests to speed up the package process):
 
 ```
-$ git checkout https://github.com/v-m/ChangePropagation.git
-$ mvn package
+$ git clone https://github.com/v-m/PropagationAnalysis.git
+$ mvn package -DskipTests
 ```
 
 (optional) Create eclipse projects:
@@ -27,7 +27,7 @@ $ mvn eclipse:eclipse
 
 ## General running
 
-As this project is made of several entry points, a unique script is proposed to ease the running. To run any tool, just invoke ``./run`` in the root folder. Pass as a first parameter the the desired tool (pass no argument to list available tools). Then pass as a second parameter the desired function in the tool. For example, read the rest of this file.
+As this project is made of several entry points, a unique script is proposed to ease the running. To run any tool, just invoke ``./run`` in the root folder. Pass as a first parameter the the desired tool (pass no argument to list available tools). Then pass as a second parameter the desired function in the tool. For example, please read the rest of this file.
 
 ## Tools
 
@@ -46,6 +46,10 @@ It proposes a total of four types of different graphs. It is based on the Spoon 
 
 Tool used to compute some statistics regarding the produces mutants and the software graphs produced with smf and softminer.
 Including: precisions, recall and f-scores.
+
+### Software learning (softwearn)
+
+Tools used to do some basic learning on propagation.
 
 ## Research Papers
 
@@ -162,6 +166,36 @@ Similar options than for ``mutopperf`` can be used. Moreover, the ``-v`` options
 ## Use JavaPDG as a graph data source
 
 Both commands (``mutopperf`` and ``globalperf``) accepts as option ``--javapdg`` (or ``-j``). Those enable to pass as an argument the path to a javapdg database. For ``globalperf``, pass the path to a folder containing subfolders for databases, one for each project (named similarly as the project folders itself). For ``mutopperf``, pass the path to the software database.
+
+## Import Steimann dataset
+
+We used Steimann dataset as part of our research. Here is an easy way to convert [Steimann data](http://www.feu.de/ps/prjs/EzUnit/eval/ISSTA13/) into data usable by PropagationAnalysis tools. Here is an execution example for Jester:
+
+```
+$ wget http://www.feu.de/ps/prjs/EzUnit/eval/ISSTA13/matrices/Jester1.37b%20\(+tests\).7z -O jester.7z
+$ 7z x jester.7z
+$ mv Jester1.37b\ \(+tests\)/ jester
+$ ./run smf importsteimann /tmp/mysoft /tmp/jester/reference.txt /tmp/jester/1-fault/ jparsec
+```
+## Fault Localization
+
+To do fault localization with Steimann dataset:
+
+```
+./run pminer faultloc --graph --steimann-dataset /tmp/mysoft/smf/mutations/main/STEIMANN-1/mutations.xml /tmp/mysoft/graphs/cg_cha.xml
+```
+To obtain a new file with such values, use the stdout redirection (`>`).
+Parameter `--graph` compute also the score using graphs alone.
+Parameter `--steimann-dataset` convert the input data to conform with steimann signatures which are not the sames as ones used in PropagationAnalysis.
+Use `-h` to list all possible options. However, note that this is the expected output of [script](scripts/README.md) related to this part.
+
+### With learning
+
+To apply learning on top of fault localization (learn on a part of the dataset to change the graph weight), use:
+
+```
+./run softwearn faultloc --graph --steimann-dataset /tmp/mysoft/smf/mutations/main/STEIMANN-1/mutations.xml /tmp/mysoft/graphs/cg_cha.xml
+```
 
 ## Dependencies
 

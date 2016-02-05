@@ -11,7 +11,6 @@ import com.vmusco.pminer.analyze.ConsoleDisplayAnalyzer;
 import com.vmusco.pminer.analyze.GraphDisplayAnalyzer;
 import com.vmusco.pminer.analyze.MutantTestAnalyzer;
 import com.vmusco.pminer.impact.ConsequencesExplorer;
-import com.vmusco.pminer.impact.GraphPropagationExplorer;
 import com.vmusco.pminer.impact.GraphPropagationExplorerForTests;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;

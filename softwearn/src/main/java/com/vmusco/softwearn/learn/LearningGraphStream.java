@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.graphstream.graph.Edge;
 
 import com.vmusco.softminer.exceptions.IncompatibleTypesException;
 import com.vmusco.softminer.graphs.EdgeIdentity;
@@ -15,7 +14,6 @@ import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.GraphNodeVisitor;
 import com.vmusco.softminer.graphs.GraphNodeVisitorAdapter;
 import com.vmusco.softminer.graphs.GraphStream;
-import com.vmusco.softwearn.learn.folding.MutationGraphKFold;
 
 /**
  * This graph class adds a layer on top of a Graph to take into consideration weights on edges

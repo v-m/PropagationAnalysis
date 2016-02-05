@@ -1,3 +1,5 @@
+#!/bin/bash
+
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 function help {
@@ -19,7 +21,7 @@ project="pminer"
 
 case "$1" in
 
-faultloc)  
+faultloc)
     package="com.vmusco.pminer.run.FaultLocalization"
     ;;
 displayvisu)
@@ -31,7 +33,7 @@ globalperf)
 mutopperf)
     package="com.vmusco.pminer.run.MutationStatsRunner"
     ;;
-*) 
+*)
     echo "Unknown command $1"
     help
     exit

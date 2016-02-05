@@ -6,7 +6,6 @@ import java.util.Set;
 import com.vmusco.pminer.analyze.MutationStatisticsCollecter;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softwearn.learn.LearningGraph;
 
 public abstract class MutationGraphExplorer {
 	protected Set<MutationStatisticsCollecter> listeners = new HashSet<MutationStatisticsCollecter>();

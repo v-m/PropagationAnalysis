@@ -1,7 +1,6 @@
 package com.vmusco.smf.analysis.persistence;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -10,7 +9,6 @@ import org.jdom2.Attribute;
 import org.jdom2.Element;
 
 import com.vmusco.smf.analysis.MutantIfos;
-import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.TestsExecutionIfos;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;

@@ -19,7 +19,6 @@ import com.vmusco.smf.analysis.ProcessStatistics.STATE;
 import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
 import com.vmusco.smf.instrumentation.EntryMethodInstrumentationProcessor;
 import com.vmusco.smf.instrumentation.StackTracePrintingInstrumentationProcessor;
-import com.vmusco.smf.testing.TestingInstrumentedCodeHelper;
 import com.vmusco.smf.utils.ConsoleTools;
 
 /**

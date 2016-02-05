@@ -1,3 +1,5 @@
+#!/bin/bash
+
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 function help {
@@ -18,7 +20,7 @@ project="softminer"
 
 case "$1" in
 
-mvngengraph)  
+mvngengraph)
     package="com.vmusco.softminer.run.MavenGraphGenerator"
     ;;
 smfgengraph)
@@ -27,7 +29,7 @@ smfgengraph)
 srcgengraph)
     package="com.vmusco.softminer.run.SourceGraphGenerator"
     ;;
-*) 
+*)
     echo "Unknown command $1"
     help
     exit

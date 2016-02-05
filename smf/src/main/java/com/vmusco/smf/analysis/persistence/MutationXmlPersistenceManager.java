@@ -1,10 +1,7 @@
 package com.vmusco.smf.analysis.persistence;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,11 +15,9 @@ import org.jdom2.input.SAXBuilder;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
-import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.mutation.MutatorsFactory;
-import com.vmusco.smf.mutation.SmfMutationOperator;
 import com.vmusco.smf.utils.SourceReference;
 
 public class MutationXmlPersistenceManager extends XMLPersistenceManager<MutationStatistics>{

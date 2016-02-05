@@ -1,7 +1,6 @@
 package com.vmusco.softwearn.tests;
 
 import com.vmusco.softminer.graphs.EdgeIdentity;
-import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softwearn.learn.LearningGraph;
 import com.vmusco.softwearn.learn.LearningGraphStream;
 import com.vmusco.softwearn.learn.learner.ImpactLearner;

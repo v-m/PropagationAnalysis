@@ -2,8 +2,6 @@ package com.vmusco.pminer.run;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,8 +22,6 @@ import com.vmusco.pminer.faultlocalization.FaultLocators;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.exceptions.BadStateException;
-import com.vmusco.smf.exceptions.MutationNotRunException;
-import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.softminer.exceptions.TargetNotFoundException;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.GraphStream;

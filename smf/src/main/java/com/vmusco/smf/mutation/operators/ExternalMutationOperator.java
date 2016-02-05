@@ -2,9 +2,6 @@ package com.vmusco.smf.mutation.operators;
 
 import com.vmusco.smf.mutation.MutationOperator;
 
-import spoon.reflect.declaration.CtElement;
-import spoon.reflect.factory.Factory;
-
 /**
  * This generic mutation operator is used to import mutations from external projects.
  * Do *NOT* use it to mutate with smf or spoon !

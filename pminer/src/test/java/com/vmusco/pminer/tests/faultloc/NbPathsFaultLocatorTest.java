@@ -8,7 +8,6 @@ import com.vmusco.pminer.faultlocalization.FaultLocators;
 import com.vmusco.pminer.tests.faultloc.FaultLocatorTester.ScoreAndWastedEffort;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.MutationNotRunException;
-import com.vmusco.softminer.exceptions.TargetNotFoundException;
 
 public class NbPathsFaultLocatorTest extends FaultLocatorAbstractTest{
 

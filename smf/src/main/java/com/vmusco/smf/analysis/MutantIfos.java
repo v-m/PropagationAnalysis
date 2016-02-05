@@ -3,13 +3,12 @@ package com.vmusco.smf.analysis;
 import java.io.File;
 
 import spoon.reflect.cu.SourcePosition;
-import spoon.support.reflect.declaration.CtElementImpl;
 
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
 import com.vmusco.smf.exceptions.MalformedSourcePositionException;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
-import com.vmusco.smf.utils.SetTools;
+import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.smf.utils.SourceReference;
 
 /**

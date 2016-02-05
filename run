@@ -1,3 +1,5 @@
+#!/bin/bash
+
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 function help {
@@ -17,23 +19,19 @@ fi
 
 case "$1" in
 
-pminer)  
-    echo "Propagation miner"
+pminer)
     script="bin/pminer"
     ;;
-smf)  
-    echo "SMF"
+smf)
     script="bin/smf"
     ;;
-softminer)  
-    echo "Softminer"
+softminer)
     script="bin/softminer"
     ;;
-softwearn)  
-    echo "Softwearn"
+softwearn)
     script="bin/softwearn"
     ;;
-*) 
+*)
     echo "Unknown command $1"
     exit
     ;;

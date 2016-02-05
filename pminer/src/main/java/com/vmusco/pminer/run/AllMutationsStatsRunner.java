@@ -16,10 +16,9 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
+import com.vmusco.pminer.impact.ConsequencesExplorer;
 import com.vmusco.pminer.impact.GraphPropagationExplorerForTests;
 import com.vmusco.pminer.impact.JavapdgPropagationExplorerForTests;
-import com.vmusco.pminer.impact.ConsequencesExplorer;
-import com.vmusco.pminer.impact.GraphPropagationExplorer;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;

@@ -2,8 +2,6 @@ package com.vmusco.softminer.tests;
 
 import org.junit.Test;
 
-import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
-
 public class CallGraphTweakingTests {
 	@Test
 	public void testNonReturnEdgesRemoval() throws Exception {

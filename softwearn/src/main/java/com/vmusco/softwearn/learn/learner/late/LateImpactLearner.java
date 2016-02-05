@@ -1,7 +1,5 @@
 package com.vmusco.softwearn.learn.learner.late;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,8 +9,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softminer.graphs.GraphVisitorValidator;
-import com.vmusco.softminer.graphs.algorithms.ShortestPath;
 import com.vmusco.softminer.graphs.algorithms.ShortestPath;
 import com.vmusco.softwearn.learn.LearningGraph;
 import com.vmusco.softwearn.learn.LearningKGraph;

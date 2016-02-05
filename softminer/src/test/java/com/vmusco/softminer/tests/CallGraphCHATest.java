@@ -2,8 +2,6 @@ package com.vmusco.softminer.tests;
 
 import org.junit.Test;
 
-import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
-
 /**
 *
 * @author Vincenzo Musco - http://www.vmusco.com

@@ -1,7 +1,5 @@
 package com.vmusco.smf.analysis.persistence;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

@@ -3,8 +3,6 @@ package com.vmusco.pminer.faultlocalization;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vmusco.smf.exceptions.BadStateException;
-
 /**
  * This class defines factory methods for getting FL techniques to use
  * @author Vincenzo Musco - http://www.vmusco.com

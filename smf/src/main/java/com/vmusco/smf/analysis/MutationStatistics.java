@@ -9,10 +9,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
@@ -27,6 +25,7 @@ import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutationOperator;
+import com.vmusco.smf.mutation.SmfMutationOperator;
 import com.vmusco.smf.utils.InterruptionManager;
 import com.vmusco.smf.utils.SetTools;
 import com.vmusco.smf.utils.SourceReference;
@@ -234,7 +233,7 @@ public class MutationStatistics implements Serializable {
 	}
 
 	public String getConfigFileResolved(){
-		return resolveName(this.DEFAULT_CONFIGFILE);
+		return resolveName(MutationStatistics.DEFAULT_CONFIGFILE);
 	}
 
 	public String getMutantFileResolved(String mutid){

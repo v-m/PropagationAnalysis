@@ -1,3 +1,5 @@
+#!/bin/bash
+
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 function help {
@@ -16,10 +18,10 @@ project="softwearn"
 
 case "$1" in
 
-faultloc)  
+faultloc)
     package="com.vmusco.softwearn.run.LearningFaultLocalization"
     ;;
-*) 
+*)
     echo "Unknown command $1"
     help
     exit

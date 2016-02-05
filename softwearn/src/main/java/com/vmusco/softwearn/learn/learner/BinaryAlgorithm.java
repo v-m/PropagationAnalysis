@@ -7,11 +7,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
-import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softwearn.learn.LearningGraph;
-import com.vmusco.softwearn.learn.folding.MutationGraphKFold;
 
 public class BinaryAlgorithm extends ImpactLearner{
 	private static final Logger logger = LogManager.getFormatterLogger(BinaryAlgorithm.class.getSimpleName());

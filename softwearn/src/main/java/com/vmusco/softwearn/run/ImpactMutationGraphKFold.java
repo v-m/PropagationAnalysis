@@ -13,7 +13,6 @@ import com.vmusco.pminer.analyze.MutantTestProcessingAdapter;
 import com.vmusco.pminer.analyze.MutationStatisticsCollecter;
 import com.vmusco.pminer.analyze.PRFStatistics;
 import com.vmusco.pminer.impact.ConsequencesExplorer;
-import com.vmusco.pminer.impact.GraphPropagationExplorer;
 import com.vmusco.pminer.impact.GraphPropagationExplorerForTests;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.utils.ConsoleTools;

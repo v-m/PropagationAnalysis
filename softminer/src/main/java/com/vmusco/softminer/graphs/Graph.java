@@ -7,11 +7,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.graphstream.algorithm.Dijkstra;
-import org.graphstream.graph.Edge;
-import org.graphstream.graph.Node;
-import org.graphstream.graph.Path;
-import org.graphstream.graph.implementations.SingleGraph;
 
 import com.vmusco.smf.utils.SourceReference;
 import com.vmusco.softminer.exceptions.IncompatibleTypesException;
@@ -21,6 +16,7 @@ import com.vmusco.softminer.exceptions.IncompatibleTypesException;
  * @author Vincenzo Musco - http://www.vmusco.com
  *
  */
+@SuppressWarnings("unused")
 public abstract class Graph {
 	private static final Logger logger = LogManager.getFormatterLogger(Graph.class.getSimpleName());
 	protected Object graph;

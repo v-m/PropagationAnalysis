@@ -2,14 +2,10 @@ package com.vmusco.smf.analysis;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
 import com.vmusco.smf.exceptions.BadStateException;
-import com.vmusco.smf.exceptions.MutationNotRunException;
-import com.vmusco.smf.utils.SetTools;
 
 /**
  * This class contains all informations related to a run 

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 function help {
@@ -20,7 +22,7 @@ project="smf"
 
 case "$1" in
 
-createmutation)  
+createmutation)
     package="com.vmusco.smf.run.CreateMutation"
     ;;
 importsteimann)
@@ -35,7 +37,7 @@ runmutants)
 stats)
     package="com.vmusco.smf.run.ProjectTools"
     ;;
-*) 
+*)
     echo "Unknown command $1"
     help
     exit
