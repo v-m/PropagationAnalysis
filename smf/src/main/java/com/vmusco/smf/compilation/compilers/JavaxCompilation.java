@@ -1,6 +1,5 @@
 package com.vmusco.smf.compilation.compilers;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.StringWriter;
 import java.net.URI;
@@ -13,15 +12,14 @@ import java.util.Map;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
+import javax.tools.JavaCompiler.CompilationTask;
 import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
-import javax.tools.JavaCompiler.CompilationTask;
 
 import com.vmusco.smf.compilation.Compilation;
 import com.vmusco.smf.compilation.CompiledObjectFileObject;
-import com.vmusco.smf.compilation.compilers.JavaSourceFromString;
 import com.vmusco.smf.compilation.VirtualFileObjectManager;
 
 public class JavaxCompilation extends Compilation{
@@ -152,34 +150,37 @@ public class JavaxCompilation extends Compilation{
 	public String getErrorsWhileLastBuild(int errorNr) {
 		Diagnostic<?> diagnostic = diagn.getDiagnostics().get(errorNr);
 		
-		String ret = "";
+		String ret = "-- ";
 		
-		if(diagnostic.getCode() != null){
-			ret += diagnostic.getCode();
-			ret += "\n";
-		}
 		if(diagnostic.getKind() != null){
 			ret += diagnostic.getKind().toString();
-			ret += "\n";
 		}
 		
-		ret += Long.toString(diagnostic.getPosition());
-		ret += "\n";
-		ret += Long.toString(diagnostic.getStartPosition());
-		ret += "\n";
-		ret += Long.toString(diagnostic.getEndPosition());
-		ret += "\n";
+		if(diagnostic.getCode() != null){
+			ret += " (";
+			ret += diagnostic.getCode();
+			ret += ")";
+		}
 		
 		if(diagnostic.getSource() != null){
+			ret += " in ";
 			ret += diagnostic.getSource().toString();
-			ret += "\n";
 		}
 		
+		ret += " @ position ";
+		ret += Long.toString(diagnostic.getPosition());
+		ret += " (";
+		ret += Long.toString(diagnostic.getStartPosition());
+		ret += ":";
+		ret += Long.toString(diagnostic.getEndPosition());
+		ret += ")";
+		
 		if(diagnostic.getMessage(null) != null){
+			ret += ":\n";
 			ret += diagnostic.getMessage(null);
 			ret += "\n";
 		}
-		ret += "=====\n";
+		ret += "=====";
 		
 		return ret;
 	}
