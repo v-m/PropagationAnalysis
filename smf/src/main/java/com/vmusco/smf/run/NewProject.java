@@ -42,10 +42,10 @@ public class NewProject extends GlobalTestRunning {
 		Option opt;
 		
 		// OPTIONS FOR PHASE 1
-		opt = new Option("C", "link-classpath", true, "use this classpath instead of determining it automatically ("+useAsSepString+")");
+		opt = new Option("C", "link-classpath", true, "use this classpath instead of determining it automatically ("+useAsSepString+"). Folders are resolved in all jar contained in root of folder.");
 		opt.setArgName("path");
 		options.addOption(opt);
-		opt = new Option("c", "copy-classpath", true, "copy the manualy specified classpath instead of determining it automatically ("+useAsSepString+")");
+		opt = new Option("c", "copy-classpath", true, "copy the manualy specified classpath instead of determining it automatically ("+useAsSepString+"). Folders are resolved in all jar contained in root of folder.");
 		opt.setArgName("path");
 		options.addOption(opt);
 		opt = new Option(null, "no-classpath", false, "do not determine classpath automatically (no classpath)");
@@ -156,7 +156,17 @@ public class NewProject extends GlobalTestRunning {
 					Set<String> set = new HashSet<>();
 					
 					for(String s : cpInput.split(File.pathSeparator)){
-						set.add(s);
+						File tmpdep = new File(s);
+						
+						if(tmpdep.isDirectory()){
+							for(File ff : tmpdep.listFiles()){
+								if(ff.isFile() && ff.getName().endsWith(".jar")){
+									set.add(ff.getAbsolutePath());
+								}
+							}
+						}else{
+							set.add(s);
+						}
 					}
 	
 					ps.setOriginalClasspath(set.toArray(new String[0]));
