@@ -28,6 +28,7 @@ import com.vmusco.smf.analysis.TestsExecutionIfos;
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
 import com.vmusco.smf.analysis.persistence.XMLPersistence;
 import com.vmusco.smf.buildtest.BuildingTest;
+import com.vmusco.smf.compilation.compilers.JavaxCompilation;
 import com.vmusco.smf.exceptions.HashClashException;
 import com.vmusco.smf.exceptions.NotValidMutationException;
 import com.vmusco.smf.mutation.operators.KingOffutt91.AbsoluteValueInsertionMutator;
@@ -201,7 +202,7 @@ public class MutationTest {
 		hash.add("8c4c7c6d6449d208a7451f9aeb224818");
 		
 		try {
-			Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), false);
+			Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), false, 8);
 		} catch (HashClashException e) {
 			return;
 		}
@@ -221,7 +222,7 @@ public class MutationTest {
 		Factory factory = SpoonHelpers.obtainFactory();
 		Object[] r = getMutationTestingObject(factory);
 
-		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), false);
+		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), false, 8);
 	}
 
 	/**
@@ -239,7 +240,7 @@ public class MutationTest {
 		Set<String> hash = new HashSet<String>();
 		hash.add("ab595c23fc91e4d344484f2cb6e8af13");
 		
-		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), false);
+		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), false, 8);
 	}
 	
 	/**
@@ -254,7 +255,7 @@ public class MutationTest {
 		Factory factory = SpoonHelpers.obtainFactory();
 		Object[] r = getMutationTestingObject(factory);
 		
-		MutantIfos pm = Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), false);
+		MutantIfos pm = Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), false, 8);
 		Assert.assertEquals("8c4c7c6d6449d208a7451f9aeb224818", pm.getHash());
 		Assert.assertEquals("i", pm.getMutationFrom());
 		Assert.assertEquals("i >= 0 ? i : i * -1", pm.getMutationTo());
@@ -293,7 +294,7 @@ public class MutationTest {
 
 		// Build project
 		System.out.print("Building.....");
-		ps.compileWithSpoon();
+		ps.build(new JavaxCompilation());
 		ProcessStatistics.saveState(ps);
 
 		System.out.println("Running tests...");
@@ -330,7 +331,7 @@ public class MutationTest {
 
 		// Build project
 		System.out.print("Building.....");
-		ps.compileWithSpoon();
+		ps.build(new JavaxCompilation());
 		ProcessStatistics.saveState(ps);
 
 		System.out.println("Running tests...");
@@ -340,7 +341,7 @@ public class MutationTest {
 		MutationStatistics ms = new MutationStatistics(ps, new ArithmeticMutatorOperator());
 		ms.loadOrCreateMutants(true, null, -1, 0, true);
 		
-		TestsExecutionIfos runTestCases = Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath("mutant_0"), ps.getTestClasses(), null);
+		TestsExecutionIfos runTestCases = Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath("mutant_0"), ps.getTestClasses(), null, null);
 		ms.getMutationStats("mutant_0").setExecutedTestsResults(runTestCases);
 		
 		File ff = new File(ms.getMutantFileResolved("mutation_0"));

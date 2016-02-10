@@ -8,6 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.compilation.compilers.JavaxCompilation;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
@@ -46,6 +47,7 @@ public class DynamicCallGraphGeneration {
 		ProcessStatistics.saveState(ps);
 
 		ps.instrumentAndBuildProjectAndTests(
+			new JavaxCompilation(),
 			new AbstractInstrumentationProcessor[]{ 
 				new EntryMethodInstrumentationProcessor(),
 			}

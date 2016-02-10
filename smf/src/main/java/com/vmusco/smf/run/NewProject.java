@@ -16,6 +16,8 @@ import org.apache.commons.cli.PosixParser;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics.STATE;
+import com.vmusco.smf.compilation.Compilation;
+import com.vmusco.smf.compilation.compilers.JavaxCompilation;
 import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
 import com.vmusco.smf.instrumentation.EntryMethodInstrumentationProcessor;
 import com.vmusco.smf.instrumentation.StackTracePrintingInstrumentationProcessor;
@@ -62,12 +64,20 @@ public class NewProject extends GlobalTestRunning {
 		
 		// OPTIONS FOR BOTH PHASES
 		opt = new Option("r", "ressources", true, "ressources used for testing ("+useAsSepString+")");
+		opt.setArgName("path");
 		options.addOption(opt);
 		opt = new Option("s", "sources", true, "sources to compile ("+useAsSepString+" - default: "+ProcessStatistics.DEFAULT_SOURCE_FOLDER+")");
+		opt.setArgName("path");
 		options.addOption(opt);
 		opt = new Option("t", "tests", true, "tests to compile ("+useAsSepString+" - default: "+ProcessStatistics.DEFAULT_TEST_FOLDER+")");
 		options.addOption(opt);
 		opt = new Option(null, "no-tests", false, "Defines there is no tests in this project (debugging purposes)");
+		options.addOption(opt);
+		opt = new Option(null, "compliance", true, "Java source code compliance level (1,2,3,4,5, 6, 7 or 8). (default: 8)");
+		opt.setArgName("compliance");
+		options.addOption(opt);
+		opt = new Option(null, "jre", true, "Set a different jre working folder than the one present in the system classpath (eg. /opt/altjre/bin/)");
+		opt.setArgName("path");
 		options.addOption(opt);
 		
 		
@@ -115,6 +125,18 @@ public class NewProject extends GlobalTestRunning {
 			if(!cmd.hasOption("do-not-copy")){
 				ConsoleTools.write("Copying files to project-local copies...\n");
 				ps.createLocalCopies(ProcessStatistics.SOURCES_COPY, ProcessStatistics.CLASSPATH_PACK);
+			}
+			
+			if(cmd.hasOption("compliance")){
+				int compval = Integer.parseInt(cmd.getOptionValue("compliance"));
+				ConsoleTools.write(String.format("Compliance level set to %d...\n", compval));
+				ps.setComplianceLevel(compval);
+			}
+			
+			if(cmd.hasOption("jre")){
+				String jre = cmd.getOptionValue("jre");
+				ConsoleTools.write(String.format("Using JRE at %s...\n", jre));
+				ps.setAlternativeJre(jre);
 			}
 			
 			if(!cmd.hasOption("classpath") && !cmd.hasOption("no-classpath")){
@@ -195,10 +217,12 @@ public class NewProject extends GlobalTestRunning {
 			System.out.println();
 			boolean ret = false;
 			
+			Compilation c = new JavaxCompilation();
+			
 			if(aips.length > 0){
-				ret = ps.instrumentAndBuildProjectAndTests(aips);
+				ret = ps.instrumentAndBuildProjectAndTests(c, aips);
 			}else{
-				ret = ps.compileWithSpoon();
+				ret = ps.build(c);
 			}
 			
 			System.out.println(ret);

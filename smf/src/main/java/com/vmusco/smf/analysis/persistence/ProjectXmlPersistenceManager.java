@@ -24,6 +24,7 @@ public class ProjectXmlPersistenceManager extends XMLPersistenceManager<ProcessS
 	protected static String PROJECT_IN_2 = "project-root";
 	protected static String ORIGINAL_PROJECT_IN_2 = "originalproject-root";
 	protected static String PROJECT_NAME_2 = "project-name";
+	protected static String COMPLIANCE_LEVEL = "compliance-level";
 	protected static String CURRENT_STATE_2 = "state";					// RUN
 	protected static String CLASSPATH_2 = "classpath";					// RUN
 	protected static String COPY_CP_2 = "local";					// RUN
@@ -81,6 +82,10 @@ public class ProjectXmlPersistenceManager extends XMLPersistenceManager<ProcessS
 		if(global.getChild(PROJECT_IN_2) != null){
 			datasetRepository = global.getChild(PROJECT_IN_2).getText();
 			ps.setProjectIn(datasetRepository);
+		}
+		
+		if(global.getChild(COMPLIANCE_LEVEL) != null){
+			ps.setComplianceLevel(Integer.parseInt(global.getChild(COMPLIANCE_LEVEL).getText()));
 		}
 		
 		ps.setSkipMvnClassDetermination(config.getAttribute(SKIP_MVN_CLASS_2).getValue().equals("true")?true:false);
@@ -258,6 +263,11 @@ public class ProjectXmlPersistenceManager extends XMLPersistenceManager<ProcessS
 			tmp.setText(ps.getProjectName());
 			run.addContent(tmp);
 		}
+		
+		
+		tmp = new Element(COMPLIANCE_LEVEL);
+		tmp.setText(Integer.toString(ps.getComplianceLevel()));
+		run.addContent(tmp);
 
 		if(ps.getTestTimeOut() > 0){
 			tmp = new Element(HANGTIMEOUT_2);

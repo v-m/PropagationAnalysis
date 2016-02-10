@@ -45,6 +45,7 @@ import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.compilation.ClassFileUtil;
 import com.vmusco.smf.compilation.Compilation;
+import com.vmusco.smf.compilation.compilers.JavaxCompilation;
 import com.vmusco.smf.exceptions.BadObjectTypeException;
 import com.vmusco.smf.exceptions.HashClashException;
 import com.vmusco.smf.exceptions.NotValidMutationException;
@@ -180,7 +181,7 @@ public final class Mutation {
 	 * @throws HashClashException
 	 * @throws NotValidMutationException
 	 */
-	public static MutantIfos probeMutant(CtElement e, CtElement m, TargetObtainer to, Factory factory, Set<String> hashes, String[] testingClassPath, boolean stackTraceInstrumentation) throws IOException, NoSuchAlgorithmException, HashClashException, NotValidMutationException{
+	public static MutantIfos probeMutant(CtElement e, CtElement m, TargetObtainer to, Factory factory, Set<String> hashes, String[] testingClassPath, boolean stackTraceInstrumentation, int compliance) throws IOException, NoSuchAlgorithmException, HashClashException, NotValidMutationException{
 		CtClass<?> theClass = findAssociatedClass(e);
 		CtElementImpl toReplace = (CtElementImpl) to.determineTarget(e);
 		CtElementImpl replaceWith = (CtElementImpl) m;
@@ -233,8 +234,9 @@ public final class Mutation {
 		}
 
 		// Compile it...
-		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
-		Map<String, byte[]> built = Compilation.compilesUsingJavax(theClass, SpoonHelpers.generateAssociatedClassContent(theClass), testingClassPath, diagnostics);
+		JavaxCompilation c = new JavaxCompilation();
+		DiagnosticCollector<JavaFileObject> diagnostics = c.getDiagnosticCollector(); 
+		Map<String, byte[]> built = c.buildInMemory(theClass.getQualifiedName(), SpoonHelpers.generateAssociatedClassContent(theClass), testingClassPath, compliance);
 
 		File bc = new File(tmpf, "bytecode");
 		if(built != null){
@@ -432,7 +434,8 @@ public final class Mutation {
 							factory,
 							mutHashs,
 							ps.getTestingClasspath(),
-							stackTraceInstrumentation);
+							stackTraceInstrumentation,
+							ps.getComplianceLevel());
 
 					if(tmpmi != null){
 						String mutationid = MUTANT_FILE_PREFIX+mutantcounter++;

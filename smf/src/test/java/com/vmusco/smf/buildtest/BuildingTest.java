@@ -15,6 +15,8 @@ import spoon.reflect.declaration.CtClass;
 import com.vmusco.smf.TestingTools;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.compilation.Compilation;
+import com.vmusco.smf.compilation.compilers.JavaxCompilation;
+import com.vmusco.smf.compilation.compilers.SpoonCompilation;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
@@ -36,10 +38,56 @@ public class BuildingTest {
 
 		File f = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
 		File tmpf = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
+		f.delete();
+		f.mkdir();
 		f.deleteOnExit();
 		tmpf.deleteOnExit();
 
-		Compilation.compileUsingSpoon(new String[]{src.getAbsolutePath()}, new String[]{}, f.getAbsolutePath(), tmpf.getAbsolutePath());
+		Compilation compilation = new SpoonCompilation(tmpf.getAbsolutePath());
+		Assert.assertTrue(compilation.buildInDirectory(new File[]{src}, f, new String[]{}, 8));
+
+		File test = new File(f, TestingTools.getTestPackageFolders(com.vmusco.smf.testclasses.simple.Class1.class, true));
+		Assert.assertTrue(test.exists());
+		Assert.assertTrue(test.isDirectory());
+		Assert.assertEquals(1, test.list().length);
+
+		Set<String> s = new HashSet<>();
+		for(String fn : test.list()){
+			s.add(fn);
+		}
+
+		String[] exp = new String[]{"Class1.class"};
+
+		for(String fn : exp){
+			Assert.assertTrue(s.remove(fn));
+		}
+
+		Assert.assertEquals(0, s.size());
+	}
+	
+	/**
+	 * Test the Spoon compilation. Test only if it create the hierarchy and all needed files on compilation (content not tests)
+	 * @throws IOException
+	 */
+	@Test
+	public void simpleJavaXToFileBuildTest() throws IOException{
+		File src = prepareSourceFolder();
+		System.out.println(src.getAbsolutePath());
+		System.out.println(TestingTools.getTestClassForCurrentProject(com.vmusco.smf.testclasses.simple.Class1.class)[0]);
+
+		File f = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
+		File tmpf = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
+		f.delete();
+		f.mkdir();
+		f.deleteOnExit();
+		tmpf.deleteOnExit();
+		
+		System.out.println("File produced in "+f.getAbsolutePath());
+
+		Compilation compilation = new JavaxCompilation();
+		Assert.assertTrue(compilation.buildInDirectory(new File[]{src}, f, new String[]{}, 8));
+
+		//Compilation.compileUsingSpoon(new String[]{src.getAbsolutePath()}, new String[]{}, f.getAbsolutePath(), tmpf.getAbsolutePath(), 8);
 		File test = new File(f, TestingTools.getTestPackageFolders(com.vmusco.smf.testclasses.simple.Class1.class, true));
 		Assert.assertTrue(test.exists());
 		Assert.assertTrue(test.isDirectory());
@@ -64,7 +112,7 @@ public class BuildingTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void simpleJavaXBuildTest() throws IOException{
+	public void simpleJavaXInMemoryBuildTest() throws IOException{
 		File src = prepareSourceFolder();
 
 		System.out.println(src.getAbsolutePath());
@@ -73,7 +121,8 @@ public class BuildingTest {
 		CtClass<?> ce = SpoonHelpers.getClassElement(new String[]{src.getAbsolutePath()}, null, com.vmusco.smf.testclasses.simple.Class1.class.getCanonicalName());
 
 		Assert.assertNotNull(ce);
-		Map<String, byte[]> comp = Compilation.compilesUsingJavax(ce, SpoonHelpers.generateAssociatedClassContent(ce), new String[]{});
+		Compilation compilation = new JavaxCompilation();
+		Map<String, byte[]> comp = compilation.buildInMemory(ce.getQualifiedName(), SpoonHelpers.generateAssociatedClassContent(ce), new String[]{}, 8);
 
 		Assert.assertEquals(1, comp.size());
 		String k = comp.keySet().iterator().next();
@@ -104,8 +153,9 @@ public class BuildingTest {
 		ProcessStatistics.saveState(ps);
 
 		// Build project
-		System.out.print("Building.....");
-		ps.compileWithSpoon();
+		Compilation c = new JavaxCompilation();
+		System.out.println("Building.....");
+		ps.build(c);
 		ProcessStatistics.saveState(ps);
 
 		System.out.println("Running tests...");
@@ -135,7 +185,7 @@ public class BuildingTest {
 		ps.createLocalCopies(ProcessStatistics.SOURCES_COPY, ProcessStatistics.CLASSPATH_PACK);
 		ProcessStatistics.saveState(ps);
 
-		ps.instrumentAndBuildProjectAndTests(
+		ps.instrumentAndBuildProjectAndTests(new JavaxCompilation(),
 				new AbstractInstrumentationProcessor[]{ 
 						new EntryMethodInstrumentationProcessor(),
 				}
@@ -146,6 +196,7 @@ public class BuildingTest {
 
 	@Test
 	public void testProcessStatisticsInstrumentation() throws Exception{
+		Compilation c = new JavaxCompilation();
 		File src = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
 		src.delete();
 		System.out.println(src.getAbsolutePath());
@@ -166,8 +217,8 @@ public class BuildingTest {
 		ProcessStatistics.saveState(ps);
 
 		// Build project
-		System.out.print("Building.....");
-		ps.compileWithSpoon();
+		System.out.println("Building.....");
+		ps.build(c);
 		ProcessStatistics.saveState(ps);
 
 		System.out.println("Running tests...");

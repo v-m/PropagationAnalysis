@@ -147,11 +147,11 @@ public final class Testing {
 		return getCurrentVMClassPath(null);
 	}
 
-	public static TestsExecutionIfos runTestCases(String projectIn, String[] classpath, String[] testClasses, TestsExecutionListener tel) throws IOException{
-		return runTestCases(projectIn, classpath, testClasses, -1, tel);
+	public static TestsExecutionIfos runTestCases(String projectIn, String[] classpath, String[] testClasses, TestsExecutionListener tel, String alternativeJre) throws IOException{
+		return runTestCases(projectIn, classpath, testClasses, -1, tel, alternativeJre);
 	}
 	
-	public static TestsExecutionIfos runTestCases(String projectIn, String[] classpath, String[] testClasses, int timeout, TestsExecutionListener tel) throws IOException{
+	public static TestsExecutionIfos runTestCases(String projectIn, String[] classpath, String[] testClasses, int timeout, TestsExecutionListener tel, String alternativeJre) throws IOException{
 		Set<String> tests = new HashSet<>();
 		Set<String> failing = new HashSet<>();
 		Set<String> ignored = new HashSet<>();
@@ -186,7 +186,7 @@ public final class Testing {
 				ExecutorService executor = Executors.newFixedThreadPool(2);
 				String currentTestCase = null;
 
-				String[] cmd = buildExecutionPathWithInstrumentationOptions(TestExecutor.class, aTest, classpath, hangingTests.toArray(new String[0]));
+				String[] cmd = buildExecutionPathWithInstrumentationOptions(alternativeJre, TestExecutor.class, aTest, classpath, hangingTests.toArray(new String[0]));
 				//String[] cmd = buildExecutionPath(TestExecutor.class, aTest, classpath, hangingTests.toArray(new String[0]));
 				
 				String s = "";
@@ -365,9 +365,14 @@ public final class Testing {
 		return tei;
 	}
 	
-	private static String[] buildExecutionPath(Class<?> classToRun, String testClassToRun, String[] classpath, String... testcasesToIgnores){
+	private static String[] buildExecutionPath(String jrebin, Class<?> classToRun, String testClassToRun, String[] classpath, String... testcasesToIgnores){
 		List<String> cmd = new ArrayList<String>();
-		cmd.add("java");
+		if(jrebin != null){
+			cmd.add(String.format("%s%cjava", jrebin, File.separatorChar));
+		}else{
+			cmd.add("java");
+		}
+				
 		cmd.add("-cp");
 		
 		String cpp = "";
@@ -388,7 +393,11 @@ public final class Testing {
 		return cmd.toArray(new String[0]);
 	}
 	
-	private static String[] buildExecutionPathWithInstrumentationOptions(Class<?> classToRun, String testClassToRun, String[] classpath, String... testcasesToIgnores){
+	private static String[] buildExecutionPath(Class<?> classToRun, String testClassToRun, String[] classpath, String... testcasesToIgnores){
+		return buildExecutionPath(null, classToRun, testClassToRun, classpath, testcasesToIgnores);
+	}
+	
+	private static String[] buildExecutionPathWithInstrumentationOptions(String jrebin, Class<?> classToRun, String testClassToRun, String[] classpath, String... testcasesToIgnores){
 		List<String> ret = new ArrayList<>();
 		
 		for(String a : testcasesToIgnores){
@@ -399,7 +408,11 @@ public final class Testing {
 		ret.add(TestExecutor.INSTRU_OPT+"exit="+(TestingInstrumentedCodeHelper.isLeavingPrinting()?"yes":"no"));
 		ret.add(TestExecutor.INSTRU_OPT+"stacktraces="+(TestingInstrumentedCodeHelper.isStacktracePrinting()?"yes":"no"));
 		
-		return buildExecutionPath(classToRun, testClassToRun, classpath, ret.toArray(new String[0]));
+		return buildExecutionPath(jrebin, classToRun, testClassToRun, classpath, ret.toArray(new String[0]));
+	}
+	
+	private static String[] buildExecutionPathWithInstrumentationOptions(Class<?> classToRun, String testClassToRun, String[] classpath, String... testcasesToIgnores){
+		return buildExecutionPathWithInstrumentationOptions(null, classToRun, testClassToRun, classpath, testcasesToIgnores);
 	}
 
 	private static boolean addIfPermited(String line, String[] testclasses, Set<String> list) {

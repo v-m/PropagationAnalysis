@@ -16,6 +16,7 @@ import org.tmatesoft.svn.core.wc2.SvnTarget;
 import org.tmatesoft.svn.core.wc2.SvnUpdate;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
+import com.vmusco.smf.compilation.compilers.JavaxCompilation;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.testing.TestCasesProcessor;
 
@@ -76,7 +77,7 @@ public class CollectionsProjectTest {
 		Assert.assertEquals(5, ps.getClasspath().length);
 		Assert.assertEquals(5, new File(ps.resolveThis(ps.getCpLocalFolder())).list().length);
 		
-		Assert.assertTrue(ps.compileWithSpoon());
+		Assert.assertTrue(ps.build(new JavaxCompilation()));
 
 		ps.performFreshTesting(null);
 		Assert.assertEquals(18, TestCasesProcessor.getNbFromAnnotations());

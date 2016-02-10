@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.TestsExecutionIfos;
+import com.vmusco.smf.compilation.compilers.JavaxCompilation;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
@@ -26,6 +27,7 @@ public class ProcessStatisticsTests {
 		
 		ProcessStatistics ps = new ProcessStatistics(ProcessStatistics.SOURCES_COPY, f.getAbsolutePath());
 		ps.createWorkingDir();
+		System.out.println(ps.getClass().getClassLoader().getResource("fakeproj/"));
 		ps.setProjectIn(ps.getClass().getClassLoader().getResource("fakeproj/").getFile());		
 		ps.setProjectName("My Fake Project");
 		ps.setOriginalClasspath(Testing.getCurrentVMClassPath());
@@ -51,9 +53,8 @@ public class ProcessStatisticsTests {
 		Testing.MIN_TEST_TIMEOUT = 1;
 		Testing.MAX_TEST_TIMEOUT = 3;
 		
-		
 		Assert.assertNull(ps.getTestExecutionResult());
-		Assert.assertTrue(ps.compileWithSpoon());
+		Assert.assertTrue(ps.build(new JavaxCompilation()));
 		
 		ps.performFreshTesting(null);		
 		
