@@ -42,7 +42,10 @@ public class NewProject extends GlobalTestRunning {
 		Option opt;
 		
 		// OPTIONS FOR PHASE 1
-		opt = new Option("c", "classpath", true, "use this classpath instead of determining it automatically ("+useAsSepString+")");
+		opt = new Option("C", "link-classpath", true, "use this classpath instead of determining it automatically ("+useAsSepString+")");
+		opt.setArgName("path");
+		options.addOption(opt);
+		opt = new Option("c", "copy-classpath", true, "copy the manualy specified classpath instead of determining it automatically ("+useAsSepString+")");
 		opt.setArgName("path");
 		options.addOption(opt);
 		opt = new Option(null, "no-classpath", false, "do not determine classpath automatically (no classpath)");
@@ -139,22 +142,29 @@ public class NewProject extends GlobalTestRunning {
 				ps.setAlternativeJre(jre);
 			}
 			
-			if(!cmd.hasOption("classpath") && !cmd.hasOption("no-classpath")){
+			if(!cmd.hasOption("link-classpath") && !cmd.hasOption("copy-classpath") && !cmd.hasOption("no-classpath")){
 				ps.setCpLocalFolder(ProcessStatistics.CLASSPATH_PACK);
 				ps.setSkipMvnClassDetermination(false);
 				ps.exportClassPath();
 			}else{
 				ps.setSkipMvnClassDetermination(true);
-				if(cmd.hasOption("classpath")){
+				ps.setCpLocalFolder(null);
+				
+				if(cmd.hasOption("link-classpath") || cmd.hasOption("copy-classpath")){
+					String cpInput = cmd.hasOption("link-classpath")?cmd.getOptionValue("link-classpath"):cmd.getOptionValue("copy-classpath");
+					
 					Set<String> set = new HashSet<>();
 					
-					for(String s : cmd.getOptionValue("classpath").split(File.pathSeparator)){
+					for(String s : cpInput.split(File.pathSeparator)){
 						set.add(s);
 					}
 	
 					ps.setOriginalClasspath(set.toArray(new String[0]));
+					
+					if(!cmd.hasOption("link-classpath")){
+						ps.copyOriginalClasspathIn(ProcessStatistics.CLASSPATH_PACK);
+					}
 				}
-				ps.setCpLocalFolder(null);
 			}
 			
 			ps.setProjectName(cmd.getArgs()[1]);

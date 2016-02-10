@@ -61,8 +61,13 @@ This framework is used in the following papers:
 
 All commands can take the ``-h`` or ``--help`` option which will give the list of possible options for the command.
 
-### Create project, mutants and run tests
+### Working with projects
 
+#### Create project
+
+This framework work in its local folder. Thus the first step is to create create all folders and a configuration file used by the framework tools. Note the directory is built to work on the computer which created it. Some parameters should require manual updating if the user want to run some tools on a working directory that has been moved to another environment.
+
+##### Start from a maven project
 In a new terminal, checkout a project and switch to the desired version (here we consider the Apache Common Lang rev. 6965455):
 
 ```
@@ -78,13 +83,34 @@ Create a new project
 $ ./run smf newproject /tmp/myproject commons-lang /tmp/commons-lang/
 ```
 
-This will create all folders and a configuration file used by the framework tools. Note the directory is built to work on the computer which created it. Some parameters should require manual updating if the user want to run some tools on a working directory that has been moved to another environment.
+##### Start from a maven project - old Java version
 
 If the project require an old version of Java, you need to install the required jre and run the command using `--compliance <nr>` and `--jre <path_to_bin>`. As an example, if my project require Java 1.6 and I have installed the jre in `/usr/lib/jvm/java-6-jre/jre`, i can use (note the addition of `bin` to the jre path!):
 
 ```
 $ ./run smf newproject /tmp/myproject commons-lang /tmp/commons-lang --compliance 6 --jre /usr/lib/jvm/java-6-jre/jre/bin/
 ```
+
+##### Start from any other project
+
+If the classpath dependencies cannot be automatized using maven, you can manually specify the dependencies requires to build and run the project. Let imagine we checkout a non maven project in `/tmp/asoftware`. This project structure is:
+
+- `/tmp/asoftware`: our software
+ - `source`: folder containing sources files
+ - `tests`: folder containing tests files
+ - `lib`: folder containing external requires jars
+  - `dep1.jar`: a first dependency
+  - `dep2.jar`: a second dependency
+ - `ress`: folder containing resources for testing
+
+A working project can be created using:
+
+```
+./run smf newproject /tmp/myproject software_name /tmp/asoftware -s source -t tests -c /tmp/asoftware/lib/dep1.jar:/tmp/asoftware/lib/dep2.jar -r ress --compliance 6 --jre /usr/lib/jvm/java-6-jre/jre/bin/
+```
+Using the `-c` flag will copy all the dependencies in the working directory. To link external dependencies without copying it use `-C` instead. Moreover, if there is no dependencies, use the `-no-classpath` flag to skip any class path definition.
+
+#### Create mutants
 
 Choose and create a mutation for a specific operator:
 
@@ -93,7 +119,9 @@ $ ./run smf createmutation -o
 $ ./run smf createmutation /tmp/myproject ABS
 ```
 
-Run tests on mutants:
+#### Run tests on mutants
+
+Simply use:
 
 ```
 $ ./run smf runmutants /tmp/myproject/mutations/main/ABS/

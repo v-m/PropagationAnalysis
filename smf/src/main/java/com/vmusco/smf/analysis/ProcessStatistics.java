@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -491,7 +492,20 @@ public class ProcessStatistics implements Serializable{
 	}
 
 	public void setOriginalClasspath(String[] classpath){
+		logger.debug("Setting original class path for project: %s", Arrays.asList(classpath));
 		this.classpath = classpath;
+	}
+	
+	public void copyOriginalClasspathIn(String target) throws IOException{
+		logger.debug("Copying dependencies to local working directory: %s...", target);
+		setCpLocalFolder(target);
+		for(String cpe : classpath){
+			File src = new File(cpe);
+			File dst = new File(resolveThis(getCpLocalFolder()), src.getName());
+			
+			logger.debug("Copying file %s -> %s", src.getAbsoluteFile(), dst.getAbsoluteFile());
+			FileUtils.copyFile(src, dst);
+		}
 	}
 
 	public boolean isSkipMvnClassDetermination() {
