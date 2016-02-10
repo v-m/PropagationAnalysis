@@ -1,5 +1,6 @@
 package com.vmusco.smf.compilation.compilers;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.StringWriter;
 import java.net.URI;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -28,11 +30,11 @@ public class JavaxCompilation extends Compilation{
 	public JavaxCompilation(){
 		this(new DiagnosticCollector<JavaFileObject>());
 	}
-	
+
 	public JavaxCompilation(DiagnosticCollector<JavaFileObject> diagnostics) {
 		this.diagn = diagnostics;
 	}
-	
+
 	public DiagnosticCollector<JavaFileObject> getDiagnosticCollector(){
 		return diagn;
 	}
@@ -53,6 +55,7 @@ public class JavaxCompilation extends Compilation{
 		boolean re = task.call();
 
 		if(!re){
+			setLastBuildSucceess(false);
 			return null;
 		}
 
@@ -66,6 +69,7 @@ public class JavaxCompilation extends Compilation{
 		}
 
 		setLastBuildTime(System.currentTimeMillis() - time);
+		setLastBuildSucceess(true);
 		return bytecodes;
 	}
 
@@ -73,17 +77,17 @@ public class JavaxCompilation extends Compilation{
 	public boolean buildInDirectory(File[] sourceFiles, File outputFolder, String[] classpath, int compliance) {
 		long time = System.currentTimeMillis();
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-		
+
 		// Retrieve files from the standard location
-		StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-		
+		StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagn, null, null);
+
 		List<File> content = new ArrayList<>();
 		List<File> scan = new ArrayList<>();
 		scan.addAll(Arrays.asList(sourceFiles));
-		
+
 		while(!scan.isEmpty()){
 			File next = scan.remove(0);
-			
+
 			if(next.isFile()){
 				if(next.getName().endsWith(".java")){
 					content.add(next);
@@ -93,30 +97,32 @@ public class JavaxCompilation extends Compilation{
 					scan.add(f);
 			}
 		}
-		
+
 		if(content.size()==0){
 			// there is no .java file in source folders
 			return true;
 		}
-		
+
 		Iterable<? extends JavaFileObject> sources = fileManager.getJavaFileObjectsFromFiles(content);
 
-		CompilationTask task = compiler.getTask(new StringWriter(), fileManager, null, getJavaxCompilerOptions(classpath, outputFolder, compliance), null, sources);
+		CompilationTask task = compiler.getTask(new StringWriter(), fileManager, diagn, getJavaxCompilerOptions(classpath, outputFolder, compliance), null, sources);
 
 		if (!task.call()) {
 			return false;
 		}
-		
+
 		setLastBuildTime(System.currentTimeMillis() - time);
 		return true;
 	}
-	
+
 	public static List<String> getJavaxCompilerOptions(String[] classpath, File outputFolder, int compliance){
 		List<String> options = new ArrayList<String>();
 		if(outputFolder != null){
 			options.add("-d");
 			options.add(outputFolder.getAbsolutePath());
 		}
+		options.add("-source");
+		options.add(Integer.toString(compliance));
 		options.add("-target");
 		options.add(Integer.toString(compliance));
 		options.add("-cp");
@@ -133,8 +139,49 @@ public class JavaxCompilation extends Compilation{
 		}
 
 		options.add(cp);
-		
+
 		return options;
+	}
+
+	@Override
+	public int getNumberErrorsWhileLastBuild() {
+		return diagn.getDiagnostics().size();
+	}
+
+	@Override
+	public String getErrorsWhileLastBuild(int errorNr) {
+		Diagnostic<?> diagnostic = diagn.getDiagnostics().get(errorNr);
+		
+		String ret = "";
+		
+		if(diagnostic.getCode() != null){
+			ret += diagnostic.getCode();
+			ret += "\n";
+		}
+		if(diagnostic.getKind() != null){
+			ret += diagnostic.getKind().toString();
+			ret += "\n";
+		}
+		
+		ret += Long.toString(diagnostic.getPosition());
+		ret += "\n";
+		ret += Long.toString(diagnostic.getStartPosition());
+		ret += "\n";
+		ret += Long.toString(diagnostic.getEndPosition());
+		ret += "\n";
+		
+		if(diagnostic.getSource() != null){
+			ret += diagnostic.getSource().toString();
+			ret += "\n";
+		}
+		
+		if(diagnostic.getMessage(null) != null){
+			ret += diagnostic.getMessage(null);
+			ret += "\n";
+		}
+		ret += "=====\n";
+		
+		return ret;
 	}
 }
 

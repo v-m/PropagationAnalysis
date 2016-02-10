@@ -88,6 +88,18 @@ public class SpoonCompilation extends Compilation{
 			return false;
 		}
 	}
+
+	@Override
+	public int getNumberErrorsWhileLastBuild() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public String getErrorsWhileLastBuild(int errorNr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
 
 /**

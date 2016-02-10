@@ -16,7 +16,7 @@ Checkout ChangePropagation and package with maven (skip tests to speed up the pa
 
 ```
 $ git clone https://github.com/v-m/PropagationAnalysis.git
-$ mvn package -DskipTests
+$ mvn package
 ```
 
 (optional) Create eclipse projects:
@@ -76,6 +76,14 @@ Create a new project
 
 ```
 $ ./run smf newproject /tmp/myproject commons-lang /tmp/commons-lang/
+```
+
+This will create all folders and a configuration file used by the framework tools. Note the directory is built to work on the computer which created it. Some parameters should require manual updating if the user want to run some tools on a working directory that has been moved to another environment.
+
+If the project require an old version of Java, you need to install the required jre and run the command using `--compliance <nr>` and `--jre <path_to_bin>`. As an example, if my project require Java 1.6 and I have installed the jre in `/usr/lib/jvm/java-6-jre/jre`, i can use (note the addition of `bin` to the jre path!):
+
+```
+$ ./run smf newproject /tmp/myproject commons-lang /tmp/commons-lang --compliance 6 --jre /usr/lib/jvm/java-6-jre/jre/bin/
 ```
 
 Choose and create a mutation for a specific operator:

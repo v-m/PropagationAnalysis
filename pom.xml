@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
     
     <groupId>com.vmusco</groupId>
-    <artifactId>change-propagation</artifactId>
+    <artifactId>PropagationAnalysis</artifactId>
     <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Change Propagation Software Packaging</name>
+    <name>Propagation Analysis Framework</name>
     
     <developers>
         <developer>
@@ -20,6 +20,7 @@
     </developers>
     
     <modules>
+        <module>test-tools</module>
         <module>smf</module>
         <module>softminer</module>
         <module>pminer</module>

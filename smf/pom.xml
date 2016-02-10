@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.vmusco</groupId>
-		<artifactId>change-propagation</artifactId>
+		<artifactId>PropagationAnalysis</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
@@ -67,6 +67,12 @@
 			<groupId>org.tmatesoft.svnkit</groupId>
 			<artifactId>svnkit</artifactId>
 			<version>1.8.10</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.vmusco</groupId>
+			<artifactId>test-tools</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>

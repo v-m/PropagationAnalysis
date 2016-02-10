@@ -65,7 +65,11 @@ public class TestingInstrumentedCodeHelper {
 		
 		int i = 0;
 		System.out.println(STACKTRACESTART);
-		for(StackTraceElement tce : Thread.currentThread().getStackTrace()){
+		StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+		
+		
+		for(int is = 0; is<stackTrace.length;is++){
+			StackTraceElement tce = stackTrace[is];
 			if(i++ < 2)
 				continue;
 

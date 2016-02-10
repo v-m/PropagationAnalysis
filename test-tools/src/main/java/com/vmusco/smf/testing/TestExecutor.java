@@ -49,8 +49,8 @@ public class TestExecutor {
 		
 		String[] s = args;
 
-		Class<?> c = Class.forName(s[0]);
-		final ArrayList<String> skip = new ArrayList<>();
+		Class c = Class.forName(s[0]);
+		final ArrayList skip = new ArrayList();
 
 		int i = 1;
 		while(i<s.length){
@@ -75,7 +75,6 @@ public class TestExecutor {
 		}
 
 		Filter f = new Filter() {
-			@Override
 			public boolean shouldRun(Description description) {
 				String name = description.getDisplayName();
 				
@@ -98,7 +97,6 @@ public class TestExecutor {
 				return true;
 			}
 
-			@Override
 			public String describe() {
 				return "Hello I'm the hang skipping filter :)";
 			}
@@ -117,7 +115,6 @@ public class TestExecutor {
 				return left+"."+right+"()";
 			}
 
-			@Override
 			public void testStarted(Description description) throws Exception {
 				String line = TEST_MARKER + testname(description.getDisplayName());
 				printDefault(line);
@@ -128,15 +125,15 @@ public class TestExecutor {
 				//printDefault("> Finished: "+testname(description.getDisplayName()));
 			}
 
-			@Override
 			public void testFailure(Failure failure) throws Exception {
 				printDefault(FAIL_MARKER+testname(failure.getTestHeader()));
-				for(String l : failure.getTrace().split("\n")){
+				String[] ll = failure.getTrace().split("\n");
+				for(int i = 0; i<ll.length; i++){
+					String l = ll[i];
 					printDefault(FAILDETAILS_MARKER+l);
 				}
 			}
 
-			@Override
 			public void testIgnored(Description description) throws Exception {
 				printDefault(IGNORE_MARKER+testname(description.getDisplayName()));
 			}

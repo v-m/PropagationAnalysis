@@ -225,12 +225,14 @@ public class NewProject extends GlobalTestRunning {
 				ret = ps.build(c);
 			}
 			
-			System.out.println(ret);
-			
 			if(ret){
 				ProcessStatistics.saveState(ps);
 			}else{
-				System.out.println("Building failed. Didn't you forget to run 'mvn clean install' priorly ?");
+				System.out.println("Building failed. Error summary:");
+				for(int i = 0; i<c.getNumberErrorsWhileLastBuild(); i++){
+					String msg = c.getErrorsWhileLastBuild(i);
+					System.out.println(msg);
+				}
 				System.exit(1);
 			}
 

@@ -341,7 +341,7 @@ public class MutationTest {
 		MutationStatistics ms = new MutationStatistics(ps, new ArithmeticMutatorOperator());
 		ms.loadOrCreateMutants(true, null, -1, 0, true);
 		
-		TestsExecutionIfos runTestCases = Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath("mutant_0"), ps.getTestClasses(), null, null);
+		TestsExecutionIfos runTestCases = Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath("mutant_0"), ps.getTestClasses(), null, ps.getAlternativeJre());
 		ms.getMutationStats("mutant_0").setExecutedTestsResults(runTestCases);
 		
 		File ff = new File(ms.getMutantFileResolved("mutation_0"));

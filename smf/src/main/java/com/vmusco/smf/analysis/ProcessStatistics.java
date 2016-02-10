@@ -961,7 +961,7 @@ public class ProcessStatistics implements Serializable{
 			setBuildProjectTime(c.getLastBuildTime());
 			return true;
 		}else{
-			System.err.println("Error on compilation phase !");
+			logger.error("Error while building project sources!");
 			return false;
 		}
 	}
@@ -984,7 +984,7 @@ public class ProcessStatistics implements Serializable{
 			setBuildProjectTime(c.getLastBuildTime());
 			return true;
 		}else{
-			System.err.println("Error on compilation phase !");
+			logger.error("Error while building project tests!");
 			return false;
 		}
 	}

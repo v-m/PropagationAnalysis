@@ -14,6 +14,7 @@ import java.util.Set;
  */
 public abstract class Compilation {
 	private long buildTime;
+	private boolean succeededLastBuild;
 	
 	/**
 	 * Compiles a class passed as string to a bytecode (byte[]) built version in memory (no file produced).
@@ -29,9 +30,22 @@ public abstract class Compilation {
 		this.buildTime = buildTime;
 	}
 	
+	protected void setLastBuildSucceess(boolean b) {
+		this.succeededLastBuild = b;
+		if(!b)
+			setLastBuildTime(-1);
+	}
+
+	public boolean doLastBuildSucceeded() {
+		return this.succeededLastBuild;
+	}
+	
 	public long getLastBuildTime() {
 		return buildTime;
 	}
+	
+	public abstract int getNumberErrorsWhileLastBuild();
+	public abstract String getErrorsWhileLastBuild(int errorNr);
 
 	public static String[] getLibraryAccess(String[] cp) {
 		Set<String> ret = getLibraryAccess();

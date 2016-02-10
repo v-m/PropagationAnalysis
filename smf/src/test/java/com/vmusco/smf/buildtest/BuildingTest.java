@@ -106,6 +106,47 @@ public class BuildingTest {
 
 		Assert.assertEquals(0, s.size());
 	}
+	
+	/**
+	 * Test the Spoon compilation. Test only if it create the hierarchy and all needed files on compilation (content not tests)
+	 * @throws IOException
+	 */
+	@Test
+	public void simpleJavaXToFileBuildTestWithOlderJdk() throws IOException{
+		File src = prepareSourceFolder();
+		System.out.println(src.getAbsolutePath());
+		System.out.println(TestingTools.getTestClassForCurrentProject(com.vmusco.smf.testclasses.simple.Class1.class)[0]);
+
+		File f = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
+		File tmpf = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
+		f.delete();
+		f.mkdir();
+		f.deleteOnExit();
+		tmpf.deleteOnExit();
+		
+		System.out.println("File produced in "+f.getAbsolutePath());
+
+		Compilation compilation = new JavaxCompilation();
+		Assert.assertTrue(compilation.buildInDirectory(new File[]{src}, f, new String[]{}, 6));
+
+		File test = new File(f, TestingTools.getTestPackageFolders(com.vmusco.smf.testclasses.simple.Class1.class, true));
+		Assert.assertTrue(test.exists());
+		Assert.assertTrue(test.isDirectory());
+		Assert.assertEquals(1, test.list().length);
+
+		Set<String> s = new HashSet<>();
+		for(String fn : test.list()){
+			s.add(fn);
+		}
+
+		String[] exp = new String[]{"Class1.class"};
+
+		for(String fn : exp){
+			Assert.assertTrue(s.remove(fn));
+		}
+
+		Assert.assertEquals(0, s.size());
+	}
 
 	/**
 	 * Test the JavaX on the fly compilation. Test only if it create the bytes (not testing the exact content)

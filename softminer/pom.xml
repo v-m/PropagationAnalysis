@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.vmusco</groupId>
-		<artifactId>change-propagation</artifactId>
+		<artifactId>PropagationAnalysis</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
@@ -33,6 +33,13 @@
 	</build>
 
 	<dependencies>
+	
+		<dependency>
+			<groupId>com.vmusco</groupId>
+			<artifactId>test-tools</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 		<dependency>
 			<artifactId>gs-core</artifactId>
 			<groupId>org.graphstream</groupId>
