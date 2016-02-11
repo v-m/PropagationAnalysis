@@ -225,7 +225,9 @@ public class NewProject extends GlobalTestRunning {
 				ret = ps.build(c);
 			}
 			
-			ps.getTestExecutionResult().cleanCalledNodeInformations();
+			if(ps.getTestExecutionResult() != null){
+				ps.getTestExecutionResult().cleanCalledNodeInformations();
+			}
 			
 			if(ret){
 				ProcessStatistics.saveState(ps);

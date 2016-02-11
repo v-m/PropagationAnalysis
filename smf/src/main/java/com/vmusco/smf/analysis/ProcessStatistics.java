@@ -165,7 +165,7 @@ public class ProcessStatistics implements Serializable{
 	private String originalSrc = null;
 	private String cpLocalFolder = null;
 
-	private int compliancelevel = 8;
+	private int compliancelevel = 7;
 
 	private String altjre = null;
 

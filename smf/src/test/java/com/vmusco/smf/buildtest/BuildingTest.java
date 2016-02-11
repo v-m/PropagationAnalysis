@@ -49,7 +49,7 @@ public class BuildingTest {
 		tmpf.deleteOnExit();
 
 		Compilation compilation = new SpoonCompilation(tmpf.getAbsolutePath());
-		Assert.assertTrue(compilation.buildInDirectory(new File[]{src}, f, new String[]{}, 8));
+		Assert.assertTrue(compilation.buildInDirectory(new File[]{src}, f, new String[]{}, 7));
 
 		File test = new File(f, TestingTools.getTestPackageFolders(com.vmusco.smf.testclasses.simple.Class1.class, true));
 		Assert.assertTrue(test.exists());
@@ -90,9 +90,8 @@ public class BuildingTest {
 		System.out.println("File produced in "+f.getAbsolutePath());
 
 		Compilation compilation = new JavaxCompilation();
-		Assert.assertTrue(compilation.buildInDirectory(new File[]{src}, f, new String[]{}, 8));
+		Assert.assertTrue(compilation.buildInDirectory(new File[]{src}, f, new String[]{}, 7));
 
-		//Compilation.compileUsingSpoon(new String[]{src.getAbsolutePath()}, new String[]{}, f.getAbsolutePath(), tmpf.getAbsolutePath(), 8);
 		File test = new File(f, TestingTools.getTestPackageFolders(com.vmusco.smf.testclasses.simple.Class1.class, true));
 		Assert.assertTrue(test.exists());
 		Assert.assertTrue(test.isDirectory());
@@ -168,7 +167,7 @@ public class BuildingTest {
 
 		Assert.assertNotNull(ce);
 		Compilation compilation = new JavaxCompilation();
-		Map<String, byte[]> comp = compilation.buildInMemory(ce.getQualifiedName(), SpoonHelpers.generateAssociatedClassContent(ce), new String[]{}, 8);
+		Map<String, byte[]> comp = compilation.buildInMemory(ce.getQualifiedName(), SpoonHelpers.generateAssociatedClassContent(ce), new String[]{}, 7);
 
 		Assert.assertEquals(1, comp.size());
 		String k = comp.keySet().iterator().next();
