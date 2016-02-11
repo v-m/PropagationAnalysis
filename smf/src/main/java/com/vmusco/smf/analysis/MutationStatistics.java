@@ -502,6 +502,14 @@ public class MutationStatistics implements Serializable {
 			public boolean hasNext() {
 				return pos < list.size();
 			}
+			
+			/**
+			 * This method is not supported here
+			 */
+			@Override
+			public void remove() {
+				// Not supported
+			}
 
 			@Override
 			public MutantIfos next() {
