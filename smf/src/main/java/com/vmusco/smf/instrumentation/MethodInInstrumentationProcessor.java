@@ -21,7 +21,7 @@ import com.vmusco.smf.utils.SpoonHelpers;
  * declaration points as they have a null body !!!
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class EntryMethodInstrumentationProcessor extends AbstractInstrumentationProcessor{
+public class MethodInInstrumentationProcessor extends AbstractInstrumentationProcessor{
 	private static final Class instrumentationClass = TestingInstrumentedCodeHelper.class;
 
 	@Override
@@ -38,50 +38,13 @@ public class EntryMethodInstrumentationProcessor extends AbstractInstrumentation
 				// At each method entry, we add a START
 				exec.getBody().insertBegin(snippet);
 				snippet.setParent(exec);
-				
-				if(exec.getType().toString().equals("void")){
-					// For void method, we add a END at the end of the method
-					snippet = getFactory().Core().createCodeSnippetStatement();
-					snippet.setValue(instrumentationClass.getCanonicalName()+".printMethodExiting(\""+methodName +"\")");
-					exec.getBody().insertEnd(snippet);
-					snippet.setParent(exec);
-				}
-			}
-		}else if(arg0 instanceof CtReturn<?> || arg0 instanceof CtThrow){
-			CtCFlowBreak exec = (CtCFlowBreak) arg0;
-
-			CtCodeSnippetStatement snippet = getFactory().Core().createCodeSnippetStatement();
-			CtTypeMember mt = exec.getParent(CtMethod.class);
-			if(mt == null)
-				mt = exec.getParent(CtConstructor.class);
-
-			String methodName = SpoonHelpers.resolveName(mt);
-			
-			if(arg0 instanceof CtThrow){
-				snippet.setValue(instrumentationClass.getCanonicalName()+".printMethodThrow(\""+methodName +"\")");
-			}else{
-				snippet.setValue(instrumentationClass.getCanonicalName()+".printMethodReturn(\""+methodName +"\")");
-			}
-			
-			snippet.setParent(exec.getParent());
-
-			exec.insertBefore(snippet);
-			if(mt instanceof CtConstructor || ((CtMethod<?>)mt).getType().toString().equals("void")){
-				CtIf rIf = getFactory().Core().createIf();
-				CtLiteral<Boolean> ctl = getFactory().Core().createLiteral();
-				ctl.setValue(true);
-				rIf.setCondition(ctl);
-
-				rIf.setThenStatement(getFactory().Core().clone(exec));
-				rIf.setParent(exec.getParent());
-				exec.replace(rIf);
 			}
 		}
 	}
 
 	@Override
 	public boolean isThisLineInstrumented(String line) {
-		return line.startsWith(TestingInstrumentedCodeHelper.STARTKEY) || line.startsWith(TestingInstrumentedCodeHelper.ENDKEY);
+		return line.startsWith(TestingInstrumentedCodeHelper.STARTKEY);
 	}
 
 	public String getLineIfInstrumented(String line) {

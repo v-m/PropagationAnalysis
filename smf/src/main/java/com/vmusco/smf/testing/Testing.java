@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -15,6 +17,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import spoon.compiler.SpoonCompiler;
 import spoon.processing.Processor;
@@ -26,14 +31,17 @@ import spoon.support.DefaultCoreFactory;
 import spoon.support.StandardEnvironment;
 import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
 
+import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.TestsExecutionIfos;
 import com.vmusco.smf.compilation.Compilation;
+import com.vmusco.smf.exceptions.TestingException;
 
 /**
  * Tests execution logic
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public final class Testing {
+	private static final Logger logger = LogManager.getFormatterLogger(Testing.class.getSimpleName());
 	public static ArrayList<CtClass<?>> temp;
 
 	/**
@@ -147,19 +155,19 @@ public final class Testing {
 		return getCurrentVMClassPath(null);
 	}
 
-	public static TestsExecutionIfos runTestCases(String projectIn, String[] classpath, String[] testClasses, TestsExecutionListener tel, String alternativeJre) throws IOException{
+	public static TestsExecutionIfos runTestCases(String projectIn, String[] classpath, String[] testClasses, TestsExecutionListener tel, String alternativeJre) throws IOException, TestingException{
 		return runTestCases(projectIn, classpath, testClasses, -1, tel, alternativeJre);
 	}
 	
-	public static TestsExecutionIfos runTestCases(String projectIn, String[] classpath, String[] testClasses, int timeout, TestsExecutionListener tel, String alternativeJre) throws IOException{
+	public static TestsExecutionIfos runTestCases(String projectIn, String[] classpath, String[] testClasses, int timeout, TestsExecutionListener tel, String alternativeJre) throws IOException, TestingException{
+		logger.trace("Running project files in %s", projectIn);
 		Set<String> tests = new HashSet<>();
 		Set<String> failing = new HashSet<>();
 		Set<String> ignored = new HashSet<>();
 		Set<String> infloops = new HashSet<>();
 		Set<String> errorts = new HashSet<>();
+		Map<String, String[]> allEntering = new HashMap<>();
 		//Set<String[]> stacktraces = new HashSet<>();
-		
-		boolean run_exception_skipped = false;
 
 		long t1 = System.currentTimeMillis();
 		int cpt = 0;
@@ -185,6 +193,7 @@ public final class Testing {
 			while(!testcase_finished){
 				ExecutorService executor = Executors.newFixedThreadPool(2);
 				String currentTestCase = null;
+				List<String> enteringMethods = null;
 
 				String[] cmd = buildExecutionPathWithInstrumentationOptions(alternativeJre, TestExecutor.class, aTest, classpath, hangingTests.toArray(new String[0]));
 				//String[] cmd = buildExecutionPath(TestExecutor.class, aTest, classpath, hangingTests.toArray(new String[0]));
@@ -198,6 +207,7 @@ public final class Testing {
 
 				ProcessBuilder pb = new ProcessBuilder(cmd);
 				pb.directory(new File(projectIn));
+				logger.debug("Running tests with command [%s] in working directory %s", s, projectIn);
 				pb.redirectErrorStream(true);
 				Process proc = pb.start();
 
@@ -220,7 +230,7 @@ public final class Testing {
 				boolean thisisfirstline = true;
 
 				try{
-					while (!run_exception_skipped && (line = future.get(timeout, TimeUnit.SECONDS)) != null){
+					while ((line = future.get(timeout, TimeUnit.SECONDS)) != null){
 						//System.out.println(line);
 						if(thisisfirstline && (line.startsWith("Exception") || line.startsWith("Error")) ){
 							testcase_finished = true;
@@ -229,7 +239,7 @@ public final class Testing {
 								if(tel != null)		tel.testSuiteUnrunnable(cpt, aTest, line);
 							}else{
 								if(tel != null)		tel.testCaseException(cpt, line, cmd);
-								run_exception_skipped = true;
+								throw new TestingException(String.format("Testing reported exception message: %s", line));
 							}
 							break;
 						}
@@ -254,9 +264,15 @@ public final class Testing {
 								if(tel != null)		tel.testCaseNotPermitted(cpt, line);
 							}
 						}else if(line.startsWith(TestExecutor.TEST_MARKER)){
+							// Save all previous entered methods
+							if(currentTestCase != null && enteringMethods != null){
+								allEntering.put(currentTestCase, enteringMethods.toArray(new String[enteringMethods.size()]));
+							}
+							
 							// Here all success and failing tests
 							line = line.substring(TestExecutor.TEST_MARKER.length());
 							currentTestCase =  line;
+							enteringMethods = new ArrayList<String>();
 							if(addIfPermited(line, testClasses, tests)){
 								if(tel != null)		tel.testCaseEntered(cpt, line);
 							}else{
@@ -283,11 +299,43 @@ public final class Testing {
 							if(stacktrace != null){
 								stacktrace.add(line.substring(TestingInstrumentedCodeHelper.STACKTRACELINE.length()));
 							}*/
+						}else if(line.startsWith(TestingInstrumentedCodeHelper.STARTKEY)){
+							// This is method entry information
+							line = line.substring(TestingInstrumentedCodeHelper.STARTKEY.length());
+							if(!line.equals(currentTestCase)){
+								enteringMethods.add(line);
+								if(tel != null)		tel.testCaseEnteringMethod(currentTestCase, line);
+							}
+						}else if(line.startsWith(TestingInstrumentedCodeHelper.ENDKEY) || 
+								line.startsWith(TestingInstrumentedCodeHelper.RETURNKEY) ||
+								line.startsWith(TestingInstrumentedCodeHelper.THROWKEY)){
+							
+							String way = "?";
+							
+							if(line.startsWith(TestingInstrumentedCodeHelper.ENDKEY)){
+								line = line.substring(TestingInstrumentedCodeHelper.ENDKEY.length());
+								way = "end";
+							}else if(line.startsWith(TestingInstrumentedCodeHelper.RETURNKEY)){
+								line = line.substring(TestingInstrumentedCodeHelper.RETURNKEY.length());
+								way = "return";
+							}else if(line.startsWith(TestingInstrumentedCodeHelper.THROWKEY)){
+								line = line.substring(TestingInstrumentedCodeHelper.THROWKEY.length());
+								way = "exception";
+							}
+							
+							if(!line.equals(currentTestCase)){
+								if(tel != null)		tel.testCaseLeavingMethod(currentTestCase, line, way);
+							}
 						}else{
 							if(tel != null)		tel.testCaseOtherCase(cpt, line);
 						}
 
 						future = executor.submit(readTask);
+					}
+					
+					// Save last entered methods
+					if(currentTestCase != null && enteringMethods != null){
+						allEntering.put(currentTestCase, enteringMethods.toArray(new String[enteringMethods.size()]));
 					}
 
 					testcase_finished = true;
@@ -312,14 +360,14 @@ public final class Testing {
 						}catch(Exception ex){
 							if(tel != null)		tel.testCaseException(cpt, line, cmd);
 							ex.printStackTrace();
-							run_exception_skipped = true;
 							testcase_finished = true;
+							throw new TestingException(e);
 						}
 					}
 				}catch(Exception e){
 					if(tel != null)		tel.testCaseException(cpt, line, cmd);
-					run_exception_skipped = true;
 					testcase_finished = true;
+					throw new TestingException(e);
 				}finally{
 					is.close();
 					future.cancel(true);
@@ -329,9 +377,6 @@ public final class Testing {
 
 			}
 		}
-
-		if(run_exception_skipped)
-			return null;
 
 		long t2 = System.currentTimeMillis();
 
@@ -347,6 +392,7 @@ public final class Testing {
 		tei.setHangingTestCases(hanging_arr);
 		tei.setErrorOnTestSuite(errts_arr);
 		tei.setAllRunnedTests(tests_arr);
+		tei.setCalledNodeInformation(allEntering);
 		tei.setRunTestsTime(t2 - t1);
 		//tei.setStacktraces(stacktraces.toArray(new String[0][0]));
 
@@ -406,7 +452,7 @@ public final class Testing {
 		
 		ret.add(TestExecutor.INSTRU_OPT+"enter="+(TestingInstrumentedCodeHelper.isEnteringPrinting()?"yes":"no"));
 		ret.add(TestExecutor.INSTRU_OPT+"exit="+(TestingInstrumentedCodeHelper.isLeavingPrinting()?"yes":"no"));
-		ret.add(TestExecutor.INSTRU_OPT+"stacktraces="+(TestingInstrumentedCodeHelper.isStacktracePrinting()?"yes":"no"));
+		//ret.add(TestExecutor.INSTRU_OPT+"stacktraces="+(TestingInstrumentedCodeHelper.isStacktracePrinting()?"yes":"no"));
 		
 		return buildExecutionPath(jrebin, classToRun, testClassToRun, classpath, ret.toArray(new String[0]));
 	}

@@ -110,6 +110,10 @@ A working project can be created using:
 ```
 Using the `-c` flag will copy all the dependencies in the working directory. To link external dependencies without copying it use `-C` instead. Moreover, if there is no dependencies, use the `-no-classpath` flag to skip any class path definition.
 
+##### Get calling informations via code instrumentation
+
+For fault localization and any other purpose, one can require to get the calling informations for each running test. To enable this feature, the smf tool will instrument code and inject snippet in the project to collect all those informations. To instrument the code, just pass the `-i` flag to the command. Note that produced files will be larger as they will also contains propagation informations.
+
 #### Create mutants
 
 Choose and create a mutation for a specific operator:

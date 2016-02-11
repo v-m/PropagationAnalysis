@@ -314,4 +314,15 @@ public class ParallelMutationRun implements TestingNotification{
 	@Override
 	public void newTimeout(int timeout) {
 	}
+
+	@Override
+	public void testCaseEnteringMethod(String currentTestCase, String enteredMethod) {
+		// Nothing to do here
+		
+	}
+
+	@Override
+	public void testCaseLeavingMethod(String currentTestCase, String leftMethod, String way) {
+		// Nothing to do here
+	}
 }

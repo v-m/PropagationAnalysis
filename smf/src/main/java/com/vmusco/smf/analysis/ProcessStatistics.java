@@ -19,6 +19,7 @@ import com.vmusco.smf.compilation.Compilation;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
+import com.vmusco.smf.exceptions.TestingException;
 import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
 import com.vmusco.smf.instrumentation.Instrumentation;
 import com.vmusco.smf.testing.TestCasesProcessor;
@@ -1018,7 +1019,7 @@ public class ProcessStatistics implements Serializable{
 		return false;
 	}
 
-	public void performFreshTesting(TestsExecutionListener tel) throws IOException {
+	public void performFreshTesting(TestsExecutionListener tel) throws IOException, TestingException {
 		Testing.executeTestDetection(getSrcTestsToTreat(true), getTestingClasspath());
 		setTestClasses(TestCasesProcessor.getTestClassesString());
 		setTestCases(TestCasesProcessor.getTestCasesString());

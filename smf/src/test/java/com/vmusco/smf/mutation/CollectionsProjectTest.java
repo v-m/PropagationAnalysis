@@ -18,6 +18,7 @@ import org.tmatesoft.svn.core.wc2.SvnUpdate;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.compilation.compilers.JavaxCompilation;
 import com.vmusco.smf.exceptions.BadStateException;
+import com.vmusco.smf.exceptions.TestingException;
 import com.vmusco.smf.testing.TestCasesProcessor;
 
 /**
@@ -62,11 +63,12 @@ public class CollectionsProjectTest {
 
 	@Ignore
 	@Test
-	public void simplePipeExecution() throws IOException, BadStateException {
+	public void simplePipeExecution() throws IOException, BadStateException, TestingException {
 		File projFolder = new File(temporaryFolder, "project");
 		
 		ProcessStatistics ps = new ProcessStatistics(ProcessStatistics.SOURCES_COPY, projFolder.getAbsolutePath()); 
 		ps.createWorkingDir();
+		projFolder.deleteOnExit();
 		Assert.assertTrue(new File(ps.getWorkingDir()).exists());
 		ps.setProjectIn(repoFolder.getAbsolutePath());
 

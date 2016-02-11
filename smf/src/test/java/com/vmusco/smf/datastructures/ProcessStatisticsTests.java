@@ -16,6 +16,7 @@ import com.vmusco.smf.compilation.compilers.JavaxCompilation;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
+import com.vmusco.smf.exceptions.TestingException;
 import com.vmusco.smf.testing.Testing;
 
 public class ProcessStatisticsTests {
@@ -27,6 +28,7 @@ public class ProcessStatisticsTests {
 		
 		ProcessStatistics ps = new ProcessStatistics(ProcessStatistics.SOURCES_COPY, f.getAbsolutePath());
 		ps.createWorkingDir();
+		f.deleteOnExit();
 		System.out.println(ps.getClass().getClassLoader().getResource("fakeproj/"));
 		ps.setProjectIn(ps.getClass().getClassLoader().getResource("fakeproj/").getFile());		
 		ps.setProjectName("My Fake Project");
@@ -41,12 +43,13 @@ public class ProcessStatisticsTests {
 		
 		ps.setSrcToCompile(new String[]{"src"});
 		ps.setSrcTestsToTreat(new String[]{"tests"});
+		ps.setComplianceLevel(6);
 		
 		return ps;
 	}
 	
 	@Test
-	public void processStatisticCreationTest() throws IOException, PersistenceException, BadStateException, MutationNotRunException{
+	public void processStatisticCreationTest() throws IOException, PersistenceException, BadStateException, MutationNotRunException, TestingException{
 		ProcessStatistics ps = createTestObject();
 		
 		Testing.INC_TEST_TIMEOUT = 1;

@@ -2,7 +2,9 @@ package com.vmusco.smf.buildtest;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,9 +21,12 @@ import com.vmusco.smf.compilation.compilers.JavaxCompilation;
 import com.vmusco.smf.compilation.compilers.SpoonCompilation;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.PersistenceException;
+import com.vmusco.smf.exceptions.TestingException;
 import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
-import com.vmusco.smf.instrumentation.EntryMethodInstrumentationProcessor;
+import com.vmusco.smf.instrumentation.MethodInInstrumentationProcessor;
+import com.vmusco.smf.instrumentation.MethodOutInstrumentationProcessor;
 import com.vmusco.smf.testing.Testing;
+import com.vmusco.smf.testing.TestsExecutionListener;
 import com.vmusco.smf.utils.SpoonHelpers;
 
 public class BuildingTest {
@@ -187,7 +192,8 @@ public class BuildingTest {
 		ps.setSrcToCompile(new String[]{"src"});
 		ps.setSrcTestsToTreat(new String[]{"tst"});
 		ps.setProjectName("my test");
-
+		ps.setComplianceLevel(6);
+		
 		// Setting classpath
 		ps.setOriginalClasspath(Testing.getCurrentVMClassPath());
 		ps.createLocalCopies(ProcessStatistics.SOURCES_COPY, ProcessStatistics.CLASSPATH_PACK);
@@ -202,10 +208,13 @@ public class BuildingTest {
 		System.out.println("Running tests...");
 		ps.performFreshTesting(null);
 		ProcessStatistics.saveState(ps);
+		
+		FileUtils.deleteDirectory(proj);
+		FileUtils.deleteDirectory(src);
 	}
 
 	@Test
-	public void instrumentCode() throws IOException, PersistenceException, BadStateException{
+	public void testProcessStatisticsInstrumentation() throws IOException, PersistenceException, BadStateException, TestingException{
 		File src = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
 		src.delete();
 		System.out.println(src.getAbsolutePath());
@@ -220,6 +229,7 @@ public class BuildingTest {
 		ps.setSrcToCompile(new String[]{"src"});
 		ps.setSrcTestsToTreat(new String[]{"tst"});
 		ps.setProjectName("my test");
+		ps.setComplianceLevel(6);
 
 		// Setting classpath
 		ps.setOriginalClasspath(Testing.getCurrentVMClassPath());
@@ -228,43 +238,33 @@ public class BuildingTest {
 
 		ps.instrumentAndBuildProjectAndTests(new JavaxCompilation(),
 				new AbstractInstrumentationProcessor[]{ 
-						new EntryMethodInstrumentationProcessor(),
+					new MethodInInstrumentationProcessor(),
+					new MethodOutInstrumentationProcessor(),
 				}
 				);
 
 		ps.performFreshTesting(null);
-	}
-
-	@Test
-	public void testProcessStatisticsInstrumentation() throws Exception{
-		Compilation c = new JavaxCompilation();
-		File src = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
-		src.delete();
-		System.out.println(src.getAbsolutePath());
-
-		File proj = prepareProjectWithTests();
-
-		ProcessStatistics ps = new ProcessStatistics(ProcessStatistics.SOURCES_COPY, src.getAbsolutePath());
-		ps.createWorkingDir();
-		ps.setProjectIn(proj.getAbsolutePath());
-
-		// Setting ps configuration
-		ps.setSrcToCompile(new String[]{"src"});
-		ps.setSrcTestsToTreat(new String[]{"tst"});
-		ps.setProjectName("my test");
-
-		// Setting classpath
-		ps.setOriginalClasspath(Testing.getCurrentVMClassPath());
-		ProcessStatistics.saveState(ps);
-
-		// Build project
-		System.out.println("Building.....");
-		ps.build(c);
-		ProcessStatistics.saveState(ps);
-
-		System.out.println("Running tests...");
-		ps.performFreshTesting(null);
-		ProcessStatistics.saveState(ps);
+		Assert.assertEquals(1, ps.getTestExecutionResult().getCalledNodes().size());
+		String[] calledNodes = ps.getTestExecutionResult().getCalledNodes("hello.you.tests.Test1.mytest()");
+		Assert.assertEquals(111, calledNodes.length);
+		ps.getTestExecutionResult().cleanCalledNodeInformations();
+		
+		calledNodes = ps.getTestExecutionResult().getCalledNodes("hello.you.tests.Test1.mytest()");
+		List<String> calledNodesList = Arrays.asList(calledNodes);
+		Assert.assertEquals(8, calledNodes.length);
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class1()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class2()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class3()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.AClass.returnTrue()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.AClass.returnFalse()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class1.recursiveMethod(int)"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.AClass.doNotReturn()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class2.arithmeticTest()"));
+		
+		System.out.println(ps);
+		
+		FileUtils.deleteDirectory(proj);
+		FileUtils.deleteDirectory(src);
 	}
 
 	private File prepareSourceFolder() throws IOException {
@@ -286,8 +286,6 @@ public class BuildingTest {
 
 		File ff = new File (System.getProperty("user.dir"));
 		ff = new File(ff.getParent(), "testproject");
-		
-		System.out.println(f);
 
 		// SOURCES
 		File srcf = new File(f, "src");

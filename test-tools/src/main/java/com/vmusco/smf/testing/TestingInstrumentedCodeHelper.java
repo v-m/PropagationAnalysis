@@ -5,8 +5,8 @@ public class TestingInstrumentedCodeHelper {
 	/***********************************
 	 *  Global behavior configuration  *
 	 ***********************************/	
-	private static boolean ENABLE_ENTERING = false;
-	private static boolean ENABLE_LEAVING = false;
+	private static boolean ENABLE_ENTERING = true;
+	private static boolean ENABLE_LEAVING = true;
 	private static boolean ENABLE_STACKTRACE = false;
 
 	public static void setEnteringPrinting(boolean isYes) {
@@ -49,8 +49,6 @@ public class TestingInstrumentedCodeHelper {
 	public static final String STACKTRACELINE = ((char)2)+">STACKTRACE>";
 	public static final String STACKTRACESTART = ((char)2)+">STACKTRACE>START!";
 	public static final String STACKTRACEEND = ((char)2)+">STACKTRACE>END!";
-
-
 
 	/** Entering/leaving method **/
 

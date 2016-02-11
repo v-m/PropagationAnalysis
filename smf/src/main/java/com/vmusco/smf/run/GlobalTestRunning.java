@@ -179,4 +179,14 @@ public abstract class GlobalTestRunning implements TestsExecutionListener{
 	public void newTimeout(int timeout) {
 		System.out.println("Dynamic timeout tweaking... New timeout is "+timeout+" secs. \n\n\n");
 	}
+	
+	@Override
+	public void testCaseEnteringMethod(String currentTestCase, String enteredMethod) {
+		// TODO Nothing to do here
+	}
+	
+	@Override
+	public void testCaseLeavingMethod(String currentTestCase, String leftMethod, String way) {
+		// Nothing to do here
+	}
 }

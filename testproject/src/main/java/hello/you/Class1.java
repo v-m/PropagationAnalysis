@@ -7,4 +7,9 @@ public class Class1 extends AClass{
 		c.doNotReturn();
 		c.arithmeticTest();
 	}
+
+	public void recursiveMethod(int i) {
+		if(i > 0)
+			recursiveMethod(i-1);
+	}
 }

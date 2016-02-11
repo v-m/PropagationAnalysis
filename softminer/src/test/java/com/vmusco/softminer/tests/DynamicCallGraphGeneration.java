@@ -11,8 +11,10 @@ import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.compilation.compilers.JavaxCompilation;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.PersistenceException;
+import com.vmusco.smf.exceptions.TestingException;
 import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
-import com.vmusco.smf.instrumentation.EntryMethodInstrumentationProcessor;
+import com.vmusco.smf.instrumentation.MethodInInstrumentationProcessor;
+import com.vmusco.smf.instrumentation.MethodOutInstrumentationProcessor;
 import com.vmusco.smf.testing.Testing;
 import com.vmusco.softminer.graphs.DynamicCallGraphGenerator;
 
@@ -25,7 +27,7 @@ public class DynamicCallGraphGeneration {
 	
 	@Ignore
 	@Test
-	public void testGeneration() throws IOException, PersistenceException, BadStateException{
+	public void testGeneration() throws IOException, PersistenceException, BadStateException, TestingException{
 		File src = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
 		src.delete();
 		System.out.println(src.getAbsolutePath());
@@ -34,6 +36,7 @@ public class DynamicCallGraphGeneration {
 
 		ProcessStatistics ps = new ProcessStatistics(ProcessStatistics.SOURCES_COPY, src.getAbsolutePath());
 		ps.createWorkingDir();
+		src.deleteOnExit();
 		ps.setProjectIn(proj.getAbsolutePath());
 
 		// Setting ps configuration
@@ -49,7 +52,8 @@ public class DynamicCallGraphGeneration {
 		ps.instrumentAndBuildProjectAndTests(
 			new JavaxCompilation(),
 			new AbstractInstrumentationProcessor[]{ 
-				new EntryMethodInstrumentationProcessor(),
+				new MethodInInstrumentationProcessor(),
+				new MethodOutInstrumentationProcessor(),
 			}
 		);
 

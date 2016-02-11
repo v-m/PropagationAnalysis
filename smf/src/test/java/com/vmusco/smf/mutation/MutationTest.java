@@ -4,12 +4,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,6 +34,9 @@ import com.vmusco.smf.buildtest.BuildingTest;
 import com.vmusco.smf.compilation.compilers.JavaxCompilation;
 import com.vmusco.smf.exceptions.HashClashException;
 import com.vmusco.smf.exceptions.NotValidMutationException;
+import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
+import com.vmusco.smf.instrumentation.MethodInInstrumentationProcessor;
+import com.vmusco.smf.instrumentation.MethodOutInstrumentationProcessor;
 import com.vmusco.smf.mutation.operators.KingOffutt91.AbsoluteValueInsertionMutator;
 import com.vmusco.smf.mutation.operators.KingOffutt91.ArithmeticMutatorOperator;
 import com.vmusco.smf.testclasses.simple.Class1;
@@ -287,7 +293,8 @@ public class MutationTest {
 		ps.setSrcToCompile(new String[]{"src"});
 		ps.setSrcTestsToTreat(new String[]{"tst"});
 		ps.setProjectName("my test");
-
+		ps.setComplianceLevel(6);
+		
 		// Setting classpath
 		ps.setOriginalClasspath(Testing.getCurrentVMClassPath());
 		ProcessStatistics.saveState(ps);
@@ -305,16 +312,19 @@ public class MutationTest {
 		ms.loadOrCreateMutants(true);
 		
 		//TODO: test mutation result
+
+		FileUtils.deleteDirectory(proj);
+		FileUtils.deleteDirectory(src);
 	}
 	
 	@Test
-	//TODO Review this -- instrumentation should be reviewed
 	public void testMutationWithPMStatisticsObjectAndInstrumentation() throws Exception{
 		File src = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
 		src.delete();
 		System.out.println(src.getAbsolutePath());
 
 		File proj = BuildingTest.prepareProjectWithTests();
+		System.out.println(proj);
 
 		ProcessStatistics ps = new ProcessStatistics(ProcessStatistics.SOURCES_COPY, src.getAbsolutePath());
 		ps.createWorkingDir();
@@ -327,11 +337,18 @@ public class MutationTest {
 
 		// Setting classpath
 		ps.setOriginalClasspath(Testing.getCurrentVMClassPath());
+		ps.setComplianceLevel(6);
+		ps.createLocalCopies(ProcessStatistics.SOURCES_COPY, ProcessStatistics.CLASSPATH_PACK);
 		ProcessStatistics.saveState(ps);
 
 		// Build project
 		System.out.print("Building.....");
-		ps.build(new JavaxCompilation());
+		ps.instrumentAndBuildProjectAndTests(new JavaxCompilation(),
+				new AbstractInstrumentationProcessor[]{ 
+					new MethodInInstrumentationProcessor(),
+					new MethodOutInstrumentationProcessor(),
+				}
+				);
 		ProcessStatistics.saveState(ps);
 
 		System.out.println("Running tests...");
@@ -342,18 +359,48 @@ public class MutationTest {
 		ms.loadOrCreateMutants(true, null, -1, 0, true);
 		
 		TestsExecutionIfos runTestCases = Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath("mutant_0"), ps.getTestClasses(), null, ps.getAlternativeJre());
-		ms.getMutationStats("mutant_0").setExecutedTestsResults(runTestCases);
+		Assert.assertEquals(1, runTestCases.getCalledNodes().size());
 		
+		String[] calledNodes = runTestCases.getCalledNodes("hello.you.tests.Test1.mytest()");
+		Assert.assertEquals(111, calledNodes.length);
+		runTestCases.cleanCalledNodeInformations();
+		
+		calledNodes = runTestCases.getCalledNodes("hello.you.tests.Test1.mytest()");
+		List<String> calledNodesList = Arrays.asList(calledNodes);
+		Assert.assertEquals(8, calledNodes.length);
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class1()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class2()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class3()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.AClass.returnTrue()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.AClass.returnFalse()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class1.recursiveMethod(int)"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.AClass.doNotReturn()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class2.arithmeticTest()"));
+		
+		ms.getMutationStats("mutant_0").setExecutedTestsResults(runTestCases);
 		File ff = new File(ms.getMutantFileResolved("mutation_0"));
 		ff.getParentFile().mkdirs();
 		MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(ms.getMutationStats("mutant_0"), ff);
 		pers.setFileLock(new FileOutputStream(ff));
 		XMLPersistence.save(pers);
 		
-		//System.out.println(runTestCases.getStacktraces().length);
-		
-		pers = new MutantInfoXMLPersisitence(new MutantIfos(), ff);
+		pers = new MutantInfoXMLPersisitence(new MutantIfos(), ff, true);
 		XMLPersistence.load(pers);
-		System.out.println(pers.getLinkedObject());
+		MutantIfos linkedObject = pers.getLinkedObject();
+		
+		calledNodes = linkedObject.getExecutedTestsResults().getCalledNodes("hello.you.tests.Test1.mytest()");
+		calledNodesList = Arrays.asList(calledNodes);
+		Assert.assertEquals(8, calledNodes.length);
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class1()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class2()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class3()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.AClass.returnTrue()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.AClass.returnFalse()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class1.recursiveMethod(int)"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.AClass.doNotReturn()"));
+		Assert.assertTrue(calledNodesList.contains("hello.you.Class2.arithmeticTest()"));
+		
+		FileUtils.deleteDirectory(proj);
+		FileUtils.deleteDirectory(src);
 	}
 }

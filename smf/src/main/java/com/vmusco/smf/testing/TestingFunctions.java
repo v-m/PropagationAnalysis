@@ -15,6 +15,7 @@ import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
 import com.vmusco.smf.analysis.persistence.XMLPersistence;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
+import com.vmusco.smf.exceptions.TestingException;
 
 /**
  * Tools used for testing executions
@@ -120,7 +121,7 @@ public abstract class TestingFunctions {
 						if(tn != null)	tn.mutantLocked();
 						nbproc++;
 					}
-				} catch (IOException e) {
+				} catch (IOException|TestingException e) {
 					if(tn != null)	tn.mutantException(e);
 				}
 			}else{

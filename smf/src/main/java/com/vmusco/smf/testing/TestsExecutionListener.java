@@ -24,4 +24,8 @@ public interface TestsExecutionListener {
 	void testSuiteUnrunnable(int cpt, String aTest, String line);
 	void currentTimeout(int timeout);
 	void newTimeout(int timeout);
+	
+	/** For instrumentation **/
+	void testCaseEnteringMethod(String currentTestCase, String enteredMethod);
+	void testCaseLeavingMethod(String currentTestCase, String leftMethod, String way);
 }

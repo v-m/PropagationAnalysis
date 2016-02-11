@@ -181,4 +181,15 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 		printMutantStat();
 	}
 
+	@Override
+	public void testCaseEnteringMethod(String currentTestCase, String enteredMethod) {
+		// Nothing to do here
+	}
+
+	@Override
+	public void testCaseLeavingMethod(String currentTestCase, String leftMethod, String way) {
+		// Nothing to do here
+		
+	}
+
 }

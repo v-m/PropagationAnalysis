@@ -19,7 +19,7 @@ import com.vmusco.smf.analysis.ProcessStatistics.STATE;
 import com.vmusco.smf.compilation.Compilation;
 import com.vmusco.smf.compilation.compilers.JavaxCompilation;
 import com.vmusco.smf.instrumentation.AbstractInstrumentationProcessor;
-import com.vmusco.smf.instrumentation.EntryMethodInstrumentationProcessor;
+import com.vmusco.smf.instrumentation.MethodInInstrumentationProcessor;
 import com.vmusco.smf.instrumentation.StackTracePrintingInstrumentationProcessor;
 import com.vmusco.smf.utils.ConsoleTools;
 
@@ -210,8 +210,8 @@ public class NewProject extends GlobalTestRunning {
 		List<AbstractInstrumentationProcessor> aip = new ArrayList<>(); 
 		
 		if(cmd.hasOption("instrument")){
-			aip.add(new EntryMethodInstrumentationProcessor());
-			aip.add(new StackTracePrintingInstrumentationProcessor());
+			aip.add(new MethodInInstrumentationProcessor());
+			//aip.add(new StackTracePrintingInstrumentationProcessor());
 		}
 		
 		if(!skipRunWithPs){
@@ -244,6 +244,8 @@ public class NewProject extends GlobalTestRunning {
 			}else{
 				ret = ps.build(c);
 			}
+			
+			ps.getTestExecutionResult().cleanCalledNodeInformations();
 			
 			if(ret){
 				ProcessStatistics.saveState(ps);
