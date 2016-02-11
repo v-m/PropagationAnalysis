@@ -50,11 +50,7 @@ public class NewProject extends GlobalTestRunning {
 		options.addOption(opt);
 		opt = new Option(null, "no-classpath", false, "do not determine classpath automatically (no classpath)");
 		options.addOption(opt);
-		opt = new Option("l", "do-not-copy", false, "do not copy the content in the project (not recommended !)");
-		options.addOption(opt);
 		opt = new Option("F", "force", false, "Overwritte the working directory if it already exists !");
-		options.addOption(opt);
-		opt = new Option("j", "just-prepare", false, "Just prepare the project directory. Do not execute any build/tests/...");
 		options.addOption(opt);
 		opt = new Option("i", "instrument", false, "instrument the source code (dynamic informations recolting -- default: false).");
 		options.addOption(opt);
@@ -83,10 +79,6 @@ public class NewProject extends GlobalTestRunning {
 		opt.setArgName("path");
 		options.addOption(opt);
 		
-		
-		
-		
-		
 		opt = new Option("h", "help", false, "print this message");
 		options.addOption(opt);
 		
@@ -106,8 +98,6 @@ public class NewProject extends GlobalTestRunning {
 		File f = new File(cmd.getArgs()[0]);
 		ProcessStatistics ps;
 		
-		boolean skipRunWithPs = false;
-		
 		if(cmd.getArgs().length == 3){
 			File f2 = new File(cmd.getArgs()[2]);
 			
@@ -124,11 +114,8 @@ public class NewProject extends GlobalTestRunning {
 			ps.createWorkingDir();
 			ps.setProjectIn(f2.getAbsolutePath());
 			
-			
-			if(!cmd.hasOption("do-not-copy")){
-				ConsoleTools.write("Copying files to project-local copies...\n");
-				ps.createLocalCopies(ProcessStatistics.SOURCES_COPY, ProcessStatistics.CLASSPATH_PACK);
-			}
+			ConsoleTools.write("Copying files to project-local copies...\n");
+			ps.createLocalCopies(ProcessStatistics.SOURCES_COPY, ProcessStatistics.CLASSPATH_PACK);
 			
 			if(cmd.hasOption("compliance")){
 				int compval = Integer.parseInt(cmd.getOptionValue("compliance"));
@@ -180,8 +167,6 @@ public class NewProject extends GlobalTestRunning {
 			ps.setProjectName(cmd.getArgs()[1]);
 			ProcessStatistics.saveState(ps);
 			
-			skipRunWithPs = cmd.hasOption("just-prepare");
-			
 			System.out.printf("Project generated in: %s\n", ps.getWorkingDir());
 		}else{
 			ps = ProcessStatistics.rawLoad(f.getAbsolutePath());
@@ -214,12 +199,7 @@ public class NewProject extends GlobalTestRunning {
 			//aip.add(new StackTracePrintingInstrumentationProcessor());
 		}
 		
-		if(!skipRunWithPs){
-			runWithPs(ps, aip.toArray(new AbstractInstrumentationProcessor[0]));
-		}else{
-			ProcessStatistics.saveState(ps);
-		}
-		
+		runWithPs(ps, aip.toArray(new AbstractInstrumentationProcessor[0]));
 		System.out.println("Done.");
 	}
 
