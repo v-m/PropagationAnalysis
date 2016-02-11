@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import org.graphstream.algorithm.Dijkstra;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
@@ -517,21 +516,6 @@ public class GraphStream extends Graph {
 	}
 
 	@Override
-	public String[] computeShortestPath(String from, String to) {
-		ArrayList<String> al = new ArrayList<String>();
-
-		org.graphstream.algorithm.AStar astar = new org.graphstream.algorithm.AStar(getGraph()); 
-		astar.compute(from, to); // with A and Z node identifiers in the graph. 
-		org.graphstream.graph.Path path = astar.getShortestPath();
-
-		for(Node n : path.getEachNode()){
-			al.add(n.getId());
-		}
-
-		return al.toArray(new String[al.size()]);
-	}
-
-	@Override
 	public Graph keepOnly(NodeTypes[] nt, NodeMarkers[] nm, EdgeTypes[] et, EdgeMarkers[] em) {
 		Graph g = new GraphStream();
 
@@ -790,32 +774,6 @@ public class GraphStream extends Graph {
 			throw new IncompatibleTypesException();
 		}
 		
-	}
-
-	@Override
-	public String[] shortestPath(String from, String to) {
-		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, null, null);
-		dijkstra.init(getGraph());
-		dijkstra.setSource(getGraph().getNode(from));
-		dijkstra.compute();
-		Path p = dijkstra.getPath(getGraph().getNode(to));
-		boolean inf = false;
-		if(Double.isInfinite(dijkstra.getPathLength(getGraph().getNode(to)))){
-			inf = true;
-		}
-		dijkstra.clear();
-		
-		if(inf)
-			return null;
-		
-		String[] ret = new String[p.getNodeCount()];
-
-		int i = 0;
-		for(Node n : p.getNodePath()){
-			ret[i++] = n.getId();
-		}
-
-		return ret;
 	}
 
 }

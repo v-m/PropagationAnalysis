@@ -231,7 +231,6 @@ public abstract class Graph {
 	public abstract EdgeMarkers[] getEdgeMarkers(String from, String to);
 
 	public abstract GraphApi getGraphFamily();
-	public abstract String[] computeShortestPath(String from, String to);
 
 	public abstract boolean colorNode(String name, String color);
 	public abstract boolean colorEdge(String from, String to, String color);
@@ -462,15 +461,6 @@ public abstract class Graph {
 	public void addDirectedEdgeAndNodeIfNeeded(EdgeIdentity ei) {
 		addDirectedEdgeAndNodeIfNeeded(ei.getFrom(), ei.getTo());
 	}
-
-	/**
-	 * Compute the shortest path from a node to another.
-	 * Note that edges are unweighted. Each edge is considered as 1
-	 * @param from
-	 * @param to
-	 * @return
-	 */
-	public abstract String[] shortestPath(String from, String to);
 
 	public EdgeIdentity[] getNodesConnectedFromAndTo(String n) {
 		List<EdgeIdentity> ret = new ArrayList<EdgeIdentity>();

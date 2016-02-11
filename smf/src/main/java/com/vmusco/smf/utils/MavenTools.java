@@ -11,10 +11,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 /**
  * This class offers utility functions to get classpath informations
@@ -103,82 +99,5 @@ public abstract class MavenTools {
 		}
 		
 		return cp;
-	}
-	
-	/**
-	 *  This method uses the local mvn installation to resolve and generate the effective POM
-	 *  As a consequence, the generated POM contains all dependencies (even nested !)
-	 * @param projectRoot
-	 * @param mavenDir
-	 * @return null if a dependency cannot be resolved !!!
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * @throws XmlPullParserException
-	 * @throws InterruptedException
-	 */
-	@Deprecated
-	public static String extractClassPathFromPom(String projectRoot, String mavenDir) throws FileNotFoundException, IOException, XmlPullParserException, InterruptedException{
-		// First step: we execute package the project in order to get all dependencies in .m2 cache
-		String outprintlog = "/tmp/"+System.currentTimeMillis();
-		System.out.println("Packaging the project to obtain all dependencies in meaven cache...");
-		System.out.println("Mvn console: "+outprintlog);
-		
-		ProcessBuilder proc1 = new ProcessBuilder("mvn", "package");
-		proc1.directory(new File(projectRoot));
-		proc1.redirectOutput(new File(outprintlog));
-		proc1.redirectError(new File(outprintlog));
-		proc1.start().waitFor();
-		
-		System.out.println("Generating a pom in order to get all dependencies...");
-		
-		ProcessBuilder p2 = new ProcessBuilder("mvn", "help:effective-pom");
-		p2.directory(new File(projectRoot));
-		p2.redirectOutput(new File(outprintlog));
-		p2.redirectError(new File(outprintlog));
-		Process proc2 = p2.start();
-
-		BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc2.getInputStream()));
-
-		String s = null;
-		String effectivePomReaded = ""; 
-		boolean recordOutputAsXml = false;
-
-		while ((s = stdInput.readLine()) != null) {
-			String st = s.trim();
-			if(st.startsWith("<?xml"))
-				recordOutputAsXml = true;
-
-			if(recordOutputAsXml)
-				effectivePomReaded += s;
-
-			if(st.endsWith("</project>"))
-				recordOutputAsXml = false;
-		}
-
-		StringReader sr = new StringReader(effectivePomReaded);
-
-		try{
-			MavenXpp3Reader reader = new MavenXpp3Reader();
-			Model model = reader.read(sr);
-	
-			String classpath = "";
-	
-			for(Dependency dep : model.getDependencies()){
-				String ff = mavenDir + File.separator + dep.getGroupId().replaceAll("\\.", File.separator) + File.separator + dep.getArtifactId() + File.separator + dep.getVersion() + File.separator + dep.getArtifactId()+"-"+dep.getVersion()+".jar";
-	
-				File fff = new File(ff);
-				if(!fff.exists()){
-					return null;
-				}else{
-					classpath += ff + File.pathSeparator;
-				}
-	
-			}
-	
-			return classpath;
-		}catch(EOFException e){
-			System.out.println("EOF reached -- no classpath !");
-			return "";
-		}
 	}
 }

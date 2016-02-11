@@ -31,16 +31,6 @@ public class ShortestPathsTests {
 		return g;
 	}
 	
-	@Test
-	public void testDijkstra(){
-		Graph g = createGraph();
-		
-		String[] path = g.shortestPath("Z", "E");
-		
-		Assert.assertEquals(2, path.length);
-		Assert.assertArrayEquals(new String[]{"Z", "E"}, path);
-	}
-	
 	/**
 	 * This test should be checked
 	 * TODO fixit

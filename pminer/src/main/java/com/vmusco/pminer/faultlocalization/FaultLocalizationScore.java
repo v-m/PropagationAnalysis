@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.softminer.exceptions.TargetNotFoundException;
 
@@ -44,8 +43,9 @@ public abstract class FaultLocalizationScore {
 
 	public static int wastedEffortForList(List<Double> scoreOfUnits, double scoreOfSearchedUnit) {
 		Collections.sort(scoreOfUnits);
-		List<Double> revlist = Lists.reverse(scoreOfUnits);
-		Iterator<Double> iterator = revlist.iterator();
+		Collections.reverse(scoreOfUnits);
+
+		Iterator<Double> iterator = scoreOfUnits.iterator();
 
 		int pos = 0;
 		int startpos = -1;
@@ -69,7 +69,7 @@ public abstract class FaultLocalizationScore {
 
 		if(startpos == -1 || endpos == -1){
 			System.out.println("MAX !!!");
-			return revlist.size()-1;
+			return scoreOfUnits.size()-1;
 		}else{
 			int mid = (endpos - startpos +1) / 2;
 			return startpos+mid;
