@@ -12,6 +12,9 @@ public class VoidsMethodInvocationOperator extends AbstractMethodsCallsOperator{
 
 	@Override
 	public void process(CtInvocation<?> element) {
+		if(!isCtElementCandidateAcceptable(element))
+			return;
+
 		if(element.getExecutable().isConstructor())
 			return;
 

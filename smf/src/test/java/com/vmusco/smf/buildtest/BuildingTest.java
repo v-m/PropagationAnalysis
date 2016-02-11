@@ -245,10 +245,6 @@ public class BuildingTest {
 		ps.performFreshTesting(null);
 		Assert.assertEquals(1, ps.getTestExecutionResult().getCalledNodes().size());
 		String[] calledNodes = ps.getTestExecutionResult().getCalledNodes("hello.you.tests.Test1.mytest()");
-		Assert.assertEquals(111, calledNodes.length);
-		ps.getTestExecutionResult().cleanCalledNodeInformations();
-		
-		calledNodes = ps.getTestExecutionResult().getCalledNodes("hello.you.tests.Test1.mytest()");
 		List<String> calledNodesList = Arrays.asList(calledNodes);
 		Assert.assertEquals(8, calledNodes.length);
 		Assert.assertTrue(calledNodesList.contains("hello.you.Class1()"));

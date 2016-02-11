@@ -26,6 +26,9 @@ public class ArithmeticMutatorOperator extends SmfMutationOperator<CtBinaryOpera
 	
 	@Override
 	public void process(CtBinaryOperator<?> element) {
+		if(!isCtElementCandidateAcceptable(element))
+			return;
+		
 		for(BinaryOperatorKind kind : operators){
 			if(element.getKind() == kind){
 				addElement(element);

@@ -20,6 +20,9 @@ public class NegationUnaryOperatorConditionOperator extends SmfMutationOperator<
 
 	@Override
 	public void process(CtTypedElement<?> element) {
+		if(!isCtElementCandidateAcceptable(element))
+			return;
+
 		addElement(element);
 	}
 

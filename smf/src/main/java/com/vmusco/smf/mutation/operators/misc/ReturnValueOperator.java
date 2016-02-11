@@ -25,6 +25,9 @@ public class ReturnValueOperator extends SmfMutationOperator<CtReturn<?>> {
 
 	@Override
 	public void process(CtReturn<?> element) {
+		if(!isCtElementCandidateAcceptable(element))
+			return;
+
 		if(element.getReturnedExpression() == null)
 			return;
 

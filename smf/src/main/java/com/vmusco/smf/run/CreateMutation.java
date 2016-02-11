@@ -62,8 +62,6 @@ public class CreateMutation implements MutationCreationListener{
 		options.addOption(opt);
 		opt = new Option("R", "reset", false, "drop all previously generated mutants if so (default: false)");
 		options.addOption(opt);
-		opt = new Option("t", "stacktrace", false, "instrument the mutants in order to get the stacktrace of the call (default: false)");
-		options.addOption(opt);
 
 		CommandLineParser parser = new PosixParser();
 		CommandLine cmd = parser.parse(options, args);
@@ -152,7 +150,7 @@ public class CreateMutation implements MutationCreationListener{
 		if(cmd.hasOption("name"))
 			ms.setMutationName(cmd.getOptionValue("name"));
 		
-		ms.loadOrCreateMutants(cmd.hasOption("reset"), cm, nbmut, safepersist, cmd.hasOption("stacktrace"));
+		ms.loadOrCreateMutants(cmd.hasOption("reset"), cm, nbmut, safepersist);
 		
 		//Runtime.getRuntime().removeShutdownHook(id);
 	}

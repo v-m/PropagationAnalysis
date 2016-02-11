@@ -44,13 +44,11 @@ import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.compilation.ClassFileUtil;
-import com.vmusco.smf.compilation.Compilation;
 import com.vmusco.smf.compilation.compilers.JavaxCompilation;
 import com.vmusco.smf.exceptions.BadObjectTypeException;
 import com.vmusco.smf.exceptions.HashClashException;
 import com.vmusco.smf.exceptions.NotValidMutationException;
 import com.vmusco.smf.exceptions.PersistenceException;
-import com.vmusco.smf.instrumentation.StackTracePrintingInstrumentationProcessor;
 import com.vmusco.smf.utils.InterruptionManager;
 import com.vmusco.smf.utils.NewReportedStandardEnvironment;
 import com.vmusco.smf.utils.SpoonHelpers;
@@ -84,12 +82,12 @@ public final class Mutation {
 	}
 
 	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset) throws PersistenceException, BadObjectTypeException {
-		createMutants(ps, ms, mcl, reset, 0, false);
+		createMutants(ps, ms, mcl, reset, 0);
 	}
 
 
-	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset, int safepersist, boolean stackTraceInstrumentation) throws PersistenceException, BadObjectTypeException {
-		createMutants(ps, ms, mcl, reset, -1, safepersist, stackTraceInstrumentation);
+	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset, int safepersist) throws PersistenceException, BadObjectTypeException {
+		createMutants(ps, ms, mcl, reset, -1, safepersist);
 	}
 
 	/**
@@ -103,16 +101,18 @@ public final class Mutation {
 	public static CtElement[] getMutations(ProcessStatistics ps, MutationStatistics ms, Factory factory) throws BadObjectTypeException{
 		String[] mutateFrom = ms.getClassToMutate(true);
 		if(mutateFrom == null || mutateFrom.length <= 0){
-			mutateFrom = ps.getSrcToCompile(true);
+			if(ps.isInstrumented()){
+				mutateFrom = ps.getSrcToCompile(true);
+			}
 		}
 
 		String[] cp;
 		int i = 0;
 
-		if(ps.getClasspath() != null){
-			cp = new String[ps.getClasspath().length + 1];
+		if(ps.getRunningClassPath() != null){
+			cp = new String[ps.getRunningClassPath().length + 1];
 
-			for(String cpe : ps.getClasspath()){
+			for(String cpe : ps.getRunningClassPath()){
 				cp[i++] = cpe;
 			}
 		}else{
@@ -174,15 +174,15 @@ public final class Mutation {
 	 * @param factory
 	 * @param hashes hash of generations (check if already generated -- null to disable the check)
 	 * @param testingClassPath
-	 * @param stackTraceInstrumentation true if the trace should be printed by the method (code injection)
 	 * @return null if element cannot be mutated or if aborted, else, the temporary directory containing a folder "src" with the mutated sources and a "bytecode" file or folder if built has succeeded or not. 
 	 * @throws IOException
 	 * @throws NoSuchAlgorithmException
 	 * @throws HashClashException
 	 * @throws NotValidMutationException
 	 */
-	public static MutantIfos probeMutant(CtElement e, CtElement m, TargetObtainer to, Factory factory, Set<String> hashes, String[] testingClassPath, boolean stackTraceInstrumentation, int compliance) throws IOException, NoSuchAlgorithmException, HashClashException, NotValidMutationException{
+	public static MutantIfos probeMutant(CtElement e, CtElement m, TargetObtainer to, Factory factory, Set<String> hashes, String[] testingClassPath, int compliance) throws IOException, NoSuchAlgorithmException, HashClashException, NotValidMutationException{
 		CtClass<?> theClass = findAssociatedClass(e);
+
 		CtElementImpl toReplace = (CtElementImpl) to.determineTarget(e);
 		CtElementImpl replaceWith = (CtElementImpl) m;
 		CtExecutable<?> exec = toReplace.getParent(CtExecutable.class);
@@ -197,12 +197,6 @@ public final class Mutation {
 
 		ifos.setMutationFrom(toReplace.toString());
 		ifos.setMutationTo(replaceWith.toString());
-
-		if(stackTraceInstrumentation && exec != null){
-			StackTracePrintingInstrumentationProcessor stackTracePrintingInstrumentationProcessor = new StackTracePrintingInstrumentationProcessor();
-			stackTracePrintingInstrumentationProcessor.setFactory(factory);
-			stackTracePrintingInstrumentationProcessor.process(exec);
-		}
 		
 		replaceWith.setParent(toReplace.getParent());
 		if(!replace(toReplace, replaceWith)){
@@ -226,9 +220,6 @@ public final class Mutation {
 			// Revert before interrupting
 			if(!replace(replaceWith, toReplace)){
 				return null;
-			}
-			if(stackTraceInstrumentation && exec != null){
-				exec.getBody().removeStatement(exec.getBody().getStatement(0));
 			}
 			throw new HashClashException();
 		}
@@ -284,9 +275,6 @@ public final class Mutation {
 		if(!replace(replaceWith, toReplace)){
 			return null;
 		}
-		if(stackTraceInstrumentation && exec != null){
-			exec.getBody().removeStatement(exec.getBody().getStatement(0));
-		}
 		return ifos; 
 	}
 
@@ -311,11 +299,10 @@ public final class Mutation {
 	 * @param reset
 	 * @param nb
 	 * @param safepersistFold
-	 * @param stackTraceInstrumentation
 	 * @throws PersistenceException
 	 * @throws BadObjectTypeException if the mutation operator declared in ms is NOT intended for direct mutation using SMF framework (ie. imported mutation operator)
 	 */
-	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, final MutationCreationListener mcl, boolean reset, int nb, int safepersist, boolean stackTraceInstrumentation) throws PersistenceException, BadObjectTypeException{
+	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, final MutationCreationListener mcl, boolean reset, int nb, int safepersist) throws PersistenceException, BadObjectTypeException{
 		try{
 			Factory factory = SpoonHelpers.obtainFactory();
 
@@ -434,7 +421,6 @@ public final class Mutation {
 							factory,
 							mutHashs,
 							ps.getTestingClasspath(),
-							stackTraceInstrumentation,
 							ps.getComplianceLevel());
 
 					if(tmpmi != null){

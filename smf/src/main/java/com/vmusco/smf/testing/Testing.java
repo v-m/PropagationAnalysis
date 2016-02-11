@@ -302,7 +302,7 @@ public final class Testing {
 						}else if(line.startsWith(TestingInstrumentedCodeHelper.STARTKEY)){
 							// This is method entry information
 							line = line.substring(TestingInstrumentedCodeHelper.STARTKEY.length());
-							if(!line.equals(currentTestCase)){
+							if(currentTestCase != null && !line.equals(currentTestCase)){
 								enteringMethods.add(line);
 								if(tel != null)		tel.testCaseEnteringMethod(currentTestCase, line);
 							}

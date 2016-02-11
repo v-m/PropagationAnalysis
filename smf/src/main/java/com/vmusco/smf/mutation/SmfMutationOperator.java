@@ -3,7 +3,10 @@ package com.vmusco.smf.mutation;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.vmusco.smf.testing.TestingInstrumentedCodeHelper;
+
 import spoon.processing.AbstractProcessor;
+import spoon.reflect.code.CtInvocation;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 
@@ -14,6 +17,29 @@ import spoon.reflect.factory.Factory;
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public abstract class SmfMutationOperator<T extends CtElement> extends AbstractProcessor<T> implements MutationOperator{
+	
+	/**
+	 * This element check if we are attempting to mutate something related to injection process...
+	 * @param e
+	 * @return
+	 */
+	protected boolean isCtElementCandidateAcceptable(CtElement e){
+		CtInvocation<?> tar = null;
+		if(e instanceof CtInvocation){
+			tar = (CtInvocation<?>)e;
+		}else{
+			tar = e.getParent(CtInvocation.class);
+		}
+		
+		while(tar != null){
+			if(tar.getTarget() != null && tar.getTarget().toString().equals(TestingInstrumentedCodeHelper.class.getSimpleName())){
+				return false;
+			}
+			
+			tar = tar.getParent(CtInvocation.class);
+		}
+		return true;
+	}
 	
 	public SmfMutationOperator() {
 		MutationGateway.candidates = new ArrayList<CtElement>();

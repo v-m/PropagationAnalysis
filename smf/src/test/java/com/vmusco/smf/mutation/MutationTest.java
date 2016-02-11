@@ -208,7 +208,7 @@ public class MutationTest {
 		hash.add("8c4c7c6d6449d208a7451f9aeb224818");
 		
 		try {
-			Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), false, 8);
+			Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), 8);
 		} catch (HashClashException e) {
 			return;
 		}
@@ -228,7 +228,7 @@ public class MutationTest {
 		Factory factory = SpoonHelpers.obtainFactory();
 		Object[] r = getMutationTestingObject(factory);
 
-		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), false, 8);
+		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), 8);
 	}
 
 	/**
@@ -246,7 +246,7 @@ public class MutationTest {
 		Set<String> hash = new HashSet<String>();
 		hash.add("ab595c23fc91e4d344484f2cb6e8af13");
 		
-		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), false, 8);
+		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), 8);
 	}
 	
 	/**
@@ -261,7 +261,7 @@ public class MutationTest {
 		Factory factory = SpoonHelpers.obtainFactory();
 		Object[] r = getMutationTestingObject(factory);
 		
-		MutantIfos pm = Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), false, 8);
+		MutantIfos pm = Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), 8);
 		Assert.assertEquals("8c4c7c6d6449d208a7451f9aeb224818", pm.getHash());
 		Assert.assertEquals("i", pm.getMutationFrom());
 		Assert.assertEquals("i >= 0 ? i : i * -1", pm.getMutationTo());
@@ -356,16 +356,12 @@ public class MutationTest {
 		ProcessStatistics.saveState(ps);
 		
 		MutationStatistics ms = new MutationStatistics(ps, new ArithmeticMutatorOperator());
-		ms.loadOrCreateMutants(true, null, -1, 0, true);
+		ms.loadOrCreateMutants(true, null, -1, 0);
 		
 		TestsExecutionIfos runTestCases = Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath("mutant_0"), ps.getTestClasses(), null, ps.getAlternativeJre());
 		Assert.assertEquals(1, runTestCases.getCalledNodes().size());
 		
 		String[] calledNodes = runTestCases.getCalledNodes("hello.you.tests.Test1.mytest()");
-		Assert.assertEquals(111, calledNodes.length);
-		runTestCases.cleanCalledNodeInformations();
-		
-		calledNodes = runTestCases.getCalledNodes("hello.you.tests.Test1.mytest()");
 		List<String> calledNodesList = Arrays.asList(calledNodes);
 		Assert.assertEquals(8, calledNodes.length);
 		Assert.assertTrue(calledNodesList.contains("hello.you.Class1()"));

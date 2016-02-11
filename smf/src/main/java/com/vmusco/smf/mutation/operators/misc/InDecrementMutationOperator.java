@@ -37,6 +37,9 @@ public class InDecrementMutationOperator extends SmfMutationOperator<CtUnaryOper
 
 	@Override
 	public void process(CtUnaryOperator<?> element) {
+		if(!isCtElementCandidateAcceptable(element))
+			return;
+
 		if(element.getKind() == UnaryOperatorKind.POSTDEC || 
 				element.getKind() == UnaryOperatorKind.PREDEC ||
 				element.getKind() == UnaryOperatorKind.POSTINC ||

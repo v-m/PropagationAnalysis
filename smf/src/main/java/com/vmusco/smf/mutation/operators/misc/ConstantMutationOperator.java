@@ -17,6 +17,9 @@ public class ConstantMutationOperator extends SmfMutationOperator<CtLiteral<?>>{
 
 	@Override
 	public void process(CtLiteral<?> element) {
+		if(!isCtElementCandidateAcceptable(element))
+			return;
+
 		if(element.getType() == null)
 			return;
 

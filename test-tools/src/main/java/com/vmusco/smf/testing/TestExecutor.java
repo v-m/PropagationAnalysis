@@ -119,6 +119,7 @@ public class TestExecutor {
 				String line = TEST_MARKER + testname(description.getDisplayName());
 				printDefault(line);
 				System.out.println(line);
+				TestingInstrumentedCodeHelper.resetMemory();
 			}
 
 			public void testFinished(Description description) throws Exception{

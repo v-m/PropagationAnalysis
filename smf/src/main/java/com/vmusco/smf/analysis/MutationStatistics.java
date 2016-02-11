@@ -338,17 +338,17 @@ public class MutationStatistics implements Serializable {
 	}
 
 	public void loadOrCreateMutants(boolean reset, MutationCreationListener mcl, int safepersist) throws Exception {
-		loadOrCreateMutants(reset, mcl, -1, safepersist, false);
+		loadOrCreateMutants(reset, mcl, -1, safepersist);
 	}
 
-	public void loadOrCreateMutants(boolean reset, MutationCreationListener mcl, int nb, int safepersist, boolean stackTraceInstrumentation) throws PersistenceException, URISyntaxException, BadObjectTypeException {
+	public void loadOrCreateMutants(boolean reset, MutationCreationListener mcl, int nb, int safepersist) throws PersistenceException, URISyntaxException, BadObjectTypeException {
 		File f = new File(getConfigFileResolved());
 
 		if(!reset && f.exists()){
 			loadMutants();
 		}
 
-		Mutation.createMutants(ps, this, mcl, reset, nb, safepersist, stackTraceInstrumentation);
+		Mutation.createMutants(ps, this, mcl, reset, nb, safepersist);
 
 		saveMutants();
 

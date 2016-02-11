@@ -55,6 +55,7 @@ public class ProcessStatistics implements Serializable{
 	public static final String DEFAULT_MUTANT_SOURCE = "source";
 	public static final String DEFAULT_MUTANT_BYTECODE = "bytecode";
 	public static final String DEFAULT_MUTANT_EXECUTION = "exec";
+	private static final String INSTRUMENTED_ORIGINAL_SUFFIX = ".original";
 
 	public enum STATE{
 		/**
@@ -934,7 +935,7 @@ public class ProcessStatistics implements Serializable{
 		System.out.println("Instrumenting project...");
 
 		File pji = new File(this.getProjectIn(true));
-		File orig = new File(pji.getParentFile(), pji.getName()+".original");
+		File orig = getNotInstrumentedFolder();
 
 		//pji.renameTo(orig);
 		FileUtils.copyDirectory(pji, orig);
@@ -955,6 +956,11 @@ public class ProcessStatistics implements Serializable{
 
 		this.currentState = STATE.BUILD;
 		return true;
+	}
+
+	public File getNotInstrumentedFolder() {
+		File file = new File(this.getProjectIn(true));
+		return new File(file.getParent(), file.getName()+INSTRUMENTED_ORIGINAL_SUFFIX);
 	}
 
 	private boolean buildProject(Compilation c) throws BadStateException, IOException{
@@ -1029,7 +1035,7 @@ public class ProcessStatistics implements Serializable{
 		this.currentState = STATE.READY;
 	}
 
-	public String[] getRunningClassPath() throws IOException{
+	public String[] getRunningClassPath(){
 		List<String> ret = new ArrayList<String>();
 
 		for(String s : getTestingClasspath()){
@@ -1042,7 +1048,7 @@ public class ProcessStatistics implements Serializable{
 			ret.add(aRess);
 		}
 
-		for(String cpe : Testing.getCurrentVMClassPath(new String[]{"smf", "junit"})){
+		for(String cpe : Testing.getCurrentVMClassPath(new String[]{"smf", "test-tools", "junit"})){
 			ret.add(cpe);
 		}
 
@@ -1052,7 +1058,7 @@ public class ProcessStatistics implements Serializable{
 	}
 
 	public boolean isInstrumented() {
-		return new File(getProjectIn(true)+File.separator+".original").exists();
+		return getNotInstrumentedFolder().exists();
 	}
 
 	public void setComplianceLevel(int level) {

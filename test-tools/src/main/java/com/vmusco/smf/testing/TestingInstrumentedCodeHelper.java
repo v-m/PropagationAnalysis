@@ -1,5 +1,8 @@
 package com.vmusco.smf.testing;
 
+import java.util.HashSet;
+import java.util.Set;
+
 
 public class TestingInstrumentedCodeHelper {
 	/***********************************
@@ -9,6 +12,8 @@ public class TestingInstrumentedCodeHelper {
 	private static boolean ENABLE_LEAVING = true;
 	private static boolean ENABLE_STACKTRACE = false;
 
+	private static Set visited = new HashSet();
+	
 	public static void setEnteringPrinting(boolean isYes) {
 		ENABLE_ENTERING = isYes;
 	}
@@ -76,11 +81,18 @@ public class TestingInstrumentedCodeHelper {
 		System.out.println(STACKTRACEEND);
 	}
 
+	public static void resetMemory(){
+		visited.clear();
+	}
 
 	public static void printMethodEntering(String methodId){
 		if(!ENABLE_ENTERING)
 			return;
 		
+		if(visited.contains(methodId))
+			return;
+		
+		visited.add(methodId);
 		System.out.println(STARTKEY+methodId);
 	}
 
