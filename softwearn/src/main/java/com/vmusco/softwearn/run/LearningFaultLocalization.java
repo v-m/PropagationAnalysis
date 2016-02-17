@@ -24,6 +24,7 @@ public class LearningFaultLocalization extends FaultLocalization{
 	private MutationGraphKFold kfold = null;
 	private int currentIteration = 0;
 	private int nbedgeswithlearn;
+	private long learningtime = -1;
 
 	protected LearningFaultLocalization() {
 		super();
@@ -86,12 +87,17 @@ public class LearningFaultLocalization extends FaultLocalization{
 		kfold = MutationGraphKFold.instantiateKFold(ms, lg, K_FOLD, LEARN_ALGO, new GraphFaultLocalizationByIntersection(base));
 		int ite = 0;
 		
+		// Here starts the learning phase time
+		learningtime = System.currentTimeMillis();
+		
 		while(ite < K_FOLD){
 			kfold.learn(ite);
 			ite++;
 		}
 		
 		kfold.learningRoundFinished();
+		// Here ends the learning phase time
+		learningtime = System.currentTimeMillis() - learningtime;
 	}
 	
 	@Override
@@ -124,7 +130,7 @@ public class LearningFaultLocalization extends FaultLocalization{
 	
 	@Override
 	protected String prepareHeader(List<DisplayData> notifier) {
-		String result = "count;max;mutid;#fold;#E;#Eon";
+		String result = "count;max;mutid;#fold;learntime;#E;predtime;#Eon";
 
 		result += String.format(";#inter");
 
@@ -136,8 +142,8 @@ public class LearningFaultLocalization extends FaultLocalization{
 	}
 	
 	@Override
-	protected String printEntry(int cpt, int nbedges, int interNodesList, String m, String intermBuffer) {
-		String result = String.format("%d;%d;%s;%d;%d;%d", cpt, maxsize, m, currentIteration, nbedges, nbedgeswithlearn);
+	protected String printEntry(int cpt, int nbedges, int interNodesList, String m, String intermBuffer, long predictTime) {
+		String result = String.format("%d;%d;%s;%d;%d;%d;%d;%d", cpt, maxsize, m, currentIteration, learningtime, nbedges, predictTime, nbedgeswithlearn);
 		result += ";"+interNodesList;
 		result += intermBuffer;
 		result += '\n';

@@ -153,10 +153,13 @@ public class FaultLocalization {
 			for(String m : all){
 				MutantIfos mi = ms.getExternalDeepLoaded(m);
 
+				// Here starts the prediction (aka intersection) time
+				long intersectiontime = System.currentTimeMillis();
 				stats.changeMutantIdentity(mi);
-
 				Graph g = stats.getLastIntersectedGraph();
-
+				intersectiontime = System.currentTimeMillis() - intersectiontime;
+				// Here ends the prediction (aka intersection) time
+				
 				String[] interNodesList = new String[0];
 				if(g != null)
 					interNodesList = g.getNodesNames();
@@ -179,7 +182,7 @@ public class FaultLocalization {
 				
 
 				if(!abort){
-					result += printEntry(++cpt, nbedges, interNodesList.length, m, intermBuffer);
+					result += printEntry(++cpt, nbedges, interNodesList.length, m, intermBuffer, intersectiontime);
 				}
 			}
 			mscIntersect.executionEnded();
@@ -188,8 +191,8 @@ public class FaultLocalization {
 		System.out.println(result);
 	}
 	
-	protected String printEntry(int cpt, int nbedges, int interNodesList, String m, String intermBuffer) {
-		String result = String.format("%d;%d;%s;%d", cpt, maxsize, m, nbedges);
+	protected String printEntry(int cpt, int nbedges, int interNodesList, String m, String intermBuffer, long predictTime) {
+		String result = String.format("%d;%d;%s;%d;%d", cpt, maxsize, m, nbedges, predictTime);
 		result += ";"+interNodesList;
 		result += intermBuffer;
 		result += '\n';
@@ -217,7 +220,7 @@ public class FaultLocalization {
 	}
 
 	protected String prepareHeader(List<DisplayData> notifier) {
-		String result = "count;max;mutid;#E";
+		String result = "count;max;mutid;#E;predtime";
 
 		result += String.format(";#inter");
 

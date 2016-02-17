@@ -4,12 +4,14 @@ import sys
 import csv
 import os
 
-fallback = False
+fallback = True
 metric = "avg_we" # avg_we, zero or one
 sep = ";" #use & for LaTeX
-eol = ""# "\\\\" #use \\ for LaTeX
+eol = "" #use \\ for LaTeX
 summary = False
-intersect = None#"softwearn.csv" # None for no intersection
+intersect = None #"softwearn.csv" # None for no intersection
+
+softwares = ["codec", "lang", "daikon", "draw2d", "eventbus", "htmlparser", "jaxen", "jester", "jexel", "jparsec"]
 
 def readMap(afile, fb):
     amap = {}
@@ -29,11 +31,6 @@ def readMap(afile, fb):
                 continue
 
             if fb or (not fb and not isThereAtLeastOneNegative(row)):
-                #if(not isThereAtLeastOneNegative(row)):
-                    #print("already there %s"%row)
-                #    pass
-                #else:
-                #    print("added %s"%row)
                 key = row[2]
                 amap[key] = row
             else:
@@ -64,8 +61,16 @@ def isThereAtLeastOneNegative(fields):
 
     return False
 
-def analyzeProject(head, lines):
+def guessTheSoft(filepath):
+    for part in filepath.split("/"):
+        for soft in softwares:
+            if part == soft:
+                return soft
 
+    return "?"
+
+
+def analyzeProject(head, lines):
     header = None
     islearning = None
 
@@ -74,12 +79,15 @@ def analyzeProject(head, lines):
     accumulators = []
     iszero = []
     isone = []
+    predictime = 0
+    learntime = 0
 
     nb = 0
 
     #header
-    islearning = (not (len(head)==16))
-    nbshift = 6 if islearning else 4
+    islearning = (not (len(head)==17))
+
+    nbshift = 8 if islearning else 5
     header = head[nbshift:]
 
     for rowkey in lines:
@@ -96,6 +104,14 @@ def analyzeProject(head, lines):
                  isone.append(0)
 
          nb = nb + 1
+
+         if islearning:
+             predictime = predictime + int(row[6])
+             if learntime < 0:
+                 learntime = int(row[4])
+         else:
+             predictime = predictime + int(row[4])
+
          c = -1;
          for col in row[nbshift:]:
             c=c+1
@@ -112,7 +128,11 @@ def analyzeProject(head, lines):
                 isone[c] = isone[c] + 1
 
     c = 0
-    ret = {"max": nbmax, "considered": nb}
+    ret = {"max": nbmax, "considered": nb, "avg_predict": predictime/nb, "avg_learn": -1, "totaltime": predictime}
+
+    if islearning:
+        ret["avg_learn"] = learntime / (nb*10)
+        ret["totaltime"] = ret["totaltime"] + learntime / (nb/10)
 
     for entry in header:
         ret[entry] = {
@@ -121,40 +141,47 @@ def analyzeProject(head, lines):
             "zero": iszero[c],
             "one": isone[c]
         }
+
         c=c+1
 
     return ret
 
 mystring = "proband"
 if(not summary):
-    mystring = "%s%c%s%c%s"%(mystring, sep, "considered", sep, "discared")
-    mystring = "%s%c%s%c%s"%(mystring, sep, "#inter", sep, "Graph")
-    mystring = "%s%c%s"%(mystring, sep, "Tarantula")
+    mystring = "%s%s%s%s%s"%(mystring, sep, "considered", sep, "discared")
+    mystring = "%s%s%s"%(mystring, sep, "Avg Predict")
+    mystring = "%s%s%s"%(mystring, sep, "Avg Learning")
+    mystring = "%s%s%s"%(mystring, sep, "Total time")
+    mystring = "%s%s%s%s%s"%(mystring, sep, "#inter", sep, "Graph")
+    mystring = "%s%s%s"%(mystring, sep, "Tarantula")
 
-mystring = "%s%c%s"%(mystring, sep, "Tarantula")
+mystring = "%s%s%s"%(mystring, sep, "Tarantula")
 if(not summary):
-    mystring = "%s%c%s"%(mystring, sep, "Ochiai")
-mystring = "%s%c%s"%(mystring, sep, "Ochiai")
+    mystring = "%s%s%s"%(mystring, sep, "Ochiai")
+mystring = "%s%s%s"%(mystring, sep, "Ochiai")
 if(not summary):
-    mystring = "%s%c%s"%(mystring, sep, "Naish")
-mystring = "%s%c%s"%(mystring, sep, "Naish")
+    mystring = "%s%s%s"%(mystring, sep, "Naish")
+mystring = "%s%s%s"%(mystring, sep, "Naish")
 if(not summary):
-    mystring = "%s%c%s"%(mystring, sep, "Tarantula*")
-mystring = "%s%c%s"%(mystring, sep, "Tarantula*")
+    mystring = "%s%s%s"%(mystring, sep, "Steimann")
+mystring = "%s%s%s"%(mystring, sep, "Steimann")
 if(not summary):
-    mystring = "%s%c%s"%(mystring, sep, "Zoltar")
-mystring = "%s%c%s"%(mystring, sep, "Zoltar")
+    mystring = "%s%s%s"%(mystring, sep, "Zoltar")
+mystring = "%s%s%s"%(mystring, sep, "Zoltar")
 
 print("%s%s"%(mystring, eol))
 
 if(not summary):
-    mystring = "%s%c%s%c%s"%("", sep, "", sep, "")
-    mystring = "%s%c%s%c%s"%(mystring, sep, "", sep, "")
-    mystring = "%s%c%s%c%s"%(mystring, sep, "Vanilla", sep, "Graph")
-    mystring = "%s%c%s%c%s"%(mystring, sep, "Vanilla", sep, "Graph")
-    mystring = "%s%c%s%c%s"%(mystring, sep, "Vanilla", sep, "Graph")
-    mystring = "%s%c%s%c%s"%(mystring, sep, "Vanilla", sep, "Graph")
-    mystring = "%s%c%s%c%s"%(mystring, sep, "Vanilla", sep, "Graph")
+    mystring = "%s%s%s%s%s"%("", sep, "", sep, "")
+    mystring = "%s%s%s%s%s"%(mystring, sep, "", sep, "")
+    mystring = "%s%s%s"%(mystring, sep, "")
+    mystring = "%s%s%s"%(mystring, sep, "")
+    mystring = "%s%s%s"%(mystring, sep, "")
+    mystring = "%s%s%s%s%s"%(mystring, sep, "Vanilla", sep, "Graph")
+    mystring = "%s%s%s%s%s"%(mystring, sep, "Vanilla", sep, "Graph")
+    mystring = "%s%s%s%s%s"%(mystring, sep, "Vanilla", sep, "Graph")
+    mystring = "%s%s%s%s%s"%(mystring, sep, "Vanilla", sep, "Graph")
+    mystring = "%s%s%s%s%s"%(mystring, sep, "Vanilla", sep, "Graph")
     print("%s%s"%(mystring, eol))
 
 for afile in sys.argv[1:]:
@@ -179,33 +206,36 @@ for afile in sys.argv[1:]:
         totaldiscared = map1[2]
         analyzed = analyzeProject(map1[0], map1[1])
 
-    mystring="%s"%afile.split("/")[5]
+    mystring="%s"%guessTheSoft(afile)
 
     if(not summary):
-        mystring = "%s%c%d%c%d"%(mystring, sep, analyzed["considered"], sep, totaldiscared)
-        mystring = "%s%c%.2f%c%.2f"%(mystring, sep, analyzed["#inter"][metric], sep, analyzed["+WG"][metric])
+        mystring = "%s%s%d%s%d"%(mystring, sep, analyzed["considered"], sep, totaldiscared)
+        mystring = "%s%s%.2f"%(mystring, sep, analyzed["avg_predict"])
+        mystring = "%s%s%.2f"%(mystring, sep, analyzed["avg_learn"])
+        mystring = "%s%s%d"%(mystring, sep, analyzed["totaltime"])
+        mystring = "%s%s%.2f%s%.2f"%(mystring, sep, analyzed["#inter"][metric], sep, analyzed["+WG"][metric])
 
-    mystring = "%s%c%.2f"%(mystring, sep, analyzed["+WT"][metric])
+    mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WT"][metric])
     if(not summary):
-        mystring = "%s%c%.2f"%(mystring, sep, analyzed["+WTG"][metric])
+        mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WTG"][metric])
 
-    mystring = "%s%c%.2f"%(mystring, sep, analyzed["+WO"][metric])
+    mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WO"][metric])
     if(not summary):
-        mystring = "%s%c%.2f"%(mystring, sep, analyzed["+WOG"][metric])
+        mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WOG"][metric])
 
-    mystring = "%s%c%.2f"%(mystring, sep, analyzed["+WN"][metric])
+    mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WN"][metric])
     if(not summary):
-        mystring = "%s%c%.2f"%(mystring, sep, analyzed["+WNG"][metric])
+        mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WNG"][metric])
 
-    mystring = "%s%c%.2f"%(mystring, sep, analyzed["+WT*"][metric])
+    mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WT*"][metric])
     if(not summary):
 
-        mystring = "%s%c%.2f"%(mystring, sep, analyzed["+WT*G"][metric])
-    mystring = "%s%c%.2f"%(mystring, sep, analyzed["+WZ"][metric])
+        mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WT*G"][metric])
+    mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WZ"][metric])
     if(not summary):
-        mystring = "%s%c%.2f"%(mystring, sep, analyzed["+WZG"][metric])
+        mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WZG"][metric])
 
     if(summary):
-        mystring = "%s%c%.2f"%(mystring, sep, analyzed["+WT*G"][metric])
+        mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WT*G"][metric])
 
     print("%s%s"%(mystring, eol))
