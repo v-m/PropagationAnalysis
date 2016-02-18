@@ -208,7 +208,7 @@ public class MutationTest {
 		hash.add("8c4c7c6d6449d208a7451f9aeb224818");
 		
 		try {
-			Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), 8);
+			Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), 7);
 		} catch (HashClashException e) {
 			return;
 		}
@@ -228,7 +228,7 @@ public class MutationTest {
 		Factory factory = SpoonHelpers.obtainFactory();
 		Object[] r = getMutationTestingObject(factory);
 
-		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), 8);
+		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), 7);
 	}
 
 	/**
@@ -246,7 +246,7 @@ public class MutationTest {
 		Set<String> hash = new HashSet<String>();
 		hash.add("ab595c23fc91e4d344484f2cb6e8af13");
 		
-		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), 8);
+		Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, hash, TestingTools.getCurrentCp(), 7);
 	}
 	
 	/**
@@ -261,7 +261,7 @@ public class MutationTest {
 		Factory factory = SpoonHelpers.obtainFactory();
 		Object[] r = getMutationTestingObject(factory);
 		
-		MutantIfos pm = Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), 8);
+		MutantIfos pm = Mutation.probeMutant((CtElement)r[0], (CtElement)r[1], (TargetObtainer)r[2], factory, null, TestingTools.getCurrentCp(), 7);
 		Assert.assertEquals("8c4c7c6d6449d208a7451f9aeb224818", pm.getHash());
 		Assert.assertEquals("i", pm.getMutationFrom());
 		Assert.assertEquals("i >= 0 ? i : i * -1", pm.getMutationTo());
