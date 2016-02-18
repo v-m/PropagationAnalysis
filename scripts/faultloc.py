@@ -131,8 +131,9 @@ def analyzeProject(head, lines):
     ret = {"max": nbmax, "considered": nb, "avg_predict": predictime/nb, "avg_learn": -1, "totaltime": predictime}
 
     if islearning:
-        ret["avg_learn"] = learntime / nb
-        ret["totaltime"] = ret["totaltime"] + learntime
+        # Time per fold - divided by 10 as there is 10-fold !
+        ret["avg_learn"] = learntime / 10
+        ret["totaltime"] = ret["totaltime"] + (learntime * 10)
 
     for entry in header:
         ret[entry] = {
@@ -159,15 +160,18 @@ mystring = "%s%s%s"%(mystring, sep, "Tarantula")
 if(not summary):
     mystring = "%s%s%s"%(mystring, sep, "Ochiai")
 mystring = "%s%s%s"%(mystring, sep, "Ochiai")
+
+if(not summary):
+    mystring = "%s%s%s"%(mystring, sep, "Zoltar")
+mystring = "%s%s%s"%(mystring, sep, "Zoltar")
+
 if(not summary):
     mystring = "%s%s%s"%(mystring, sep, "Naish")
 mystring = "%s%s%s"%(mystring, sep, "Naish")
 if(not summary):
     mystring = "%s%s%s"%(mystring, sep, "Steimann")
 mystring = "%s%s%s"%(mystring, sep, "Steimann")
-if(not summary):
-    mystring = "%s%s%s"%(mystring, sep, "Zoltar")
-mystring = "%s%s%s"%(mystring, sep, "Zoltar")
+mystring = "%s%s%s"%(mystring, sep, "Vautrin")
 
 print("%s%s"%(mystring, eol))
 
@@ -223,19 +227,19 @@ for afile in sys.argv[1:]:
     if(not summary):
         mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WOG"][metric])
 
+
+
+    mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WZ"][metric])
+    if(not summary):
+        mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WZG"][metric])
+
     mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WN"][metric])
     if(not summary):
         mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WNG"][metric])
 
     mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WT*"][metric])
     if(not summary):
-
-        mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WT*G"][metric])
-    mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WZ"][metric])
-    if(not summary):
-        mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WZG"][metric])
-
-    if(summary):
         mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WT*G"][metric])
 
+    mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WT*G"][metric])
     print("%s%s"%(mystring, eol))

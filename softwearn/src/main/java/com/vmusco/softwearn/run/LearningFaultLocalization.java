@@ -8,6 +8,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.vmusco.pminer.faultlocalization.GraphFaultLocalizationByIntersection;
 import com.vmusco.pminer.run.FaultLocalization;
@@ -17,8 +19,12 @@ import com.vmusco.softwearn.learn.LearningKGraphStream;
 import com.vmusco.softwearn.learn.folding.MutationGraphKFold;
 import com.vmusco.softwearn.learn.learner.Learner;
 import com.vmusco.softwearn.learn.learner.late.BinaryLateImpactLearning;
+import com.vmusco.softwearn.learn.learner.late.LateImpactLearner;
 
 public class LearningFaultLocalization extends FaultLocalization{
+
+	protected static final Logger logger = LogManager.getFormatterLogger(LearningFaultLocalization.class.getSimpleName());
+	
 	private int K_FOLD = 10;
 	private Learner LEARN_ALGO = new BinaryLateImpactLearning(K_FOLD);
 	private MutationGraphKFold kfold = null;
@@ -89,6 +95,7 @@ public class LearningFaultLocalization extends FaultLocalization{
 		
 		// Here starts the learning phase time
 		learningtime = System.currentTimeMillis();
+		logger.info("Starting learning at %d", learningtime);
 		
 		while(ite < K_FOLD){
 			kfold.learn(ite);
@@ -98,6 +105,7 @@ public class LearningFaultLocalization extends FaultLocalization{
 		kfold.learningRoundFinished();
 		// Here ends the learning phase time
 		learningtime = System.currentTimeMillis() - learningtime;
+		logger.info("Finished learning at %d (duration: +/-%d)", System.currentTimeMillis(), learningtime);
 	}
 	
 	@Override
