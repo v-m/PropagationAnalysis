@@ -107,7 +107,7 @@ def analyzeProject(head, lines):
 
          if islearning:
              predictime = predictime + int(row[6])
-             if learntime < 0:
+             if learntime <= 0:
                  learntime = int(row[4])
          else:
              predictime = predictime + int(row[4])
@@ -131,8 +131,8 @@ def analyzeProject(head, lines):
     ret = {"max": nbmax, "considered": nb, "avg_predict": predictime/nb, "avg_learn": -1, "totaltime": predictime}
 
     if islearning:
-        ret["avg_learn"] = learntime / (nb*10)
-        ret["totaltime"] = ret["totaltime"] + learntime / (nb/10)
+        ret["avg_learn"] = learntime / nb
+        ret["totaltime"] = ret["totaltime"] + learntime
 
     for entry in header:
         ret[entry] = {
@@ -150,7 +150,7 @@ mystring = "proband"
 if(not summary):
     mystring = "%s%s%s%s%s"%(mystring, sep, "considered", sep, "discared")
     mystring = "%s%s%s"%(mystring, sep, "Avg Predict")
-    mystring = "%s%s%s"%(mystring, sep, "Avg Learning")
+    mystring = "%s%s%s"%(mystring, sep, "Tot Learning")
     mystring = "%s%s%s"%(mystring, sep, "Total time")
     mystring = "%s%s%s%s%s"%(mystring, sep, "#inter", sep, "Graph")
     mystring = "%s%s%s"%(mystring, sep, "Tarantula")
