@@ -1,18 +1,23 @@
 package com.vmusco.smf.utils;
 
 /**
- * 
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class InterruptionDemander extends Thread {
-	private static Object lock = new Object();
-
+public class SafeInterruption extends Thread{
+	private Object lock = new Object();
+	private boolean interruptDemanded = false;
+	private boolean disabled = false;
+	
 	@Override
 	public void run() {
+		if(disabled)
+			return;
+		
 		synchronized (lock) {
 
 			System.out.println("Received interrupt... Please wait, clean exiting...");
-			InterruptionManager.interruptDemanded(this);
+			interruptDemanded = true;
+			
 			try {
 				lock.wait();
 			} catch (InterruptedException e) {
@@ -22,13 +27,22 @@ public class InterruptionDemander extends Thread {
 		}
 	}
 
-	public void initShutdown(){
+	public void shutdown(){
 		synchronized (lock) {
-			lock.notify();
+			lock.notifyAll();
 		}
 	}
 
 	public void shutdownProcess(){
 		
 	}
+	
+	public boolean isInterruptDemanded() {
+		return interruptDemanded;
+	}
+
+	public void disableBlocker() {
+		disabled  = true;
+	}
+
 }

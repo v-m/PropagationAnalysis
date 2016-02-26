@@ -20,7 +20,7 @@ import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutatorsFactory;
 import com.vmusco.smf.mutation.SmfMutationOperator;
 import com.vmusco.smf.utils.ConsoleTools;
-import com.vmusco.smf.utils.InterruptionDemander;
+import com.vmusco.smf.utils.SafeInterruption;
 
 /**
  * This entry point is used to create a new mutation project.
@@ -143,16 +143,16 @@ public class CreateMutation implements MutationCreationListener{
 		
 		System.out.println("Generating mutations, please wait...\n\n\n\n");
 
-		InterruptionDemander id = new InterruptionDemander();
+		SafeInterruption id = new SafeInterruption();
 		
 		Runtime.getRuntime().addShutdownHook(id);
 		
 		if(cmd.hasOption("name"))
 			ms.setMutationName(cmd.getOptionValue("name"));
 		
-		ms.loadOrCreateMutants(cmd.hasOption("reset"), cm, nbmut, safepersist);
-		
-		//Runtime.getRuntime().removeShutdownHook(id);
+		ms.loadOrCreateMutants(cmd.hasOption("reset"), cm, nbmut, safepersist, id);
+
+		id.disableBlocker();
 	}
 
 	private int nbchecks = 0;

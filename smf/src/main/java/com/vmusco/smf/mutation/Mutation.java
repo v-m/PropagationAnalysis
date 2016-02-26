@@ -49,7 +49,7 @@ import com.vmusco.smf.exceptions.BadObjectTypeException;
 import com.vmusco.smf.exceptions.HashClashException;
 import com.vmusco.smf.exceptions.NotValidMutationException;
 import com.vmusco.smf.exceptions.PersistenceException;
-import com.vmusco.smf.utils.InterruptionManager;
+import com.vmusco.smf.utils.SafeInterruption;
 import com.vmusco.smf.utils.NewReportedStandardEnvironment;
 import com.vmusco.smf.utils.SpoonHelpers;
 
@@ -87,7 +87,7 @@ public final class Mutation {
 
 
 	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, MutationCreationListener mcl, boolean reset, int safepersist) throws PersistenceException, BadObjectTypeException {
-		createMutants(ps, ms, mcl, reset, -1, safepersist);
+		createMutants(ps, ms, mcl, reset, -1, safepersist, null);
 	}
 
 	/**
@@ -302,7 +302,7 @@ public final class Mutation {
 	 * @throws PersistenceException
 	 * @throws BadObjectTypeException if the mutation operator declared in ms is NOT intended for direct mutation using SMF framework (ie. imported mutation operator)
 	 */
-	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, final MutationCreationListener mcl, boolean reset, int nb, int safepersist) throws PersistenceException, BadObjectTypeException{
+	public static void createMutants(ProcessStatistics ps, MutationStatistics ms, final MutationCreationListener mcl, boolean reset, int nb, int safepersist, SafeInterruption si) throws PersistenceException, BadObjectTypeException{
 		try{
 			Factory factory = SpoonHelpers.obtainFactory();
 
@@ -346,7 +346,6 @@ public final class Mutation {
 					if(s.endsWith(".debug.txt")){
 						ss = s.substring(0, s.length()-".debug.txt".length());
 					}
-
 
 					if(!ms.isMutantDefined(ss)){
 						File ssyncf = new File(syncf, s);
@@ -409,7 +408,13 @@ public final class Mutation {
 
 			if(mcl != null) mcl.preparationDone(mutations.size(), fnb);
 
-			while(mutations.size()>0 && validmutants<fnb && !InterruptionManager.isInterruptedDemanded()){
+			while(mutations.size()>0 && validmutants<fnb){
+				if(si != null){
+					if(si.isInterruptDemanded()){
+						break;
+					}
+				}
+				
 				final Object[] o = mutations.remove(0);
 
 				try{

@@ -26,7 +26,7 @@ import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.mutation.SmfMutationOperator;
-import com.vmusco.smf.utils.InterruptionManager;
+import com.vmusco.smf.utils.SafeInterruption;
 import com.vmusco.smf.utils.SetTools;
 import com.vmusco.smf.utils.SourceReference;
 
@@ -342,18 +342,21 @@ public class MutationStatistics implements Serializable {
 	}
 
 	public void loadOrCreateMutants(boolean reset, MutationCreationListener mcl, int nb, int safepersist) throws PersistenceException, URISyntaxException, BadObjectTypeException {
+		loadOrCreateMutants(reset, mcl, nb, safepersist, null);
+	}
+	
+	public void loadOrCreateMutants(boolean reset, MutationCreationListener mcl, int nb, int safepersist, SafeInterruption si) throws PersistenceException, URISyntaxException, BadObjectTypeException {
 		File f = new File(getConfigFileResolved());
 
 		if(!reset && f.exists()){
 			loadMutants();
 		}
 
-		Mutation.createMutants(ps, this, mcl, reset, nb, safepersist);
-
+		Mutation.createMutants(ps, this, mcl, reset, nb, safepersist, si);
 		saveMutants();
 
-		if(InterruptionManager.isInterruptedDemanded()){
-			InterruptionManager.notifyLastIterationFinished();
+		if(si != null){
+			si.shutdown();
 		}
 	}
 
