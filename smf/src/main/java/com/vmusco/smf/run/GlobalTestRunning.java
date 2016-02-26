@@ -27,6 +27,7 @@ public abstract class GlobalTestRunning implements TestsExecutionListener{
 	protected int nbnotpermitted = 0;
 	protected String state;
 	protected String execname;
+	private int currentTimeout = -1;
 
 	public GlobalTestRunning() {
 		this.fos = null;
@@ -38,14 +39,15 @@ public abstract class GlobalTestRunning implements TestsExecutionListener{
 
 	protected void printMutantStat(){
 		ConsoleTools.restartPreviousLine();
-		ConsoleTools.write(execname+": ", ConsoleTools.BOLD);
-		ConsoleTools.write(state);
-		ConsoleTools.write(" [testsuite: "+nbtestsuitedone+"/"+nbtestsuite+", processed: "+nbtotaltc+", ");
-		ConsoleTools.write("fails: "+nbfail, ConsoleTools.BOLD, nbfail==0?ConsoleTools.FG_GREEN:ConsoleTools.FG_RED);
-		ConsoleTools.write(" (");
-		ConsoleTools.write("suites: "+nbunrunnable, nbunrunnable==0?0:ConsoleTools.FG_YELLOW);
-		ConsoleTools.write("), ignore: "+nbignored+", hang: "+nbhang+", discared: "+nbnotpermitted+"].");
-		ConsoleTools.endLine();
+		
+		String message = String.format("%s: %s[timeout=%ds. testsuite: %d/%d. processed: %d, fails: %s (suites: %s), ignore: %d, hang: %d, discared: %d].\n", 
+				ConsoleTools.format(execname, ConsoleTools.BOLD),
+				state, currentTimeout, nbtestsuitedone, nbtestsuite, nbtotaltc,
+				ConsoleTools.format(Integer.toString(nbfail), ConsoleTools.BOLD, nbfail==0?ConsoleTools.FG_GREEN:ConsoleTools.FG_RED),
+				ConsoleTools.format(Integer.toString(nbunrunnable), nbunrunnable==0?0:ConsoleTools.FG_YELLOW),
+				nbignored, nbhang, nbnotpermitted
+				);
+		ConsoleTools.write(message);
 	}
 
 	@Override
@@ -170,9 +172,7 @@ public abstract class GlobalTestRunning implements TestsExecutionListener{
 	
 	@Override
 	public void currentTimeout(int timeout) {
-		ConsoleTools.write("Current timeout is: "+timeout);
-		ConsoleTools.endLine();
-		ConsoleTools.endLine();
+		this.currentTimeout  = timeout;
 	}
 	
 	@Override

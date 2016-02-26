@@ -39,14 +39,6 @@ public class TestExecutor {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		/*File ff = File.createTempFile("aaa", "bbb");
-		ff.createNewFile();
-		
-		file = new PrintStream(ff);
-		defile = System.out;
-
-		printDefault(ff.getAbsolutePath());*/
-		
 		String[] s = args;
 
 		Class c = Class.forName(s[0]);

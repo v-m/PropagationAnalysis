@@ -196,7 +196,6 @@ public class NewProject extends GlobalTestRunning {
 		
 		if(cmd.hasOption("instrument")){
 			aip.add(new MethodInInstrumentationProcessor());
-			//aip.add(new StackTracePrintingInstrumentationProcessor());
 		}
 		
 		runWithPs(ps, aip.toArray(new AbstractInstrumentationProcessor[0]));

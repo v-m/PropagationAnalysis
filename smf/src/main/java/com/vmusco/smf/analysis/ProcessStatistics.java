@@ -565,13 +565,6 @@ public class ProcessStatistics implements Serializable{
 			return null;
 	}
 
-	/*public String[][] getStackTraces() {
-		if(cleanTestExecution != null)
-			return cleanTestExecution.getStacktraces();
-		else
-			return null;
-	}*/
-
 	public static String[] fixTestSignatures(String[] hangingTestCases2) {
 		String[] ret = new String[hangingTestCases2.length];
 

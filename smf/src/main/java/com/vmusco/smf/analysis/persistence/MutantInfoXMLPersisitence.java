@@ -22,16 +22,10 @@ public class MutantInfoXMLPersisitence extends XMLPersistenceManager<MutantIfos>
 
 	private static final String ROOT = "mutation-execution";
 	private static final String ID = "id";
-
-	/*private static final String STS = "stacktraces";
-	private static final String ST = "stacktrace";
-	private static final String T = "trace";*/
 	
 	private File f;
 	private FileOutputStream fos;
 	private boolean deepLoading;
-	
-	//private String mutantId;
 
 	public MutantInfoXMLPersisitence(MutantIfos obj, File persist_file) {
 		this(obj, persist_file, false);

@@ -400,16 +400,6 @@ public class ProjectXmlPersistenceManager extends XMLPersistenceManager<ProcessS
 			}
 
 			TestInformationPersistence.insertInto(testexec, ps.getTestExecutionResult());
-
-			/*if(ps.getStackTraces() != null){
-				Element e = new Element(STACKTRACES_3);
-				testexec.addContent(e);
-				
-				for(String[] st : ps.getStackTraces()){
-					Element ee = new Element(STACKTRACE_4);
-					populateXml(ee, ONE_ST_5, st);
-				}
-			}*/
 		}
 		
 		return root;

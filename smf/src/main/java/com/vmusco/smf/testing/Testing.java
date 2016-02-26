@@ -167,7 +167,6 @@ public final class Testing {
 		Set<String> infloops = new HashSet<>();
 		Set<String> errorts = new HashSet<>();
 		Map<String, String[]> allEntering = new HashMap<>();
-		//Set<String[]> stacktraces = new HashSet<>();
 
 		long t1 = System.currentTimeMillis();
 		int cpt = 0;
@@ -179,12 +178,10 @@ public final class Testing {
 			timeout = MIN_TEST_TIMEOUT;
 		}else{
 			tweaking_timeout = false;
-			timeout = MAX_TEST_TIMEOUT;
 		}
 		
 		if(tel != null)		tel.currentTimeout(timeout);
 
-		//List<String> stacktrace = new ArrayList<>();
 		for(String aTest : testClasses){
 			cpt++;
 			boolean testcase_finished = false;
@@ -196,7 +193,6 @@ public final class Testing {
 				List<String> enteringMethods = null;
 
 				String[] cmd = buildExecutionPathWithInstrumentationOptions(alternativeJre, TestExecutor.class, aTest, classpath, hangingTests.toArray(new String[0]));
-				//String[] cmd = buildExecutionPath(TestExecutor.class, aTest, classpath, hangingTests.toArray(new String[0]));
 				
 				String s = "";
 				for(String c : cmd)
@@ -279,26 +275,10 @@ public final class Testing {
 								if(tel != null)		tel.testCaseNotPermitted(cpt, line);
 							}
 							
-							// Stacktrace managing
-							/*if(stacktrace.size() > 0){
-								// Persist Stacktrace
-								stacktraces.add(stacktrace.toArray(new String[0]));
-								stacktrace = new ArrayList<>();
-							}*/
 						}else if(line.startsWith(TestExecutor.UNDETERMINED_MARKER)){
 							// Here all success and failing tests
 							line = line.substring(TestExecutor.UNDETERMINED_MARKER.length());
 							if(tel != null)		tel.testCaseUndeterminedTest(cpt, line);
-						/*}else if(line.startsWith(TestingInstrumentedCodeHelper.STACKTRACESTART)){
-							stacktrace = new ArrayList<String>();
-						}else if(line.startsWith(TestingInstrumentedCodeHelper.STACKTRACEEND)){
-							stacktraces.add(stacktrace.toArray(new String[0]));
-							stacktrace = null;
-						}else if(line.startsWith(TestingInstrumentedCodeHelper.STACKTRACELINE)){
-							// This is a stacktrace information
-							if(stacktrace != null){
-								stacktrace.add(line.substring(TestingInstrumentedCodeHelper.STACKTRACELINE.length()));
-							}*/
 						}else if(line.startsWith(TestingInstrumentedCodeHelper.STARTKEY)){
 							// This is method entry information
 							line = line.substring(TestingInstrumentedCodeHelper.STARTKEY.length());
@@ -394,7 +374,6 @@ public final class Testing {
 		tei.setAllRunnedTests(tests_arr);
 		tei.setCalledNodeInformation(allEntering);
 		tei.setRunTestsTime(t2 - t1);
-		//tei.setStacktraces(stacktraces.toArray(new String[0][0]));
 
 		if(tweaking_timeout){
 			tei.setTestTimeOut(timeout);
@@ -439,10 +418,6 @@ public final class Testing {
 		return cmd.toArray(new String[0]);
 	}
 	
-	private static String[] buildExecutionPath(Class<?> classToRun, String testClassToRun, String[] classpath, String... testcasesToIgnores){
-		return buildExecutionPath(null, classToRun, testClassToRun, classpath, testcasesToIgnores);
-	}
-	
 	private static String[] buildExecutionPathWithInstrumentationOptions(String jrebin, Class<?> classToRun, String testClassToRun, String[] classpath, String... testcasesToIgnores){
 		List<String> ret = new ArrayList<>();
 		
@@ -452,7 +427,6 @@ public final class Testing {
 		
 		ret.add(TestExecutor.INSTRU_OPT+"enter="+(TestingInstrumentedCodeHelper.isEnteringPrinting()?"yes":"no"));
 		ret.add(TestExecutor.INSTRU_OPT+"exit="+(TestingInstrumentedCodeHelper.isLeavingPrinting()?"yes":"no"));
-		//ret.add(TestExecutor.INSTRU_OPT+"stacktraces="+(TestingInstrumentedCodeHelper.isStacktracePrinting()?"yes":"no"));
 		
 		return buildExecutionPath(jrebin, classToRun, testClassToRun, classpath, ret.toArray(new String[0]));
 	}

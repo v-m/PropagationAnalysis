@@ -26,12 +26,6 @@ public final class TestInformationPersistence {
 	protected static String A_CALLED_NODE_CPT = "count";
 	
 	
-
-	/*private static final String STACKTRACES_3 = "stacktraces";
-	private static final String STACKTRACE_4 = "stacktrace";
-	private static final String ONE_ST_5 = "trace";*/
-
-	
 	private TestInformationPersistence() {
 		// No instance can be created... Tool class only
 	}
@@ -87,25 +81,6 @@ public final class TestInformationPersistence {
 		} catch (BadStateException e1) {
 			// No informations about calls... Just skip this
 		}
-		
-		
-		/*if(tei.getStacktraces() != null){
-			e = new Element(STS);
-	
-			for(String[] st : tei.getStacktraces()){
-				Element ee = new Element(ST);
-	
-				for(String t : st){
-					Element eee = new Element(T);
-					eee.setText(t);
-					ee.addContent(eee);
-				}
-				
-				e.addContent(ee);
-			}
-	
-			root.addContent(e);
-		}*/
 	}
 	
 	/**
@@ -189,24 +164,6 @@ public final class TestInformationPersistence {
 	
 	public static void deepRead(Element root, TestsExecutionIfos tei){
 		tei.setCalledNodeInformation(readCalledNodes(root));
-		
-		/*if((tmp = root.getChild(STS)) != null){
-			List<String[]> st = new ArrayList<String[]>();
-			
-			List<Element> tmplist = tmp.getChildren(ST);
-			for(Element e: tmplist){
-				List<String> stt = new ArrayList<String>();
-				List<Element> tmplist2 = e.getChildren(T);
-				
-				for(Element ee: tmplist2){
-					stt.add(ee.getText());
-				}
-				
-				st.add(stt.toArray(new String[0]));
-			}
-			
-			tei.setStacktraces(st.toArray(new String[0][0]));
-		}*/
 	}
 	
 	public static Map<String, String[]> readCalledNodes(Element root){

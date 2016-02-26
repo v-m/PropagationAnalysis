@@ -56,11 +56,6 @@ public class TestsExecutionIfos {
 	 */
 	private Map<String, String[]> calledNodes = null;
 
-	/**
-	 * Stacktrace informations if available
-	 */
-	//private String[][] stacktraces = null;
-
 	private long runTestsTime = -1;
 	private int timeout = -1;
 	/**
@@ -189,12 +184,4 @@ public class TestsExecutionIfos {
 	public int getTestTimeOut(){
 		return timeout;
 	}
-
-	/*public void setStacktraces(String[][] array) {
-		this.stacktraces = array;
-	}
-
-	public String[][] getStacktraces(){
-		return this.stacktraces;
-	}*/
 }
