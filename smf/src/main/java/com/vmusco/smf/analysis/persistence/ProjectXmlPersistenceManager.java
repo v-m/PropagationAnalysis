@@ -25,7 +25,7 @@ public class ProjectXmlPersistenceManager extends XMLPersistenceManager<ProcessS
 	protected static String ORIGINAL_PROJECT_IN_2 = "originalproject-root";
 	protected static String PROJECT_NAME_2 = "project-name";
 	protected static String COMPLIANCE_LEVEL = "compliance-level";
-	protected static String ALT_JRE = "compliance-level";
+	protected static String ALT_JRE = "alternative-jre";
 	protected static String CURRENT_STATE_2 = "state";					// RUN
 	protected static String CLASSPATH_2 = "classpath";					// RUN
 	protected static String COPY_CP_2 = "local";					// RUN
