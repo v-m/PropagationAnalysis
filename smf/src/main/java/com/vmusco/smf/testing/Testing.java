@@ -34,6 +34,7 @@ import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.TestsExecutionIfos;
 import com.vmusco.smf.compilation.Compilation;
+import com.vmusco.smf.exceptions.MutantHangsException;
 import com.vmusco.smf.exceptions.TestingException;
 
 /**
@@ -160,6 +161,15 @@ public final class Testing {
 	}
 	
 	public static TestsExecutionIfos runTestCases(String projectIn, String[] classpath, String[] testClasses, int timeout, TestsExecutionListener tel, String alternativeJre) throws IOException, TestingException{
+		try{
+			return runTestCases(projectIn, classpath, testClasses, timeout, tel, alternativeJre, false);
+		}catch(MutantHangsException ex){
+			// Never occurs
+			return null;
+		}
+	}
+	
+	public static TestsExecutionIfos runTestCases(String projectIn, String[] classpath, String[] testClasses, int timeout, TestsExecutionListener tel, String alternativeJre, boolean skipHanging) throws IOException, TestingException, MutantHangsException{
 		logger.trace("Running project files in %s", projectIn);
 		Set<String> tests = new HashSet<>();
 		Set<String> failing = new HashSet<>();
@@ -320,6 +330,8 @@ public final class Testing {
 
 					testcase_finished = true;
 				}catch(TimeoutException e){
+					if(skipHanging)
+						throw new MutantHangsException();
 					if(tweaking_timeout && timeout < MAX_TEST_TIMEOUT){
 						timeout += INC_TEST_TIMEOUT;
 						if(tel != null)		tel.newTimeout(timeout);

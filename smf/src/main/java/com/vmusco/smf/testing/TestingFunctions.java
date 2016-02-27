@@ -13,6 +13,7 @@ import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.analysis.persistence.MutantInfoXMLPersisitence;
 import com.vmusco.smf.analysis.persistence.XMLPersistence;
+import com.vmusco.smf.exceptions.MutantHangsException;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.exceptions.TestingException;
@@ -37,7 +38,7 @@ public abstract class TestingFunctions {
 
 		return al;
 	}
-	
+
 	public static List<String> getUnfinishedCollection(MutationStatistics ms, boolean shuffle){
 		ArrayList<String> al = new ArrayList<String>();
 		for(String mut : getViableCollection(ms)){
@@ -66,11 +67,11 @@ public abstract class TestingFunctions {
 
 		if(shuffle)
 			Collections.shuffle(al);
-		
+
 		return al;
 	}
-	
-	public static int processMutants(MutationStatistics ms, List<String> mutantIds, int nbdone, int nbmax, TestingNotification tn, boolean onlyKilled) throws PersistenceException{
+
+	public static int processMutants(MutationStatistics ms, List<String> mutantIds, int nbdone, int nbmax, TestingNotification tn, boolean onlyKilled, boolean skipHanging) throws PersistenceException{
 		int nbproc = nbdone;
 
 		while(mutantIds.size() > 0){
@@ -86,43 +87,52 @@ public abstract class TestingFunctions {
 			File ff = new File(ms.getMutantFileResolved(mut));
 
 			if(!ff.exists() || ff.length() == 0){
-
+				
+				
 				try{
-					FileOutputStream fos = new FileOutputStream(ff);
-
+					FileOutputStream fos = new FileOutputStream(ff);;
 					FileLock lock = fos.getChannel().tryLock();
-					if(lock != null){
-						ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
-						ifos.setExecutedTestsResults(Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath(mut), ms.getTestClasses(), ps.getTestTimeOut(), tn, ps.getAlternativeJre()));
-
-						if(tn != null)	tn.mutantPersisting(mut);
-
-						try{
-							MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(ifos, ff);
-							pers.setFileLock(fos);
-							XMLPersistence.save(pers);
-						}catch(PersistenceException e){
-							if(e.getUnderException() instanceof MutationNotRunException){
-								// Should not occurs here !!!
-								System.err.print("After a generation unable to persis ?! Core error !");
-								System.exit(1);
-							}else{
-								if(tn != null)	tn.mutantSkippedDueToException(mut);
+					try{
+						if(lock != null){
+							ProcessStatistics ps = ms.getRelatedProcessStatisticsObject();
+							ifos.setExecutedTestsResults(Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath(mut), ms.getTestClasses(), ps.getTestTimeOut(), tn, ps.getAlternativeJre(), skipHanging));
+	
+							if(tn != null)	tn.mutantPersisting(mut);
+	
+							try{
+								MutantInfoXMLPersisitence pers = new MutantInfoXMLPersisitence(ifos, ff);
+								pers.setFileLock(fos);
+								XMLPersistence.save(pers);
+							}catch(PersistenceException e){
+								if(e.getUnderException() instanceof MutationNotRunException){
+									// Should not occurs here !!!
+									System.err.print("After a generation unable to persis ?! Core error !");
+									System.exit(1);
+								}else{
+									if(tn != null)	tn.mutantSkippedDueToException(mut);
+								}
 							}
+	
+							lock.release();
+							fos.close();
+	
+							if(tn != null)	tn.mutantEnded(mut);
+	
+							nbproc++;
+						}else{
+							if(tn != null)	tn.mutantLocked();
+							nbproc++;
 						}
-						
+					} catch (TestingException e) {
+						if(tn != null)	tn.mutantException(e);
+					} catch(MutantHangsException e){
+						if(tn != null) tn.mutantHangs(mut);
 						lock.release();
 						fos.close();
-
-						if(tn != null)	tn.mutantEnded(mut);
-
-						nbproc++;
-					}else{
-						if(tn != null)	tn.mutantLocked();
-						nbproc++;
 					}
-				} catch (IOException|TestingException e) {
-					if(tn != null)	tn.mutantException(e);
+				}catch(IOException e) {
+					e.printStackTrace();
+					System.exit(1);
 				}
 			}else{
 				if(tn != null)	tn.mutantAlreadyDone();
@@ -135,8 +145,8 @@ public abstract class TestingFunctions {
 
 		return nbproc;
 	}
-	
+
 	public static int processMutants(MutationStatistics ms, List<String> mutantIds, int nbmax, TestingNotification tn) throws PersistenceException{
-		return processMutants(ms, mutantIds, 0, nbmax, tn, false);
+		return processMutants(ms, mutantIds, 0, nbmax, tn, false, false);
 	}
 }

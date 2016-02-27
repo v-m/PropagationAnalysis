@@ -14,6 +14,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
 import com.vmusco.smf.analysis.MutationStatistics;
+import com.vmusco.smf.exceptions.MutantHangsException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.testing.TestingFunctions;
 import com.vmusco.smf.testing.TestingNotification;
@@ -53,12 +54,14 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 		options.addOption(opt);
 		opt = new Option("s", "no-shuffle", false, "indicated the mutants selection order should not be shuffled (the order is system dependent).");
 		options.addOption(opt);
+		opt = new Option("H", "skip-hanging", false, "skip the mutant if at least one test hangs.");
+		options.addOption(opt);
 
 
 		CommandLineParser parser = new PosixParser();
 		CommandLine cmd = parser.parse(options, args);
 
-		if(cmd.getArgs().length == 0){
+		if(cmd.getArgs().length == 0 || cmd.hasOption("help")){
 			HelpFormatter formatter = new HelpFormatter();
 			String header = "Run tests on mutants described on <mutationFile> which is a path to mutation xml config file (or path to folder and will be completed with "+MutationStatistics.DEFAULT_CONFIGFILE+").";
 			String footer = "Return: the number of mutant proceeded. 0 if no mutants remaining. -1 in case of error. -2 if this message is displayed.";
@@ -93,7 +96,7 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 				
 				MutationRunTests tel = new MutationRunTests(mutations.length);
 				
-				TestingFunctions.processMutants(ms, al, 0, mutations.length, tel, false);
+				TestingFunctions.processMutants(ms, al, 0, mutations.length, tel, false, cmd.hasOption("skip-hanging"));
 			}else{
 				mutations = ms.listViableMutants();
 
@@ -114,7 +117,7 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 				List<String> al = TestingFunctions.getUnfinishedCollection(ms, !cmd.hasOption("no-shuffle"));
 				int alreadydone = nbviable - al.size(); 
 						
-				TestingFunctions.processMutants(ms, al, alreadydone, nbtodo, tel, onlykilled);
+				TestingFunctions.processMutants(ms, al, alreadydone, nbtodo, tel, onlykilled, cmd.hasOption("skip-hanging"));
 			}
 		}
 	}
@@ -190,6 +193,13 @@ public class MutationRunTests extends GlobalTestRunning implements TestingNotifi
 	public void testCaseLeavingMethod(String currentTestCase, String leftMethod, String way) {
 		// Nothing to do here
 		
+	}
+
+	@Override
+	public void mutantHangs(String id) {
+		ConsoleTools.write("\n !!! Mutant "+id+" has beed skipped due to hanging !!! \n", ConsoleTools.FG_RED);
+		this.state = "Mutant hangs...";
+		printMutantStat();
 	}
 
 }

@@ -15,6 +15,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
 import com.vmusco.smf.analysis.MutationStatistics;
+import com.vmusco.smf.exceptions.MutantHangsException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.smf.testing.TestingFunctions;
 import com.vmusco.smf.testing.TestingNotification;
@@ -170,7 +171,7 @@ public class ParallelMutationRun implements TestingNotification{
 		if(al.size()<=0)
 			return;
 		
-		TestingFunctions.processMutants(ms, al, alreadydone, slicesize, this, false);
+		TestingFunctions.processMutants(ms, al, alreadydone, slicesize, this, false, false);
 	}
 	
 	private void printStats(String cop, String cpr) {
@@ -324,5 +325,10 @@ public class ParallelMutationRun implements TestingNotification{
 	@Override
 	public void testCaseLeavingMethod(String currentTestCase, String leftMethod, String way) {
 		// Nothing to do here
+	}
+
+	@Override
+	public void mutantHangs(String id) {
+		// 
 	}
 }
