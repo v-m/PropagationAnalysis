@@ -129,6 +129,9 @@ public abstract class TestingFunctions {
 						if(tn != null) tn.mutantHangs(mut);
 						lock.release();
 						fos.close();
+					}finally{
+						// GC the results once saved...
+						ifos.setExecutedTestsResults(null);
 					}
 				}catch(IOException e) {
 					e.printStackTrace();
