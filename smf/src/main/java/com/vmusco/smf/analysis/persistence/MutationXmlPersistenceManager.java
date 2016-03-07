@@ -26,7 +26,10 @@ public class MutationXmlPersistenceManager extends XMLPersistenceManager<Mutatio
 	private static String MUTATION_NAME = "name";
 
 	protected static String CLASS_TO_MUTATE_2 = "class-to-mutate";	// MUTATION
+	protected static String METHOD_TO_MUTATE_2 = "method-to-mutate";	// MUTATION
+	
 	protected static String CLASS_TO_MUTATE_3 = "class";				// MUTATION
+	protected static String METHOD_TO_MUTATE_3 = "signature";				// MUTATION
 
 	private static final String MUTATION_2 = "mutants";
 	private static final String MUTATION_3 = "mutant";
@@ -116,6 +119,16 @@ public class MutationXmlPersistenceManager extends XMLPersistenceManager<Mutatio
 			}
 			ms.setClassToMutate(al.toArray(new String[0]));
 		}
+		
+		if((tmp = root.getChild(METHOD_TO_MUTATE_2)) != null){
+			List<Element> tmplist = tmp.getChildren(METHOD_TO_MUTATE_3);
+
+			ArrayList<String> al = new ArrayList<String>();
+			for(Element e: tmplist){
+				al.add(e.getText());
+			}
+			ms.setMethodSignaturesToMutate(al.toArray(new String[0]));
+		}
 
 		if((tmp = root.getChild(MUTATION_2)) != null){
 			List<Element> tmplist = tmp.getChildren(MUTATION_3);
@@ -199,6 +212,12 @@ public class MutationXmlPersistenceManager extends XMLPersistenceManager<Mutatio
 			Element tmp = new Element(CLASS_TO_MUTATE_2);
 			mutations.addContent(tmp);
 			ProjectXmlPersistenceManager.populateXml(tmp, CLASS_TO_MUTATE_3, ms.getClassToMutate(false));
+		}
+		
+		if(ms.getMethodSignaturesToMutate() != null){
+			Element tmp = new Element(METHOD_TO_MUTATE_2);
+			mutations.addContent(tmp);
+			ProjectXmlPersistenceManager.populateXml(tmp, METHOD_TO_MUTATE_3, ms.getMethodSignaturesToMutate());
 		}
 
 

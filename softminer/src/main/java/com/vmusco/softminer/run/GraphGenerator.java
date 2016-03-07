@@ -14,8 +14,8 @@ import org.apache.commons.cli.PosixParser;
 
 import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softminer.graphs.persistance.GraphML;
-import com.vmusco.softminer.graphs.persistance.GraphPersistence;
+import com.vmusco.softminer.graphs.persistence.GraphML;
+import com.vmusco.softminer.graphs.persistence.GraphPersistence;
 import com.vmusco.softminer.sourceanalyzer.ProcessorCommunicator;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuildLogic;
 import com.vmusco.softminer.sourceanalyzer.graphbuilding.GraphBuilder;

@@ -12,7 +12,7 @@ public class Test1{
 		Class1 c1 = new Class1();
 		Class3 c3 = new Class3();
 
-		c1.recursiveMethod(100);
+		c1.recursiveMethod(10);
 		Assert.assertTrue(c1.returnTrue());
 		Assert.assertFalse(c3.returnFalse());
 	}

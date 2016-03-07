@@ -101,8 +101,15 @@ public final class Mutation {
 	public static CtElement[] getMutations(ProcessStatistics ps, MutationStatistics ms, Factory factory) throws BadObjectTypeException{
 		String[] mutateFrom = ms.getClassToMutate(true);
 		if(mutateFrom == null || mutateFrom.length <= 0){
-			if(ps.isInstrumented()){
+			if(!ps.isInstrumented()){
 				mutateFrom = ps.getSrcToCompile(true);
+			}else{
+				mutateFrom = new String[ps.getSrcToCompile(false).length];
+				
+				int i=0;
+				for(String s : ps.getSrcToCompile(false)){
+					mutateFrom[i++] = ps.getNotInstrumentedFolder().getAbsolutePath()+"/"+s;
+				}
 			}
 		}
 

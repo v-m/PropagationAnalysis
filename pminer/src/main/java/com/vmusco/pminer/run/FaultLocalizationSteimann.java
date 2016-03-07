@@ -25,20 +25,20 @@ import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.softminer.exceptions.TargetNotFoundException;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.GraphStream;
-import com.vmusco.softminer.graphs.persistance.GraphML;
+import com.vmusco.softminer.graphs.persistence.GraphML;
 import com.vmusco.softminer.utils.SteimannDatasetTools;
 
 /**
  * See http://www.feu.de/ps/prjs/EzUnit/eval/ISSTA13/ for dataset
  * @author Vincenzo Musco - http://www.vmusco.com
  */
-public class FaultLocalization {
+public class FaultLocalizationSteimann {
 
 	private boolean first = true;
 	protected int maxsize;
 	protected MutationStatistics ms;
 
-	protected FaultLocalization() {
+	protected FaultLocalizationSteimann() {
 	}
 	
 	protected static Options prepareOptions(){
@@ -164,7 +164,7 @@ public class FaultLocalization {
 				if(g != null)
 					interNodesList = g.getNodesNames();
 				
-				mscIntersect.intersectionFound(mi, new String[]{mi.getMutationIn()}, interNodesList);
+				mscIntersect.intersectionFound(mi.getId(), mi.getMutationIn(), new String[]{mi.getMutationIn()}, interNodesList);
 
 				Iterator<MutantTestProcessingListener<MutationStatisticsCollecter>> listenerIterator = mscIntersect.listenerIterator();
 
@@ -251,7 +251,7 @@ public class FaultLocalization {
 			System.exit(0);
 		}
 		
-		FaultLocalization fl = new FaultLocalization();
+		FaultLocalizationSteimann fl = new FaultLocalizationSteimann();
 		fl.run(cmd);
 	}
 
@@ -386,20 +386,20 @@ public class FaultLocalization {
 			if(base != null){
 				String[] graphCases = a.getLastGraphDetermined();
 				try{
-					return fls.wastedEffort(graphCases, a.getLastMutantIfos().getMutationIn());
+					return fls.wastedEffort(graphCases, a.getLastChangeIn());
 				}catch(TargetNotFoundException e){
 					if(fallback){
 						if(fbminus){
 							return -1;
 						}else{
-							return fls.wastedEffort(a.getLastMutantIfos().getMutationIn());
+							return fls.wastedEffort(a.getLastChangeIn());
 						}
 					}else{
 						throw e;
 					}
 				}
 			}else{
-				return fls.wastedEffort(a.getLastMutantIfos().getMutationIn());
+				return fls.wastedEffort(a.getLastChangeIn());
 			}
 		}
 
@@ -421,13 +421,16 @@ public class FaultLocalization {
 		 * @throws BadStateException 
 		 */
 		public double score() throws BadStateException{
-			MutantIfos mi = a.getLastMutantIfos();
-			fls.computeScore(mi.getMutationIn());
+			fls.computeScore(a.getLastChangeIn());
 			return fls.getScore();
 		}
 
 		static interface HeaderPrinter{
 			String headerText();
+		}
+		
+		public FaultLocalizationScore getFaultLocatorScore() {
+			return fls;
 		}
 	}
 

@@ -25,6 +25,10 @@ public abstract class FaultLocalizationScore {
 	public FaultLocalizationScore(FaultLocalizationStats stats) {
 		this.stats=stats;
 	}
+	
+	public void setStats(FaultLocalizationStats stats) {
+		this.stats = stats;
+	}
 
 	protected abstract void computeScore();
 

@@ -1,5 +1,6 @@
 package com.vmusco.smf.mutation.operators;
 
+import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.mutation.MutationOperator;
 
 /**
@@ -22,6 +23,12 @@ public class ExternalMutationOperator implements MutationOperator {
 	@Override
 	public String shortDescription() {
 		return String.format("External mutation operator \"%s\"", name);
+	}
+
+	@Override
+	public void setMutationStatistic(MutationStatistics mutationStatistics) {
+		//this.ms = mutationStatistics;
+		// Not needed here ?!
 	}
 
 }

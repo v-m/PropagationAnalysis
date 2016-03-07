@@ -16,8 +16,8 @@ import com.vmusco.smf.testing.TestingInstrumentedCodeHelper;
 import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.softminer.graphs.DynamicCallGraphGenerator;
 import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softminer.graphs.persistance.GraphML;
-import com.vmusco.softminer.graphs.persistance.GraphPersistence;
+import com.vmusco.softminer.graphs.persistence.GraphML;
+import com.vmusco.softminer.graphs.persistence.GraphPersistence;
 
 /**
 * Generate call graphs

@@ -591,8 +591,27 @@ public class ProcessStatistics implements Serializable{
 	}
 
 
+	/**
+	 * 
+	 * @return the set of raw failing, hanging and error test cases
+	 */
+	public String[] getRawAllFailErrorAndHangTestCases(){
+		Set<String> cases = new HashSet<String>();
+		
+		for(String s : includeTestSuiteGlobalFailingCases(cleanTestExecution.getRawErrorOnTestSuite(), null)){
+			cases.add(s);
+		}
 
+		for(String s:cleanTestExecution.getRawHangingTestCases()){
+			cases.add(s);
+		}
 
+		for(String s:cleanTestExecution.getRawFailingTestCases()){
+			cases.add(s);
+		}
+		
+		return cases.toArray(new String[cases.size()]);
+	}
 
 
 	public String[] includeTestSuiteGlobalFailingCases(String[] testsuites, String[] include){

@@ -14,7 +14,7 @@ import com.vmusco.softminer.graphs.EdgeTypes;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.NodeTypes;
 import com.vmusco.softminer.graphs.Graph.GraphApi;
-import com.vmusco.softminer.graphs.persistance.GraphML;
+import com.vmusco.softminer.graphs.persistence.GraphML;
 
 /**
  * 

@@ -3,6 +3,7 @@ package com.vmusco.smf.mutation;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.testing.TestingInstrumentedCodeHelper;
 
 import spoon.processing.AbstractProcessor;
@@ -18,6 +19,8 @@ import spoon.reflect.factory.Factory;
  */
 public abstract class SmfMutationOperator<T extends CtElement> extends AbstractProcessor<T> implements MutationOperator{
 	
+	private MutationStatistics ms;
+
 	/**
 	 * This element check if we are attempting to mutate something related to injection process...
 	 * @param e
@@ -46,7 +49,10 @@ public abstract class SmfMutationOperator<T extends CtElement> extends AbstractP
 	}
 	
 	public void addElement(CtElement element){
-		MutationGateway.addElement(element);
+		if(this.ms == null)
+			MutationGateway.addElement(element);
+		else
+			MutationGateway.addElement(this.ms, element);
 	}
 	
 	public CtElement[] emptySet(){
@@ -98,6 +104,11 @@ public abstract class SmfMutationOperator<T extends CtElement> extends AbstractP
 
 	public String shortDescription(){
 		return "no description set";
+	}
+	
+	@Override
+	public void setMutationStatistic(MutationStatistics mutationStatistics) {
+		this.ms = mutationStatistics;
 	}
 	
 }

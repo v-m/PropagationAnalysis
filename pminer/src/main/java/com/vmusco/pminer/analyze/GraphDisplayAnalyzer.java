@@ -34,11 +34,11 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 		g.bestDisplay();
 	}
 
-	protected void makeUp(MutantIfos mi, String[] ais, String[] cis) {
+	protected void makeUp(String id, String in, String[] ais, String[] cis) {
 		//String[] mutationDetermined = ps.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults());
 		//String[] graphDetermined = cis;
 		
-		String mutationInsertionPosition = mi.getMutationIn();
+		String mutationInsertionPosition = in;
 
 		CIAEstimationSets sets = new CIAEstimationSets(cis, ais);
 		
@@ -91,17 +91,17 @@ public class GraphDisplayAnalyzer extends MutantTestAnalyzer {
 	}
 
 	@Override
-	public void intersectionFound(MutantIfos mi, String[] ais, String[] cis) {
-		makeUp(mi, ais, cis);
+	public void intersectionFound(String id, String in, String[] ais, String[] cis) {
+		makeUp(id, in, ais, cis);
 	}
 
 	@Override
-	public void unboundedFound(MutantIfos mi) {
+	public void unboundedFound(String id, String in) {
 		
 	}
 
 	@Override
-	public void isolatedFound(MutantIfos mi) {
+	public void isolatedFound(String id, String in) {
 		
 	}
 }

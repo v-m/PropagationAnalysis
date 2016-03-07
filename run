@@ -4,10 +4,10 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 function help {
     echo "Availible commands are:"
-    echo "   pminer        ..."
-    echo "   smf           ..."
-    echo "   softminer     ..."
-    echo "   softwearn     ..."
+    echo "   pminer        Software propagation study"
+    echo "   smf           Project and mutation managing"
+    echo "   softminer     Software graphs tools"
+    echo "   softwearn     Learning versions of tools"
     exit
 }
 

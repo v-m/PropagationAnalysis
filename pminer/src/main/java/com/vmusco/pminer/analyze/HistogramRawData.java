@@ -5,8 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.vmusco.smf.analysis.MutantIfos;
-
 /**
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
@@ -38,7 +36,7 @@ public class HistogramRawData extends HistogramAnalyzer {
 	}
 	
 	@Override
-	public void fireIntersectionFound(MutantIfos mi, int nblast) {
+	public void fireIntersectionFound(String id, String in, int nblast) {
 		try {
 			if(firstWrite){
 				firstWrite = false;

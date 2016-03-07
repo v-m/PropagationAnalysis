@@ -4,11 +4,11 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 function help {
     echo "Availible commands are:"
-    echo "   createmutation   ..."
-    echo "   importsteimann   ..."
-    echo "   newproject       ..."
-    echo "   runmutants       ..."
-    echo "   stats            ..."
+    echo "   createmutation   Create mutants for a SMF project"
+    echo "   importsteimann   Import Steimann dataset mutants into SMF compatible project"
+    echo "   newproject       Create a new SMF project"
+    echo "   runmutants       Run mutant test suites"
+    echo "   stats            Display some stats for SMF projects"
     exit
 }
 

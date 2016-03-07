@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdom2.Comment;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -17,6 +19,8 @@ import org.jdom2.output.XMLOutputter;
 import com.vmusco.smf.exceptions.PersistenceException;
 
 public class XMLPersistence {
+
+	protected static final Logger logger = LogManager.getFormatterLogger(XMLPersistence.class.getSimpleName());
 	
 	private static final String VALUE = "value";
 	private static final String ID = "id";
@@ -33,8 +37,10 @@ public class XMLPersistence {
 				throw new PersistenceException(e);
 			}
 		} catch (JDOMException e1) {
-			e1.printStackTrace();
-			return;
+			logger.warn("Malformed XML file: %s", pm.getPersistenceFile().getAbsolutePath());
+			PersistenceException persistenceException = new PersistenceException("Malformed XML file");
+			persistenceException.setFile(pm.getPersistenceFile());
+			throw persistenceException;
 		}
 		
 		Element root = document.getRootElement();

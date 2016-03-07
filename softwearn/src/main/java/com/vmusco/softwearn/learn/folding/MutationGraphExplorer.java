@@ -39,19 +39,19 @@ public abstract class MutationGraphExplorer {
 	
 	public void fireIntersectionFound(MutantIfos mi, String[] ais, String[] cis){
 		for(MutationStatisticsCollecter l : listeners){
-			l.intersectionFound(mi, ais, cis);
+			l.intersectionFound(mi.getId(), mi.getMutationIn(), ais, cis);
 		}
 	}
 	
 	public void fireUnboundedFound(MutantIfos mi){
 		for(MutationStatisticsCollecter l : listeners){
-			l.unboundedFound(mi);
+			l.unboundedFound(mi.getId(), mi.getMutationIn());
 		}
 	}
 	
 	public void fireIsolatedFound(MutantIfos mi){
 		for(MutationStatisticsCollecter l : listeners){
-			l.isolatedFound(mi);
+			l.isolatedFound(mi.getId(), mi.getMutationIn());
 		}
 	}
 }

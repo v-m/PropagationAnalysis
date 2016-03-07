@@ -37,7 +37,7 @@ public class AbsoluteValueInsertionMutator extends SmfMutationOperator<CtElement
 			if(srcinv.getParent() instanceof CtStatement)
 				return;
 			
-			MutationGateway.addElement(element);
+			addElement(element);
 		}else if(element instanceof CtLiteral<?> || element instanceof CtVariableRead<?> || element instanceof CtVariableAccess<?>){
 			CtTypedElement<?> anElem = (CtTypedElement<?>) element;
 
@@ -55,7 +55,7 @@ public class AbsoluteValueInsertionMutator extends SmfMutationOperator<CtElement
 			if(!isAcceptableType(anElem.getType()))
 				return;
 
-			MutationGateway.addElement(anElem);
+			addElement(anElem);
 		}
 	}
 

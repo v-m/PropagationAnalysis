@@ -17,23 +17,23 @@ public abstract class HistogramAnalyzer extends MutantTestAnalyzer {
 	
 
 	@Override
-	public void unboundedFound(MutantIfos mi) {
+	public void unboundedFound(String id, String in) {
 		
 	}
 
 	@Override
-	public void isolatedFound(MutantIfos mi) {
+	public void isolatedFound(String id, String in) {
 		
 	}
 	
-	public abstract void fireIntersectionFound(MutantIfos mi, int nblast);
+	public abstract void fireIntersectionFound(String id, String in, int nblast);
 	
 	/**
 	 * Use {@link HistogramAnalyzer#fireIntersectionFound(MutantIfos, int)} instead, or invoke {@link HistogramAnalyzer#setPropagationSizeForNextProcessing(int)} before.
 	 * ais and cis are not used !
 	 */
 	@Override
-	public void intersectionFound(MutantIfos mi, String[] ais, String[] cis) {
-		fireIntersectionFound(mi, propsize);
+	public void intersectionFound(String id, String in, String[] ais, String[] cis) {
+		fireIntersectionFound(id, in, propsize);
 	}
 }

@@ -12,16 +12,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.vmusco.pminer.faultlocalization.GraphFaultLocalizationByIntersection;
-import com.vmusco.pminer.run.FaultLocalization;
+import com.vmusco.pminer.run.FaultLocalizationSteimann;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softwearn.learn.LearningKGraphStream;
 import com.vmusco.softwearn.learn.folding.MutationGraphKFold;
 import com.vmusco.softwearn.learn.learner.Learner;
 import com.vmusco.softwearn.learn.learner.late.BinaryLateImpactLearning;
-import com.vmusco.softwearn.learn.learner.late.LateImpactLearner;
 
-public class LearningFaultLocalization extends FaultLocalization{
+public class LearningFaultLocalization extends FaultLocalizationSteimann{
 
 	protected static final Logger logger = LogManager.getFormatterLogger(LearningFaultLocalization.class.getSimpleName());
 	
@@ -37,7 +36,7 @@ public class LearningFaultLocalization extends FaultLocalization{
 	}
 	
 	public static void main(String[] args) throws Exception {
-		Options options = FaultLocalization.prepareOptions();
+		Options options = FaultLocalizationSteimann.prepareOptions();
 
 		Option opt;
 		opt = new Option("k", "kfold", true, "Set the number of fold (for learning only -- default: 10)");

@@ -311,6 +311,59 @@ public class MutationTest {
 		MutationStatistics ms = new MutationStatistics(ps, new ArithmeticMutatorOperator());
 		ms.loadOrCreateMutants(true);
 		
+
+		for(String s : ms.listMutants()){
+			MutantIfos sta = ms.getMutationStats(s);
+			System.out.println(sta.getMutationFrom()+" -> "+sta.getMutationTo());
+		}
+		System.out.println(ms.listMutants().length);
+		
+		//TODO: test mutation result
+
+		FileUtils.deleteDirectory(proj);
+		FileUtils.deleteDirectory(src);
+	}
+	
+	@Test
+	public void testMutationWithPMStatisticsObjectAndSelectiveMethods() throws Exception{
+		File src = File.createTempFile(this.getClass().getCanonicalName(), Long.toString(System.currentTimeMillis()));
+		src.delete();
+		System.out.println(src.getAbsolutePath());
+
+		File proj = BuildingTest.prepareProjectWithTests();
+
+		ProcessStatistics ps = new ProcessStatistics(ProcessStatistics.SOURCES_COPY, src.getAbsolutePath());
+		ps.createWorkingDir();
+		ps.setProjectIn(proj.getAbsolutePath());
+
+		// Setting ps configuration
+		ps.setSrcToCompile(new String[]{"src"});
+		ps.setSrcTestsToTreat(new String[]{"tst"});
+		ps.setProjectName("my test");
+		ps.setComplianceLevel(6);
+		
+		// Setting classpath
+		ps.setOriginalClasspath(Testing.getCurrentVMClassPath());
+		ProcessStatistics.saveState(ps);
+
+		// Build project
+		System.out.print("Building.....");
+		ps.build(new JavaxCompilation());
+		ProcessStatistics.saveState(ps);
+
+		System.out.println("Running tests...");
+		ps.performFreshTesting(null);
+		ProcessStatistics.saveState(ps);
+		
+		MutationStatistics ms = new MutationStatistics(ps, new ArithmeticMutatorOperator());
+		ms.setMethodSignaturesToMutate(new String[]{"hello.you.Class2.arithmeticTest()"});
+		ms.loadOrCreateMutants(true);
+		
+		for(String s : ms.listMutants()){
+			MutantIfos sta = ms.getMutationStats(s);
+			System.out.println(sta.getMutationFrom()+" -> "+sta.getMutationTo());
+		}
+		System.out.println(ms.listMutants().length);
 		//TODO: test mutation result
 
 		FileUtils.deleteDirectory(proj);
@@ -352,11 +405,16 @@ public class MutationTest {
 		ProcessStatistics.saveState(ps);
 
 		System.out.println("Running tests...");
+		System.out.println("...");
 		ps.performFreshTesting(null);
+		System.out.println("...");
 		ProcessStatistics.saveState(ps);
+		System.out.println("...");
 		
 		MutationStatistics ms = new MutationStatistics(ps, new ArithmeticMutatorOperator());
+		System.out.println("...");
 		ms.loadOrCreateMutants(true, null, -1, 0);
+		System.out.println("...");
 		
 		TestsExecutionIfos runTestCases = Testing.runTestCases(ps.getProjectIn(true), ms.getRunningClassPath("mutant_0"), ps.getTestClasses(), null, ps.getAlternativeJre());
 		Assert.assertEquals(1, runTestCases.getCalledNodes().size());

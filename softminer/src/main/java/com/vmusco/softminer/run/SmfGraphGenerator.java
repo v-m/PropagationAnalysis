@@ -28,12 +28,24 @@ public class SmfGraphGenerator implements GraphGeneratorLogic{
 
 	@Override
 	public boolean process(CommandLine cmd) {
-		for(String s : ps.getSrcToCompile(true)){
-			sources.add(s);
-		}
-
-		for(String s : ps.getSrcTestsToTreat(true)){
-			sources.add(s);
+		if(ps.isInstrumented()){
+			for(String s : ps.getSrcToCompile(false)){
+				String entry = ps.getNotInstrumentedFolder().getAbsolutePath()+"/"+s;
+				sources.add(entry);
+			}
+	
+			for(String s : ps.getSrcTestsToTreat(false)){
+				String entry = ps.getNotInstrumentedFolder().getAbsolutePath()+"/"+s;
+				sources.add(entry);
+			}
+		}else{
+			for(String s : ps.getSrcToCompile(true)){
+				sources.add(s);
+			}
+	
+			for(String s : ps.getSrcTestsToTreat(true)){
+				sources.add(s);
+			}
 		}
 		
 		projname = ps.getProjectName();
@@ -83,7 +95,7 @@ public class SmfGraphGenerator implements GraphGeneratorLogic{
 
 	@Override
 	public boolean verifyCommandParameters(CommandLine cmd) {
-		return cmd.getArgs().length != 1;
+		return cmd.getArgs().length > 0;
 	}
 
 	@Override

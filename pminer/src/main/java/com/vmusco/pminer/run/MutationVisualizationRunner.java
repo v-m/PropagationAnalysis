@@ -66,7 +66,7 @@ public class MutationVisualizationRunner{
 		String[] ais = ms.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults());
 		String[] cis = propaGraph.getLastConsequenceNodes();
 		
-		mta.intersectionFound(mi, ais, cis);
+		mta.intersectionFound(mi.getId(), mi.getMutationIn(), ais, cis);
 		mta.executionEnded();
 		System.exit(0);
 	}

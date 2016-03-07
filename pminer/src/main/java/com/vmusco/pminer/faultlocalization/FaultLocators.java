@@ -163,7 +163,7 @@ public abstract class FaultLocators {
 	 * @param stats
 	 * @return
 	 */
-	public static FaultLocalizationScore getZoltar(FaultLocalizationStatsWithMutantIfos stats) {
+	public static FaultLocalizationScore getZoltar(FaultLocalizationStats stats) {
 		return new FaultLocalizationScore(stats) {
 			@Override
 			protected void computeScore() {

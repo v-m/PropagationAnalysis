@@ -1,4 +1,4 @@
-package com.vmusco.softminer.graphs.persistance;
+package com.vmusco.softminer.graphs.persistence;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -19,6 +21,7 @@ import org.jdom2.output.Format;
 import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
 
+import com.vmusco.smf.analysis.ProcessStatistics;
 import com.vmusco.smf.utils.SourceReference;
 import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.EdgeMarkers;
@@ -33,6 +36,8 @@ import com.vmusco.softminer.graphs.NodeTypes;
  *
  */
 public class GraphML implements GraphPersistence{
+	private static final Logger logger = LogManager.getFormatterLogger(GraphML.class.getSimpleName());
+	
 	private static final Namespace xmlns = Namespace.getNamespace("http://graphml.graphdrawing.org/xmlns");
 	private Graph target;
 	
@@ -118,6 +123,9 @@ public class GraphML implements GraphPersistence{
 	}
 	
 	public static Element generateXmlNodes(Graph aGraph, Namespace xmlns){
+		int nbnodes = 0;
+		int nbedges = 0;
+		
 		Element g = new Element("graph", xmlns);
 		Attribute attr;
 
@@ -131,6 +139,7 @@ public class GraphML implements GraphPersistence{
 		g.setAttribute(attr);
 
 		for(String n : aGraph.getNodesNames()){
+			nbnodes++;
 			Element aNode = new Element("node", xmlns);
 			g.addContent(aNode);
 
@@ -178,6 +187,7 @@ public class GraphML implements GraphPersistence{
 		int i = 1;
 
 		for(EdgeIdentity e : aGraph.getEdges()){
+			nbedges++;
 			Element anEdge = new Element("edge", xmlns);
 			g.addContent(anEdge);
 			
@@ -215,7 +225,8 @@ public class GraphML implements GraphPersistence{
 					anEdge.setAttribute(attr);
 			}
 		}
-		
+
+		logger.info("Write %d nodes and %d edges", nbnodes, nbedges);
 		return g;
 	}
 
@@ -301,12 +312,16 @@ public class GraphML implements GraphPersistence{
 		format.setLineSeparator(LineSeparator.UNIX);
 		XMLOutputter output = new XMLOutputter(format);
 		output.output(d, os);
+		
 	}
 
 
 
 	@Override
 	public void load(InputStream is) throws IOException {
+		int nbnodes = 0;
+		int nbedges = 0;
+		
 		SAXBuilder sxb = new SAXBuilder();
 		Document document;
 		try {
@@ -325,6 +340,7 @@ public class GraphML implements GraphPersistence{
 			g.setBuildTime(Long.valueOf(attribute.getValue()));
 		
 		for(Element e : graph.getChildren("node", xmlns)){
+			nbnodes++;
 			String nodename = e.getAttribute("id").getValue();
 			g.addNode(nodename);
 			
@@ -363,6 +379,7 @@ public class GraphML implements GraphPersistence{
 		}
 		
 		for(Element e : graph.getChildren("edge", xmlns)){
+			nbedges++;
 			String source = e.getAttribute("source").getValue();
 			String target = e.getAttribute("target").getValue();
 
@@ -390,6 +407,8 @@ public class GraphML implements GraphPersistence{
 				}
 			}
 		}
+		
+		logger.info("Read %d nodes and %d edges", nbnodes, nbedges);
 	}
 
 }

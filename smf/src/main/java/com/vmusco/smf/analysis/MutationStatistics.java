@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +53,12 @@ public class MutationStatistics implements Serializable {
 	 * If this value is null, then all classes on the source are considered !
 	 */
 	private String[] classToMutate = new String[]{};
+	
+	/**
+	 * This is the list of method signatures to mutate
+	 */
+	private String[] methodSignaturesToMutate = null;
+	
 	private HashMap<String, MutantIfos> mutations = new HashMap<String, MutantIfos>();
 	private Long mutantsGenerationTime = null;
 
@@ -179,6 +186,7 @@ public class MutationStatistics implements Serializable {
 		this.ps = ps;
 		this.mutationName = name;
 		this.mutop = mutator;
+		this.mutop.setMutationStatistic(this);
 		
 	}
 
@@ -258,7 +266,8 @@ public class MutationStatistics implements Serializable {
 	 * @return
 	 */
 	public boolean isMutantExecutionPersisted(String mutationId){
-		return getMutantExecutionFile(mutationId).exists();
+		File mutFile = getMutantExecutionFile(mutationId);
+		return mutFile.exists() && mutFile.length()>0;
 	}
 
 	/**
@@ -492,6 +501,7 @@ public class MutationStatistics implements Serializable {
 		
 		try {
 			list = Arrays.asList(listViableAndRunnedMutants(false));
+			Collections.shuffle(list);
 		} catch (PersistenceException e) {
 			// Not thrown as parameter is false (no loading)
 			e.printStackTrace();
@@ -554,4 +564,19 @@ public class MutationStatistics implements Serializable {
 		return mi;
 	}
 	
+	public void setMethodSignaturesToMutate(String[] methodSignaturesToMutate) {
+		this.methodSignaturesToMutate = methodSignaturesToMutate;
+	}
+	
+	public String[] getMethodSignaturesToMutate() {
+		return methodSignaturesToMutate;
+	}
+	
+	public boolean isMethodCandidateToMutation(String signature){
+		if(getMethodSignaturesToMutate() == null)
+			return true;
+		else{
+			return Arrays.asList(getMethodSignaturesToMutate()).contains(signature);
+		}
+	}
 }

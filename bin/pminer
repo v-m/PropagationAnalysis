@@ -4,10 +4,10 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 function help {
     echo "Availible commands are:"
-    echo "   faultloc         ..."
-    echo "   displayvisu      ..."
-    echo "   globalperf       ..."
-    echo "   mutopperf        ..."
+    echo "   faultlocste      Fault localizatino on Steimann mutant dataset"
+    echo "   displayvisu      Show a visualization of the propagation"
+    echo "   globalperf       Compute performances for CIA"
+    echo "   mutopperf        Compute performances for CIA"
     exit
 }
 
@@ -21,8 +21,8 @@ project="pminer"
 
 case "$1" in
 
-faultloc)
-    package="com.vmusco.pminer.run.FaultLocalization"
+faultlocste)
+    package="com.vmusco.pminer.run.FaultLocalizationSteimann"
     ;;
 displayvisu)
     package="com.vmusco.pminer.run.MutationVisualizationRunner"

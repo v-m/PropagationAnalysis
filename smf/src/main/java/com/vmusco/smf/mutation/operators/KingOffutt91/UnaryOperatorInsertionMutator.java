@@ -29,7 +29,7 @@ public class UnaryOperatorInsertionMutator extends SmfMutationOperator<CtBinaryO
 				element.getKind() == BinaryOperatorKind.MOD ||
 				element.getKind() == BinaryOperatorKind.OR ||
 				element.getKind() == BinaryOperatorKind.AND){
-			MutationGateway.addElement(element);
+			addElement(element);
 		}
 	}
 

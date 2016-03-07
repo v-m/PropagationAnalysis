@@ -18,7 +18,8 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	private List<MutantTestProcessingListener<MutationStatisticsCollecter>> mtpl;
 
 	// Last values retainer
-	private MutantIfos lastMutantIfos;
+	private String lastIn;
+	private String lastId;
 	private String[] lastGraphDetermined;
 	private List<Double> times;
 	private boolean lastUnbounded;
@@ -65,13 +66,14 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	 * To declare an isolated case, pass impactedNodes = null and impactedTests = []
 	 */
 	@Override
-	public void intersectionFound(MutantIfos mi, String[] ais, String[] cis) {
-		lastMutantIfos = mi;
+	public void intersectionFound(String id, String in, String[] ais, String[] cis) {
+		lastIn = in;
+		lastId = id;
 		lastGraphDetermined = cis;
 		lastUnbounded = false;
 		lastIsolated  = false;
 		
-		soud.cumulate(mi.getId(), ais, cis);
+		soud.cumulate(id, ais, cis);
 		prf.cumulate(ais, cis);
 
 		Iterator<MutantTestProcessingListener<MutationStatisticsCollecter>> listenerIterator = listenerIterator();
@@ -83,17 +85,19 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	}
 	
 	@Override
-	public void isolatedFound(MutantIfos mi) {
-		lastMutantIfos = mi;
-		soud.addIsolated(mi.getId());
+	public void isolatedFound(String id, String in) {
+		lastIn = in;
+		lastId = id;
+		soud.addIsolated(id);
 		lastUnbounded = false;
 		lastIsolated = true;
 	}
 	
 	@Override
-	public void unboundedFound(MutantIfos mi) {
-		lastMutantIfos = mi;
-		soud.addUnbounded(mi.getId());
+	public void unboundedFound(String id, String in) {
+		lastIn = id;
+		lastId = id;
+		soud.addUnbounded(in);
 		lastUnbounded = true;
 		lastIsolated = false;
 	}
@@ -118,12 +122,12 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		return lastGraphDetermined;
 	}
 
-	public String getLastMutantId() {
-		return lastMutantIfos.getId();
+	public String getLastId() {
+		return lastId;
 	}
 
-	public MutantIfos getLastMutantIfos() {
-		return lastMutantIfos;
+	public String getLastChangeIn() {
+		return lastIn;
 	}
 
 	public boolean isLastUnbounded(){
@@ -151,7 +155,7 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		soud = new SOUDStatistics();
 		mtpl = new ArrayList<>();
 
-		lastMutantIfos = null;
+		lastIn = null;
 		lastGraphDetermined = null;
 		times = new ArrayList<Double>();
 		lastUnbounded = false;

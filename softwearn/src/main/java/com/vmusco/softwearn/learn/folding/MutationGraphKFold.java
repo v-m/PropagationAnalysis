@@ -234,7 +234,7 @@ public class MutationGraphKFold extends MutationGraphExplorer{
 				ais = ms.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults());
 				
 				for(MutationStatisticsCollecter msc : listeners){
-					msc.intersectionFound(mi, ais, cis);
+					msc.intersectionFound(mi.getId(), mi.getMutationIn(), ais, cis);
 				}
 			} catch (MutationNotRunException e) {
 				e.printStackTrace();

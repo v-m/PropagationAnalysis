@@ -1,4 +1,4 @@
-package com.vmusco.softminer.graphs.persistance;
+package com.vmusco.softminer.graphs.persistence;
 
 import java.io.IOException;
 import java.io.InputStream;

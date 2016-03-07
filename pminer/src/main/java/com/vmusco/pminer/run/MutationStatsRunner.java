@@ -24,7 +24,7 @@ import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.GraphApi;
-import com.vmusco.softminer.graphs.persistance.GraphML;
+import com.vmusco.softminer.graphs.persistence.GraphML;
 
 /**
  * Compute performances for mutants of a soft and op
@@ -90,7 +90,7 @@ public class MutationStatsRunner{
 			public void aMutantHasBeenProceeded(MutationStatisticsCollecter a) {
 				if(ssep == null){
 					System.out.printf("%20s%s...............................%7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %s\n",
-							a.getLastMutantId(),
+							a.getLastId(),
 							(a.isLastUnbounded()?" (unbounded)":((a.isLastIsolated())?"  (isolated)":"............")),
 							(int)a.getSoud().getLastCandidateImpactSetSize(),
 							(int)a.getSoud().getLastActualImpactSetSize(),
@@ -100,10 +100,10 @@ public class MutationStatsRunner{
 							a.getPrecisionRecallFscore().getLastPrecision(),
 							a.getPrecisionRecallFscore().getLastRecall(),
 							a.getPrecisionRecallFscore().getLastFscore(),
-							((a.isLastUnbounded()||a.isLastIsolated())?a.getLastMutantIfos().getMutationIn():""));
+							((a.isLastUnbounded()||a.isLastIsolated())?a.getLastChangeIn():""));
 				}else{
 					System.out.printf("\"%s\"%c%c%c%c%c%c%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%c%c%c%c\n",
-							a.getLastMutantId()+(a.isLastUnbounded()?" (unbounded)":((a.isLastIsolated())?" (isolated)":"")),
+							a.getLastId()+(a.isLastUnbounded()?" (unbounded)":((a.isLastIsolated())?" (isolated)":"")),
 							ssep,ssep,ssep,ssep,ssep, ssep, ssep,
 							(int)a.getSoud().getLastCandidateImpactSetSize(),ssep,
 							(int)a.getSoud().getLastActualImpactSetSize(),ssep,
@@ -223,7 +223,7 @@ public class MutationStatsRunner{
 				pgp.visit(ms, ifos);
 				String[] ais = ms.getCoherentMutantFailAndHangTestCases(ifos.getExecutedTestsResults());
 				String[] cis = pgp.getLastConsequenceNodes();
-				sd.intersectionFound(ifos, ais, cis);
+				sd.intersectionFound(ifos.getId(), ifos.getMutationIn(), ais, cis);
 				cpt++;
 			}catch(SpecialEntryPointException e){
 				// No entry point here !
@@ -233,9 +233,9 @@ public class MutationStatsRunner{
 					continue;
 				}else{
 					if(e.getType().equals(TYPE.NOT_FOUND)){
-						sd.unboundedFound(ifos);
+						sd.unboundedFound(ifos.getId(), ifos.getMutationIn());
 					}else{
-						sd.isolatedFound(ifos);
+						sd.isolatedFound(ifos.getId(), ifos.getMutationIn());
 					}
 					cpt++;
 				}

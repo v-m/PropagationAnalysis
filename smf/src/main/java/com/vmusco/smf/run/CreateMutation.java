@@ -19,6 +19,7 @@ import com.vmusco.smf.mutation.Mutation;
 import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutatorsFactory;
 import com.vmusco.smf.mutation.SmfMutationOperator;
+import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.smf.utils.SafeInterruption;
 
@@ -53,6 +54,8 @@ public class CreateMutation implements MutationCreationListener{
 		opt = new Option("n", "name", true, "a name for the mutation");
 		options.addOption(opt);
 		opt = new Option("m", "mutate", true, "classes to mutate ("+useAsSepString+" - default: all classes)");
+		options.addOption(opt);
+		opt = new Option("d", "mutate-dependent", true, "mutate classes which depends on specified method");
 		options.addOption(opt);
 		opt = new Option("n", "nb-mutants", true, "number of desired viable mutants (already generated are not taken into consideration) (default: max)");
 		options.addOption(opt);
@@ -119,6 +122,10 @@ public class CreateMutation implements MutationCreationListener{
 		if(cmd.hasOption("mutate"))
 			ms.setClassToMutate(cmd.getOptionValue("mutate").split(File.pathSeparator));
 
+		if(cmd.hasOption("mutate-dependent")){
+			ms.setMethodSignaturesToMutate(Testing.whichMethodsDependsOnAnother(ps.getProjectIn(true), ps.getRunningClassPath(), ps.getTestClasses(), 0, ps.getAlternativeJre(), true, cmd.getOptionValue("mutate-dependent")));
+		}
+		
 		if(cmd.getArgs().length > 2){
 			ms.setMutationName(cmd.getArgs()[2]);
 		}

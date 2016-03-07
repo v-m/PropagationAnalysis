@@ -1,9 +1,9 @@
 package com.vmusco.smf.mutation;
 
-import com.vmusco.smf.mutation.operators.AbstractBinaryOperator;
-
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
+
+import com.vmusco.smf.mutation.operators.AbstractBinaryOperator;
 
 /**
  * This interface define a manual mutation operation to add in general abstract processing steps

@@ -4,9 +4,9 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 function help {
     echo "Availible commands are:"
-    echo "   mvngengraph   ..."
-    echo "   smfgengraph   ..."
-    echo "   srcgengraph   ..."
+    echo "   mvngengraph   Generate a graph from a maven project"
+    echo "   smfgengraph   Generate a graph from a SMF project"
+    echo "   srcgengraph   Generate a graph from a manually defined project"
     exit
 }
 

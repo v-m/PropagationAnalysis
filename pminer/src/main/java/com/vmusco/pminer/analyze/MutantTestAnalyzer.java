@@ -1,7 +1,5 @@
 package com.vmusco.pminer.analyze;
 
-import com.vmusco.smf.analysis.MutantIfos;
-
 /**
  * Abstract class defining events for analyzing mutants
  * @author Vincenzo Musco - http://www.vmusco.com
@@ -20,9 +18,9 @@ public abstract class MutantTestAnalyzer {
 	 */
 	public void executionEnded(){}
 
-	public abstract void intersectionFound(MutantIfos mi, String[] ais, String[] cis);
-	public abstract void unboundedFound(MutantIfos mi);
-	public abstract void isolatedFound(MutantIfos mi);
+	public abstract void intersectionFound(String id, String in, String[] ais, String[] cis);
+	public abstract void unboundedFound(String id, String in);
+	public abstract void isolatedFound(String id, String in);
 	
 	/***
 	 * This method can be invoked to order the runner to interrupt its execution and discard remaining set

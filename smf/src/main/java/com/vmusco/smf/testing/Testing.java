@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -400,6 +401,110 @@ public final class Testing {
 		}
 		
 		return tei;
+	}
+	
+	public static String[] whichMethodsDependsOnAnother(String projectIn, String[] classpath, String[] testClasses, int timeout, String alternativeJre, boolean skipHanging, final String lookingFor) throws IOException, TestingException, MutantHangsException{
+		
+		//= "org.apache.commons.math.ode.events.EventState.evaluateStep(org.apache.commons.math.ode.sampling.StepInterpolator)";
+		final Set<String> candidates = new HashSet<>();
+		
+		TestsExecutionListener reader = new TestsExecutionListener() {
+			LinkedList<String> elements = new LinkedList<String>();
+			
+			@Override
+			public void testSuiteUnrunnable(int cpt, String aTest, String line) {
+			}
+			
+			@Override
+			public void testSuiteExecutionStart(int nbtest, int length, String cmd) {
+			}
+			
+			@Override
+			public void testCaseUndeterminedTest(int cpt, String line) {
+			}
+			
+			@Override
+			public void testCaseOtherCase(int cpt, String line) {
+			}
+			
+			@Override
+			public void testCaseNotPermitted(int cpt, String line) {
+			}
+			
+			@Override
+			public void testCaseNewLoop(int cpt, String line) {
+			}
+			
+			@Override
+			public void testCaseNewIgnored(int cpt, String line) {
+			}
+			
+			@Override
+			public void testCaseNewFail(int cpt, String line) {
+			}
+			
+			@Override
+			public void testCaseLeavingMethod(String currentTestCase, String leftMethod, String way) {
+				elements.pop();
+			}
+			
+			@Override
+			public void testCaseFailureInfos(int cpt, String line) {
+			}
+			
+			@Override
+			public void testCaseExecutionFinished(int cpt, String[] all, String[] fail, String[] ignored, String[] hang) {
+			}
+			
+			@Override
+			public void testCaseException(int nbtest, String readLine, String[] executedCommand) {
+			}
+			
+			@Override
+			public void testCaseEnteringMethod(String currentTestCase, String enteredMethod) {
+				elements.push(enteredMethod);
+				
+				if(enteredMethod.equals(lookingFor)){
+					for(String e : elements){
+						candidates.add(e);
+					}
+				}
+			}
+			
+			@Override
+			public void testCaseEntered(int cpt, String line) {
+				elements = new LinkedList<String>();
+			}
+			
+			@Override
+			public void newTimeout(int timeout) {
+			}
+			
+			@Override
+			public void currentTimeout(int timeout) {
+			}
+		};
+		
+		Testing.runTestCases(projectIn, classpath, testClasses, timeout, reader, alternativeJre, skipHanging);
+		
+		return candidates.toArray(new String[candidates.size()]);
+	}
+	
+	public static String[] whichClassDependsOnMethod(String projectIn, String[] classpath, String[] testClasses, int timeout, String alternativeJre, boolean skipHanging, final String lookingFor) throws IOException, TestingException, MutantHangsException{
+		Set<String> classes = new HashSet();
+		
+		for(String s : whichMethodsDependsOnAnother(projectIn, classpath, testClasses, timeout, alternativeJre, skipHanging, lookingFor)){
+			System.out.println(s);
+			if(s.contains("$")){
+				classes.add(s.substring(0, s.lastIndexOf('$')));
+			}else{
+				String ss = s.substring(0, s.lastIndexOf('('));
+				ss = ss.substring(0, ss.lastIndexOf("."));
+				classes.add(ss);
+			}
+		}
+		
+		return classes.toArray(new String[classes.size()]);
 	}
 	
 	private static String[] buildExecutionPath(String jrebin, Class<?> classToRun, String testClassToRun, String[] classpath, String... testcasesToIgnores){
