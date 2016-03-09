@@ -72,13 +72,13 @@ public class MutationStatistics implements Serializable {
 	 * @throws PersistenceException 
 	 */
 	public static MutationStatistics loadState(String persistFile) throws PersistenceException {
-		logger.trace("Loading ms state %s", persistFile);
+		logger.info("Loading ms state %s", persistFile);
 		File finalf = new File(persistFile);
 		if(finalf.isDirectory()){
 			finalf = new File(finalf, MutationStatistics.DEFAULT_CONFIGFILE);
 		}
-
-		MutationXmlPersistenceManager mgr = new MutationXmlPersistenceManager(new File(persistFile));
+		
+		MutationXmlPersistenceManager mgr = new MutationXmlPersistenceManager(finalf);
 		XMLPersistence.load(mgr);
 		
 		return mgr.getLinkedObject();
@@ -502,6 +502,7 @@ public class MutationStatistics implements Serializable {
 		try {
 			list = Arrays.asList(listViableAndRunnedMutants(false));
 			Collections.shuffle(list);
+			System.out.println("Iterator with "+list.size()+" elements.");
 		} catch (PersistenceException e) {
 			// Not thrown as parameter is false (no loading)
 			e.printStackTrace();

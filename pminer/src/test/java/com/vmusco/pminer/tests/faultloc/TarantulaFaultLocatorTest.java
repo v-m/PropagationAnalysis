@@ -50,4 +50,12 @@ public class TarantulaFaultLocatorTest extends FaultLocatorAbstractTest{
 		Assert.assertEquals(1, ret.allscores.size());
 		Assert.assertEquals(1/1.5, ret.allscores.get("e"), 0);
 	}
+	
+	@Test
+	public void paperTestWithoutGraph() throws BadStateException, MutationNotRunException{
+		FaultLocatorTester flt = getFltForPaperTestCase();
+		ScoreAndWastedEffort ret = processLocator(flt);
+
+		System.out.println(ret);
+	}
 }
