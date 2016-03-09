@@ -1,8 +1,10 @@
 package com.vmusco.softwearn.learn.learner.late;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,7 +24,38 @@ public abstract class LateImpactLearner implements Learner {
 	protected static final Logger logger = LogManager.getFormatterLogger(LateImpactLearner.class.getSimpleName());
 
 	private int maxk;
-
+	
+	// Statistics structures and methods
+	// Used to gather statistics about the learning
+	private HashMap<String, Integer> nbOccurenceStats = new HashMap<>();
+	private HashMap<String, Set<String>> pathsForMutantsStats = new HashMap<>();
+	private String currentMutant = null;
+			
+	public void setChangeId(String currentMutant) {
+		this.currentMutant = currentMutant;
+	}
+	
+	public HashMap<String, Integer> getNbOccurencesStat() {
+		return nbOccurenceStats;
+	}
+	
+	public HashMap<String, Set<String>> getPathsForMutantsStats() {
+		return pathsForMutantsStats;
+	}
+	
+	public int getLearnedPathForChange(String mutid){
+		int nbocc = 0;
+		
+		for(String key : pathsForMutantsStats.keySet()){
+			if(pathsForMutantsStats.get(key).contains(mutid)){
+				nbocc += nbOccurenceStats.get(key);
+			}
+		}
+		
+		return nbocc;
+	}
+	// ----------
+	
 	protected Map<String, Map<Integer, Integer>> lateLearner;
 
 	public LateImpactLearner(int maxk) {
@@ -34,7 +67,7 @@ public abstract class LateImpactLearner implements Learner {
 	public void learn(LearningGraph g, String point, String[] tests, int k) {
 		if(g instanceof LearningKGraph){
 			for(String aTest : tests){
-				String key = point+"##>"+aTest;
+				String key = point+FAULT_PATH_SEPARATOR+aTest;
 
 				if(!lateLearner.containsKey(key)){
 					lateLearner.put(key, newStructureForKLateLearning(maxk));
@@ -44,6 +77,14 @@ public abstract class LateImpactLearner implements Learner {
 
 				Map<Integer, Integer> str = lateLearner.get(key);
 				lateLearnExceptFor(str, k);
+				
+				if(currentMutant != null){
+					if(!pathsForMutantsStats.containsKey(key)){
+						pathsForMutantsStats.put(key, new HashSet<String>());
+					}
+					
+					pathsForMutantsStats.get(key).add(currentMutant);
+				}
 			}
 		}else{
 			logger.error("The graph should be a LearningKGraph object !");
@@ -66,14 +107,17 @@ public abstract class LateImpactLearner implements Learner {
 			ShortestPath esp = new ShortestPath(g.graph());
 			
 			for(String key : lateLearner.keySet()){
-				String point = key.split("##>")[0];
-				String test = key.split("##>")[1];
+				int learnedEdgeWithThisPair = 0;
+				
+				String point = key.split(FAULT_PATH_SEPARATOR)[0];
+				String test = key.split(FAULT_PATH_SEPARATOR)[1];
 
 				logger.trace("Treating %s -> %s", point, test);
 
 				if(g.graph().isThereAtLeastOnePath(test, point)){
 					//List<String[]> paths = getPaths(g, test, point);
 					//List<String[]> paths = ShortestPath.kShortestPathsYens(g.graph(), test, point, 10);
+					
 					List<String[]> paths = esp.yen(test, point, 10);
 
 					for(String[] path : paths){
@@ -83,6 +127,9 @@ public abstract class LateImpactLearner implements Learner {
 							logger.info("Empty path for %s - %s !", test, point);
 							continue;
 						}
+						
+						learnedEdgeWithThisPair += allEdgesInPath.length;
+						
 						for(EdgeIdentity edge : allEdgesInPath){
 							Map<Integer, Integer> ks = lateLearner.get(key);
 
@@ -100,6 +147,8 @@ public abstract class LateImpactLearner implements Learner {
 				}else{
 					logger.trace("No path between "+test+" and "+point);
 				}
+				
+				nbOccurenceStats.put(key, learnedEdgeWithThisPair);
 			}
 		}else{
 			logger.error("Graph should be a LearningKGraph instance !");

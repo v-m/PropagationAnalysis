@@ -3,8 +3,10 @@ package com.vmusco.pminer.run;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -33,7 +35,6 @@ import com.vmusco.softminer.utils.SteimannDatasetTools;
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public class FaultLocalizationSteimann {
-
 	private boolean first = true;
 	protected int maxsize;
 	protected MutationStatistics ms;
@@ -47,6 +48,10 @@ public class FaultLocalizationSteimann {
 		Option opt;
 
 		opt = new Option("g", "graph", false, "Compute the wasted effort based on the graph interesection (default: false)");
+		options.addOption(opt);
+		
+		// Random can only be generated with a graph -- otherwise it has no sense. We want to determine if we improve with Vautrin
+		opt = new Option(null, "random", true, "Compute the wasted effort randomly - based on the specified seed (default: false)");
 		options.addOption(opt);
 
 		opt = new Option(null, "no-tarantula", false, "Do not compute the tarantula wasted effort (default: true)");
@@ -177,7 +182,7 @@ public class FaultLocalizationSteimann {
 						break;
 					}
 						
-					intermBuffer += ";"+next.getLastWastedEffort();
+					intermBuffer += ";"+next.getLastOutline();
 				}
 				
 
@@ -225,7 +230,7 @@ public class FaultLocalizationSteimann {
 		result += String.format(";#inter");
 
 		for(DisplayData dd : notifier){
-			result += String.format(";%s", dd.getHeader().split(";")[1]);
+			result += String.format(";%s", dd.getHeader());
 		}
 		result += '\n';
 		return result;
@@ -264,7 +269,12 @@ public class FaultLocalizationSteimann {
 		if(cmd.hasOption("graph")){
 			notifier.add(new DisplayData(FaultLocators.getIntersectionMaxSizeApporach(stats), base, fallback, true, "G"));
 		}
+		
+		if(cmd.hasOption("random")){
+			notifier.add(new DisplayRandomData(FaultLocators.getRandomBased(stats, Long.parseLong(cmd.getOptionValue("random"))), "R"));
+		}
 
+		
 		if(!cmd.hasOption("no-tarantula")){
 			notifier.add(new DisplayData(FaultLocators.getTarantula(stats), "T"));
 		}
@@ -333,9 +343,9 @@ public class FaultLocalizationSteimann {
 
 		private Graph base;
 		private MutationStatisticsCollecter a;
-		private String headCol;
-		private FaultLocalizationScore fls;
-		private String outline;
+		protected String headCol;
+		protected FaultLocalizationScore fls;
+		protected String outline;
 		private boolean fallback;
 		private boolean fbminus;
 
@@ -358,7 +368,8 @@ public class FaultLocalizationSteimann {
 
 		public String getHeader(){
 			String ret = "";
-			ret += "+S"+headCol+";+W"+headCol;
+			//ret += "+S"+headCol+";+W"+headCol;
+			ret += "+W"+headCol;
 			return ret;
 		}
 
@@ -371,7 +382,8 @@ public class FaultLocalizationSteimann {
 			String outline = "";
 
 			try{
-				outline = String.format(";%.2f;%d", score(), wastedEffort());
+				//outline = String.format(";%.2f;%d", score(), wastedEffort());
+				outline = String.format("%d", wastedEffort());
 				this.outline = outline;
 			}catch(TargetNotFoundException e){
 				this.outline = null;
@@ -382,7 +394,7 @@ public class FaultLocalizationSteimann {
 			}
 		}
 
-		public int wastedEffort() throws BadStateException, TargetNotFoundException{
+		private int wastedEffort() throws BadStateException, TargetNotFoundException{
 			if(base != null){
 				String[] graphCases = a.getLastGraphDetermined();
 				try{
@@ -407,20 +419,12 @@ public class FaultLocalizationSteimann {
 			return outline;
 		}
 
-		public String getLastWastedEffort(){
-			return outline.split(";")[2];
-		}
-
-		public String getLastScore(){
-			return outline.split(";")[1];
-		}
-
 		/**
 		 * Not working with graphs
 		 * @return
 		 * @throws BadStateException 
 		 */
-		public double score() throws BadStateException{
+		private double score() throws BadStateException{
 			fls.computeScore(a.getLastChangeIn());
 			return fls.getScore();
 		}
@@ -431,6 +435,78 @@ public class FaultLocalizationSteimann {
 		
 		public FaultLocalizationScore getFaultLocatorScore() {
 			return fls;
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * Random data requires a special handling as parallel generation may lead to inappropriate results! 
+	 * @author Vincenzo Musco - http://www.vmusco.com
+	 */
+	protected static class DisplayRandomData extends DisplayData {
+		
+		public DisplayRandomData(FaultLocalizationScore fls, String headCol) {
+			super(fls, headCol);
+		}
+		
+		public String getHeader(){
+			String ret = "";
+			//ret += "+S"+headCol+";+W"+headCol+"+S"+headCol+"G;+W"+headCol+"G";
+			ret += "+W"+headCol+";+W"+headCol+"G";
+			return ret;
+		}
+
+		@Override
+		public void aMutantHasBeenProceeded(MutationStatisticsCollecter a) {
+			//SOUDStatistics soud = a.getSoud();
+			Map<String, Double> scores = null;
+			
+			try{
+				scores = fls.getWastedEffortList();
+			} catch (BadStateException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
+			Map<String, Double> graphscores = new HashMap<String, Double>();
+			
+			for(String aCase : a.getLastGraphDetermined()){
+				if(scores.containsKey(aCase)){
+					graphscores.put(aCase, scores.get(aCase));
+				}
+			}
+			
+			int we_nograph = FaultLocalizationScore.wastedEffortForList(new ArrayList<Double>(scores.values()), scores.get(a.getLastChangeIn()));
+			int we_graph = -1;
+			
+			if(graphscores.get(a.getLastChangeIn()) != null)
+				we_graph = FaultLocalizationScore.wastedEffortForList(new ArrayList<Double>(graphscores.values()), graphscores.get(a.getLastChangeIn()));
+			
+			//double score = scores.get(a.getLastChangeIn());
+			
+			String outline = "";
+			//outline = String.format(";%.2f;%d;%.2f;%d;", score, we_nograph, score, we_graph);
+			outline = String.format("%d;%d", we_nograph, we_graph);
+			this.outline = outline;
 		}
 	}
 

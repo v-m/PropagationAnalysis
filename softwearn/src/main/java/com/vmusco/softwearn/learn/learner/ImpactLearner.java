@@ -16,4 +16,14 @@ public abstract class ImpactLearner implements Learner{
 	@Override
 	public void learningRoundFinished(LearningGraph g) {
 	}
+	
+	public void setChangeId(String id){
+		// Nothing to do here..
+		// Not implemented in this version
+	}
+	
+	public int getLearnedPathForChange(String changeid){
+		return -1;
+		// Not implemented in this version
+	}
 }

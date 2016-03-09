@@ -80,6 +80,10 @@ public abstract class FaultLocalizationScore {
 		}
 	}
 
+	public Map<String, Double> getWastedEffortList() throws BadStateException{
+		return getWastedEffortList(stats.getUUTs());
+	}
+	
 	public Map<String, Double> getWastedEffortList(String[] entries) throws BadStateException{
 		Map<String, Double> ret = new HashMap<String, Double>();
 		

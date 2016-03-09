@@ -1,7 +1,14 @@
 package com.vmusco.pminer.faultlocalization;
 
+import java.io.ByteArrayOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
+
+import sun.security.provider.MD5;
 
 /**
  * This class defines factory methods for getting FL techniques to use
@@ -35,6 +42,49 @@ public abstract class FaultLocators {
 
 				setScore( (failed/totalfailed) /
 						((passed/totalpassed) + (failed/totalfailed)) );
+			}
+		};
+	}
+	
+	/*****
+	 * EXECUTION BASED
+	 */
+	public static FaultLocalizationScore getRandomBased(FaultLocalizationStats stats, final long seed){
+		return new FaultLocalizationScore(stats){
+			private Random r = new Random(seed);
+			
+			@Override
+			protected void computeScore() {
+				/*try {
+					MessageDigest md = MessageDigest.getInstance("MD5");
+					String s = "";
+					
+					Calendar c = Calendar.getInstance();
+					
+					s += key;
+					s += stats.getCurrentTestingNode();
+					
+					for(String f : stats.getAllFailedTests()){
+						s += f;
+					}
+
+					int computedScore = 0;
+					byte[] digest = md.digest(s.getBytes());
+					
+					for(byte dig : digest){
+						computedScore += Math.abs(dig);
+					}
+					
+					computedScore %= 200;
+					
+					setScore( computedScore );
+				} catch (NoSuchAlgorithmException e) {
+					System.out.println("Unable to find a digest for MD5 !");
+					System.exit(1);
+				}*/
+				
+				setScore(r.nextInt(250));
+
 			}
 		};
 	}

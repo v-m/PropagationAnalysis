@@ -190,6 +190,7 @@ public class MutationGraphKFold extends MutationGraphExplorer{
 	
 	private void learn(MutantIfos[] mutants, int k) throws MutationNotRunException{
 		for(MutantIfos mi : mutants){
+			learner.setChangeId(mi.getId());
 			logger.trace("Learning with %s", mi.getId());
 			String point = mi.getMutationIn();
 			String[] tests = ms.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults());
