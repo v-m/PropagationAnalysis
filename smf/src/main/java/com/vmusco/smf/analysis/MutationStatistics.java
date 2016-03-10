@@ -28,7 +28,7 @@ import com.vmusco.smf.mutation.MutationCreationListener;
 import com.vmusco.smf.mutation.MutationOperator;
 import com.vmusco.smf.mutation.SmfMutationOperator;
 import com.vmusco.smf.utils.SafeInterruption;
-import com.vmusco.smf.utils.SetTools;
+import com.vmusco.smf.utils.CollectionsTools;
 import com.vmusco.smf.utils.SourceReference;
 
 /**
@@ -391,8 +391,8 @@ public class MutationStatistics implements Serializable {
 	public boolean isMutantAlive(String mutid) throws MutationNotRunException, PersistenceException {
 		MutantIfos mutationStats = loadMutationStats(mutid, false);
 
-		return SetTools.areSetsSimilars(ps.getFailingTestCases(), mutationStats.getExecutedTestsResults().getRawFailingTestCases()) &&
-				SetTools.areSetsSimilars(ps.getHangingTestCases(), mutationStats.getExecutedTestsResults().getRawHangingTestCases());
+		return CollectionsTools.areSetsSimilars(ps.getFailingTestCases(), mutationStats.getExecutedTestsResults().getRawFailingTestCases()) &&
+				CollectionsTools.areSetsSimilars(ps.getHangingTestCases(), mutationStats.getExecutedTestsResults().getRawHangingTestCases());
 	}
 
 	public boolean isMutantKilled(String mutid) throws MutationNotRunException, PersistenceException {

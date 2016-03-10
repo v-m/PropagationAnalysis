@@ -26,7 +26,7 @@ import com.vmusco.smf.testing.TestCasesProcessor;
 import com.vmusco.smf.testing.Testing;
 import com.vmusco.smf.testing.TestsExecutionListener;
 import com.vmusco.smf.utils.MavenTools;
-import com.vmusco.smf.utils.SetTools;
+import com.vmusco.smf.utils.CollectionsTools;
 
 /**
  * This class contains all informations required for a mutation project
@@ -646,7 +646,7 @@ public class ProcessStatistics implements Serializable{
 		String[] mutset = includeTestSuiteGlobalFailingCases(tei.getRawErrorOnTestSuite(), tei.getRawFailingTestCases());
 		String[] glbset = includeTestSuiteGlobalFailingCases(getErrorOnTestSuite(), getFailingTestCases());
 
-		return SetTools.setDifference(mutset, glbset);
+		return CollectionsTools.setDifference(mutset, glbset);
 	}
 
 	/**
@@ -659,7 +659,7 @@ public class ProcessStatistics implements Serializable{
 		String[] mutset = tei.getRawIgnoredTestCases();
 		String[] glbset = getIgnoredTestCases();
 
-		return SetTools.setDifference(mutset, glbset);
+		return CollectionsTools.setDifference(mutset, glbset);
 	}
 
 	/**
@@ -672,7 +672,7 @@ public class ProcessStatistics implements Serializable{
 		String[] mutset = tei.getRawHangingTestCases();
 		String[] glbset = getHangingTestCases();
 
-		return SetTools.setDifference(mutset, glbset);
+		return CollectionsTools.setDifference(mutset, glbset);
 	}
 
 	/**
@@ -697,7 +697,7 @@ public class ProcessStatistics implements Serializable{
 			cases.add(s);
 		}
 
-		return SetTools.setDifference(cases.toArray(new String[cases.size()]), getUnmutatedFailAndHang());
+		return CollectionsTools.setDifference(cases.toArray(new String[cases.size()]), getUnmutatedFailAndHang());
 	}
 
 

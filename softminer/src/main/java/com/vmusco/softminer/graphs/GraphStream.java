@@ -8,7 +8,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.graphstream.algorithm.ConnectedComponents;
+import org.graphstream.algorithm.TarjanStronglyConnectedComponents;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
@@ -776,4 +779,50 @@ public class GraphStream extends Graph {
 		
 	}
 
+	@Override
+	public int getNbConnectedComponents() {
+		TarjanStronglyConnectedComponents cc = new TarjanStronglyConnectedComponents();
+		cc.init(getGraph());
+		cc.compute();
+		
+		Map<Object, Integer> cpt = new HashMap<>();
+		
+		for (Node n : getGraph().getEachNode()){
+			Object attribute = n.getAttribute(cc.getSCCIndexAttribute());
+			if(!cpt.containsKey(attribute)){
+				cpt.put(attribute, 1);
+			}else{
+				cpt.put(attribute, cpt.get(attribute) + 1);
+			}
+		}
+		
+		return cpt.keySet().size();
+	}
+
+	@Override
+	public int getNbGiantComponents() {
+		TarjanStronglyConnectedComponents cc = new TarjanStronglyConnectedComponents();
+		cc.init(getGraph());
+		cc.compute();
+		
+		Map<Object, Integer> cpt = new HashMap<>();
+		
+		for (Node n : getGraph().getEachNode()){
+			Object attribute = n.getAttribute(cc.getSCCIndexAttribute());
+			if(!cpt.containsKey(attribute)){
+				cpt.put(attribute, 1);
+			}else{
+				cpt.put(attribute, cpt.get(attribute) + 1);
+			}
+		}
+		
+		int max = 0;
+		
+		for(Integer i : cpt.values()){
+			if(i > max)
+				max = i;
+		}
+		
+		return max;
+	}
 }

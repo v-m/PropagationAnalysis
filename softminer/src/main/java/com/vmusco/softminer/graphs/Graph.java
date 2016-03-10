@@ -477,4 +477,7 @@ public abstract class Graph {
 		
 		return ret.toArray(new EdgeIdentity[ret.size()]);
 	}
+
+	public abstract int getNbConnectedComponents();
+	public abstract int getNbGiantComponents();
 }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vmusco.pminer.utils.Tools;
-import com.vmusco.smf.utils.SetTools;
+import com.vmusco.smf.utils.CollectionsTools;
 
 /**
  * Class used to compute 
@@ -44,9 +44,9 @@ public class SOUDStatistics {
 		int cis_size = cis.length;
 		int ais_size = ais.length;
 
-		int fpis_size = SetTools.setDifference(cis, ais).length;
-		int dis_size = SetTools.setDifference(ais, cis).length;
-		int inter_size = SetTools.setIntersection(ais, cis).length;
+		int fpis_size = CollectionsTools.setDifference(cis, ais).length;
+		int dis_size = CollectionsTools.setDifference(ais, cis).length;
+		int inter_size = CollectionsTools.setIntersection(ais, cis).length;
 
 		this.cis.add(cis_size * 1.0d);
 		this.ais.add(ais_size * 1.0d);

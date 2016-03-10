@@ -46,6 +46,14 @@
 			<version>1.3</version>
 			<optional>false</optional>
 		</dependency>
+		
+		
+		<dependency>
+			<artifactId>gs-algo</artifactId>
+			<groupId>org.graphstream</groupId>
+			<version>1.3</version>
+			<optional>false</optional>
+		</dependency>
 
 		<dependency>
 			<groupId>com.vmusco</groupId>

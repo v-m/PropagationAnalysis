@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.GraphStream;
+import com.vmusco.softminer.graphs.GraphTools;
 
 public class GraphStreamBasicTest {
 	@Test
@@ -37,5 +38,17 @@ public class GraphStreamBasicTest {
 		Assert.assertEquals(g.getInDegreeFor("mynewa"), 3);
 		
 		//g.bestDisplay();
+	}
+	
+	@Test
+	public void testConnectedComponent(){
+		Graph g = new GraphStream();
+		
+		GraphTools.fastInsertion(g, "a->b->c->d->e->f->a");
+		GraphTools.fastInsertion(g, "g->h->i->g");
+		GraphTools.fastInsertion(g, "j->k->j");
+
+		Assert.assertEquals(6, g.getNbGiantComponents());
+		Assert.assertEquals(3, g.getNbConnectedComponents());
 	}
 }

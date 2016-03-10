@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.vmusco.smf.exceptions.BadStateException;
 import com.vmusco.smf.exceptions.MutationNotRunException;
-import com.vmusco.smf.utils.SetTools;
+import com.vmusco.smf.utils.CollectionsTools;
 import com.vmusco.softminer.graphs.Graph;
 
 /**
@@ -56,7 +56,7 @@ public class FaultLocalizationStats {
 		// EXECUTION STATS UPDATING
 		this.UUTusedByTests = UUTusedByTests;
 		this.totalfailed = fails;
-		this.totalpassed = SetTools.setDifference(testcases, this.totalfailed);
+		this.totalpassed = CollectionsTools.setDifference(testcases, this.totalfailed);
 
 		if(base != null){
 			inter = new GraphFaultLocalizationByIntersection(base);
@@ -116,7 +116,7 @@ public class FaultLocalizationStats {
 	}
 	
 	public String[] getNonExecutingFailedTests(){
-		return SetTools.setDifference(totalfailed, failed);
+		return CollectionsTools.setDifference(totalfailed, failed);
 	}
 	
 	
@@ -141,17 +141,17 @@ public class FaultLocalizationStats {
 	}
 	
 	public String[] getNonExecutingPassedTests(){
-		return SetTools.setDifference(totalpassed, passed);
+		return CollectionsTools.setDifference(totalpassed, passed);
 	}
 	
 	private String[] failingTests(){
-		return SetTools.setIntersection(
+		return CollectionsTools.setIntersection(
 				totalfailed,
 				this.concernedTests);
 	}
 
 	private String[] passedTests(){
-		return SetTools.setDifference(concernedTests, this.failed);
+		return CollectionsTools.setDifference(concernedTests, this.failed);
 	}
 	
 	private String[] concernedTests() throws BadStateException {
