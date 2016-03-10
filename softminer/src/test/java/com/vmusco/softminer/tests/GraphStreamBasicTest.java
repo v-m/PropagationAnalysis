@@ -45,10 +45,12 @@ public class GraphStreamBasicTest {
 		Graph g = new GraphStream();
 		
 		GraphTools.fastInsertion(g, "a->b->c->d->e->f->a");
-		GraphTools.fastInsertion(g, "g->h->i->g");
-		GraphTools.fastInsertion(g, "j->k->j");
+		GraphTools.fastInsertion(g, "g->h->i->g->b");
+		GraphTools.fastInsertion(g, "j->k->j->i");
 
-		Assert.assertEquals(6, g.getNbGiantComponents());
-		Assert.assertEquals(3, g.getNbConnectedComponents());
+		Assert.assertEquals(3, g.getNbStronglyConnectedComponents());
+		Assert.assertEquals(6, g.getSizeStronglyGiantComponent());
+		Assert.assertEquals(1, g.getNbWeaklyConnectedComponents());
+		Assert.assertEquals(11, g.getSizeWeaklyGiantComponent());
 	}
 }
