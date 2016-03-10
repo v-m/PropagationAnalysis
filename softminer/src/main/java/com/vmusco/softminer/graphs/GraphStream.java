@@ -780,7 +780,7 @@ public class GraphStream extends Graph {
 	}
 
 	@Override
-	public int getNbConnectedComponents() {
+	public int getNbStronglyConnectedComponents() {
 		TarjanStronglyConnectedComponents cc = new TarjanStronglyConnectedComponents();
 		cc.init(getGraph());
 		cc.compute();
@@ -800,7 +800,7 @@ public class GraphStream extends Graph {
 	}
 
 	@Override
-	public int getNbGiantComponents() {
+	public int getSizeStronglyGiantComponent() {
 		TarjanStronglyConnectedComponents cc = new TarjanStronglyConnectedComponents();
 		cc.init(getGraph());
 		cc.compute();
@@ -824,5 +824,21 @@ public class GraphStream extends Graph {
 		}
 		
 		return max;
+	}
+
+	@Override
+	public int getNbWeaklyConnectedComponents() {
+		ConnectedComponents cc = new ConnectedComponents();
+		cc.init(getGraph());
+		
+		return cc.getConnectedComponentsCount();
+	}
+
+	@Override
+	public int getSizeWeaklyGiantComponent() {
+		ConnectedComponents cc = new ConnectedComponents();
+		cc.init(getGraph());
+		
+		return cc.getGiantComponent().size();
 	}
 }

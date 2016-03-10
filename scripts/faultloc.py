@@ -5,6 +5,7 @@ import csv
 import os
 
 fallback = True
+random = True
 metric = "avg_we" # avg_we, zero or one
 sep = ";" #use & for LaTeX
 eol = "" #use \\ for LaTeX
@@ -120,7 +121,7 @@ def analyzeProject(head, lines):
             if(value == -1):
                 continue
 
-            accumulators[c] = accumulators[c]+ value
+            accumulators[c] = accumulators[c] + value
             if(value == 0):
                 iszero[c] = iszero[c] + 1
 
@@ -138,7 +139,7 @@ def analyzeProject(head, lines):
     for entry in header:
         ret[entry] = {
             "nb": nb,
-            "avg_we": accumulators[c]/nb,
+            "avg_we": float(accumulators[c])/nb,
             "zero": iszero[c],
             "one": isone[c]
         }
@@ -154,9 +155,16 @@ if(not summary):
     mystring = "%s%s%s"%(mystring, sep, "Tot Learning")
     mystring = "%s%s%s"%(mystring, sep, "Total time")
     mystring = "%s%s%s%s%s"%(mystring, sep, "#inter", sep, "Graph")
-    mystring = "%s%s%s"%(mystring, sep, "Tarantula")
 
+if(random):
+    if(not summary):
+        mystring = "%s%s%s"%(mystring, sep, "Random")
+    mystring = "%s%s%s"%(mystring, sep, "Random")
+
+if(not summary):
+    mystring = "%s%s%s"%(mystring, sep, "Tarantula")
 mystring = "%s%s%s"%(mystring, sep, "Tarantula")
+
 if(not summary):
     mystring = "%s%s%s"%(mystring, sep, "Ochiai")
 mystring = "%s%s%s"%(mystring, sep, "Ochiai")
@@ -181,6 +189,8 @@ if(not summary):
     mystring = "%s%s%s"%(mystring, sep, "")
     mystring = "%s%s%s"%(mystring, sep, "")
     mystring = "%s%s%s"%(mystring, sep, "")
+    if(random):
+        mystring = "%s%s%s%s%s"%(mystring, sep, "Vanilla", sep, "Graph")
     mystring = "%s%s%s%s%s"%(mystring, sep, "Vanilla", sep, "Graph")
     mystring = "%s%s%s%s%s"%(mystring, sep, "Vanilla", sep, "Graph")
     mystring = "%s%s%s%s%s"%(mystring, sep, "Vanilla", sep, "Graph")
@@ -218,6 +228,12 @@ for afile in sys.argv[1:]:
         mystring = "%s%s%.2f"%(mystring, sep, analyzed["avg_learn"])
         mystring = "%s%s%d"%(mystring, sep, analyzed["totaltime"])
         mystring = "%s%s%.2f%s%.2f"%(mystring, sep, analyzed["#inter"][metric], sep, analyzed["+WG"][metric])
+
+    if(random):
+        mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WR"][metric])
+
+        if(not(summary)):
+            mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WRG"][metric])
 
     mystring = "%s%s%.2f"%(mystring, sep, analyzed["+WT"][metric])
     if(not summary):

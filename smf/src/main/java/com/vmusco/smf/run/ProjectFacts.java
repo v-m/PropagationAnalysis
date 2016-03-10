@@ -51,29 +51,34 @@ public class ProjectFacts {
 		if(cmd.hasOption("mutation")){
 			MutationStatistics ms = MutationStatistics.loadState((String) cmd.getArgList().get(0));
 			
-			
 			if(cmd.hasOption("whichmethods")){
-				Map<String, Integer> cpt = new HashMap<>();
-				
-				for(String mutid : ms.listViableMutants()){
-					MutantIfos stats = ms.getMutationStats(mutid);
-					
-					if(!cpt.containsKey(stats.getMutationIn())){
-						cpt.put(stats.getMutationIn(), 1);
-					}else{
-						cpt.put(stats.getMutationIn(), cpt.get(stats.getMutationIn())+1);
-					}
-				}
-				
-				Map<String, Integer> sortMapByValue = CollectionsTools.sortMapByValue(cpt);
-				
-				for(String key : sortMapByValue.keySet()){
-					System.out.println(String.format("%5d %s", sortMapByValue.get(key), key));
-				}
+				whichMethods(ms);
 			}
 		}else{
 			ProcessStatistics ps = ProcessStatistics.rawLoad((String) cmd.getArgList().get(0));
 			
 		}
+	}
+
+	private static void whichMethods(MutationStatistics ms) {
+		Map<String, Integer> cpt = new HashMap<>();
+		
+		for(String mutid : ms.listViableMutants()){
+			MutantIfos stats = ms.getMutationStats(mutid);
+			
+			if(!cpt.containsKey(stats.getMutationIn())){
+				cpt.put(stats.getMutationIn(), 1);
+			}else{
+				cpt.put(stats.getMutationIn(), cpt.get(stats.getMutationIn())+1);
+			}
+		}
+		
+		Map<String, Integer> sortMapByValue = CollectionsTools.sortMapByValue(cpt);
+		
+		for(String key : sortMapByValue.keySet()){
+			System.out.println(String.format("%5d %s", sortMapByValue.get(key), key));
+		}
+		
+		System.out.println(String.format(">>> %d methods over %d mutants", sortMapByValue.keySet().size(), ms.listViableMutants().length));
 	}
 }

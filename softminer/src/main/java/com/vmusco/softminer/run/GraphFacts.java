@@ -19,7 +19,7 @@ import com.vmusco.softminer.graphs.persistence.GraphML;
 
 public class GraphFacts {
 	
-	public static void main(String[] args) throws FileNotFoundException, IOException, ParseException {
+	public static void main(String[] args) throws Exception{
 		Options options = new Options();
 
 		options.addOption(new Option("h", "help", false, "display this message"));
@@ -32,15 +32,17 @@ public class GraphFacts {
 			formatter.printHelp(String.format(" [options] <graphfile>"), options);
 
 			System.exit(0);
-		}		
+		}
+		
 		Graph g = new GraphStream();
 		GraphML mgl = new GraphML(g);
 		mgl.load(new FileInputStream((String) cmd.getArgList().get(0)));
 		
 		System.out.println(String.format("Graph %s", cmd.getArgList().get(0)));
 		System.out.println(String.format("Graph structure: %d nodes, %d edges.", g.getNbNodes(), g.getNbEdges()));
-		
-		System.out.println(String.format("Strongly connected components: %d (giant size= %d)", g.getNbConnectedComponents(), g.getNbGiantComponents()));
+
+		System.out.println(String.format("Strongly connected components: %d (giant size= %d)", g.getNbStronglyConnectedComponents(), g.getSizeStronglyGiantComponent()));
+		System.out.println(String.format("Weakly connected components: %d (giant size= %d)", g.getNbWeaklyConnectedComponents(), g.getSizeWeaklyGiantComponent()));
 	}
 
 }

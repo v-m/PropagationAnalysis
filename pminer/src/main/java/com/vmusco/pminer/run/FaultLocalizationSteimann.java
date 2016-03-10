@@ -500,6 +500,8 @@ public class FaultLocalizationSteimann {
 			
 			if(graphscores.get(a.getLastChangeIn()) != null)
 				we_graph = FaultLocalizationScore.wastedEffortForList(new ArrayList<Double>(graphscores.values()), graphscores.get(a.getLastChangeIn()));
+			else
+				we_graph = we_nograph;
 			
 			//double score = scores.get(a.getLastChangeIn());
 			
