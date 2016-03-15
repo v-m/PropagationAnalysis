@@ -12,7 +12,6 @@ import com.vmusco.smf.analysis.MutantIfos;
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public class MutationStatisticsCollecter extends MutantTestAnalyzer {
-
 	private PRFStatistics prf;
 	private SOUDStatistics soud;
 	private List<MutantTestProcessingListener<MutationStatisticsCollecter>> mtpl = new ArrayList<>();
@@ -25,17 +24,30 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	private boolean lastUnbounded;
 	private boolean lastIsolated;
 
-	public MutationStatisticsCollecter() {
-		clear();
+	private boolean includeBadCases;
+
+	/**
+	 * Exclude by default bad cases
+	 * {@link MutationStatisticsCollecter#MutationStatisticsCollecter(boolean)}
+	 */
+	public MutationStatisticsCollecter(){
+		this(false);
+	}
+	
+	/**
+	 * @param includeBadCases set to true to include unbounded and isolated into computations, false otherwise
+	 */
+	public MutationStatisticsCollecter(boolean includeBadCases) {
+		clear(includeBadCases);
 	}
 
-	public MutationStatisticsCollecter(MutantTestProcessingListener<MutationStatisticsCollecter> mtpl) {
-		this();
+	public MutationStatisticsCollecter(boolean includeBadCases, MutantTestProcessingListener<MutationStatisticsCollecter> mtpl) {
+		this(includeBadCases);
 		addListener(mtpl);
 	}
 
-	public MutationStatisticsCollecter(List<MutantTestProcessingListener<MutationStatisticsCollecter>> mtpl) {
-		this();
+	public MutationStatisticsCollecter(boolean includeBadCases, List<MutantTestProcessingListener<MutationStatisticsCollecter>> mtpl) {
+		this(includeBadCases);
 		this.mtpl.addAll(mtpl);
 	}
 
@@ -93,6 +105,10 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		soud.addIsolated(id);
 		lastUnbounded = false;
 		lastIsolated = true;
+		
+		if(includeBadCases){
+			prf.cumulate(null, null);
+		}
 	}
 
 	@Override
@@ -102,6 +118,10 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		soud.addUnbounded(in);
 		lastUnbounded = true;
 		lastIsolated = false;
+
+		if(includeBadCases){
+			prf.cumulate(null, null);
+		}
 	}
 
 
@@ -152,11 +172,12 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		return times.get(times.size() - 1);
 	}
 
-	public void clear(){
+	public void clear(boolean includeBadCases){
 		prf = new PRFStatistics();
-		soud = new SOUDStatistics();
+		soud = new SOUDStatistics(includeBadCases);
 		mtpl = new ArrayList<>();
 
+		this.includeBadCases = includeBadCases;
 		lastIn = null;
 		lastGraphDetermined = null;
 		times = new ArrayList<Double>();

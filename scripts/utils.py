@@ -36,6 +36,9 @@ def parseGlobalCsvFiles(files, sep = ";", type = "avg"):
         f = open(fpath, "r")
 
         for line in f:
+            if line[0] == "#":
+                continue;
+
             line_parts = line.replace("\n","").split(sep)
 
             if type in line_parts[2]:

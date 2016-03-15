@@ -34,6 +34,8 @@ public class JavapdgPropagationExplorerForTests extends ConsequencesExplorer {
 		// GETTING METHODS ENTRIES FROM DATABASE
 		dbentries = getMethodsFromDerby(dbpath);
 		bugs = new HashMap<String, Long>();
+		
+		this.tests = tests;
 
 		//BUILDING NUMERICAL GRAPH FROM DATABASE
 		populateWithNumericalCallGraphFromDerby(dbpath);
@@ -234,4 +236,7 @@ public class JavapdgPropagationExplorerForTests extends ConsequencesExplorer {
 		return conn;
 	}
 
+	public Map<Long, JavaPDGTriplet> getDbentries() {
+		return dbentries;
+	}
 }

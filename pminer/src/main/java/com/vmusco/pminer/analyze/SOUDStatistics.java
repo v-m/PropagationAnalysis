@@ -28,13 +28,26 @@ public class SOUDStatistics {
 	private List<String> isolated = new ArrayList<String>();
 
 	private int cases = 0;
+	private boolean includeBadCases;
+
+	public SOUDStatistics(boolean includeBadCases) {
+		this.includeBadCases = includeBadCases;
+	}
 
 	public void addUnbounded(String mutationid){
 		unbounded.add(mutationid);
+		
+		if(includeBadCases){
+			cases++;
+		}
 	}
 
 	public void addIsolated(String mutationid){
 		isolated.add(mutationid);
+		
+		if(includeBadCases){
+			cases++;
+		}
 	}
 
 	public void cumulate(String mutationid, String[] ais, String[] cis){
@@ -63,7 +76,6 @@ public class SOUDStatistics {
 			underestimate.add(mutationid);
 		else
 			different.add(mutationid);
-
 		cases++;
 	}
 

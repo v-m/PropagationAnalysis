@@ -33,6 +33,10 @@ public class JavaPDGTriplet {
 	public String getPackageName(){
 		return packg.substring(0, packg.lastIndexOf("/")).replaceAll("/", "\\.");
 	}
+	
+	public String getSignature() {
+		return signature;
+	}
 
 	public String[] getParameters(){
 		String ss = signature.substring(1, signature.lastIndexOf(')'));

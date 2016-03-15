@@ -106,18 +106,18 @@ public class ImpactMutationGraphKFold {
 		}
 
 		MutationGraphKFold tenfold = MutationGraphKFold.instantiateKFold(ms, g, k, nbmut, il, t);
-		final MutationStatisticsCollecter msc = new MutationStatisticsCollecter(){
+		final MutationStatisticsCollecter msc = new MutationStatisticsCollecter(true){
 			@Override
 			public void executionEnded() {
 				PRFStatistics precisionRecallFscore = getPrecisionRecallFscore();
 				System.out.println("P = "+precisionRecallFscore.getCurrentMeanPrecision()+
 						" / R = "+precisionRecallFscore.getCurrentMeanRecall()+
 						" / F = "+precisionRecallFscore.getCurrentMeanFscore());
-				clear();
+				clear(true);
 			}
 		};
 		
-		final MutationStatisticsCollecter mscall = new MutationStatisticsCollecter();
+		final MutationStatisticsCollecter mscall = new MutationStatisticsCollecter(true);
 		
 		msc.addListener(new MutantTestProcessingAdapter());
 		mscall.addListener(new MutantTestProcessingAdapter());

@@ -38,7 +38,7 @@ import com.vmusco.softminer.graphs.NodeTypes;
 public class GraphML implements GraphPersistence{
 	private static final Logger logger = LogManager.getFormatterLogger(GraphML.class.getSimpleName());
 	
-	private static final Namespace xmlns = Namespace.getNamespace("http://graphml.graphdrawing.org/xmlns");
+	public static final Namespace xmlns = Namespace.getNamespace("http://graphml.graphdrawing.org/xmlns");
 	private Graph target;
 	
 	public GraphML(Graph aGraph){
@@ -230,6 +230,87 @@ public class GraphML implements GraphPersistence{
 		return g;
 	}
 
+	public static void populateFromGraphMl(Element root, Graph g){
+		int nbnodes = 0;
+		int nbedges = 0;
+		
+		Element graph = root.getChild("graph", xmlns);
+		
+		Attribute attribute = graph.getAttribute("buildtime");
+		if(attribute != null)
+			g.setBuildTime(Long.valueOf(attribute.getValue()));
+		
+		for(Element e : graph.getChildren("node", xmlns)){
+			nbnodes++;
+			String nodename = e.getAttribute("id").getValue();
+			g.addNode(nodename);
+			
+			for(Element ee : e.getChildren("data", xmlns)){
+				String tmp = ee.getAttribute("key").getValue();
+				if(tmp.equals("type")){
+					// This is the node type declaration
+					String type = ee.getValue();
+					g.setNodeType(nodename, NodeTypes.valueOf(type));
+				}else if(tmp.equals("marker")){
+					// This is a node marker
+					String isEnabled = ee.getText().toLowerCase();
+					if(!isEnabled.equals("true"))
+						continue;
+					String marker = tmp; 
+					g.markNode(nodename, NodeMarkers.valueOf(marker));
+				}else if(tmp.equals("sourcecode")){
+					SourceReference[] sc = generateSourceCodeFromElement(ee);
+					
+					for(SourceReference sr : sc){
+						g.bindNodeToSourcePosition(nodename, sr);
+					}
+				}else if(tmp.equals("formaltype")){
+					List<String> ft = new ArrayList<>();
+					
+					StringTokenizer st = new StringTokenizer(ee.getValue(), ",");
+					while(st.hasMoreElements()){
+						ft.add(st.nextToken());
+					}
+					
+					if(ft.size()>0){
+						g.setNodeFormalTypes(nodename, ft);
+					}
+				}
+			}
+		}
+		
+		for(Element e : graph.getChildren("edge", xmlns)){
+			nbedges++;
+			String source = e.getAttribute("source").getValue();
+			String target = e.getAttribute("target").getValue();
+
+			g.addDirectedEdge(source, target);
+			
+			for(Element ee : e.getChildren("data", xmlns)){
+				String tmp = ee.getAttribute("key").getValue();
+				if(tmp.equals("type")){
+					// This is the edge type declaration
+					String type = ee.getValue();
+					g.setEdgeType(source, target, EdgeTypes.valueOf(type));
+				}else if(tmp.equals("marker")){
+					// This is an edge marker
+					String isEnabled = ee.getText().toLowerCase();
+					if(!isEnabled.equals("true"))
+						continue;
+					String marker = tmp; 
+					g.markEdge(source, target, EdgeMarkers.valueOf(marker));
+				}else if(tmp.equals("sourcecode")){
+					SourceReference[] sc = generateSourceCodeFromElement(ee);
+					
+					for(SourceReference sr : sc){
+						g.bindEdgeToSourcePosition(source, target, sr);
+					}
+				}
+			}
+		}
+		
+		logger.info("Read %d nodes and %d edges", nbnodes, nbedges);
+	}
 
 
 	@Override
@@ -319,8 +400,7 @@ public class GraphML implements GraphPersistence{
 
 	@Override
 	public void load(InputStream is) throws IOException {
-		int nbnodes = 0;
-		int nbedges = 0;
+		
 		
 		SAXBuilder sxb = new SAXBuilder();
 		Document document;
@@ -332,83 +412,7 @@ public class GraphML implements GraphPersistence{
 		}
 
 		Element root = document.getRootElement();
-		Element graph = root.getChild("graph", xmlns);
-		Graph g = this.target;
-		
-		Attribute attribute = graph.getAttribute("buildtime");
-		if(attribute != null)
-			g.setBuildTime(Long.valueOf(attribute.getValue()));
-		
-		for(Element e : graph.getChildren("node", xmlns)){
-			nbnodes++;
-			String nodename = e.getAttribute("id").getValue();
-			g.addNode(nodename);
-			
-			for(Element ee : e.getChildren("data", xmlns)){
-				String tmp = ee.getAttribute("key").getValue();
-				if(tmp.equals("type")){
-					// This is the node type declaration
-					String type = ee.getValue();
-					g.setNodeType(nodename, NodeTypes.valueOf(type));
-				}else if(tmp.equals("marker")){
-					// This is a node marker
-					String isEnabled = ee.getText().toLowerCase();
-					if(!isEnabled.equals("true"))
-						continue;
-					String marker = tmp; 
-					g.markNode(nodename, NodeMarkers.valueOf(marker));
-				}else if(tmp.equals("sourcecode")){
-					SourceReference[] sc = generateSourceCodeFromElement(ee);
-					
-					for(SourceReference sr : sc){
-						g.bindNodeToSourcePosition(nodename, sr);
-					}
-				}else if(tmp.equals("formaltype")){
-					List<String> ft = new ArrayList<>();
-					
-					StringTokenizer st = new StringTokenizer(ee.getValue(), ",");
-					while(st.hasMoreElements()){
-						ft.add(st.nextToken());
-					}
-					
-					if(ft.size()>0){
-						g.setNodeFormalTypes(nodename, ft);
-					}
-				}
-			}
-		}
-		
-		for(Element e : graph.getChildren("edge", xmlns)){
-			nbedges++;
-			String source = e.getAttribute("source").getValue();
-			String target = e.getAttribute("target").getValue();
-
-			g.addDirectedEdge(source, target);
-			
-			for(Element ee : e.getChildren("data", xmlns)){
-				String tmp = ee.getAttribute("key").getValue();
-				if(tmp.equals("type")){
-					// This is the edge type declaration
-					String type = ee.getValue();
-					g.setEdgeType(source, target, EdgeTypes.valueOf(type));
-				}else if(tmp.equals("marker")){
-					// This is an edge marker
-					String isEnabled = ee.getText().toLowerCase();
-					if(!isEnabled.equals("true"))
-						continue;
-					String marker = tmp; 
-					g.markEdge(source, target, EdgeMarkers.valueOf(marker));
-				}else if(tmp.equals("sourcecode")){
-					SourceReference[] sc = generateSourceCodeFromElement(ee);
-					
-					for(SourceReference sr : sc){
-						g.bindEdgeToSourcePosition(source, target, sr);
-					}
-				}
-			}
-		}
-		
-		logger.info("Read %d nodes and %d edges", nbnodes, nbedges);
+		populateFromGraphMl(root, this.target);
 	}
 
 }

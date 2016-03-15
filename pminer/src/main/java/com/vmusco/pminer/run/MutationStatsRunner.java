@@ -195,7 +195,7 @@ public class MutationStatsRunner{
 		String[] ret = new String[2];
 		//int nbunbounded = 0;
 
-		MutationStatisticsCollecter sd = new MutationStatisticsCollecter(listener);
+		MutationStatisticsCollecter sd = new MutationStatisticsCollecter(true, listener);
 		
 		int nbentry = (nb > 0 && allMutations.length>nb)?nb:allMutations.length;
 		int cpt = 0;
@@ -230,7 +230,6 @@ public class MutationStatsRunner{
 				cpt++;
 			}catch(SpecialEntryPointException e){
 				// No entry point here !
-				//nbunbounded++;
 
 				if(excludeUnbounded){
 					continue;
