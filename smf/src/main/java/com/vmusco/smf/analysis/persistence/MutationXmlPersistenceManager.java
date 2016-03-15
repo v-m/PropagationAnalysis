@@ -76,7 +76,8 @@ public class MutationXmlPersistenceManager extends XMLPersistenceManager<Mutatio
 			
 			String name = root.getAttributeValue(MUTATION_NAME);
 
-			ProcessStatistics ps = ProcessStatistics.loadState((new File(f.getParentFile(), targetPs)).getAbsolutePath());
+			String abspath = (new File(f.getParentFile(), targetPs)).getAbsolutePath();
+			ProcessStatistics ps = ProcessStatistics.loadState(abspath);
 			
 			MutationOperator mutator = MutatorsFactory.getOperatorClassFromId(mutid);
 			ms = new MutationStatistics(ps, mutator, name);

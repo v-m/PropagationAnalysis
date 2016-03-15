@@ -102,12 +102,13 @@ public class AllMutationsStatsRunner{
 		for(String aFile : files){
 			File f = new File(aFile);
 			File fp = new File(f, smfrun);
-			ProcessStatistics ps = ProcessStatistics.loadState(fp.getAbsolutePath());
-			String[] tests = ps.getTestCases();
 			
 			Map<String, ConsequencesExplorer> explorers = null;
 
 			if(fp.exists()){
+				ProcessStatistics ps = ProcessStatistics.loadState(fp.getAbsolutePath());
+				String[] tests = ps.getTestCases();
+				
 				// This is a project
 				if(cmd.hasOption("javapdg")){
 					explorers = getExplorers(fp, graphs[0], tests);
@@ -119,7 +120,11 @@ public class AllMutationsStatsRunner{
 			}else{
 				for(File ff : f.listFiles()){
 					fp = new File(ff, smfrun);
+					
 					if(ff.isDirectory() && fp.exists()){
+						ProcessStatistics ps = ProcessStatistics.loadState(fp.getAbsolutePath());
+						String[] tests = ps.getTestCases();
+						
 						// This is a project
 						if(cmd.hasOption("javapdg")){
 							explorers = getExplorers(fp, graphs[0], tests);

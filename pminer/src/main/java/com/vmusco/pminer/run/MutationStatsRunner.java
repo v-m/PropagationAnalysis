@@ -164,9 +164,9 @@ public class MutationStatsRunner{
 	protected static String getDataHeader(Character sep){
 		printLine(sep);
 		if(sep == null){
-			return String.format("           Mutant id    Op  #mut #aliv #unbo  #iso #node #edge     CIS     AIS   C^AIS    FPIS     DIS    prec  recall  fscore       S       C       O       U       D");
+			return String.format("           Mutant id    Op  #mut #aliv #unbo  #iso #node #edge     CIS     AIS   C^AIS    FPIS     DIS    prec  recall  fscore       S       C       O       U       D      time");
 		}else{
-			return String.format("\"MutId\"%c\"Op\"%c\"nbmut\"%c\"nbalives\"%c\"nunbound\"%c\"nisolated\"%c\"nbnodes\"%c\"nbedges\"%c\"CIS\"%c\"AIS\"%c\"CAIS\"%c\"FPIS\"%c\"DIS\"%c\"prec\"%c\"recall\"%c\"fscore\"%c\"S\"%c\"C\"%c\"O\"%c\"U\"%c\"D\"", sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep);
+			return String.format("\"MutId\"%c\"Op\"%c\"nbmut\"%c\"nbalives\"%c\"nunbound\"%c\"nisolated\"%c\"nbnodes\"%c\"nbedges\"%c\"CIS\"%c\"AIS\"%c\"CAIS\"%c\"FPIS\"%c\"DIS\"%c\"prec\"%c\"recall\"%c\"fscore\"%c\"S\"%c\"C\"%c\"O\"%c\"U\"%c\"D\"%c\"time\"", sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep, sep,sep);
 		}
 	}
 
@@ -200,7 +200,7 @@ public class MutationStatsRunner{
 		int nbentry = (nb > 0 && allMutations.length>nb)?nb:allMutations.length;
 		int cpt = 0;
 		int nbalives = 0;
-		
+
 		for(String mutation : allMutations){											// For each mutant...				
 			boolean forceStop = false;
 			
@@ -220,10 +220,13 @@ public class MutationStatsRunner{
 				continue;
 
 			try{
+				long time = System.currentTimeMillis();
 				pgp.visit(ms, ifos);
+				time = System.currentTimeMillis()-time;
 				String[] ais = ms.getCoherentMutantFailAndHangTestCases(ifos.getExecutedTestsResults());
 				String[] cis = pgp.getLastConsequenceNodes();
 				sd.intersectionFound(ifos.getId(), ifos.getMutationIn(), ais, cis);
+				sd.declareNewTime(time);
 				cpt++;
 			}catch(SpecialEntryPointException e){
 				// No entry point here !
@@ -260,9 +263,10 @@ public class MutationStatsRunner{
 		if(excludeNulls){
 			sd.getPrecisionRecallFscore().removesNulls();
 		}
+		
 
 		if(sep == null){
-			ret[0] = String.format("%5s %5d %5d %5d %5d %5d %5d %7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
+			ret[0] = String.format("%5s %5d %5d %5d %5d %5d %5d %7d %7d %7d %7d %7d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
 					ms.getMutationOperator().operatorId(),
 					cpt,
 					nbalives,
@@ -282,9 +286,10 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbSameProportion() + sd.getSoud().getNbOverestimatedProportion(),
 					sd.getSoud().getNbOverestimatedProportion(),
 					sd.getSoud().getNbUnderestimatedProportion(),
-					sd.getSoud().getNbDifferentProportion());
+					sd.getSoud().getNbDifferentProportion(),
+					sd.getMedianTimes());
 
-			ret[1] = String.format("%5s %5d %5d %5d %5d %5d %5d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
+			ret[1] = String.format("%5s %5d %5d %5d %5d %5d %5d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
 					ms.getMutationOperator().operatorId(),
 					cpt,
 					nbalives,
@@ -304,9 +309,10 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbSameProportion() + sd.getSoud().getNbOverestimatedProportion(),
 					sd.getSoud().getNbOverestimatedProportion(),
 					sd.getSoud().getNbUnderestimatedProportion(),
-					sd.getSoud().getNbDifferentProportion());
+					sd.getSoud().getNbDifferentProportion(),
+					sd.getMeanTimes());
 		}else{
-			ret[0] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
+			ret[0] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
 					ms.getMutationOperator().operatorId(),sep,
 					cpt,sep,
 					nbalives,sep,
@@ -326,9 +332,10 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbSameProportion() + sd.getSoud().getNbOverestimatedProportion(),sep,
 					sd.getSoud().getNbOverestimatedProportion(),sep,
 					sd.getSoud().getNbUnderestimatedProportion(),sep,
-					sd.getSoud().getNbDifferentProportion());
+					sd.getSoud().getNbDifferentProportion(), sep,
+					sd.getMedianTimes());
 
-			ret[1] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
+			ret[1] = String.format("\"%s\"%c%d%c%d%c%d%c%d%c%d%c%d%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f%c%f\n",
 					ms.getMutationOperator().operatorId(),sep,
 					cpt,sep,
 					nbalives,sep,
@@ -348,7 +355,8 @@ public class MutationStatsRunner{
 					sd.getSoud().getNbSameProportion() + sd.getSoud().getNbOverestimatedProportion(),sep,
 					sd.getSoud().getNbOverestimatedProportion(),sep,
 					sd.getSoud().getNbUnderestimatedProportion(),sep,
-					sd.getSoud().getNbDifferentProportion());
+					sd.getSoud().getNbDifferentProportion(), sep,
+					sd.getMeanTimes());
 		}
 
 		return ret;

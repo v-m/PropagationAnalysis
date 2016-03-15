@@ -6,8 +6,8 @@ function help {
     echo "Availible commands are:"
     echo "   faultlocste      Fault localizatino on Steimann mutant dataset"
     echo "   displayvisu      Show a visualization of the propagation"
-    echo "   globalperf       Compute performances for CIA"
-    echo "   mutopperf        Compute performances for CIA"
+    echo "   globalperf       Compute performances for CIA - for all mutations performed"
+    echo "   mutopperf        Compute performances for CIA - display the detail for each mutant in a mutation campain"
     exit
 }
 

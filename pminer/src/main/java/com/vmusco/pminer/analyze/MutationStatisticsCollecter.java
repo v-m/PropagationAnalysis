@@ -15,7 +15,7 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 
 	private PRFStatistics prf;
 	private SOUDStatistics soud;
-	private List<MutantTestProcessingListener<MutationStatisticsCollecter>> mtpl;
+	private List<MutantTestProcessingListener<MutationStatisticsCollecter>> mtpl = new ArrayList<>();
 
 	// Last values retainer
 	private String lastIn;
@@ -24,27 +24,29 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	private List<Double> times;
 	private boolean lastUnbounded;
 	private boolean lastIsolated;
-	
+
 	public MutationStatisticsCollecter() {
 		clear();
 	}
-	
+
 	public MutationStatisticsCollecter(MutantTestProcessingListener<MutationStatisticsCollecter> mtpl) {
 		this();
 		addListener(mtpl);
 	}
-	
+
 	public MutationStatisticsCollecter(List<MutantTestProcessingListener<MutationStatisticsCollecter>> mtpl) {
 		this();
 		this.mtpl.addAll(mtpl);
 	}
-	
+
 	public Iterator<MutantTestProcessingListener<MutationStatisticsCollecter>> listenerIterator(){
 		return mtpl.iterator();
 	}
-	
+
 	public void addListener(MutantTestProcessingListener<MutationStatisticsCollecter> mtpl){
-		this.mtpl.add(mtpl);
+		if(mtpl != null){
+			this.mtpl.add(mtpl);
+		}
 	}
 
 
@@ -56,7 +58,7 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	public void declareNewTime(long propatime){
 		times.add(propatime * 1d);
 	}
-	
+
 	/**
 	 * To declare an unbounded case, use {@link MutationStatisticsCollecter#unboundedFound(MutantIfos)}
 	 * To declare an isolated case, use {@link MutationStatisticsCollecter#isolatedFound(MutantIfos)}
@@ -72,18 +74,18 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		lastGraphDetermined = cis;
 		lastUnbounded = false;
 		lastIsolated  = false;
-		
+
 		soud.cumulate(id, ais, cis);
 		prf.cumulate(ais, cis);
 
 		Iterator<MutantTestProcessingListener<MutationStatisticsCollecter>> listenerIterator = listenerIterator();
-		
+
 		while(listenerIterator.hasNext()){
 			MutantTestProcessingListener<MutationStatisticsCollecter> mtpl = listenerIterator.next();
 			mtpl.aMutantHasBeenProceeded(this);
 		}
 	}
-	
+
 	@Override
 	public void isolatedFound(String id, String in) {
 		lastIn = in;
@@ -92,7 +94,7 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		lastUnbounded = false;
 		lastIsolated = true;
 	}
-	
+
 	@Override
 	public void unboundedFound(String id, String in) {
 		lastIn = id;
@@ -101,8 +103,8 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		lastUnbounded = true;
 		lastIsolated = false;
 	}
-	
-	
+
+
 
 	@Override
 	public void executionEnded() {
@@ -116,7 +118,7 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	public SOUDStatistics getSoud() {
 		return soud;
 	}
-	
+
 
 	public String[] getLastGraphDetermined() {
 		return lastGraphDetermined;
@@ -133,7 +135,7 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	public boolean isLastUnbounded(){
 		return lastUnbounded;
 	}
-	
+
 	public boolean isLastIsolated() {
 		return lastIsolated;
 	}
@@ -145,11 +147,11 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	public double getMeanTimes(){
 		return Tools.average(Tools.toDoubleArray(times));
 	}
-	
+
 	public double getLastTime(){
 		return times.get(times.size() - 1);
 	}
-	
+
 	public void clear(){
 		prf = new PRFStatistics();
 		soud = new SOUDStatistics();
