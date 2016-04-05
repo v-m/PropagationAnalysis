@@ -48,6 +48,10 @@ public class LateImpactMutationGraphKFold {
 
 		LateImpactLearner il = null;
 
+		if(cmd.hasOption("list-update-algorithms")){
+			algoHelp();
+		}
+		
 		if(cmd.getArgList().size() < 3 || cmd.hasOption('h')){
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp(LateImpactMutationGraphKFold.class.getCanonicalName()+" [GRAPH_FILE] [MUTATION_FILE] [UPDATE_ALGO]", options);
@@ -74,17 +78,8 @@ public class LateImpactMutationGraphKFold {
 			il = new DichoLateImpactLearning(k, kspnr);
 		}
 
-		if(il == null || cmd.hasOption("list-update-algorithms")){
-			ConsoleTools.write("Available algorithms: \n", ConsoleTools.BOLD);
-			ConsoleTools.write("\tno", ConsoleTools.BOLD);
-			ConsoleTools.write(": Use no algorithm (weight remains unchanged) [default init weight = 1]\n");
-			ConsoleTools.write("\tdicho", ConsoleTools.BOLD);
-			ConsoleTools.write(": Use the Dichotomic Algorithm (add the empirical probability to the weight) [default init weight = 0]\n");
-			ConsoleTools.write("\tbinary", ConsoleTools.BOLD);
-			ConsoleTools.write(": Use the Binary Algorithm (set to 1 all impacted weights at least once)\n [default init weight = 0]");
-
-			ConsoleTools.endLine();
-			System.exit(0);
+		if(il == null){
+			algoHelp();
 		}
 		
 
@@ -132,8 +127,10 @@ public class LateImpactMutationGraphKFold {
 		msc.addListener(new MutantTestProcessingAdapter());
 		mscall.addListener(new MutantTestProcessingAdapter());
 		tenfold.addTestListener(msc);
+		tenfold.addTestListener(mscall);
 
 		tenfold.kfold(threshold);
+		
 		
 		// All folds results
 		PRFStatistics precisionRecallFscore = mscall.getPrecisionRecallFscore();
@@ -144,6 +141,19 @@ public class LateImpactMutationGraphKFold {
 		System.out.println("[[[ P = "+precisionRecallFscore.getCurrentMeanPrecision()+
 				" / R = "+precisionRecallFscore.getCurrentMeanRecall()+
 				" / F = "+precisionRecallFscore.getCurrentMeanFscore()+" ]]]");
+	}
+
+	private static void algoHelp() {
+		ConsoleTools.write("Available algorithms: \n", ConsoleTools.BOLD);
+		ConsoleTools.write("\tno", ConsoleTools.BOLD);
+		ConsoleTools.write(": Use no algorithm (weight remains unchanged) [default init weight = 1]\n");
+		ConsoleTools.write("\tdicho", ConsoleTools.BOLD);
+		ConsoleTools.write(": Use the Dichotomic Algorithm (add the empirical probability to the weight) [default init weight = 0]\n");
+		ConsoleTools.write("\tbinary", ConsoleTools.BOLD);
+		ConsoleTools.write(": Use the Binary Algorithm (set to 1 all impacted weights at least once)\n [default init weight = 0]");
+
+		ConsoleTools.endLine();
+		System.exit(0);
 	}
 
 }

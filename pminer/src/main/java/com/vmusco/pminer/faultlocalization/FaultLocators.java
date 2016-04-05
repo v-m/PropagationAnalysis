@@ -1,14 +1,8 @@
 package com.vmusco.pminer.faultlocalization;
 
-import java.io.ByteArrayOutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
-
-import sun.security.provider.MD5;
 
 /**
  * This class defines factory methods for getting FL techniques to use

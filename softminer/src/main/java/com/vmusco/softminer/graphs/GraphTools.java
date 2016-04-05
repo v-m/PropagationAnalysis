@@ -1,5 +1,7 @@
 package com.vmusco.softminer.graphs;
 
+import com.vmusco.smf.utils.SignatureTools;
+
 public final class GraphTools {
 	private GraphTools() {
 	}
@@ -67,5 +69,37 @@ public final class GraphTools {
 				prev = link;
 			}
 		}
+	}
+	
+	public static Graph exportClassDependencyGraph(Graph callgraph){
+		Graph ng = new GraphStream();
+		
+		for(EdgeIdentity ei : callgraph.getEdges()){
+			String from = SignatureTools.getClassOf(ei.getFrom());
+			String to = SignatureTools.getClassOf(ei.getTo());
+
+			if(from.equals(to))
+				continue;
+
+			ng.addDirectedEdgeAndNodeIfNeeded(from, to);
+		}
+		
+		return ng;
+	}
+	
+	public static Graph exportPackageDependencyGraph(Graph callgraph){
+		Graph ng = new GraphStream();
+		
+		for(EdgeIdentity ei : callgraph.getEdges()){
+			String from = SignatureTools.getPackageOf(ei.getFrom());
+			String to = SignatureTools.getPackageOf(ei.getTo());
+
+			if(from.equals(to))
+				continue;
+
+			ng.addDirectedEdgeAndNodeIfNeeded(from, to);
+		}
+		
+		return ng;
 	}
 }

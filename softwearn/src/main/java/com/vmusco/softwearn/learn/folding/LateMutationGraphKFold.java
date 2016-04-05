@@ -167,36 +167,19 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 	}
 	
 	public void kfold(final float testing_threshold) throws Exception{
-		for(int i=0; i<partitionDataset.size(); i++){
-			fold(i, testing_threshold);
-		}
-	}
-	
-	public void fold(int iteration, final float threshold) throws MutationNotRunException{
-		logger.info("Training with %d subset", iteration);
 		LearningKGraph lg = (LearningKGraph)g;
+		lg.switchToLearningPhase();
 		
-		lg.resetLearnedInformations();
-		
-		// Training
-		learn(iteration);
-
-		lg.setThreshold(threshold);
-		
-		// Testing
-		test(iteration);
-	}
-	
-	public void learn(int iteration) throws MutationNotRunException{
-		logger.debug("Fold %d", iteration);
-		
-		for(int i=0; i<this.k; i++){
-			if(i == iteration){
-				continue;
-			}
-			
-			logger.debug("Training with subset %d", i);
+		for(int i=0; i<partitionDataset.size(); i++){
 			learn(partitionDataset.get(i), i);
+		}
+		
+		learner.learningRoundFinished(lg);
+		
+		lg.setThreshold(testing_threshold);
+		
+		for(int i=0; i<partitionDataset.size(); i++){
+			test(i);
 		}
 	}
 	
@@ -253,8 +236,8 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 				e.printStackTrace();
 				System.exit(1);
 			} catch (SpecialEntryPointException e) {
-				logger.debug("A special entry point is thrown...");
-				e.printStackTrace();
+				logger.debug("A special entry point is thrown ("+(e.getType().name())+")...");
+				//e.printStackTrace();
 			}
 		}
 		
