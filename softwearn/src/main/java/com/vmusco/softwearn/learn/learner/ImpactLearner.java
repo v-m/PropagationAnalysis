@@ -2,6 +2,11 @@ package com.vmusco.softwearn.learn.learner;
 
 import com.vmusco.softwearn.learn.LearningGraph;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
+@Deprecated
 public abstract class ImpactLearner implements Learner{
 	public abstract void learn(LearningGraph g, String changePoint, String impactedTest);
 

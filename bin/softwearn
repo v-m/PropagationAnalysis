@@ -4,7 +4,8 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 function help {
     echo "Availible commands are:"
-    echo "   faultloc   ..."
+    echo "   faultloc   Perform Fault Localization"
+    echo "   cia   Perform Change Impact Analysis in k-fold for mutations obtained with smf"
     exit
 }
 
@@ -20,6 +21,9 @@ case "$1" in
 
 faultloc)
     package="com.vmusco.softwearn.run.LearningFaultLocalization"
+    ;;
+cia)
+    package="com.vmusco.softwearn.run.LateImpactMutationGraphKFold"
     ;;
 *)
     echo "Unknown command $1"

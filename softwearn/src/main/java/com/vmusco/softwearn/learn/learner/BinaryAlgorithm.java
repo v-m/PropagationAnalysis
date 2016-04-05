@@ -5,18 +5,17 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.vmusco.smf.analysis.MutantIfos;
-import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.softminer.graphs.EdgeIdentity;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softwearn.learn.LearningGraph;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
+@Deprecated
 public class BinaryAlgorithm extends ImpactLearner{
 	private static final Logger logger = LogManager.getFormatterLogger(BinaryAlgorithm.class.getSimpleName());
-
-	@Override
-	public void postPreparedSet(MutationStatistics ms, MutantIfos[] mutants) {
-	}
 
 	@Override
 	public float defaultInitWeight() {
@@ -36,5 +35,9 @@ public class BinaryAlgorithm extends ImpactLearner{
 		}else{
 			logger.trace("No path between "+impactedTest+" and "+changePoint);
 		}
+	}
+
+	@Override
+	public void postDeclareAnImpact(String change, String[] tests) {
 	}
 }

@@ -24,6 +24,7 @@ public abstract class LateImpactLearner implements Learner {
 	protected static final Logger logger = LogManager.getFormatterLogger(LateImpactLearner.class.getSimpleName());
 
 	private int maxk;
+	private int kspnr;
 	
 	// Statistics structures and methods
 	// Used to gather statistics about the learning
@@ -59,7 +60,16 @@ public abstract class LateImpactLearner implements Learner {
 	protected Map<String, Map<Integer, Integer>> lateLearner;
 
 	public LateImpactLearner(int maxk) {
+		this(maxk, 10);
+	}
+	
+	/**
+	 * @param maxk the number of k-fold to consider
+	 * @param kspnr the number of shortest path to compute
+	 */
+	public LateImpactLearner(int maxk, int kspnr) {
 		this.maxk = maxk;
+		this.kspnr = kspnr;
 		this.lateLearner = new HashMap<String, Map<Integer,Integer>>();
 	}
 
@@ -91,11 +101,11 @@ public abstract class LateImpactLearner implements Learner {
 		}
 	}
 
-	public abstract void updatePath(LearningKGraph g, EdgeIdentity edge);
+	public abstract void updatePath(LearningKGraph g, EdgeIdentity edge, String test, String point);
 
-	public void updatePath(LearningKGraph g, EdgeIdentity edge, int k) {
+	public void updatePath(LearningKGraph g, EdgeIdentity edge, int k, String test, String point) {
 		g.setK(k);
-		updatePath(g, edge);
+		updatePath(g, edge, test, point);
 	}
 
 	@Override
@@ -115,10 +125,15 @@ public abstract class LateImpactLearner implements Learner {
 				logger.trace("Treating %s -> %s", point, test);
 
 				if(g.graph().isThereAtLeastOnePath(test, point)){
-					//List<String[]> paths = getPaths(g, test, point);
 					//List<String[]> paths = ShortestPath.kShortestPathsYens(g.graph(), test, point, 10);
 					
-					List<String[]> paths = esp.yen(test, point, 10);
+					List<String[]> paths = null;
+					
+					if(kspnr <= 0){
+						paths = g.graph().getPaths(test, point);
+					}else{
+						paths = esp.yen(test, point, kspnr);
+					}
 
 					for(String[] path : paths){
 						EdgeIdentity[] allEdgesInPath = Graph.getAllEdgesInPath(path);
@@ -139,7 +154,7 @@ public abstract class LateImpactLearner implements Learner {
 
 								for(int i=0; i<nbtime; i++){
 									logger.trace("+1 path for %d !", onek);
-									updatePath(lg, edge, onek);
+									updatePath(lg, edge, onek, test, point);
 								}
 							}
 						}
@@ -154,15 +169,6 @@ public abstract class LateImpactLearner implements Learner {
 			logger.error("Graph should be a LearningKGraph instance !");
 		}
 	}
-
-	public List<String[]> getPaths(final LearningGraph g, String test, String point) {
-		return g.graph().getPaths(test, point);
-	}
-	
-	
-	
-	
-	
 
 	private static void lateLearnExceptFor(Map<Integer, Integer> str, int k) {
 		for(int i=0; i<str.size(); i++){

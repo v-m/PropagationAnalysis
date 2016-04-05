@@ -1,14 +1,17 @@
 package com.vmusco.softwearn.learn.learner;
 
-import com.vmusco.smf.analysis.MutantIfos;
-import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.softwearn.learn.LearningGraph;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
+@Deprecated
 public class NoAlgorithm extends ImpactLearner{
 	
-	@Override
+	/*@Override
 	public void postPreparedSet(MutationStatistics ms, MutantIfos[] mutants) {
-	}
+	}*/
 
 	@Override
 	public float defaultInitWeight() {
@@ -18,6 +21,10 @@ public class NoAlgorithm extends ImpactLearner{
 	@Override
 	public void learn(LearningGraph g, String changePoint, String impactedTest) {
 		
+	}
+
+	@Override
+	public void postDeclareAnImpact(String change, String[] tests) {
 	}
 
 }

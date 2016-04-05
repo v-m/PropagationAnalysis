@@ -24,6 +24,7 @@ import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.softminer.graphs.Graph;
 import com.vmusco.softminer.graphs.Graph.GraphApi;
+import com.vmusco.softminer.graphs.GraphTools;
 import com.vmusco.softminer.graphs.persistence.GraphML;
 
 /**
@@ -32,6 +33,7 @@ import com.vmusco.softminer.graphs.persistence.GraphML;
  */
 public class MutationStatsRunner{
 	private static final Class<?> thisclass = MutationStatsRunner.class;
+	public static final boolean CLASSLEVEL = true;
 
 	private MutationStatsRunner() {
 	}
@@ -157,7 +159,13 @@ public class MutationStatsRunner{
 	public static Graph loadGraph(String graphPath) throws FileNotFoundException, IOException {
 		Graph aGraph = Graph.getNewGraph(GraphApi.GRAPH_STREAM);
 		GraphML gml = new GraphML(aGraph);
-		gml.load(new FileInputStream(graphPath));
+		FileInputStream is = new FileInputStream(graphPath);
+		gml.load(is);
+		is.close();
+		
+		if(CLASSLEVEL)
+			aGraph = GraphTools.exportClassDependencyGraph(aGraph);
+		
 		return aGraph;
 	}
 

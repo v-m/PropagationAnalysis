@@ -49,7 +49,7 @@ public class LearningFaultLocalization extends FaultLocalizationSteimann{
 		options.addOption(opt);
 		opt = new Option("a", "algorithm", true, "Select a learning algorithm (default: binary) -- currently the only choice.");
 		options.addOption(opt);
-		opt = new Option("K", "ksp", true, "Enter the number of shortest path used for learning (default: 10)");
+		opt = new Option("K", "ksp", true, "The number of shortest paths to compute. Use 0 to consider all paths --  can be quite slow. (default: 10)");
 		options.addOption(opt);
 		opt = new Option("persistcg", true, "Set a folder where persist generated causal graphs");
 		options.addOption(opt);
@@ -96,11 +96,16 @@ public class LearningFaultLocalization extends FaultLocalizationSteimann{
 			lfl.K_FOLD = Integer.parseInt(cmd.getOptionValue("kfold")); 
 		}
 		
+		int kspnr = 10;
+		if(cmd.hasOption("ksp")){
+			kspnr = Integer.parseInt(cmd.getOptionValue("ksp"));
+		}
+		
 		if(cmd.hasOption("algorithm")){
 			String requestedAlgo = cmd.getOptionValue("algorithm");
 			
 			if(requestedAlgo.equals("binary")){
-				lfl.LEARN_ALGO = new BinaryLateImpactLearning(lfl.K_FOLD);
+				lfl.LEARN_ALGO = new BinaryLateImpactLearning(lfl.K_FOLD, kspnr);
 			}else{
 				System.out.println(String.format("Unknown algorithm: %s.", requestedAlgo));
 				System.exit(1);

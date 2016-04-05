@@ -7,6 +7,10 @@ import com.vmusco.pminer.analyze.MutationStatisticsCollecter;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.softminer.graphs.Graph;
 
+/**
+ * 
+ * @author Vincenzo Musco - http://www.vmusco.com
+ */
 public abstract class MutationGraphExplorer {
 	protected Set<MutationStatisticsCollecter> listeners = new HashSet<MutationStatisticsCollecter>();
 	protected Graph g;

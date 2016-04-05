@@ -18,29 +18,26 @@ import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.utils.ConsoleTools;
 import com.vmusco.softminer.graphs.persistence.GraphML;
 import com.vmusco.softminer.graphs.persistence.GraphPersistence;
-import com.vmusco.softwearn.learn.LearningGraph;
-import com.vmusco.softwearn.learn.LearningGraphStream;
-import com.vmusco.softwearn.learn.folding.MutationGraphKFold;
-import com.vmusco.softwearn.learn.learner.BinaryAlgorithm;
-import com.vmusco.softwearn.learn.learner.DichotomicAlgorithm;
-import com.vmusco.softwearn.learn.learner.Learner;
-import com.vmusco.softwearn.learn.learner.NoAlgorithm;
+import com.vmusco.softwearn.learn.LearningKGraph;
+import com.vmusco.softwearn.learn.LearningKGraphStream;
+import com.vmusco.softwearn.learn.folding.LateMutationGraphKFold;
+import com.vmusco.softwearn.learn.learner.late.BinaryLateImpactLearning;
+import com.vmusco.softwearn.learn.learner.late.DichoLateImpactLearning;
+import com.vmusco.softwearn.learn.learner.late.LateImpactLearner;
+import com.vmusco.softwearn.learn.learner.late.NoLateImpactLearning;
 
-/***
- * An optimized alternative is available
- * @see LateImpactMutationGraphKFold 
- * @author Vincenzo Musco - http://www.vmusco.com
- */
-@Deprecated
-public class ImpactMutationGraphKFold {
+public class LateImpactMutationGraphKFold {
 
 	private static final float _DEFAULT_THRESHOLD = 0.2f;
+	private static final int _DEFAULT_KSP = 10;
+	private static final int _DEFAULT_KFOLD = 10;
 
 	public static void main(String[] args) throws Exception {
 		Options options = new Options();
 
 		options.addOption(new Option("U", "list-update-algorithms", false, "list the available updating algorithms"));
-		options.addOption(new Option("k", "kfolds", true, "The number of folds to run (default: 10)"));
+		options.addOption(new Option("k", "kfolds", true, "The number of folds to run (default: "+_DEFAULT_KFOLD+")"));
+		options.addOption(new Option("K", "ksp", true, "The number of shortest paths to compute. Use 0 to consider all paths --  can be quite slow. (default: "+_DEFAULT_KSP+")"));
 		options.addOption(new Option("w", "init-weight", true, "The initialization value of the weigths (any float between 0 to 1, default: algorithm dependent)."));
 		options.addOption(new Option("n", "nb-mutants", true, "The number of mutants to consider or MAX if > nb mutants (default: max)."));
 		options.addOption(new Option("t", "threshold", true, "The threshold over which (>=) mutant are kept (any float from 0 to 1, default: "+_DEFAULT_THRESHOLD+")."));
@@ -49,21 +46,32 @@ public class ImpactMutationGraphKFold {
 		CommandLineParser parser = new PosixParser();
 		CommandLine cmd = parser.parse(options, args);
 
-		Learner il = null;
+		LateImpactLearner il = null;
 
 		if(cmd.getArgList().size() < 3 || cmd.hasOption('h')){
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp(ImpactMutationGraphKFold.class.getCanonicalName()+" [GRAPH_FILE] [MUTATION_FILE] [UPDATE_ALGO]", options);
+			formatter.printHelp(LateImpactMutationGraphKFold.class.getCanonicalName()+" [GRAPH_FILE] [MUTATION_FILE] [UPDATE_ALGO]", options);
 
 			System.exit(1);
 		}
 
+
+		int k = _DEFAULT_KFOLD;
+		if(cmd.hasOption("kfolds")){
+			k = Integer.parseInt(cmd.getOptionValue("kfolds"));
+		}
+		
+		int kspnr = _DEFAULT_KSP;
+		if(cmd.hasOption("ksp")){
+			kspnr = Integer.parseInt(cmd.getOptionValue("ksp"));
+		}
+		
 		if(cmd.getArgs()[2].equals("no")){
-			il = new NoAlgorithm();
+			il = new NoLateImpactLearning(k, kspnr);
 		}else if(cmd.getArgs()[2].equals("binary")){
-			il = new BinaryAlgorithm();
+			il = new BinaryLateImpactLearning(k, kspnr);
 		}else if(cmd.getArgs()[2].equals("dicho")){
-			il = new DichotomicAlgorithm();
+			il = new DichoLateImpactLearning(k, kspnr);
 		}
 
 		if(il == null || cmd.hasOption("list-update-algorithms")){
@@ -82,17 +90,13 @@ public class ImpactMutationGraphKFold {
 
 		final MutationStatistics ms = MutationStatistics.loadState(cmd.getArgs()[1]);
 
-		int k = 10;
-		if(cmd.hasOption("kfolds")){
-			k = Integer.parseInt(cmd.getOptionValue("kfolds"));
-		}
 
 		float initW = il.defaultInitWeight();
 		if(cmd.hasOption("init-weight")){
 			initW = Float.parseFloat(cmd.getOptionValue("init-weight"));
 		}
 
-		LearningGraph g = new LearningGraphStream(initW);
+		LearningKGraph g = new LearningKGraphStream(initW, k);
 		GraphPersistence gp = new GraphML(g.graph());
 		gp.load(new FileInputStream(cmd.getArgs()[0]));
 
@@ -111,7 +115,7 @@ public class ImpactMutationGraphKFold {
 			threshold = Float.parseFloat(cmd.getOptionValue("threshold"));
 		}
 
-		MutationGraphKFold tenfold = MutationGraphKFold.instantiateKFold(ms, g, k, nbmut, il, t);
+		LateMutationGraphKFold tenfold = LateMutationGraphKFold.instantiateKFold(ms, g, k, nbmut, il, t);
 		final MutationStatisticsCollecter msc = new MutationStatisticsCollecter(true){
 			@Override
 			public void executionEnded() {

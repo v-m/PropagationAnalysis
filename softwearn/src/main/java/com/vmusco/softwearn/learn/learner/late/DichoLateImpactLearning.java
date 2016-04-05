@@ -1,50 +1,25 @@
-package com.vmusco.softwearn.learn.learner;
+package com.vmusco.softwearn.learn.learner.late;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.vmusco.softminer.graphs.EdgeIdentity;
-import com.vmusco.softminer.graphs.Graph;
-import com.vmusco.softwearn.learn.LearningGraph;
+import com.vmusco.softwearn.learn.LearningKGraph;
 
-/**
- * 
- * @author Vincenzo Musco - http://www.vmusco.com
- */
-@Deprecated
-public class DichotomicAlgorithm extends ImpactLearner{
-	private static final Logger logger = LogManager.getFormatterLogger(DichotomicAlgorithm.class.getSimpleName());
+public class DichoLateImpactLearning extends LateImpactLearner {
 
 	private Map<String, Integer> nbTimeTestImpactedByMutation = new HashMap<String, Integer>();
 	private Map<String, Integer> nbTimeMutated = new HashMap<String, Integer>();
 
+
 	@Override
 	public void postDeclareAnImpact(String change, String[] tests) {
 		newMutation(change);
-		
+
 		for(String i : tests){
 			newImpact(change, i);
 		}
 	}
-	
-	/*@Override
-	public void postPreparedSet(MutationStatistics ms, MutantIfos[] mis){
-		for(MutantIfos mi : mis){
-			newMutation(mi.getMutationIn());
-
-			try {
-				for(String i : ms.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults())){
-					newImpact(mi.getMutationIn(), i.endsWith("()")?i:i+"()");
-				}
-			} catch (MutationNotRunException e) {
-				e.printStackTrace();
-			}
-		}
-	}*/
 
 	private void newMutation(String changePoint){
 		String k = changePoint;
@@ -98,27 +73,25 @@ public class DichotomicAlgorithm extends ImpactLearner{
 		}*/
 	}
 
-	@Override
-	public float defaultInitWeight() {
-		return 0;
+	public DichoLateImpactLearning(int maxk) {
+		super(maxk);
+	}
+
+	public DichoLateImpactLearning(int maxk, int kspnr) {
+		super(maxk, kspnr);
 	}
 
 	@Override
-	public void learn(LearningGraph g, String changePoint, String impactedTest) {
-		float weight = getEmpiricalWeight(changePoint, impactedTest);
+	public void updatePath(LearningKGraph g, EdgeIdentity edge, String test, String point) {
+		float weight = getEmpiricalWeight(point, test);
 
-		if(g.graph().isThereAtLeastOnePath(impactedTest, changePoint)){
-			List<String[]> paths = g.graph().getPaths(impactedTest, changePoint);
+		float nweight = (g.getEdgeThreshold(edge.getFrom(), edge.getTo()) + weight)/2;
+		g.setEdgeThreshold(edge.getFrom(), edge.getTo(), nweight);
+	}
 
-			for(String[] path : paths){
-				for(EdgeIdentity edge : Graph.getAllEdgesInPath(path)){
-					float nweight = (g.getEdgeThreshold(edge.getFrom(), edge.getTo()) + weight)/2;
-					g.setEdgeThreshold(edge.getFrom(), edge.getTo(), nweight);
-				}
-			}
-		}else{
-			logger.trace("No path between "+impactedTest+" and "+changePoint);
-		}
+	@Override
+	public float defaultInitWeight() {
+		return 0;
 	}
 
 }
