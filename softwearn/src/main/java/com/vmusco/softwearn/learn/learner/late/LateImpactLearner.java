@@ -31,6 +31,10 @@ public abstract class LateImpactLearner implements Learner {
 	private HashMap<String, Integer> nbOccurenceStats = new HashMap<>();
 	private HashMap<String, Set<String>> pathsForMutantsStats = new HashMap<>();
 	private String currentMutant = null;
+	
+	protected Map<String, Map<Integer, Integer>> lateLearner;
+	private long time = -1;
+
 			
 	public void setChangeId(String currentMutant) {
 		this.currentMutant = currentMutant;
@@ -57,8 +61,6 @@ public abstract class LateImpactLearner implements Learner {
 	}
 	// ----------
 	
-	protected Map<String, Map<Integer, Integer>> lateLearner;
-
 	public LateImpactLearner(int maxk) {
 		this(maxk, 10);
 	}
@@ -116,6 +118,8 @@ public abstract class LateImpactLearner implements Learner {
 			LearningKGraph lg = (LearningKGraph)g;
 			ShortestPath esp = new ShortestPath(g.graph());
 			
+			time = System.currentTimeMillis();
+			
 			for(String key : lateLearner.keySet()){
 				int learnedEdgeWithThisPair = 0;
 				
@@ -165,6 +169,8 @@ public abstract class LateImpactLearner implements Learner {
 				
 				nbOccurenceStats.put(key, learnedEdgeWithThisPair);
 			}
+			
+			time = System.currentTimeMillis() - time;
 		}else{
 			logger.error("Graph should be a LearningKGraph instance !");
 		}
@@ -188,5 +194,14 @@ public abstract class LateImpactLearner implements Learner {
 		}
 
 		return ret;
+	}
+	
+	public int getKspNr() {
+		return kspnr;
+	}
+	
+	@Override
+	public long getLastLearningTime(){
+		return time;
 	}
 }

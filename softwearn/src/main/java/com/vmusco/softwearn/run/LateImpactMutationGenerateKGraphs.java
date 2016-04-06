@@ -1,6 +1,7 @@
 package com.vmusco.softwearn.run;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -25,13 +26,17 @@ import com.vmusco.softwearn.learn.learner.late.BinaryLateImpactLearning;
 import com.vmusco.softwearn.learn.learner.late.DichoLateImpactLearning;
 import com.vmusco.softwearn.learn.learner.late.LateImpactLearner;
 import com.vmusco.softwearn.learn.learner.late.NoLateImpactLearning;
+import com.vmusco.softwearn.persistence.MutationGraphKFoldPersistence;
 
-public class LateImpactMutationGraphKFold {
-
-	private static final float _DEFAULT_THRESHOLD = 0.2f;
+public class LateImpactMutationGenerateKGraphs {
 	private static final int _DEFAULT_KSP = 10;
 	private static final int _DEFAULT_KFOLD = 10;
 
+	/**
+	 * This program generate k-set of weights for a software graphs
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
 		Options options = new Options();
 
@@ -40,7 +45,6 @@ public class LateImpactMutationGraphKFold {
 		options.addOption(new Option("K", "ksp", true, "The number of shortest paths to compute. Use 0 to consider all paths --  can be quite slow. (default: "+_DEFAULT_KSP+")"));
 		options.addOption(new Option("w", "init-weight", true, "The initialization value of the weigths (any float between 0 to 1, default: algorithm dependent)."));
 		options.addOption(new Option("n", "nb-mutants", true, "The number of mutants to consider or MAX if > nb mutants (default: max)."));
-		options.addOption(new Option("t", "threshold", true, "The threshold over which (>=) mutant are kept (any float from 0 to 1, default: "+_DEFAULT_THRESHOLD+")."));
 		options.addOption(new Option("h", "help", false, "print this message"));
 
 		CommandLineParser parser = new PosixParser();
@@ -52,9 +56,9 @@ public class LateImpactMutationGraphKFold {
 			algoHelp();
 		}
 		
-		if(cmd.getArgList().size() < 3 || cmd.hasOption('h')){
+		if(cmd.getArgList().size() < 4 || cmd.hasOption('h')){
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp(LateImpactMutationGraphKFold.class.getCanonicalName()+" [GRAPH_FILE] [MUTATION_FILE] [UPDATE_ALGO]", options);
+			formatter.printHelp(LateImpactMutationGenerateKGraphs.class.getCanonicalName()+" [GRAPH_FILE] [MUTATION_FILE] [UPDATE_ALGO] [GENERATED_FILE]", options);
 
 			System.exit(1);
 		}
@@ -82,10 +86,7 @@ public class LateImpactMutationGraphKFold {
 			algoHelp();
 		}
 		
-
 		final MutationStatistics ms = MutationStatistics.loadState(cmd.getArgs()[1]);
-
-
 		float initW = il.defaultInitWeight();
 		if(cmd.hasOption("init-weight")){
 			initW = Float.parseFloat(cmd.getOptionValue("init-weight"));
@@ -95,9 +96,8 @@ public class LateImpactMutationGraphKFold {
 		GraphPersistence gp = new GraphML(g.graph());
 		gp.load(new FileInputStream(cmd.getArgs()[0]));
 
-		String[] tests =ms.getTestCases();
+		String[] tests = ms.getTestCases();
 		ConsequencesExplorer t = new GraphPropagationExplorerForTests(g.graph(), tests);
-		
 		
 		int nbmut = 0;
 
@@ -105,42 +105,11 @@ public class LateImpactMutationGraphKFold {
 			nbmut = Integer.parseInt(cmd.getOptionValue("nb-mutants"));
 		}
 
-		float threshold = _DEFAULT_THRESHOLD;
-		if(cmd.hasOption("threshold")){
-			threshold = Float.parseFloat(cmd.getOptionValue("threshold"));
-		}
-
 		LateMutationGraphKFold tenfold = LateMutationGraphKFold.instantiateKFold(ms, g, k, nbmut, il, t);
-		final MutationStatisticsCollecter msc = new MutationStatisticsCollecter(true){
-			@Override
-			public void executionEnded() {
-				PRFStatistics precisionRecallFscore = getPrecisionRecallFscore();
-				System.out.println("P = "+precisionRecallFscore.getCurrentMeanPrecision()+
-						" / R = "+precisionRecallFscore.getCurrentMeanRecall()+
-						" / F = "+precisionRecallFscore.getCurrentMeanFscore());
-				clear(true);
-			}
-		};
-		
-		final MutationStatisticsCollecter mscall = new MutationStatisticsCollecter(true);
-		
-		msc.addListener(new MutantTestProcessingAdapter());
-		mscall.addListener(new MutantTestProcessingAdapter());
-		tenfold.addTestListener(msc);
-		tenfold.addTestListener(mscall);
-
 		tenfold.learnKFold();
-		tenfold.testKFold(threshold);
 		
-		// All folds results
-		PRFStatistics precisionRecallFscore = mscall.getPrecisionRecallFscore();
-		System.out.println("P = "+precisionRecallFscore.getCurrentMeanPrecision()+
-				" / R = "+precisionRecallFscore.getCurrentMeanRecall()+
-				" / F = "+precisionRecallFscore.getCurrentMeanFscore());
-
-		System.out.println("[[[ P = "+precisionRecallFscore.getCurrentMeanPrecision()+
-				" / R = "+precisionRecallFscore.getCurrentMeanRecall()+
-				" / F = "+precisionRecallFscore.getCurrentMeanFscore()+" ]]]");
+		MutationGraphKFoldPersistence persist = new MutationGraphKFoldPersistence(tenfold);
+		persist.save(new FileOutputStream(cmd.getArgs()[3]), cmd.getArgs()[0], cmd.getArgs()[1], cmd.getArgs()[2]);
 	}
 
 	private static void algoHelp() {

@@ -39,7 +39,7 @@ public interface LearningGraph {
 	 * consider the edge is not there... 
 	 * @return
 	 */
-	public float getThreshold();
+	public float getThresholds();
 	/**
 	 * This threshold is used by edge accessing methods.
 	 * If an edge weight is not in the right range, then the graph object

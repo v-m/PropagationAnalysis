@@ -18,4 +18,5 @@ public interface Learner {
 	// Used for statistics...
 	public void setChangeId(String id);
 	public int getLearnedPathForChange(String id);
+	long getLastLearningTime();
 }

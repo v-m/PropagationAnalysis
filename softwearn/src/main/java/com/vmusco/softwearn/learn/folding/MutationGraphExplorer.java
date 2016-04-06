@@ -58,4 +58,8 @@ public abstract class MutationGraphExplorer {
 			l.isolatedFound(mi.getId(), mi.getMutationIn());
 		}
 	}
+	
+	public Graph getGraph() {
+		return g;
+	}
 }

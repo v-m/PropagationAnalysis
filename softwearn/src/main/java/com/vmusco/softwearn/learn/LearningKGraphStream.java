@@ -29,4 +29,8 @@ public class LearningKGraphStream extends LearningGraphStream implements Learnin
 			setEdgeThreshold(from, to, treshold);
 		}
 	}
+
+	public Map<Integer, Map<Integer, Float>> getAllThresholds() {
+		return kthresholds;
+	}
 }

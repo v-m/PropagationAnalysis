@@ -18,7 +18,7 @@ import com.vmusco.softminer.graphs.GraphStream;
 /**
  * This graph class adds a layer on top of a Graph to take into consideration weights on edges
  * Moreover, some access to graph edges are overloaded to allows to get only edges on a certain threshold
- * The threshold is defined using {@link LearningGraphStream#getThreshold()} and {@link LearningGraphStream#setRunningThreshold()}.
+ * The threshold is defined using {@link LearningGraphStream#getThresholds()} and {@link LearningGraphStream#setRunningThreshold()}.
  * This threshold is also set using {@link LearningGraphStream#LearningGraphStream(float, float)}.  
  * @author Vincenzo Musco - http://www.vmusco.com
  */
@@ -196,7 +196,7 @@ public class LearningGraphStream extends GraphStream implements LearningGraph {
 		currentTreshold = threshold;
 	}
 
-	public float getThreshold() {
+	public float getThresholds() {
 		return (currentTreshold<=0)?0:currentTreshold;
 	}
 	
@@ -205,17 +205,17 @@ public class LearningGraphStream extends GraphStream implements LearningGraph {
 	 */
 	@Override
 	public EdgeIdentity[] getEdges() {
-		return getEdges(getThreshold());
+		return getEdges(getThresholds());
 	}
 
 	@Override
 	public void visitFrom(GraphNodeVisitor aVisitor, String node) {
-		visitFrom(aVisitor, node, getThreshold());
+		visitFrom(aVisitor, node, getThresholds());
 	}
 
 	@Override
 	public void visitTo(GraphNodeVisitor aVisitor, String node) {
-		visitTo(aVisitor, node, getThreshold());
+		visitTo(aVisitor, node, getThresholds());
 	}
 
 	@Override
@@ -225,7 +225,7 @@ public class LearningGraphStream extends GraphStream implements LearningGraph {
 	
 	@Override
 	public boolean hasDirectedEdge(String from, String to) {
-		return hasDirectedEdge(from, to, getThreshold());
+		return hasDirectedEdge(from, to, getThresholds());
 	}
 
 	@Override
@@ -243,7 +243,7 @@ public class LearningGraphStream extends GraphStream implements LearningGraph {
 	
 	@Override
 	public String[] getNodesConnectedFrom(String node) {
-		return getNodesConnectedFrom(node, getThreshold());
+		return getNodesConnectedFrom(node, getThresholds());
 	}
 
 	@Override
@@ -261,7 +261,7 @@ public class LearningGraphStream extends GraphStream implements LearningGraph {
 	
 	@Override
 	public String[] getNodesConnectedTo(String node) {
-		return getNodesConnectedTo(node, getThreshold());
+		return getNodesConnectedTo(node, getThresholds());
 	}
 
 	@Override
@@ -286,5 +286,13 @@ public class LearningGraphStream extends GraphStream implements LearningGraph {
 			thresholds.put(k, getDefaultTreshold());
 		}
 		switchToLearningPhase();
+	}
+	
+	/**
+	 * PERSISTENCE METHODS
+	 */
+	
+	public String[] getIntToStrBuffer() {
+		return intToStrBuffer.toArray(new String[intToStrBuffer.size()]);
 	}
 }

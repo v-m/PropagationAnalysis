@@ -8,13 +8,19 @@ import com.vmusco.softwearn.learn.LearningGraph;
  */
 @Deprecated
 public abstract class ImpactLearner implements Learner{
+	private long time = -1;
+
 	public abstract void learn(LearningGraph g, String changePoint, String impactedTest);
 
 	@Override
 	public void learn(LearningGraph g, String point, String[] tests, int k) {
+		time = System.currentTimeMillis();
+		
 		for(String aTest : tests){
 			learn(g, point, aTest);
 		}
+		
+		time = System.currentTimeMillis() - time;
 	}
 
 
@@ -30,5 +36,10 @@ public abstract class ImpactLearner implements Learner{
 	public int getLearnedPathForChange(String changeid){
 		return -1;
 		// Not implemented in this version
+	}
+	
+	@Override
+	public long getLastLearningTime() {
+		return time;
 	}
 }
