@@ -171,6 +171,7 @@ public abstract class LateImpactLearner implements Learner {
 			}
 			
 			time = System.currentTimeMillis() - time;
+			logger.info("Learned in %d ms", time);
 		}else{
 			logger.error("Graph should be a LearningKGraph instance !");
 		}
