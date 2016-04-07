@@ -33,4 +33,8 @@ public class LearningKGraphStream extends LearningGraphStream implements Learnin
 	public Map<Integer, Map<Integer, Float>> getAllThresholds() {
 		return kthresholds;
 	}
+	
+	public void setAllThresholds(Map<Integer, Map<Integer, Float>> thr) {
+		this.kthresholds = thr;
+	}
 }

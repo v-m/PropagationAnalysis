@@ -62,4 +62,8 @@ public abstract class MutationGraphExplorer {
 	public Graph getGraph() {
 		return g;
 	}
+	
+	public void setGraph(Graph g){
+		this.g = g;
+	}
 }

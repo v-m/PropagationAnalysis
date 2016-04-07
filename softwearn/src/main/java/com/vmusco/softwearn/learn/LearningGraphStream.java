@@ -295,4 +295,15 @@ public class LearningGraphStream extends GraphStream implements LearningGraph {
 	public String[] getIntToStrBuffer() {
 		return intToStrBuffer.toArray(new String[intToStrBuffer.size()]);
 	}
+	
+	public void setIntToStrBuffer(String[] buffer) {
+		intToStrBuffer.clear();
+		strToIntBuffer.clear();
+		
+		int i = 0;
+		for(String b : buffer){
+			intToStrBuffer.add(b);
+			strToIntBuffer.put(b, i++);
+		}
+	}
 }

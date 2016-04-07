@@ -1,33 +1,50 @@
 package com.vmusco.softwearn.persistence;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
 
+import com.vmusco.pminer.impact.ConsequencesExplorer;
+import com.vmusco.pminer.impact.GraphPropagationExplorerForTests;
 import com.vmusco.smf.analysis.MutantIfos;
+import com.vmusco.smf.analysis.MutationStatistics;
+import com.vmusco.smf.exceptions.PersistenceException;
+import com.vmusco.softminer.graphs.Graph;
+import com.vmusco.softminer.graphs.persistence.GraphML;
+import com.vmusco.softminer.graphs.persistence.GraphPersistence;
 import com.vmusco.softwearn.exceptions.BadElementException;
+import com.vmusco.softwearn.learn.LearningKGraph;
 import com.vmusco.softwearn.learn.LearningKGraphStream;
 import com.vmusco.softwearn.learn.folding.LateMutationGraphKFold;
 
 public class MutationGraphKFoldPersistence {
 	private LateMutationGraphKFold thefold;
 	private LearningKGraphStream g;
+	
 	public MutationGraphKFoldPersistence(LateMutationGraphKFold thefold) throws BadElementException {
+		this.thefold = thefold;
+	}
+	
+	public void save(OutputStream os, String graphpath, String mutpath, String algoname) throws IOException, BadElementException{
 		if(!(thefold.getGraph() instanceof LearningKGraphStream)){
 			throw new BadElementException("A LearningKGraphStream objectis required !");
 		}
-		this.thefold = thefold;
 		this.g = (LearningKGraphStream) thefold.getGraph();
-	}
-	
-	public void save(OutputStream os, String graphpath, String mutpath, String algoname) throws IOException{
+		
 		Format format = Format.getPrettyFormat();
 		format.setLineSeparator(LineSeparator.UNIX);
 		XMLOutputter output = new XMLOutputter(format);
@@ -96,7 +113,7 @@ public class MutationGraphKFoldPersistence {
 		 * 		</k>
 		 *  </mutation-split>
 		 *  <graph-mapping>
-		 *  	<node id="" name="" />
+		 *  	<edge id="" name="" />
 		 *  </graph-mapping>
 		 *  <weights>
 		 *  	<k id="1">
@@ -182,7 +199,82 @@ public class MutationGraphKFoldPersistence {
 		return root;
 	}
 
-	public void load(InputStream is){
+	public void load(InputStream is) throws JDOMException, IOException, PersistenceException{
+		SAXBuilder sxb = new SAXBuilder();
+		Document document;
+		document = sxb.build(is);
+		Element root = document.getRootElement();
+		effectiveLoading(root);
+	}
+
+	private void effectiveLoading(Element root) throws IOException, PersistenceException {
+		// Restore ms
+		MutationStatistics ms = MutationStatistics.loadState(root.getChild("dependencies").getChild("mutations").getText());
+		thefold.setMutationStatisticsObject(ms);
+		ms.listViableAndRunnedMutants(true);
 		
+		// Restore the mutation partition state
+		List<MutantIfos[]> partition = new ArrayList<>();
+		for(Element splitk : root.getChild("execution").getChild("mutation-split").getChildren("k")){
+			int splitid = Integer.parseInt(splitk.getAttributeValue("id"));
+			
+			List<MutantIfos> onemicontent = new ArrayList<>();
+			
+			for(Element splitone : splitk.getChildren("mutant")){
+				String mutid = splitone.getAttributeValue("id");
+				MutantIfos onemi = ms.getMutationStats(mutid);
+				onemicontent.add(onemi);
+			}
+			
+			partition.add(onemicontent.toArray(new MutantIfos[onemicontent.size()]));
+		}
+		
+		thefold.setPartitionDataset(partition);
+		
+		// Restore the graph
+		String graphPath = root.getChild("dependencies").getChild("graph").getText();
+		float initW = Float.parseFloat(root.getChild("config").getChild("init-weight").getText());
+		int k = Integer.parseInt(root.getChild("config").getChild("kfold").getText());
+
+		LearningKGraphStream g = new LearningKGraphStream(initW, k);
+		GraphPersistence gp = new GraphML(g.graph());
+		gp.load(new FileInputStream(graphPath));
+		
+		
+		
+		// Restore mappings
+		List<String> maps = new ArrayList<>();
+		for(Element e : root.getChild("execution").getChild("graph-mapping").getChildren("edge")){
+			String name = e.getAttributeValue("name");
+			maps.add(name);
+		}
+		
+		g.setIntToStrBuffer(maps.toArray(new String[maps.size()]));
+		
+		// Restore K-thresholds
+		Map<Integer, Map<Integer, Float>> kthresh = new HashMap<Integer, Map<Integer,Float>>();
+		for(Element kelem : root.getChild("execution").getChild("weights").getChildren("k")){
+			int kid = Integer.parseInt(kelem.getAttributeValue("id"));
+			
+			Map<Integer,Float> mapForK = new HashMap<>();
+			
+			for(Element kelemw : kelem.getChildren("weight")){
+				int nodeid = Integer.parseInt(kelemw.getAttributeValue("id"));
+				float weight = Float.parseFloat(kelemw.getText());
+				
+				mapForK.put(nodeid, weight);
+			}
+			
+			kthresh.put(kid, mapForK);
+		}
+		thefold.setGraph(g);
+		
+		g.setAllThresholds(kthresh);
+		
+		thefold.setLearner(null);
+		
+		String[] tests = ms.getTestCases();
+		ConsequencesExplorer t = new GraphPropagationExplorerForTests(g.graph(), tests);
+		thefold.setTester(t);
 	}
 }

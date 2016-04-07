@@ -95,7 +95,7 @@ public class LateImpactMutationGraphKFold {
 		GraphPersistence gp = new GraphML(g.graph());
 		gp.load(new FileInputStream(cmd.getArgs()[0]));
 
-		String[] tests =ms.getTestCases();
+		String[] tests = ms.getTestCases();
 		ConsequencesExplorer t = new GraphPropagationExplorerForTests(g.graph(), tests);
 		
 		

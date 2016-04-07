@@ -47,6 +47,10 @@ public final class Yen implements KSPAlgorithm {
         ArrayList<Path> ksp = new ArrayList<Path>();
         PriorityQueue<Path> candidates = new PriorityQueue<Path>();
 
+        if(K < 1){
+        	return ksp;
+        }
+        
         try {
             /* Compute and add the shortest path */
             Path kthPath = Dijkstra.shortestPath(graph, sourceLabel, targetLabel);

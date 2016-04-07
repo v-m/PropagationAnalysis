@@ -26,6 +26,11 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 	private ConsequencesExplorer tester;
 	List<MutantIfos[]> partitionDataset;
 
+	// For persistence restoration only
+	public LateMutationGraphKFold() {
+		super(null);
+	}
+	
 	public LateMutationGraphKFold(LearningKGraph g) {
 		super(g.graph());
 	}
@@ -214,6 +219,9 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 	}
 
 	public void test(int iteration){
+		LearningKGraph lkg = (LearningKGraph)getGraph();
+		
+		lkg.setK(iteration);
 		test(getTestingSubset(iteration), iteration);
 	}
 
@@ -295,5 +303,9 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 
 	public ConsequencesExplorer getTester() {
 		return tester;
+	}
+	
+	public void setMutationStatisticsObject(MutationStatistics ms){
+		this.ms = ms;
 	}
 }
