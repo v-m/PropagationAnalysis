@@ -71,6 +71,19 @@ public abstract class Tools {
 		return ret/alist.length;
 	}
 	
+	public static double average(List<Double> alist){
+		if(alist.size() == 0)
+			return -1d;
+		
+		double ret = 0.0;
+		
+		for(double i : alist){
+			ret += i;
+		}
+		
+		return ret/alist.size();
+	}
+	
 	public static double average(int[] alist){
 		if(alist.length == 0)
 			return -1;

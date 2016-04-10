@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.vmusco.pminer.analyze.MutationStatisticsCollecter;
 import com.vmusco.pminer.exceptions.SpecialEntryPointException;
+import com.vmusco.pminer.exceptions.SpecialEntryPointException.TYPE;
 import com.vmusco.pminer.impact.ConsequencesExplorer;
 import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
@@ -248,7 +249,13 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 				System.exit(1);
 			} catch (SpecialEntryPointException e) {
 				logger.debug("A special entry point is thrown ("+(e.getType().name())+")...");
-				//e.printStackTrace();
+				
+				for(MutationStatisticsCollecter msc : listeners){
+					if(e.getType() == TYPE.ISOLATED)
+						msc.isolatedFound(mi.getId(), mi.getMutationIn());
+					else if(e.getType() == TYPE.NOT_FOUND)
+						msc.unboundedFound(mi.getId(), mi.getMutationIn());
+				}
 			}
 		}
 

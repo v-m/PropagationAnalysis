@@ -109,4 +109,8 @@ public class PRFStatistics {
 	public double getLastFscore(){
 		return fscores.get(fscores.size() - 1).doubleValue();
 	}
+	
+	public int getNbCases(){
+		return fscores.size();
+	}
 }

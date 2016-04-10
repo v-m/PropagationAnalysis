@@ -122,7 +122,7 @@ public class LateImpactMutationGraphKFold {
 			}
 		};
 		
-		final MutationStatisticsCollecter mscall = new MutationStatisticsCollecter(true);
+		final MutationStatisticsCollecter mscall = new MutationStatisticsCollecter(false);
 		
 		msc.addListener(new MutantTestProcessingAdapter());
 		mscall.addListener(new MutantTestProcessingAdapter());

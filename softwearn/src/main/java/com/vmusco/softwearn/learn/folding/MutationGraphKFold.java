@@ -259,7 +259,7 @@ public class MutationGraphKFold extends MutationGraphExplorer{
 				System.exit(1);
 			} catch (SpecialEntryPointException e) {
 				logger.debug("A special entry point is thrown...");
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 

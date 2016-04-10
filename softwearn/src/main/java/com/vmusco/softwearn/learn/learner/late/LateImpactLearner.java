@@ -205,4 +205,8 @@ public abstract class LateImpactLearner implements Learner {
 	public long getLastLearningTime(){
 		return time;
 	}
+
+	public void setLastLearningTime(long learnTime) {
+		this.time = learnTime;
+	}
 }

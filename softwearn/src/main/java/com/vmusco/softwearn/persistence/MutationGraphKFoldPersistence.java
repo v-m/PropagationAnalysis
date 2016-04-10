@@ -30,6 +30,7 @@ import com.vmusco.softwearn.exceptions.BadElementException;
 import com.vmusco.softwearn.learn.LearningKGraph;
 import com.vmusco.softwearn.learn.LearningKGraphStream;
 import com.vmusco.softwearn.learn.folding.LateMutationGraphKFold;
+import com.vmusco.softwearn.learn.learner.late.NoLateImpactLearning;
 
 public class MutationGraphKFoldPersistence {
 	private LateMutationGraphKFold thefold;
@@ -199,10 +200,14 @@ public class MutationGraphKFoldPersistence {
 		return root;
 	}
 
-	public void load(InputStream is) throws JDOMException, IOException, PersistenceException{
+	public void load(InputStream is) throws IOException, PersistenceException{
 		SAXBuilder sxb = new SAXBuilder();
 		Document document;
-		document = sxb.build(is);
+		try {
+			document = sxb.build(is);
+		} catch (JDOMException e) {
+			throw new PersistenceException("Document malformed !");
+		}
 		Element root = document.getRootElement();
 		effectiveLoading(root);
 	}
@@ -253,6 +258,7 @@ public class MutationGraphKFoldPersistence {
 		
 		// Restore K-thresholds
 		Map<Integer, Map<Integer, Float>> kthresh = new HashMap<Integer, Map<Integer,Float>>();
+
 		for(Element kelem : root.getChild("execution").getChild("weights").getChildren("k")){
 			int kid = Integer.parseInt(kelem.getAttributeValue("id"));
 			
@@ -271,7 +277,10 @@ public class MutationGraphKFoldPersistence {
 		
 		g.setAllThresholds(kthresh);
 		
-		thefold.setLearner(null);
+		// Just for leanring time
+		long learnTime = Long.parseLong(root.getChild("execution").getChild("weights").getAttributeValue("learning-time"));
+		thefold.setLearner(new NoLateImpactLearning(0, 0));
+		thefold.getLearner().setLastLearningTime(learnTime);
 		
 		String[] tests = ms.getTestCases();
 		ConsequencesExplorer t = new GraphPropagationExplorerForTests(g.graph(), tests);
