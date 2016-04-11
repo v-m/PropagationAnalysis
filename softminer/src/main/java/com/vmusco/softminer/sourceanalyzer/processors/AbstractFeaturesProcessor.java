@@ -150,8 +150,17 @@ public abstract class AbstractFeaturesProcessor extends AbstractProcessor<CtName
 		}
 
 		for(CtExecutableReference exec: allExecutables){
-			if(exec.getDeclaration() instanceof CtConstructor || exec.getDeclaringType() == null || exec.getDeclaringType().getDeclaration() == null)
+			try{
+				if(exec == null || 
+						exec.getDeclaration() == null ||
+						exec.getDeclaration() instanceof CtConstructor || 
+						exec.getDeclaringType() == null || 
+						exec.getDeclaringType().getDeclaration() == null)
+					continue;
+			}catch(NullPointerException ex){
+				// Skip in case of null anywhere
 				continue;
+			}
 			
 			String declaringClass = exec.getDeclaringType().getDeclaration().getSignature();
 			String signature = SpoonHelpers.notFullyQualifiedName((CtTypeMember)exec.getDeclaration());

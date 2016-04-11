@@ -48,12 +48,16 @@ public abstract class Compilation {
 	public abstract String getErrorsWhileLastBuild(int errorNr);
 
 	public static String[] getLibraryAccess(String[] cp) {
-		Set<String> ret = getLibraryAccess();
+		Set<String> ret = new HashSet<String>();
 
 		if(cp != null){
 			for(String c : cp){
 				ret.add(c);
 			}
+		}
+		
+		for(String c : getLibraryAccess()){
+			ret.add(c);
 		}
 
 		return ret.toArray(new String[0]);

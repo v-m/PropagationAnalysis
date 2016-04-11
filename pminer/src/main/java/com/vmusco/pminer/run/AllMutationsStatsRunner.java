@@ -60,6 +60,8 @@ public class AllMutationsStatsRunner{
 		options.addOption(opt);
 		opt = new Option("t", "short-names", false, "in case of reccursive folder exploration, do not merge the parent-project name");
 		options.addOption(opt);
+		opt = new Option("g", "graphbase", true, "a folder containing all graphs under a folder per project (default none)");
+		options.addOption(opt);
 		opt = new Option("h", "help", false, "display this message");
 		options.addOption(opt);
 
@@ -68,10 +70,10 @@ public class AllMutationsStatsRunner{
 
 		if(cmd.getArgs().length < 2 || cmd.hasOption("help")){
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp(thisclass.getCanonicalName()+" [options] <software["+File.pathSeparator+"...]> <relativepathtograph["+File.pathSeparator+"...]>", 
+			formatter.printHelp(thisclass.getCanonicalName()+" [options] <software["+File.pathSeparator+"...]> <graphname["+File.pathSeparator+"...]>", 
 					"Run statistics on all softwares describes in <software> separated by "+File.pathSeparator+". <software> can be a software directly containing a "+ProcessStatistics.DEFAULT_CONFIGFILE+" file or folder containing projects folders which contains a "+ProcessStatistics.DEFAULT_CONFIGFILE+" file. "+
 							"The name of the folder is used as project name. "+
-							"The graphs used are those supplied by <relativepathtograph> which are path relatives to project folder. If the --javapdg option is supplied, <relativepathtograph> must point to one folder which contains subfolders, one for each considered project (with the same folder name) or a jar/zip archive file",
+							"The graphs used are those supplied by <graphname> which are graph names files relatives to the path specified by -g (or the project folder instead). If the --javapdg option is supplied, <graphname> must point to one folder which contains subfolders, one for each considered project (with the same folder name) or a jar/zip archive file",
 							options,
 					"");
 			System.exit(0);
@@ -113,7 +115,7 @@ public class AllMutationsStatsRunner{
 				if(cmd.hasOption("javapdg")){
 					explorers = getExplorers(fp, graphs[0], tests);
 				}else{
-					explorers = getExplorers(fp, graphs, tests);
+					explorers = getExplorers(fp, graphs, tests, cmd.getOptionValue("graphbase"));
 				}
 
 				processProject(f.getName(), ps, explorers, cmd.hasOption("nb-mutants")?Integer.parseInt(cmd.getOptionValue("nb-mutants")):-1, cmd.hasOption("include-alives"), cmd.hasOption("exclude-nulls"), sep, mutationrun, projectrun, cmd.hasOption("average"), cmd.hasOption("exclude-unbounded"), avg, med);
@@ -129,7 +131,7 @@ public class AllMutationsStatsRunner{
 						if(cmd.hasOption("javapdg")){
 							explorers = getExplorers(fp, graphs[0], tests);
 						}else{
-							explorers = getExplorers(fp, graphs, tests);
+							explorers = getExplorers(fp, graphs, tests, cmd.getOptionValue("graphbase"));
 						}
 
 						String name = f.getName()+"-"+ff.getName();
@@ -142,14 +144,20 @@ public class AllMutationsStatsRunner{
 		}
 	}
 
-	public static Map<String, ConsequencesExplorer> getExplorers(File f, String[] graphs, String[] tests) throws IOException{
+	public static Map<String, ConsequencesExplorer> getExplorers(File f, String[] graphs, String[] tests, String graphroot) throws IOException{
 		/*************
 		 * Load graphs
 		 */
 		Map<String, ConsequencesExplorer> explorers = new HashMap<>();
 
 		for(int i = 0; i<graphs.length; i++){
-			File gf = new File(f.getParentFile(), graphs[i]);
+			File gf;
+			if(graphroot == null){
+				gf = new File(f.getParentFile(), graphs[i]);
+			}else{
+				gf = new File(new File(graphroot, f.getParentFile().getName()), graphs[i]);
+			}
+			
 			if(!gf.exists()){
 				throw new FileNotFoundException("Unable to locate the graph file "+gf.getAbsolutePath());
 			}else{

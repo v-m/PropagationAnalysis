@@ -15,7 +15,7 @@ public class MavenGraphGenerator implements GraphGeneratorLogic {
 	private File output_path;
 	private File output_final;
 	private String[] classpath;
-	private HashSet<String> sources;
+	private HashSet<String> sources = new HashSet<>();
 
 	public static void main(String[] args) throws Exception {
 		MavenGraphGenerator g = new MavenGraphGenerator();

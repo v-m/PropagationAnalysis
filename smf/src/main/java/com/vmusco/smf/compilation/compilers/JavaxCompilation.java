@@ -126,14 +126,14 @@ public class JavaxCompilation extends Compilation{
 		options.add("-cp");
 		String cp = "";
 
-		for(String s : getLibraryAccess()){
-			cp += ((cp.length()>0)?File.pathSeparator:"") + s;
-		}
-
 		if(classpath != null){
 			for(String s : classpath){
 				cp += ((cp.length()>0)?File.pathSeparator:"") + s;
 			}
+		}
+
+		for(String s : getLibraryAccess()){
+			cp += ((cp.length()>0)?File.pathSeparator:"") + s;
 		}
 
 		options.add(cp);

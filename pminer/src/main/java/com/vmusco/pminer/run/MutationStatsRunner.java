@@ -33,7 +33,7 @@ import com.vmusco.softminer.graphs.persistence.GraphML;
  */
 public class MutationStatsRunner{
 	private static final Class<?> thisclass = MutationStatsRunner.class;
-	public static final boolean CLASSLEVEL = true;
+	public static final boolean CLASSLEVEL = false;
 
 	private MutationStatsRunner() {
 	}
@@ -209,7 +209,7 @@ public class MutationStatsRunner{
 		int cpt = 0;
 		int nbalives = 0;
 
-		for(String mutation : allMutations){											// For each mutant...				
+		for(String mutation : allMutations){											// For each mutant...
 			boolean forceStop = false;
 			
 			MutantIfos ifos = (MutantIfos) ms.getMutationStats(mutation);
@@ -221,6 +221,7 @@ public class MutationStatsRunner{
 					continue;
 				}
 			}
+			
 			// relevant IS list of tests impacted by the introduced bug (determined using mutation)
 			String[] relevantArray = ms.getCoherentMutantFailAndHangTestCases(ifos.getExecutedTestsResults());
 
@@ -233,9 +234,11 @@ public class MutationStatsRunner{
 				time = System.currentTimeMillis()-time;
 				String[] ais = ms.getCoherentMutantFailAndHangTestCases(ifos.getExecutedTestsResults());
 				String[] cis = pgp.getLastConsequenceNodes();
+				
 				sd.intersectionFound(ifos.getId(), ifos.getMutationIn(), ais, cis);
 				sd.declareNewTime(time);
 				cpt++;
+
 			}catch(SpecialEntryPointException e){
 				// No entry point here !
 

@@ -811,19 +811,25 @@ public class ProcessStatistics implements Serializable{
 		List<String> l = new ArrayList<String>();
 
 		if(this.getClasspath() != null){
+			/*for(String s : getSrcTestsToTreat(true)){
+				l.add(s);
+			}*/
+			
+			if(new File(this.srcGenerationFolder()).exists()){
+				l.add(this.srcGenerationFolder());
+			}
+			
+			if(new File(this.testsGenerationFolder()).exists()){
+				l.add(this.testsGenerationFolder());
+			}
+			
 			for(String c : this.getClasspath()){
 				l.add(c);
 			}
 
-			if(new File(this.srcGenerationFolder()).exists())
-				l.add(this.srcGenerationFolder());
-
-			if(new File(this.testsGenerationFolder()).exists())
-				l.add(this.testsGenerationFolder());
-
 			//l.add(Testing.getCurrentVMClassPath(new String[]{"smf"})[0]);
 
-			return l.toArray(new String[0]);
+			return l.toArray(new String[l.size()]);
 		}else{
 			return new String[]{
 					this.srcGenerationFolder(),
@@ -893,11 +899,11 @@ public class ProcessStatistics implements Serializable{
 		return f.exists();
 	}
 
-	public void exportClassPath() throws IOException {
+	public void exportClassPath(String folder) throws IOException {
 		System.out.println("[MAVEN] Exporting classpath...");
 
 		File dst = new File(this.buildPath(this.cpLocalFolder));
-		MavenTools.exportDependenciesUsingMaven(this.getProjectIn(true), dst.getAbsolutePath(), this.buildPath("mvn_copy.log"));
+		MavenTools.exportDependenciesUsingMaven(folder, dst.getAbsolutePath(), this.buildPath("mvn_copy.log"));
 	}
 
 
@@ -1006,6 +1012,7 @@ public class ProcessStatistics implements Serializable{
 		File[] srcs = new File[srcstr.length];
 		int i=0;
 		for(String src : srcstr){
+			logger.trace("Adding test to build: "+src);
 			srcs[i++] = new File(src);
 		}
 
