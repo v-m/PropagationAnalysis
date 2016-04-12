@@ -55,7 +55,12 @@ Tools used to do some basic learning on propagation.
 
 This framework is used in the following papers:
 
-- __Vincenzo Musco__, Martin Monperrus, Philippe Preux. An Experimental Protocol for Analyzing the Accuracy of Software Error Impact Analysis. Tenth IEEE/ACM International Workshop on Automation of Software Test, May 2015, Florence, Italy.
+- __Vincenzo Musco__, Antonin Carette, Martin Monperrus, Philippe Preux. A Learning Algorithm for Change Impact Prediction. 5th International Workshop on Realizing Artificial Intelligence Synergies in Software Engineering, May 2016, Austin, USA. 
+- __Vincenzo Musco__, Martin Monperrus, Philippe Preux. An Experimental Protocol for Analyzing the Accuracy of Software Error Impact Analysis. 10th IEEE/ACM International Workshop on Automation of Software Test, May 2015, Florence, Italy. 
+
+### Generated data
+
+Dataset generated for those papers can be found [here](https://github.com/v-m/PropagationAnalysis-dataset).
 
 ## How to use
 
