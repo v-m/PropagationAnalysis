@@ -25,46 +25,46 @@ public abstract class LateImpactLearner implements Learner {
 
 	private int maxk;
 	private int kspnr;
-	
+
 	// Statistics structures and methods
 	// Used to gather statistics about the learning
 	private HashMap<String, Integer> nbOccurenceStats = new HashMap<>();
 	private HashMap<String, Set<String>> pathsForMutantsStats = new HashMap<>();
 	private String currentMutant = null;
-	
+
 	protected Map<String, Map<Integer, Integer>> lateLearner;
 	private long time = -1;
 
-			
+
 	public void setChangeId(String currentMutant) {
 		this.currentMutant = currentMutant;
 	}
-	
+
 	public HashMap<String, Integer> getNbOccurencesStat() {
 		return nbOccurenceStats;
 	}
-	
+
 	public HashMap<String, Set<String>> getPathsForMutantsStats() {
 		return pathsForMutantsStats;
 	}
-	
+
 	public int getLearnedPathForChange(String mutid){
 		int nbocc = 0;
-		
+
 		for(String key : pathsForMutantsStats.keySet()){
 			if(pathsForMutantsStats.get(key).contains(mutid)){
 				nbocc += nbOccurenceStats.get(key);
 			}
 		}
-		
+
 		return nbocc;
 	}
 	// ----------
-	
+
 	public LateImpactLearner(int maxk) {
 		this(maxk, 10);
 	}
-	
+
 	/**
 	 * @param maxk the number of k-fold to consider
 	 * @param kspnr the number of shortest path to compute
@@ -89,12 +89,12 @@ public abstract class LateImpactLearner implements Learner {
 
 				Map<Integer, Integer> str = lateLearner.get(key);
 				lateLearnExceptFor(str, k);
-				
+
 				if(currentMutant != null){
 					if(!pathsForMutantsStats.containsKey(key)){
 						pathsForMutantsStats.put(key, new HashSet<String>());
 					}
-					
+
 					pathsForMutantsStats.get(key).add(currentMutant);
 				}
 			}
@@ -117,64 +117,70 @@ public abstract class LateImpactLearner implements Learner {
 		if(g instanceof LearningKGraph){
 			LearningKGraph lg = (LearningKGraph)g;
 			ShortestPath esp = new ShortestPath(g.graph());
-			
+
 			time = System.currentTimeMillis();
-			
-			for(String key : lateLearner.keySet()){
-				int learnedEdgeWithThisPair = 0;
-				
-				String point = key.split(FAULT_PATH_SEPARATOR)[0];
-				String test = key.split(FAULT_PATH_SEPARATOR)[1];
 
-				logger.trace("Treating %s -> %s", point, test);
+			if(learnAbility()){
+				for(String key : lateLearner.keySet()){
+					int learnedEdgeWithThisPair = 0;
 
-				if(g.graph().isThereAtLeastOnePath(test, point)){
-					//List<String[]> paths = ShortestPath.kShortestPathsYens(g.graph(), test, point, 10);
-					
-					List<String[]> paths = null;
-					
-					if(kspnr <= 0){
-						paths = g.graph().getPaths(test, point);
-					}else{
-						paths = esp.yen(test, point, kspnr);
-					}
+					String point = key.split(FAULT_PATH_SEPARATOR)[0];
+					String test = key.split(FAULT_PATH_SEPARATOR)[1];
 
-					for(String[] path : paths){
-						EdgeIdentity[] allEdgesInPath = Graph.getAllEdgesInPath(path);
-						
-						if(allEdgesInPath == null){
-							logger.info("Empty path for %s - %s !", test, point);
-							continue;
+					logger.trace("Treating %s -> %s", point, test);
+
+					if(g.graph().isThereAtLeastOnePath(test, point)){
+						//List<String[]> paths = ShortestPath.kShortestPathsYens(g.graph(), test, point, 10);
+
+						List<String[]> paths = null;
+
+						if(kspnr <= 0){
+							paths = g.graph().getPaths(test, point);
+						}else{
+							paths = esp.yen(test, point, kspnr);
 						}
-						
-						learnedEdgeWithThisPair += allEdgesInPath.length;
-						
-						for(EdgeIdentity edge : allEdgesInPath){
-							Map<Integer, Integer> ks = lateLearner.get(key);
 
-							for(int onek : ks.keySet()){
-								int nbtime = ks.get(onek);
-								logger.trace("Path for %d x%d", onek, nbtime);
+						for(String[] path : paths){
+							EdgeIdentity[] allEdgesInPath = Graph.getAllEdgesInPath(path);
 
-								for(int i=0; i<nbtime; i++){
-									logger.trace("+1 path for %d !", onek);
-									updatePath(lg, edge, onek, test, point);
+							if(allEdgesInPath == null){
+								logger.info("Empty path for %s - %s !", test, point);
+								continue;
+							}
+
+							learnedEdgeWithThisPair += allEdgesInPath.length;
+
+							for(EdgeIdentity edge : allEdgesInPath){
+								Map<Integer, Integer> ks = lateLearner.get(key);
+
+								for(int onek : ks.keySet()){
+									int nbtime = ks.get(onek);
+									logger.trace("Path for %d x%d", onek, nbtime);
+
+									for(int i=0; i<nbtime; i++){
+										logger.trace("+1 path for %d !", onek);
+										updatePath(lg, edge, onek, test, point);
+									}
 								}
 							}
 						}
+					}else{
+						logger.trace("No path between "+test+" and "+point);
 					}
-				}else{
-					logger.trace("No path between "+test+" and "+point);
+
+					nbOccurenceStats.put(key, learnedEdgeWithThisPair);
 				}
-				
-				nbOccurenceStats.put(key, learnedEdgeWithThisPair);
 			}
-			
+
 			time = System.currentTimeMillis() - time;
 			logger.info("Learned in %d ms", time);
 		}else{
 			logger.error("Graph should be a LearningKGraph instance !");
 		}
+	}
+
+	protected boolean learnAbility() {
+		return true;
 	}
 
 	private static void lateLearnExceptFor(Map<Integer, Integer> str, int k) {
@@ -196,11 +202,11 @@ public abstract class LateImpactLearner implements Learner {
 
 		return ret;
 	}
-	
+
 	public int getKspNr() {
 		return kspnr;
 	}
-	
+
 	@Override
 	public long getLastLearningTime(){
 		return time;

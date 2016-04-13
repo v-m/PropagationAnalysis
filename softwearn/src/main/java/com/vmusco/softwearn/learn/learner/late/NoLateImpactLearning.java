@@ -30,4 +30,9 @@ public class NoLateImpactLearning extends LateImpactLearner {
 	public void postDeclareAnImpact(String change, String[] tests) {
 		
 	}
+	
+	@Override
+	protected boolean learnAbility() {
+		return false;
+	}
 }
