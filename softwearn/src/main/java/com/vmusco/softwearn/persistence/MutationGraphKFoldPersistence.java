@@ -35,6 +35,8 @@ import com.vmusco.softwearn.learn.learner.late.NoLateImpactLearning;
 public class MutationGraphKFoldPersistence {
 	private LateMutationGraphKFold thefold;
 	private LearningKGraphStream g;
+	private static String lastMsPath;
+	private static MutationStatistics lastMs;
 	
 	public MutationGraphKFoldPersistence(LateMutationGraphKFold thefold) throws BadElementException {
 		this.thefold = thefold;
@@ -190,6 +192,10 @@ public class MutationGraphKFoldPersistence {
 			Map<Integer, Float> map = allThresholds.get(kid);
 			
 			for(int kkid : map.keySet()){
+				if(map.get(kkid) <= 0){
+					continue;
+				}
+				
 				Element weight = new Element("weight");
 				weight.setAttribute("id", Integer.toString(kkid));
 				weight.setText(Float.toString(map.get(kkid)));
@@ -203,20 +209,29 @@ public class MutationGraphKFoldPersistence {
 	public void load(InputStream is) throws IOException, PersistenceException{
 		SAXBuilder sxb = new SAXBuilder();
 		Document document;
+		long time = System.currentTimeMillis();
 		try {
 			document = sxb.build(is);
 		} catch (JDOMException e) {
 			throw new PersistenceException("Document malformed !");
 		}
 		Element root = document.getRootElement();
+		//System.out.println(System.currentTimeMillis() - time);
+		//time = System.currentTimeMillis();
 		effectiveLoading(root);
+		//System.out.println(System.currentTimeMillis() - time);
+		//time = System.currentTimeMillis();
 	}
 
 	private void effectiveLoading(Element root) throws IOException, PersistenceException {
 		// Restore ms
-		MutationStatistics ms = MutationStatistics.loadState(root.getChild("dependencies").getChild("mutations").getText());
-		thefold.setMutationStatisticsObject(ms);
-		ms.listViableAndRunnedMutants(true);
+		if(root.getChild("dependencies").getChild("mutations").getText() != lastMsPath){
+			lastMsPath = root.getChild("dependencies").getChild("mutations").getText();
+			lastMs = MutationStatistics.loadState(lastMsPath);
+			lastMs.listViableAndRunnedMutants(true);
+		}
+
+		thefold.setMutationStatisticsObject(lastMs);
 		
 		// Restore the mutation partition state
 		List<MutantIfos[]> partition = new ArrayList<>();
@@ -227,7 +242,7 @@ public class MutationGraphKFoldPersistence {
 			
 			for(Element splitone : splitk.getChildren("mutant")){
 				String mutid = splitone.getAttributeValue("id");
-				MutantIfos onemi = ms.getMutationStats(mutid);
+				MutantIfos onemi = lastMs.getMutationStats(mutid);
 				onemicontent.add(onemi);
 			}
 			
@@ -245,8 +260,6 @@ public class MutationGraphKFoldPersistence {
 		GraphPersistence gp = new GraphML(g.graph());
 		gp.load(new FileInputStream(graphPath));
 		
-		
-		
 		// Restore mappings
 		List<String> maps = new ArrayList<>();
 		for(Element e : root.getChild("execution").getChild("graph-mapping").getChildren("edge")){
@@ -263,6 +276,10 @@ public class MutationGraphKFoldPersistence {
 			int kid = Integer.parseInt(kelem.getAttributeValue("id"));
 			
 			Map<Integer,Float> mapForK = new HashMap<>();
+			
+			for(int i=0; i<maps.size(); i++){
+				mapForK.put(i, 0f);
+			}
 			
 			for(Element kelemw : kelem.getChildren("weight")){
 				int nodeid = Integer.parseInt(kelemw.getAttributeValue("id"));
@@ -282,7 +299,7 @@ public class MutationGraphKFoldPersistence {
 		thefold.setLearner(new NoLateImpactLearning(0, 0));
 		thefold.getLearner().setLastLearningTime(learnTime);
 		
-		String[] tests = ms.getTestCases();
+		String[] tests = lastMs.getTestCases();
 		ConsequencesExplorer t = new GraphPropagationExplorerForTests(g.graph(), tests);
 		thefold.setTester(t);
 	}

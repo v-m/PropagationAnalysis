@@ -111,13 +111,18 @@ public class LateImpactMutationGraphKFold {
 		}
 
 		LateMutationGraphKFold tenfold = LateMutationGraphKFold.instantiateKFold(ms, g, k, nbmut, il, t);
+		
+		run(tenfold, threshold);
+	}
+
+	public static void run(LateMutationGraphKFold tenfold, float threshold) throws Exception {
 		final MutationStatisticsCollecter msc = new MutationStatisticsCollecter(true){
 			@Override
 			public void executionEnded() {
 				PRFStatistics precisionRecallFscore = getPrecisionRecallFscore();
-				System.out.println("P = "+precisionRecallFscore.getCurrentMeanPrecision()+
+				/*System.out.println("P = "+precisionRecallFscore.getCurrentMeanPrecision()+
 						" / R = "+precisionRecallFscore.getCurrentMeanRecall()+
-						" / F = "+precisionRecallFscore.getCurrentMeanFscore());
+						" / F = "+precisionRecallFscore.getCurrentMeanFscore());*/
 				clear(true);
 			}
 		};

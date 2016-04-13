@@ -308,6 +308,16 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 		partitionDataset = dataset;
 	}
 
+	public int getTotalNbOfMutants(){
+		int total = 0;
+		
+		for(MutantIfos[] mi : partitionDataset){
+			total += mi.length;
+		}
+		
+		return total;
+	}
+	
 	public ConsequencesExplorer getTester() {
 		return tester;
 	}

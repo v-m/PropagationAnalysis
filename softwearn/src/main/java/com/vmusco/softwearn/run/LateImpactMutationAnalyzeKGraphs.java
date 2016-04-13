@@ -66,9 +66,9 @@ public class LateImpactMutationAnalyzeKGraphs {
 			@Override
 			public void executionEnded() {
 				PRFStatistics precisionRecallFscore = getPrecisionRecallFscore();
-				System.out.println("P = "+precisionRecallFscore.getCurrentMeanPrecision()+
+				/*System.out.println("P = "+precisionRecallFscore.getCurrentMeanPrecision()+
 						" / R = "+precisionRecallFscore.getCurrentMeanRecall()+
-						" / F = "+precisionRecallFscore.getCurrentMeanFscore());
+						" / F = "+precisionRecallFscore.getCurrentMeanFscore());*/
 				clear(true);
 			}
 		};
