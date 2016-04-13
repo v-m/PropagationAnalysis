@@ -2,7 +2,9 @@ package com.vmusco.softwearn.learn.folding;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +17,7 @@ import com.vmusco.smf.analysis.MutantIfos;
 import com.vmusco.smf.analysis.MutationStatistics;
 import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
+import com.vmusco.softwearn.exceptions.CoherencyException;
 import com.vmusco.softwearn.learn.LearningKGraph;
 import com.vmusco.softwearn.learn.learner.late.LateImpactLearner;
 
@@ -27,6 +30,8 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 	private ConsequencesExplorer tester;
 	List<MutantIfos[]> partitionDataset;
 
+	private Random random = null;
+
 	// For persistence restoration only
 	public LateMutationGraphKFold() {
 		super(null);
@@ -38,33 +43,41 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 
 	/**
 	 * Build an object for 10-fold testing with mutants and graph ({@link LateMutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, boolean)})
-	 * @throws PersistenceException 	 */
-	public static LateMutationGraphKFold instantiateTenFold(MutationStatistics ms, LearningKGraph g, int nbmutants, LateImpactLearner learner, ConsequencesExplorer tester, boolean ignoreOverlaping) throws PersistenceException{
-		return instantiateKFold(ms, g, 10, nbmutants, learner, tester, ignoreOverlaping);
+	 * @throws PersistenceException 	 
+	 * @throws CoherencyException */
+	public static LateMutationGraphKFold instantiateTenFold(MutationStatistics ms, LearningKGraph g, int nbmutants, LateImpactLearner learner, ConsequencesExplorer tester, boolean ignoreOverlaping) throws PersistenceException, CoherencyException{
+		return instantiateKFold(ms, g, 10, nbmutants, learner, tester, ignoreOverlaping, null);
 	}
 
 	/**
 	 * Build an object for k-fold testing with mutants and graph ({@link LateMutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, boolean)})
 	 * taking all mutants in the mutation object and taking into consideration overlaping mutants 
-	 * @throws PersistenceException 	 */
-	public static LateMutationGraphKFold instantiateKFold(MutationStatistics ms, LearningKGraph g, int k, LateImpactLearner learner, ConsequencesExplorer tester) throws PersistenceException {
+	 * @throws PersistenceException 	 
+	 * @throws CoherencyException */
+	public static LateMutationGraphKFold instantiateKFold(MutationStatistics ms, LearningKGraph g, int k, LateImpactLearner learner, ConsequencesExplorer tester) throws PersistenceException, CoherencyException {
 		return instantiateKFold(ms, g, k, learner, tester, false);
 	}
 
 	/**
 	 * Build an object for k-fold testing with mutants and graph ({@link LateMutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, boolean)})
 	 * taking all mutants in the mutation object
-	 * @throws PersistenceException 	 */
-	public static LateMutationGraphKFold instantiateKFold(MutationStatistics ms, LearningKGraph g, int k, LateImpactLearner learner, ConsequencesExplorer tester, boolean ignoreOverlaping) throws PersistenceException {
-		return instantiateKFold(ms, g, k, 0, learner, tester, ignoreOverlaping);
+	 * @throws PersistenceException 	 
+	 * @throws CoherencyException */
+	public static LateMutationGraphKFold instantiateKFold(MutationStatistics ms, LearningKGraph g, int k, LateImpactLearner learner, ConsequencesExplorer tester, boolean ignoreOverlaping) throws PersistenceException, CoherencyException {
+		return instantiateKFold(ms, g, k, 0, learner, tester, ignoreOverlaping, null);
 	}
 
 	/**
 	 * Build an object for k-fold testing with mutants and graph ({@link LateMutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, boolean)})
 	 * taking into consideration overlaping mutants
-	 * @throws PersistenceException 	 */
-	public static LateMutationGraphKFold instantiateKFold(MutationStatistics ms, LearningKGraph g, int k, int nbmutants, LateImpactLearner learner, ConsequencesExplorer tester) throws PersistenceException {
-		return instantiateKFold(ms, g, k, nbmutants, learner, tester, false);
+	 * @throws PersistenceException 	 
+	 * @throws CoherencyException */
+	public static LateMutationGraphKFold instantiateKFold(MutationStatistics ms, LearningKGraph g, int k, int nbmutants, LateImpactLearner learner, ConsequencesExplorer tester) throws PersistenceException, CoherencyException {
+		return instantiateKFold(ms, g, k, nbmutants, learner, tester, false, null);
+	}
+	
+	public static LateMutationGraphKFold instantiateKFold(MutationStatistics ms2, LearningKGraph g, int k2, int nbmut, LateImpactLearner il, ConsequencesExplorer t, Random random) throws PersistenceException, CoherencyException {
+		return instantiateKFold(ms2, g, k2, nbmut, il, t, false, random);
 	}
 
 	/**
@@ -75,17 +88,21 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 	 * @param nbmutants the number of mutants to consider
 	 * @param learner a learning listener responsible of updating weights and getting end notifications
 	 * @param ignoreOverlaping true to ignore the overlapping mutants once divided by k false to have a last fold which may be larger than others
+	 * @param random a seed to shuffle (null to total random generation)
 	 * @throws PersistenceException 
+	 * @throws CoherencyException 
 	 * @throws Exception
 	 */
-	public static LateMutationGraphKFold instantiateKFold(MutationStatistics ms, LearningKGraph g, int k, int nbmutants, LateImpactLearner learner, ConsequencesExplorer tester, boolean ignoreOverlaping) throws PersistenceException{
+	public static LateMutationGraphKFold instantiateKFold(MutationStatistics ms, LearningKGraph g, int k, int nbmutants, LateImpactLearner learner, ConsequencesExplorer tester, boolean ignoreOverlaping, Random random) throws PersistenceException, CoherencyException{
 		LateMutationGraphKFold r = new LateMutationGraphKFold(g);
-
+		if(random != null)
+			r.random  = random;
+		
 		r.init(ms, k, nbmutants, learner, tester, ignoreOverlaping);
 		return r;
 	}
 
-	protected void init(MutationStatistics ms, int k, int nbmutants, LateImpactLearner learner, ConsequencesExplorer tester, boolean ignoreOverlaping) throws PersistenceException {
+	protected void init(MutationStatistics ms, int k, int nbmutants, LateImpactLearner learner, ConsequencesExplorer tester, boolean ignoreOverlaping) throws PersistenceException, CoherencyException {
 		this.ms = ms;
 		this.k = k;
 		this.setLearner(learner);
@@ -94,6 +111,10 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 		List<MutantIfos> data = this.getData(nbmutants);
 		this.partitionDataset = this.partitionDataset(data, ignoreOverlaping);
 
+		if(this.partitionDataset == null){
+			throw new CoherencyException(String.format("The number of available mutants (%d) is lower than the desired k value (%d)", data.size(), this.k));
+		}
+		
 		for(MutantIfos mi : data){
 			try {
 				ArrayList<String> tests = new ArrayList<>();
@@ -119,20 +140,22 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 	private List<MutantIfos> getData(int nbmut) throws PersistenceException{
 		List<MutantIfos> l = new ArrayList<MutantIfos>();
 		String[] allMutants = this.ms.listViableAndRunnedMutants(true);
-
+		
 		for(String m : allMutants)
 			l.add(this.ms.getMutationStats(m));
 
-		Collections.shuffle(l);
-		/*
-		 * Can be sorted for testing purposes...
-		 * Collections.sort(l, new Comparator<MutantIfos>() {
+		// Prior sorting to ensure to apply similarly Random object
+		Collections.sort(l, new Comparator<MutantIfos>() {
 			@Override
 			public int compare(MutantIfos o1, MutantIfos o2) {
 				return o1.getId().compareTo(o2.getId());
 			}
-		});*/
-
+		});
+		if(this.random != null)
+			Collections.shuffle(l, random);
+		else
+			Collections.shuffle(l);
+		
 		int considerednbmut = nbmut;
 
 		if(nbmut > allMutants.length){
@@ -141,7 +164,7 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 		}else if(nbmut == 0){
 			considerednbmut = l.size();
 		}
-
+		
 		logger.info("Picked %d mutants", considerednbmut);
 
 		return l.subList(0, considerednbmut);
