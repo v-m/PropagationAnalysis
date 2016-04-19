@@ -15,7 +15,7 @@ public interface LearningGraph {
 	Graph getPrunedGraph(float treshold);
 	float getDefaultTreshold();
 	void setDefaultTreshold(float treshold);
-	
+
 	/**
 	 * Method allowing access to direct Graph object (casting or access)
 	 * @return
@@ -65,4 +65,5 @@ public interface LearningGraph {
 	 * Switch to learning phase
 	 */
 	void resetLearnedInformations();
+	int getNbThresholdNotNull();
 }

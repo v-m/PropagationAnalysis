@@ -24,8 +24,6 @@ public abstract class Graph {
 
 	/**
 	 * Generates a new graph which contain only nodes/edges with specific types and markers
-	 * @param node
-	 * @return
 	 */
 	public abstract Graph keepOnly(NodeTypes[] nt, NodeMarkers[] nm, EdgeTypes[] et, EdgeMarkers[] em);
 

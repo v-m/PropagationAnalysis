@@ -33,7 +33,6 @@ import com.vmusco.softminer.graphs.NodeTypes;
 /**
  * 
  * @author Vincenzo Musco - http://www.vmusco.com
- *
  */
 public class GraphML implements GraphPersistence{
 	private static final Logger logger = LogManager.getFormatterLogger(GraphML.class.getSimpleName());
@@ -312,14 +311,11 @@ public class GraphML implements GraphPersistence{
 		logger.info("Read %d nodes and %d edges", nbnodes, nbedges);
 	}
 
-
-	@Override
-	public void save(OutputStream os) throws IOException {
+	public static Element generateRootDocument(){
 		Namespace xsi = Namespace.getNamespace("xsi","http://www.w3.org/2001/XMLSchema-instance");
 
 		Element root = new Element("graphml", xmlns);
 		root.addNamespaceDeclaration(xsi);
-		Document d = new Document(root);
 
 		Element tmp;
 		// <key id="type" for="node" attr.name="type" attr.type="string"/>
@@ -337,7 +333,7 @@ public class GraphML implements GraphPersistence{
 		tmp.setAttribute(new Attribute("attr.name", "type"));
 		tmp.setAttribute(new Attribute("attr.type", "string"));
 		root.addContent(tmp);
-		
+
 		// <key id="type" for="edge" attr.name="sourcecode" attr.type="string" />
 		tmp = new Element("key", xmlns);
 		tmp.setAttribute(new Attribute("id", "type"));
@@ -345,7 +341,7 @@ public class GraphML implements GraphPersistence{
 		tmp.setAttribute(new Attribute("attr.name", "sourcecode"));
 		tmp.setAttribute(new Attribute("attr.type", "string"));
 		root.addContent(tmp);
-		
+
 		// <key id="type" for="node" attr.name="formaltype" attr.type="string" />
 		tmp = new Element("key", xmlns);
 		tmp.setAttribute(new Attribute("id", "type"));
@@ -353,7 +349,7 @@ public class GraphML implements GraphPersistence{
 		tmp.setAttribute(new Attribute("attr.name", "formaltype"));
 		tmp.setAttribute(new Attribute("attr.type", "string"));
 		root.addContent(tmp);
-		
+
 		//<key id="uses_reflexion" for="node" attr.name="uses_reflexion" attr.type="boolean">
 		//<default>false</default>
 		//</key>
@@ -363,45 +359,49 @@ public class GraphML implements GraphPersistence{
 			tmp.setAttribute(new Attribute("for", "node"));
 			tmp.setAttribute(new Attribute("attr.name", m.name()));
 			tmp.setAttribute(new Attribute("attr.type", "boolean"));
-			
+
 			Element tmp2 = new Element("default", xmlns);
 			tmp2.setText("false");
 			tmp.addContent(tmp2);
 			root.addContent(tmp);
 		}
-		
+
 		//<key id="uses_reflexion" for="edge" attr.name="uses_reflexion" attr.type="boolean">
-        //	<default>false</default>
-        //</key>
+		//	<default>false</default>
+		//</key>
 		for(EdgeMarkers m : EdgeMarkers.values()){
 			tmp = new Element("key", xmlns);
 			tmp.setAttribute(new Attribute("id", m.name()));
 			tmp.setAttribute(new Attribute("for", "edge"));
 			tmp.setAttribute(new Attribute("attr.name", m.name()));
 			tmp.setAttribute(new Attribute("attr.type", "boolean"));
-			
+
 			Element tmp2 = new Element("default", xmlns);
 			tmp2.setText("false");
 			tmp.addContent(tmp2);
 			root.addContent(tmp);
 		}
-		
+
+		return root;
+	}
+
+	@Override
+	public void save(OutputStream os) throws IOException {
+		Element root = generateRootDocument();
 		Element graphml = generateXmlNodes(target, xmlns);
 		root.addContent(graphml);
 
+		Document d = new Document(root);
 		Format format = Format.getPrettyFormat();
 		format.setLineSeparator(LineSeparator.UNIX);
 		XMLOutputter output = new XMLOutputter(format);
 		output.output(d, os);
-		
 	}
 
 
 
 	@Override
 	public void load(InputStream is) throws IOException {
-		
-		
 		SAXBuilder sxb = new SAXBuilder();
 		Document document;
 		try {

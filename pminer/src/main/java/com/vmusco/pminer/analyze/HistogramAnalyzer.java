@@ -29,7 +29,7 @@ public abstract class HistogramAnalyzer extends MutantTestAnalyzer {
 	public abstract void fireIntersectionFound(String id, String in, int nblast);
 	
 	/**
-	 * Use {@link HistogramAnalyzer#fireIntersectionFound(MutantIfos, int)} instead, or invoke {@link HistogramAnalyzer#setPropagationSizeForNextProcessing(int)} before.
+	 * Use {@link HistogramAnalyzer#fireIntersectionFound(String, String, int)} instead, or invoke {@link HistogramAnalyzer#setPropagationSizeForNextProcessing(int)} before.
 	 * ais and cis are not used !
 	 */
 	@Override

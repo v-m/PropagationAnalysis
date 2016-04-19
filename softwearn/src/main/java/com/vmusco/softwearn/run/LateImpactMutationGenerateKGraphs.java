@@ -1,9 +1,13 @@
 package com.vmusco.softwearn.run;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Random;
 
+import com.vmusco.smf.exceptions.MutationNotRunException;
+import com.vmusco.softwearn.exceptions.CoherencyException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -91,7 +95,7 @@ public class LateImpactMutationGenerateKGraphs {
 		persist.save(new FileOutputStream(cmd.getArgs()[3]), cmd.getArgs()[0], cmd.getArgs()[1], cmd.getArgs()[2]);
 	}
 	
-	public static LateMutationGraphKFold run(String mspath, int k, int nbmut, String askedAlgo, int kspnr, float overrideInitWeight, String graphpath, Random r) throws Exception{
+	public static LateMutationGraphKFold run(String mspath, int k, int nbmut, String askedAlgo, int kspnr, float overrideInitWeight, String graphpath, Random r) throws PersistenceException, IOException, CoherencyException, MutationNotRunException {
 		final MutationStatistics ms = MutationStatistics.loadState(mspath);
 		
 		LateImpactLearner il = null;

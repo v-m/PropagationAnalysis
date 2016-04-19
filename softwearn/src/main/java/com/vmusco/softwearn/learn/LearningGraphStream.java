@@ -18,8 +18,8 @@ import com.vmusco.softminer.graphs.GraphStream;
 /**
  * This graph class adds a layer on top of a Graph to take into consideration weights on edges
  * Moreover, some access to graph edges are overloaded to allows to get only edges on a certain threshold
- * The threshold is defined using {@link LearningGraphStream#getThresholds()} and {@link LearningGraphStream#setRunningThreshold()}.
- * This threshold is also set using {@link LearningGraphStream#LearningGraphStream(float, float)}.  
+ * The threshold is defined using {@link LearningGraphStream#getThresholds()} and {@link LearningGraph#setThreshold(float)}.
+ * This threshold is also set using {@link LearningGraphStream#LearningGraphStream(float)}.
  * @author Vincenzo Musco - http://www.vmusco.com
  */
 public class LearningGraphStream extends GraphStream implements LearningGraph {
@@ -287,7 +287,20 @@ public class LearningGraphStream extends GraphStream implements LearningGraph {
 		}
 		switchToLearningPhase();
 	}
-	
+
+	@Override
+	public int getNbThresholdNotNull() {
+		int nb = 0;
+
+		for(float f : thresholds.values()){
+			if(f > 0.0f){
+				nb++;
+			}
+		}
+
+		return nb;
+	}
+
 	/**
 	 * PERSISTENCE METHODS
 	 */

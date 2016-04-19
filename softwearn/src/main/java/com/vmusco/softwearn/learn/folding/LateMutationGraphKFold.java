@@ -42,7 +42,7 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 	}
 
 	/**
-	 * Build an object for 10-fold testing with mutants and graph ({@link LateMutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, boolean)})
+	 * Build an object for k-fold testing with mutants and graph ({@link LateMutationGraphKFold#instantiateKFold(MutationStatistics, LearningKGraph, int, int, LateImpactLearner, ConsequencesExplorer, boolean, Random)})
 	 * @throws PersistenceException 	 
 	 * @throws CoherencyException */
 	public static LateMutationGraphKFold instantiateTenFold(MutationStatistics ms, LearningKGraph g, int nbmutants, LateImpactLearner learner, ConsequencesExplorer tester, boolean ignoreOverlaping) throws PersistenceException, CoherencyException{
@@ -50,7 +50,7 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 	}
 
 	/**
-	 * Build an object for k-fold testing with mutants and graph ({@link LateMutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, boolean)})
+	 * Build an object for k-fold testing with mutants and graph ({@link LateMutationGraphKFold#instantiateKFold(MutationStatistics, LearningKGraph, int, int, LateImpactLearner, ConsequencesExplorer, boolean, Random)})
 	 * taking all mutants in the mutation object and taking into consideration overlaping mutants 
 	 * @throws PersistenceException 	 
 	 * @throws CoherencyException */
@@ -59,7 +59,7 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 	}
 
 	/**
-	 * Build an object for k-fold testing with mutants and graph ({@link LateMutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, boolean)})
+	 * Build an object for k-fold testing with mutants and graph ({@link LateMutationGraphKFold#instantiateKFold(MutationStatistics, LearningKGraph, int, int, LateImpactLearner, ConsequencesExplorer, boolean, Random)})
 	 * taking all mutants in the mutation object
 	 * @throws PersistenceException 	 
 	 * @throws CoherencyException */
@@ -68,7 +68,7 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 	}
 
 	/**
-	 * Build an object for k-fold testing with mutants and graph ({@link LateMutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, boolean)})
+	 * Build an object for k-fold testing with mutants and graph ({@link LateMutationGraphKFold#instantiateKFold(MutationStatistics, LearningKGraph, int, int, LateImpactLearner, ConsequencesExplorer, boolean, Random)})
 	 * taking into consideration overlaping mutants
 	 * @throws PersistenceException 	 
 	 * @throws CoherencyException */
@@ -195,7 +195,7 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 		return r;
 	}
 
-	public void learnKFold() throws Exception{
+	public void learnKFold() throws MutationNotRunException {
 		LearningKGraph lg = (LearningKGraph)g;
 		lg.switchToLearningPhase();
 
