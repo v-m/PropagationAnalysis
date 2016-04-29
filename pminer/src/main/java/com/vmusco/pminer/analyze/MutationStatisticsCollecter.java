@@ -25,6 +25,7 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	private boolean lastIsolated;
 
 	private boolean includeBadCases;
+	private boolean foundAtLeastOne = false;
 
 	/**
 	 * Exclude by default bad cases
@@ -72,8 +73,8 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	}
 
 	/**
-	 * To declare an unbounded case, use {@link MutationStatisticsCollecter#unboundedFound(MutantIfos)}
-	 * To declare an isolated case, use {@link MutationStatisticsCollecter#isolatedFound(MutantIfos)}
+	 * To declare an unbounded case, use {@link MutationStatisticsCollecter#unboundedFound(String, String)}
+	 * To declare an isolated case, use {@link MutationStatisticsCollecter#isolatedFound(String, String)}
 	 * 
 	 * 
 	 * To declare an unbounded case, pass impactedNodes = null and impactedTests = null
@@ -81,6 +82,7 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 	 */
 	@Override
 	public void intersectionFound(String id, String in, String[] ais, String[] cis) {
+		foundAtLeastOne = true;
 		lastIn = in;
 		lastId = id;
 		lastGraphDetermined = cis;
@@ -183,5 +185,9 @@ public class MutationStatisticsCollecter extends MutantTestAnalyzer {
 		times = new ArrayList<Double>();
 		lastUnbounded = false;
 		lastIsolated = false;
+	}
+
+	public boolean hasFoundAtLeastOne() {
+		return foundAtLeastOne;
 	}
 }

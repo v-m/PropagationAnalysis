@@ -170,6 +170,7 @@ public class FaultLocalizationSteimann {
 					interNodesList = g.getNodesNames();
 				
 				mscIntersect.intersectionFound(mi.getId(), mi.getMutationIn(), new String[]{mi.getMutationIn()}, interNodesList);
+				mscIntersect.declareNewTime(intersectiontime);
 
 				Iterator<MutantTestProcessingListener<MutationStatisticsCollecter>> listenerIterator = mscIntersect.listenerIterator();
 

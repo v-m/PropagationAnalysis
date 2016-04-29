@@ -75,23 +75,24 @@ public class LateImpactMutationAnalyzeKGraphs {
 
 		final MutationStatisticsCollecter mscall = new MutationStatisticsCollecter(true);
 		
-		run(thefold, threshold, msc, mscall);
+		run(thefold, threshold, new MutationStatisticsCollecter[]{ msc, mscall });
 		
 		PRFStatistics precisionRecallFscore = mscall.getPrecisionRecallFscore();
 		System.out.println("[[[ P = "+precisionRecallFscore.getCurrentMeanPrecision()+
 				" / R = "+precisionRecallFscore.getCurrentMeanRecall()+
 				" / F = "+precisionRecallFscore.getCurrentMeanFscore()+" ]]]");
 	}
-	
-	public static void run(LateMutationGraphKFold thefold, float threshold, MutationStatisticsCollecter msc, MutationStatisticsCollecter mscall){
-		if(msc != null){
-			msc.addListener(new MutantTestProcessingAdapter());
-			thefold.addTestListener(msc);
-		}
-		
-		if(mscall != null){
-			mscall.addListener(new MutantTestProcessingAdapter());
-			thefold.addTestListener(mscall);
+
+	public static void run(LateMutationGraphKFold thefold, float threshold, MutationStatisticsCollecter msc){
+		LateImpactMutationAnalyzeKGraphs.run(thefold, threshold, new MutationStatisticsCollecter[]{ msc });
+	}
+
+	public static void run(LateMutationGraphKFold thefold, float threshold, MutationStatisticsCollecter[] mscs){
+		if(mscs != null){
+			for(MutationStatisticsCollecter msc : mscs){
+				msc.addListener(new MutantTestProcessingAdapter());
+				thefold.addTestListener(msc);
+			}
 		}
 
 		//LearningKGraph g = new LearningKGraphStream(initW, k);

@@ -10,4 +10,5 @@ public interface GraphNodeVisitor {
 	boolean isNodeValid(String node);
 	String[] nextNodesToVisitFrom(String node);
 	boolean interruptVisit();
+	void visitEnded();
 }

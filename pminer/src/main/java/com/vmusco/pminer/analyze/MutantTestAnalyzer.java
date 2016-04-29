@@ -21,7 +21,7 @@ public abstract class MutantTestAnalyzer {
 	public abstract void intersectionFound(String id, String in, String[] ais, String[] cis);
 	public abstract void unboundedFound(String id, String in);
 	public abstract void isolatedFound(String id, String in);
-	
+
 	/***
 	 * This method can be invoked to order the runner to interrupt its execution and discard remaining set
 	 * @return

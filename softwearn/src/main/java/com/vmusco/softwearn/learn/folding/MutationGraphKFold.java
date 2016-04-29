@@ -16,6 +16,7 @@ import com.vmusco.smf.exceptions.MutationNotRunException;
 import com.vmusco.smf.exceptions.PersistenceException;
 import com.vmusco.softwearn.learn.LearningGraph;
 import com.vmusco.softwearn.learn.learner.Learner;
+import org.apache.logging.log4j.core.appender.SyslogAppender;
 
 /**
  * 
@@ -35,14 +36,14 @@ public class MutationGraphKFold extends MutationGraphExplorer{
 	}
 
 	/**
-	 * Build an object for 10-fold testing with mutants and graph ({@link MutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, boolean)})
+	 * Build an object for 10-fold testing with mutants and graph ({@link MutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, ConsequencesExplorer, boolean)})
 	 * @throws PersistenceException 	 */
 	public static MutationGraphKFold instantiateTenFold(MutationStatistics ms, LearningGraph g, int nbmutants, Learner learner, ConsequencesExplorer tester, boolean ignoreOverlaping) throws PersistenceException{
 		return instantiateKFold(ms, g, 10, nbmutants, learner, tester, ignoreOverlaping);
 	}
 
 	/**
-	 * Build an object for k-fold testing with mutants and graph ({@link MutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, boolean)})
+	 * Build an object for k-fold testing with mutants and graph ({@link MutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, ConsequencesExplorer, boolean)})
 	 * taking all mutants in the mutation object and taking into consideration overlaping mutants 
 	 * @throws PersistenceException 	 */
 	public static MutationGraphKFold instantiateKFold(MutationStatistics ms, LearningGraph g, int k, Learner learner, ConsequencesExplorer tester) throws PersistenceException {
@@ -50,7 +51,7 @@ public class MutationGraphKFold extends MutationGraphExplorer{
 	}
 
 	/**
-	 * Build an object for k-fold testing with mutants and graph ({@link MutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, boolean)})
+	 * Build an object for k-fold testing with mutants and graph ({@link MutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, ConsequencesExplorer, boolean)})
 	 * taking all mutants in the mutation object
 	 * @throws PersistenceException 	 */
 	public static MutationGraphKFold instantiateKFold(MutationStatistics ms, LearningGraph g, int k, Learner learner, ConsequencesExplorer tester, boolean ignoreOverlaping) throws PersistenceException {
@@ -58,7 +59,7 @@ public class MutationGraphKFold extends MutationGraphExplorer{
 	}
 
 	/**
-	 * Build an object for k-fold testing with mutants and graph ({@link MutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, boolean)})
+	 * Build an object for k-fold testing with mutants and graph ({@link MutationGraphKFold#instantiateKFold(MutationStatistics, LearningGraph, int, int, Learner, ConsequencesExplorer, boolean)})
 	 * taking into consideration overlaping mutants
 	 * @throws PersistenceException 	 */
 	public static MutationGraphKFold instantiateKFold(MutationStatistics ms, LearningGraph g, int k, int nbmutants, Learner learner, ConsequencesExplorer tester) throws PersistenceException {
@@ -247,12 +248,15 @@ public class MutationGraphKFold extends MutationGraphExplorer{
 
 			String[] ais;
 			try {
+				long time = System.currentTimeMillis();
 				tester.visit(ms, mi);
+				time = System.currentTimeMillis() - time;
 				String[] cis = tester.getLastConsequenceNodes();
 				ais = ms.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults());
 
 				for(MutationStatisticsCollecter msc : listeners){
 					msc.intersectionFound(mi.getId(), mi.getMutationIn(), ais, cis);
+					msc.declareNewTime(time);
 				}
 			} catch (MutationNotRunException e) {
 				e.printStackTrace();

@@ -260,12 +260,15 @@ public class LateMutationGraphKFold extends MutationGraphExplorer{
 
 			String[] ais;
 			try {
+				long time = System.currentTimeMillis();
 				tester.visit(ms, mi);
+				time = System.currentTimeMillis() - time;
 				String[] cis = tester.getLastConsequenceNodes();
 				ais = ms.getCoherentMutantFailAndHangTestCases(mi.getExecutedTestsResults());
 
 				for(MutationStatisticsCollecter msc : listeners){
 					msc.intersectionFound(mi.getId(), mi.getMutationIn(), ais, cis);
+					msc.declareNewTime(time);
 				}
 			} catch (MutationNotRunException e) {
 				e.printStackTrace();

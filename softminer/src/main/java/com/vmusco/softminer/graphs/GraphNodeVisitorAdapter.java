@@ -26,6 +26,11 @@ public class GraphNodeVisitorAdapter implements GraphNodeVisitor{
 	}
 
 	@Override
+	public void visitEnded() {
+
+	}
+
+	@Override
 	public boolean isNodeValid(String node) {
 		return true;
 	}

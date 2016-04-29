@@ -144,6 +144,10 @@ public class LearningGraphStream extends GraphStream implements LearningGraph {
 	}
 	
 	protected void visit(final GraphNodeVisitor aVisitor, final String node, final boolean from, final float threshold){
+		float beforeThre = getThresholds();
+
+		setThreshold(threshold);
+
 		super.visit(new GraphNodeVisitorAdapter() {
 			@Override
 			public void visitNode(String node) {
@@ -166,7 +170,14 @@ public class LearningGraphStream extends GraphStream implements LearningGraph {
 			public boolean interruptVisit() {
 				return aVisitor.interruptVisit();
 			}
+
+			@Override
+			public void visitEnded() {
+				aVisitor.visitEnded();
+			}
 		}, node, from);
+
+		setThreshold(beforeThre);
 	}
 
 	@Override
@@ -268,7 +279,12 @@ public class LearningGraphStream extends GraphStream implements LearningGraph {
 	public void switchToLearningPhase() {
 		setThreshold(-1);	// For learning phase
 	}
-	
+
+	@Override
+	public void switchToRunningPhase() {
+		setThreshold(getDefaultTreshold());
+	}
+
 	@Override
 	public boolean isLearningPhrase(){
 		return currentTreshold < 0;

@@ -83,20 +83,59 @@ public abstract class Tools {
 		
 		return ret/alist.size();
 	}
-	
+
 	public static double average(int[] alist){
 		if(alist.length == 0)
 			return -1;
-		
+
 		double ret = 0.0;
-		
+
 		for(int i : alist){
 			ret += i;
 		}
-		
+
 		ret = ret * 1d;
-		
+
 		return ret/alist.length;
+	}
+
+	public static double average(Long[] alist){
+		if(alist.length == 0)
+			return -1;
+
+		double ret = 0.0;
+
+		for(long i : alist){
+			ret += i;
+		}
+
+		ret = ret * 1d;
+
+		return ret/alist.length;
+	}
+
+	public static long sum(Long[] alist){
+		long ret = 0;
+
+		if(alist.length != 0){
+			for(long i : alist){
+				ret += i;
+			}
+		}
+
+		return ret;
+	}
+
+	public static int sum(Integer[] alist){
+		int ret = 0;
+
+		if(alist.length != 0){
+			for(int i : alist){
+				ret += i;
+			}
+		}
+
+		return ret;
 	}
 	
 	/**
@@ -131,16 +170,17 @@ public abstract class Tools {
 		return ret;
 	}
 	
-	public static <T extends Double,Integer> int countEqualsOrLower(T[] intArray, T searchingNumber) {
+	/*public static <T extends Double,Integer> int countEqualsOrLower(T[] intArray, T searchingNumber) {
 		int cpt = 0;
 		
 		for(T i : intArray){
-			if(i <= searchingNumber)
+			if(i <= searchingNumber) {
 				cpt++;
+			}
 		}
 		
 		return cpt;
-	}
+	}*/
 	
 	
 }

@@ -24,9 +24,13 @@ public abstract class MutationGraphExplorer {
 	public void addTestListener(MutationStatisticsCollecter aListener){
 		listeners.add(aListener);
 	}
-	
+
 	public void removeTestListener(MutationStatisticsCollecter aListener){
 		listeners.remove(aListener);
+	}
+
+	public void removeAllTestListeners(){
+		listeners.clear();
 	}
 	
 	public void fireExecutionStarting(){

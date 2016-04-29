@@ -355,6 +355,8 @@ public abstract class Graph {
 				break;
 			}
 		}
+
+		aVisitor.visitEnded();
 	}
 
 	/*public void visitEdgeFrom(GraphEdgeVisitor aVisitor, String node){
@@ -436,6 +438,7 @@ public abstract class Graph {
 			}
 		}
 
+		aVisitor.visitEnded();
 		long end_time = System.nanoTime();
 
 		return end_time - start_time;

@@ -50,6 +50,7 @@ public interface LearningGraph {
 	public void setThreshold(float threshold);
 
 	public void switchToLearningPhase();
+	public void switchToRunningPhase();
 	boolean isLearningPhrase();
 	
 	/*
