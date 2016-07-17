@@ -54,7 +54,7 @@ Tools used to do some basic learning on propagation.
 ## Research Papers
 
 This framework is used in the following papers:
-
+- __Vincenzo Musco__, Martin Monperrus, Philippe Preux. A Large Scale Study of Call Graph-based Impact Prediction using Mutation Testing. Software Quality Journal, 2016.
 - __Vincenzo Musco__, Antonin Carette, Martin Monperrus, Philippe Preux. A Learning Algorithm for Change Impact Prediction. 5th International Workshop on Realizing Artificial Intelligence Synergies in Software Engineering, May 2016, Austin, USA. 
 - __Vincenzo Musco__, Martin Monperrus, Philippe Preux. An Experimental Protocol for Analyzing the Accuracy of Software Error Impact Analysis. 10th IEEE/ACM International Workshop on Automation of Software Test, May 2015, Florence, Italy. 
 
